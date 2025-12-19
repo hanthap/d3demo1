@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>D3 + Supabase Example</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Supabase Data with D3</h1>
+  <div id="chart"></div>
+
+  <script>
+    // Initialize Supabase client
+    const supabaseClient = supabase.createClient(
+      "https://hfunworrmdfxzdtmbvth.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU"
+    );
+
+    async function loadData() {
+      // Fetch rows from a table
+      let { data, error } = await supabaseClient
+        .from("edges")
+        .select("*");
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      // Use d3 to bind data
+      d3.select("#chart")
+        .selectAll("p")
+        .data(data)
+        .enter()
+        .append("p")
+        .text(d => `Row: ${d.FROM_NODE_ID} - ${d.TO_NODE_ID}`);
+
+//        console.log(data);
+
+    }
+
+    loadData();
+
+  </script>
+</body>
+</html>
