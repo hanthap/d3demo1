@@ -13,8 +13,46 @@
   <script>
     // Initialize Supabase client
 
-function myFunc(item) {
-      item.label = `${item.FROM_NODE_ID}-${item.TO_NODE_ID}`;
+  var nodes = [];
+  var mapNodes; // key,value lookup dict
+
+
+  function NodeInfo(d) {
+    if ( d.NODE_TXT ) {
+        return d.NODE_TXT.replace(/\|/g,'\n');
+    }
+}
+
+function IsRoundedShape(d) {
+    // for now, all nodes are circles
+    return true;
+}
+
+function AppendShapes(rs) {
+    nodes = rs; // the 'master' array used by d3 to render shapes
+    // we also want to access each datum via its unique NODE_ID string
+    mapNodes = new Map ( nodes.map((x,i) => ( [x.NODE_ID, x ]) ) );
+  console.log(mapNodes);  
+    // create the SVG visual element
+    gNode.selectAll('circle') // in case we've already got some
+        .data(nodes.filter(IsRoundedShape)) // see comment above - how best to hide a circle when its group is visible and vice versa
+            .join('circle')  // append a new circle shape bound to that datum
+                // .on('mouseover',handleMouseOverNode) // for popup if implemented
+                // .on('mouseout',handleMouseOutNode)
+                // .on('click',handleClickNode)
+                // .on('dblclick',handleDblClickNode)
+                // .attr('r',NodeRadius)
+                // .attr('fill',NodeColour)
+                // .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
+                // can we append a custom element that supports CSS eg (stackoverflow)
+                .text(NodeInfo)
+                ;
+}
+
+
+function AppendNodeDatum(d,i) { // forEach will pass (datum, index)
+      d.label = `${i} ${d.NODE_ID} = ${d.NODE_TXT}`;
+      return d; // not used
 }
 
 
@@ -24,30 +62,63 @@ function myFunc(item) {
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU"
     );
 
-    async function loadData() {
-      // Fetch rows from a table
-      let { data, error } = await supabaseClient
+    async function loadData() { // must be async, to allow "await"
+      
+      nodes_promise = supabaseClient 
+        .from("vertices")
+        .select("*");
+
+      edges_promise = supabaseClient 
         .from("edges")
         .select("*");
 
-      if (error) {
-        console.error(error);
+let { data: nodes, error: node_error } = await nodes_promise; 
+
+      if (node_error) {
+        console.error(node_error);
         return;
       }
-      data.forEach(myFunc);
-      console.log(data);
+      nodes.forEach(AppendNodeDatum);
+
+      AppendShapes(nodes);
+
+let { data: edges, error: edge_error } = await edges_promise; 
+
+      if (edge_error) {
+        console.error(edge_error);
+        return;
+      }
 
       // Use d3 to bind data
       d3.select("#chart")
         .selectAll("p")
-        .data(data)
+        .data(nodes)
         .enter() // subset with no DOM elements
         .append("p") // create a new element for each not found
         .text(d => d.label);
 
+    console.log(nodes);
+    console.log(edges);
+
     }
 
-    loadData();
+            var width = window.innerWidth, height = window.innerHeight;
+      console.log(`width=${width} height=${height}`);
+
+
+
+         var svg = d3.select('body').append('svg')
+                .attr('width',width)
+                .attr('height',height)
+                // set origin to centre of svg
+                .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
+                // interesting behaviour when window resizes - ALMOST good
+                .attr('style', 'max-width:100%; height:auto; height:intrinsic;')
+
+            const gNode = svg.append("g"); // involved parties
+
+    loadData(); // no "await" therefore returns a promise
+
 
   </script>
 </body>
