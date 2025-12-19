@@ -12,6 +12,13 @@
 
   <script>
     // Initialize Supabase client
+
+function myFunc(item) {
+      item.label = `${item.FROM_NODE_ID}-${item.TO_NODE_ID}`;
+}
+
+
+
     const supabaseClient = supabase.createClient(
       "https://hfunworrmdfxzdtmbvth.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU"
@@ -27,16 +34,16 @@
         console.error(error);
         return;
       }
+      data.forEach(myFunc);
+      console.log(data);
 
       // Use d3 to bind data
       d3.select("#chart")
         .selectAll("p")
         .data(data)
-        .enter()
-        .append("p")
-        .text(d => `Row: ${d.FROM_NODE_ID} - ${d.TO_NODE_ID}`);
-
-//        console.log(data);
+        .enter() // subset with no DOM elements
+        .append("p") // create a new element for each not found
+        .text(d => d.label);
 
     }
 
