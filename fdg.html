@@ -1,0 +1,1100 @@
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <style type="text/css">
+
+            circle {
+                stroke-width: 3;
+                opacity: 0.1;
+                stroke:black;
+            }
+
+            circle.xhover {
+                opacity: 0.6;
+                stroke:blue
+            }
+
+            circle:hover {
+                opacity:0.6;
+                stroke:blue;
+                animation: border-flicker 2s linear infinite;
+            }
+
+            circle.selected {
+                opacity:1;
+            }
+
+            circle.stacked {
+                display:none;
+            }
+
+            circle.head {
+                fill:magenta;
+            }
+            .blink_me {
+                animation: blinker 1.7s cubic-bezier(.5,0,1,1) infinite alternate;
+            }
+
+            @keyframes blinker {
+                50% { opacity: 0 ;}
+            }
+
+            rect.leaf.head {
+                fill:magenta
+            }
+
+            rect.leaf.selected {
+                stroke:black;
+                stroke-opacity: 1;
+                fill-opacity: 1;
+            }
+
+            rect.leaf.xhover {
+                stroke:blue;
+                opacity: 0.6;
+            }
+
+            rect.leaf {
+                stroke-width: 3;
+                fill-opacity: 0.1;
+                stroke-opacity: 0.1;
+            }
+
+            rect.leaf:hover {
+                stroke:blue;
+                opacity: 0.6;
+            }
+
+            rect.frame {
+                fill:transparent;
+                stroke-width: 3;
+                stroke-opacity: 0.1;
+                fill-opacity: 0.2;
+            }
+
+            rect.frame.selected {
+                stroke-opacity: 1;
+                stroke:black;
+            }
+
+            rect.frame.xhover {
+                stroke:blue;
+                stroke-dasharray: 20,10,5,5,5,10;
+                stroke-opacity: 1;
+                fill-opacity: 0;
+            }
+
+            rect.frame:hover {
+                stroke:blue;
+                stroke-dasharray: 20,10,5,5,5,10;
+                stroke-opacity: 1;
+                fill-opacity: 0;
+            }
+
+            .edge {
+                opacity: 1;
+            }
+
+            .linkzone {
+                stroke:blue;
+                stroke-opacity: 0;
+                stroke-width: 8;
+                stroke-linecap: round;
+            }
+
+            line:hover {
+                stroke-opacity: 0.5;
+            }
+
+            line.selected {
+                stroke-opacity: 1;
+            }
+
+            svg {
+                stroke:black;
+                stroke-width: 3;
+            }
+
+        </style>
+
+    </head>
+    <body onkeydown="handleKeyDown();">
+        <script>
+            var x; // last clicked node
+            const shape = "circle";
+            var currentobject = null;
+            var width = window.innerWidth, height = window.innerHeight;
+            var simulation;
+            var simPassive;
+            var frozen = false;
+            var radius = 16;
+            var nodes = [];
+            var fencePosts = [];
+            var links = [];
+            var filteredLinks = [];
+            var mapNodes; // key,value lookup dict
+
+            // Lookup NodeColour using SRCE_CDE from vertices.csv
+            var sourcePalette = d3.scaleOrdinal()
+                .domain( [ 'XDX', 'OCR', 'GHI' ])
+                .range( [ 'gold', 'red', 'blue' ]);
+
+            // Lookup LinkColour using EDGE_CDE from edges.csv
+            var edgePalette = d3.scaleOrdinal()
+                .domain( [ 'OCH', 'ME', 'FZ', 'D' ])
+                .range( [ 'blue', 'green', 'grey', 'pink', 'yellow' ]);
+
+            var svg = d3.select('body').append('svg')
+                .attr('width',width)
+                .attr('height',height)
+                // set origin to centre of svg
+                .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
+                // interesting behaviour when window resizes - ALMOST good
+                .attr('style', 'max-width:100%; height:auto; height:intrinsic;')
+
+            // groups are passive shapes in the background
+            const gGroup = svg.append('g')
+                .classed( 'group', true )
+                ;
+
+            const gLinkZone = svg.append('g')
+                .classed( 'linkzone', true )
+                ;
+
+            const gLink = svg.append('g')
+                .classed( 'edge', true )
+                ;
+
+            const gNodeAR = svg.append('g'); // arrangements
+            
+            
+            const gNode = svg.append("g"); // involved parties
+
+            const defs = svg.append("defs");
+
+            const pattern = defs
+                .append("pattern")
+                .attr("id", "green-pattern")
+                .attr("height",1)
+                .attr("width",0.05);
+
+        //-------------------------------------------------------------------------------
+
+        function HoverLink( d, bHovering ) {
+
+            gNode.selectAll("circle")
+                .filter( c => c == d.source || c == d.target )
+                .classed( 'xhover', bHovering );
+
+            gNode.selectAll("rect") // leaf
+                .filter( c => c == d.source || c == d.target )
+                .classed( 'xhover', bHovering );
+
+            gNode.selectAll("rect") // frame
+                .filter( c => c == d.source || c == d.target )
+                .classed( 'xhover', bHovering );
+                // TO DO : make this recursive
+
+        }
+
+        //-------------------------------------------------------------------------------
+
+        // true if n is [a descendant of] either of the vertices of edge e
+        function IsAtVertexOf(  e, n ) {
+            return HasAncestor( e.source, n ) || HasAncestor( e.target, n );
+        }
+
+        //-------------------------------------------------------------------------------
+
+        function handleClickLinkZone(e,d) {
+            // to do: should we toggle?
+            d.source.selected ^= 1;
+            d.target.selected ^= 1;
+            d.selected ^= 1;
+            ticked();
+        }
+
+        //-------------------------------------------------------------------------------
+
+        function handleMouseOverLinkZone(e,d) {
+            HoverLink( d, true );
+        }
+
+       //-------------------------------------------------------------------------------
+
+       function handleMouseOutLinkZone(e,d) {
+            HoverLink( d, false );
+        }
+    //-------------------------------------------------------------------------------
+
+    function handleMouseOverNode(e,d) {
+            // fill colour now done with CSS "hover"
+            currentobject = d;
+        }
+
+    //-------------------------------------------------------------------------------
+
+    function handleMouseOutNode(e,d) {
+            if ( e.button) return; //  ignore if still dragging 
+             // fill colour now done with CSS "hover"
+             currentobject = null;           
+        }
+    
+   //-------------------------------------------------------------------------------
+    // to do: return true iff node d is a member of { a, descendants of a } including
+    // need to make this recursive
+   function HasAncestor(a,d) {
+        return ( d.outLinks.filter( e => IsHierLink(e) && e.target == a ).length ); // simplistic and non-recursive
+   }
+
+   //-------------------------------------------------------------------------------
+
+   function HoverFrame( d, bHovering ) {
+
+    gNode.selectAll("circle")
+        .filter( c => HasAncestor(d, c) )
+        .classed( 'xhover', bHovering );
+    
+    gNode.selectAll("rect")
+        .filter( c => HasAncestor(d, c) )
+        .classed( 'xhover', bHovering );
+    
+    // same for group rectangles
+    gGroup.selectAll("rect")
+        .filter( c => HasAncestor(d, c) )
+        .classed( 'xhover', bHovering );
+
+   }
+
+   //-------------------------------------------------------------------------------
+
+   function handleMouseOverFrame(e, d) {
+        HoverFrame( d, true )
+   }
+
+   //-------------------------------------------------------------------------------
+
+   function handleMouseOutFrame(e, d) {
+    if ( e.button) return; //  ignore if still dragging 
+        HoverFrame( d, false )
+   }
+
+   //-------------------------------------------------------------------------------
+
+   function handleClickNode( k, d ) {
+        x = this;
+        console.log(d); // the d3 datum
+        console.log(k); // the click event
+        console.log(this); // the DOM element (circle)
+
+        // use loc.x and loc.y here
+
+        // fill colour now done with 
+        currentobject = d;
+        // toggle 'selected' status of the clicked node
+        d.selected =  ! d.selected
+
+        // optionally, toggle the selected status of directly linked neighbours
+        if ( k.ctrlKey ) {
+            d.inLinks.forEach ( f => f.source.selected ^= 1 );
+            d.outLinks.forEach ( f => f.target.selected ^= 1 );
+        }
+
+        if ( k.shiftKey ) {
+            // stack/unstack the parent node (affecting all its subnodes)
+            d.inLinks.forEach ( f => f.source.selected ^= 1 );
+            d.outLinks.forEach ( f => f.target.selected ^= 1 );
+            p = ParentOf(d);
+            p.stacked ^= 1; // toggle
+            // try catch because p could have no children => slice[1] returns undefined
+            try {
+                ChildrenOf(p).slice(1).forEach( c => ( c.stacked = p.stacked ));
+            } catch { }
+            simulation.stop();
+            RunSim();
+            }
+
+        ticked();
+
+   }
+
+   //-------------------------------------------------------------------------------
+
+   function handleDblClickNode(e,d) {
+    // console.log(d)
+    // ParentOf(d).stacked = true
+    ticked()
+   }
+
+
+   //-------------------------------------------------------------------------------
+
+   function handleClickFrame(e,d) {
+    x = d;
+    d.selected ^= 1;
+    // to do: if ctrl key set (x,y) at persistent centre of gravity for all child nodes
+    // and increase their gravitational weight
+    // the frame should naturally shrink as a result
+    if ( e.ctrlKey )  {
+        loc = cursorPoint(e);
+        ChildrenOf(d).slice(1).forEach( c => {
+            [ c.cogX, c.cogY ] = [ loc.x, loc.y ]
+            c.weight = 1
+        } ) ;
+        simulation.stop();
+        RunSim()
+    }
+
+    if ( e.shiftKey )  {
+       // stack/unstack status of the frame node (affecting all its subnodes)
+            ChildrenOf(d).slice(1).forEach( c  => ( c.stacked = d.stacked ));
+            simulation.stop();
+            RunSim();
+        } 
+    else 
+        // to do: make this recursive
+    ChildrenOf(d).forEach( c => {
+            c.selected = d.selected;
+            ChildrenOf(c).forEach( gc => { gc.selected = d.selected } );
+         } ) ; // set all children on or off
+         ticked();
+
+    }
+
+ //-------------------------------------------------------------------------------
+
+// which nodes do we care about? include active & passive nodes
+function NodeScope(d) {
+    return true;
+    // return ( 'OCH', 'ME', 'FZ').includes( d.EDGE_CDE )
+}
+
+ //-------------------------------------------------------------------------------
+    // to do: handle multiple containership hierarchies => need a priority order in case of 
+function IsHierLink(d) {
+    return ( false 
+      //  || ( 'ME').includes( d.EDGE_CDE )
+        || ( 'OCH').includes( d.EDGE_CDE )
+        // to do: a Golden ID with exactly 2 visible nodes COULD be more simply represented as a connecting line
+        // instead of a frame rectangle
+    );
+
+}
+
+//-------------------------------------------------------------------------------
+
+function IsRectShape(d) {
+    return d.NODE_TYPE == 'AR';
+}
+
+//-------------------------------------------------------------------------------
+
+function IsRoundedShape(d) {
+    return d.NODE_TYPE == 'ID';
+}
+
+//-------------------------------------------------------------------------------
+/*
+
+TO DO: allow for multiple parallel hierarchies, each of which can be represented 
+each hierarchy could be defined by a group of link types eg 'GOLDEN', 
+frame shapes are colour-coded with round square 
+When multiple hierarchies are stackable we need to set priority rules to 
+BUG: HHOLD stacks & unstacks nicely but only when OCH hierarchy is disabled, something to do with
+
+
+*/
+function IsFrameShape(d) {
+    return false
+    || ( 'GENH' ).includes( d.CUST_TYPE_CDE ) // households
+    || ( 'GRP').includes( d.CUST_TYPE_CDE ) // ultimate parents
+    || ( 'OCH').includes( d.SRCE_CDE ) // golden ids
+    || ( ( 'AF').includes( d.SRCE_CDE ) && HasVisibleChild(d)  ) // does this work?
+    || HasVisibleChild(d) ;
+}
+
+//-------------------------------------------------------------------------------
+
+function HasVisibleChild(d) {
+    return ( VisibleChildrenOf(d).length > 0 );
+}
+
+//-------------------------------------------------------------------------------
+
+function IsVisibleNode(d) {
+    p = ParentOf(d);
+    return ( (!p.stacked) || d == LeadingChildOf(p) );
+}
+
+//-------------------------------------------------------------------------------
+// only active (unstacked) nodes will drive the simulation
+
+function IsActiveNode(d) {
+    return ( NodeScope(d) && IsVisibleNode(d) && !IsFrameShape(d) );
+}
+
+//-------------------------------------------------------------------------------
+
+function LinkScope(d) {
+// a link is in scope if both vertices are in scope
+    return ( NodeScope(d.source) && NodeScope(d.target) );
+}
+
+//-------------------------------------------------------------------------------
+
+function handleKeyDown(d) {
+    // console.log(event)
+    switch (event.key) {
+    case 'Escape' : 
+        // clear all highlights by removing the 'selected' class
+        nodes.forEach( d => d.selected = 0 );
+        break;
+    case 'End':
+    case 'Pause' :
+        // toggle frozen
+        if ( frozen ^= 1 )
+            simulation.stop();
+        else
+            simulation.restart();
+        break;
+    case 'Home' :
+        simulation.stop();
+        frozen = false;
+        RunSim(); // re-initialise
+        break;
+    }
+    ticked();
+}
+
+//-------------------------------------------------------------------------------
+
+function AppendNodeDatum(d,i) {
+    d.index = i;
+    d.charge = -40;
+    d.cogX = 0;
+    d.cogY = 0;
+    d.height = 2 * radius;
+    d.width = 2 * radius;
+    d.weight = 0.1;
+    d.r = radius;
+    d.stacked = 0;
+    d.selected = 0;
+    d.xhover = 0;
+    return d;
+}
+
+//-------------------------------------------------------------------------------
+
+function getNodeFromID( NODE_ID ) {
+    return ( nodes[ mapNodes.get(NODE_ID).index ] );
+}
+
+//-------------------------------------------------------------------------------
+
+function AppendLinkDatum(d,i) {
+
+try { 
+    // bind to its live vertex objects
+    d.source = getNodeFromID( d.FROM_NODE_ID );
+    d.target = getNodeFromID( d.TO_NODE_ID );
+    d.distance = 10;
+    d.strength = 0.1;
+   // console.log(d);
+    return d; // only if we didn't throw an error eg 'no such node'
+} catch ( e ) {
+        console.log(e)
+    }
+}
+
+//-------------------------------------------------------------------------------
+
+function NodeRadius(d) { 
+    return radius;
+}
+
+//-------------------------------------------------------------------------------
+
+function CollideRadius(d) { // used for collision detection, even if the node is a rect
+    return d.r + 3; // +3 = extra to allow for stroke-width of circle element 
+}
+
+//-------------------------------------------------------------------------------
+
+function NodeCentre(d) {
+    if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
+    else return [ d.x, d.y ];
+}
+
+//-------------------------------------------------------------------------------
+
+function NodeInfo(d) {
+    if ( d.NODE_TXT ) {
+        return d.NODE_TXT.replace(/\|/g,'\n');
+    }
+}
+
+//-------------------------------------------------------------------------------
+
+function NodeCharge(d) {
+    return d.charge;
+}
+
+//-------------------------------------------------------------------------------
+
+function NodeColour(d) {
+    try {
+        return sourcePalette( d.SRCE_CDE );
+    } catch (e) { };
+}
+
+//-------------------------------------------------------------------------------
+// to do: in case either node is stacked look for any links that are obscured by this one and display their info too
+function LinkInfo(d) {
+    try {
+        return d.EDGE_TXT + '\n\nFrom: ' + NodeInfo(d.source) + '\n\nTo: ' + NodeInfo(d.target);
+    } catch (e) { };
+}
+
+//-------------------------------------------------------------------------------
+
+function LinkColour(d) {
+    try {
+        return edgePalette( d.EDGE_CDE );
+    } catch (e) { };
+}
+
+//-------------------------------------------------------------------------------
+
+function IsActiveLink(d) {
+    return true;
+}
+
+//-------------------------------------------------------------------------------
+
+function LinkStrength(d) {
+    return 0.1;
+}
+
+//-------------------------------------------------------------------------------
+
+function LinkDistance(d) {
+    return IsHierLink(d) ? 0 : d.distance ;
+}
+
+//-------------------------------------------------------------------------------
+
+function RunSim() {
+    // to do: override default settings that influence movement for the first few seconds
+    // just for the currently-active subset of nodes controlling the animation
+    simulation = d3.forceSimulation(nodes.filter(IsActiveNode))
+
+        // nodes can touch but should not overlap
+        // d3.forceCollide() is a built-in algorithm that works for circles based on centre & radius, 
+        // but rects don't have a radius and their x,y coords are top left corner, not centre.
+        // a physically accurate algorithm for rectangles is very complex
+        // see https://observablehq.com/@lvngd/rectangular-collision-detection
+        // so instead we use many-body repulsion as a workaround
+        // or maybe a one-body translation (after-the-fact exclusion), without momentum etc
+        .force('collide', d3.forceCollide().radius(CollideRadius))
+    
+        // electrostatic forces attract/repel based on charge 
+        .force('my-charge', d3.forceManyBody()
+            .strength(NodeCharge))
+
+        // default centre is (0,0) within the viewBox coords
+        // d3.forceCenter() tries to keep the overall centre of mass in a fixed location
+        .force('centre', d3.forceCenter().strength(1))
+
+        // a centre of gravity helps to avoid explosive repulsion (& can also be used as an anchor for related groups clusters)
+        .force('cogX', d3.forceX( d => d.cogX )
+            .strength( d => d.weight ))
+        .force('cogY', d3.forceX( d => d.cogY )
+            .strength( d => (width/height) * d.weight ))
+
+        // each edge can act as a spring between 2 nodes (like a covalent bond)
+        .force('my-link', d3.forceLink()
+            .distance(LinkDistance)
+            .strength(LinkStrength)
+            .links(filteredLinks.filter(LinkScope))
+            .iterations(2)
+            )
+        .alphaTarget(0.3) // freeze if/when alpha drops below this threshold
+        .alphaDecay(0.1)  // zero => never freeze, keep responding to drag events
+        .on('tick',ticked)
+        ;
+    ticked();
+    // the simulation starts running by default - we don't always want it to
+    if (frozen) simulation.stop();
+    initDrag();
+}
+
+//-------------------------------------------------------------------------------
+// if we only create circles for nodes that are initially active, how to switch from passive to active later in the session?
+// might be easier up front to create a circle for every node in scope and decide whether to show or hide using CSS attributes
+function AppendShapes(rs) {
+    nodes = rs; // the 'master' array used by d3 to render shapes
+    // we also want to access each datum via its unique NODE_ID string
+    mapNodes = new Map ( nodes.map((x,i) => ( [x.NODE_ID, x ]) ) );
+
+    // create the SVG visual element
+    gNode.selectAll('circle') // in case we've already got some
+        .data(nodes.filter(IsRoundedShape)) // see comment above - how best to hide a circle when its group is visible and vice versa
+            .join('circle')  // append a new circle shape bound to that datum
+                .on('mouseover',handleMouseOverNode) // for popup if implemented
+                .on('mouseout',handleMouseOutNode)
+                .on('click',handleClickNode)
+                .on('dblclick',handleDblClickNode)
+                .attr('r',NodeRadius)
+                .attr('fill',NodeColour)
+                .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
+                // can we append a custom element that supports CSS eg (stackoverflow)
+                .text(NodeInfo)
+                ;
+    gNode.selectAll('rect') // in case we've already got some
+        .data(nodes.filter(IsRectShape))
+            .join('rect') // append a new rect shape bound to that datum
+                .classed('leaf',true)
+                .on('mouseover',handleMouseOverNode) // for popup if implemented
+                .on('mouseout',handleMouseOutNode)
+                .on('click',handleClickNode)
+                .on('dblclick',handleDblClickNode)
+                .attr('width',d => d.width)
+                .attr('height',d => d.height)
+                .attr('fill',NodeColour)
+                .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
+                // can we append a custom element that supports CSS eg 
+                .text(NodeInfo)
+                ;
+}
+
+//-------------------------------------------------------------------------------
+
+    // this might have to wait until we've finished loading edges as well
+
+function AppendFrameShapes() {
+    console.log(nodes.filter(IsFrameShape));
+    gGroup.selectAll('rect') // in case we've already got some
+        .data(nodes.filter(IsFrameShape)) // for each datum in scope
+            .join('rect') // append a new rectangular frame bound to this 
+            .attr('rx', d => IsRoundedShape(d) ? 2*radius : 0 ) // for rounded corners
+            .attr('ry', d => IsRoundedShape(d) ? 2*radius : 0 ) 
+            .classed('frame',true)
+            .on('click', handleClickFrame)
+            .on('mouseover', handleMouseOverFrame) // for popup
+            .on('mouseout', handleMouseOutFrame)
+            .append('title')
+                .text(NodeInfo)
+            ;
+
+}
+
+//-------------------------------------------------------------------------------
+
+function AppendLines(rs) {
+    links = rs;
+   // console.log(links);
+    filteredLinks = links;
+    gLinkZone.selectAll('line')
+        .data(filteredLinks.filter(LinkScope))
+        .join('line')
+        .on('click',handleClickLinkZone)
+        .on('mouseover',handleMouseOverLinkZone)
+        .on('mouseout',handleMouseOutLinkZone)
+        .append('title') // simpler tooltip using HTML elements
+        .text(LinkInfo)
+        ;
+    gLink.selectAll('line')
+        .data(filteredLinks.filter(LinkScope))
+        .join('line') // create a line element bound to datum (in its __datum__ element)
+        .on('click',handleClickLinkZone)    
+        .attr('stroke',LinkColour)
+        ;
+
+}
+
+//-------------------------------------------------------------------------------
+
+async function LoadData_DEPRECATED() {
+    // this queues both promises (and their associated "then" statements) via parallel threads
+
+    const nodePromise = d3.csv('vertices.csv', AppendNodeDatum)
+        .then( AppendShapes );
+    await nodePromise;
+
+    const linkPromise = d3.csv('edges.csv', AppendLinkDatum)
+        .then( AppendLines );
+    await linkPromise;
+    // async means even LoadData() runs in a new thread. Control immediately returns
+    // only within this function can we reliably delay AfterLoad() until 
+    AfterLoad();
+}
+
+async function LoadData() {
+    // this queues both promises (and their associated "then" statements) via parallel threads
+  // Initialize Supabase client
+    const supabaseClient = supabase.createClient(
+      "https://hfunworrmdfxzdtmbvth.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU"
+    );
+
+    const nodePromise = supabaseClient
+        .from("vertices")
+        .select("*");
+
+let { data: nodelist, error } = await nodePromise; 
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+       console.log(nodelist); 
+       nodelist.forEach(AppendNodeDatum);
+       AppendShapes( nodelist );
+
+
+const linkPromise = supabaseClient
+        .from("edges")
+        .select("*");
+
+let { data: linklist, error: link_error } = await linkPromise; 
+
+      if (link_error) {
+        console.error(link_error);
+        return;
+      }
+
+       linklist.forEach(AppendLinkDatum);
+       AppendLines( linklist );
+
+    // async means even LoadData() runs in a new thread. Control immediately returns
+    // only within this function can we reliably delay AfterLoad() until 
+    AfterLoad();
+}
+
+//-------------------------------------------------------------------------------
+
+function ChildrenOf(d) {
+    if ( d.inLinks ) {
+            return ( d.inLinks.filter( IsHierLink ).map( e => e.source ) )
+    } else return [];
+
+}
+
+//-------------------------------------------------------------------------------
+
+function VisibleChildrenOf(d) {
+        return ChildrenOf(d).filter(IsVisibleNode);
+}
+
+//-------------------------------------------------------------------------------
+
+function LeadingChildOf(d) {
+        c = ChildrenOf(d);
+        return ( c.length ? c[0] : d ); // self-contained?
+}
+
+//-------------------------------------------------------------------------------
+function HasStackedParent(d) {  // if visible we'll use a different colour
+// parent is currently stacked // TO DO and has 2+ non-hidden children
+    return ( d.outLinks.filter(IsHierLink).filter( e => e.target.stacked).length );
+    // at least one outward edge points to a node that is stacked
+}
+
+//-------------------------------------------------------------------------------
+function ParentOf(d) {
+    if ( d.outLinks ) {
+        t = d.outLinks.filter( IsHierLink );
+        // if more than 1, just pick the first for now.. might need to take a different approach
+        return( t.length ? t[0].target : d ); 
+    } else return d;
+}
+
+//-------------------------------------------------------------------------------
+// final init steps that have to wait until nodes AND links are both populated 
+function AfterLoad() {
+    // collect all immediate links into/out of each node regardless of type
+    nodes.forEach( d => { 
+        d.inLinks  = links.filter( x => ( x.TO_NODE_ID   == d.NODE_ID ) ); 
+        d.outLinks = links.filter( x => ( x.FROM_NODE_ID == d.NODE_ID ) );
+    } );
+    // these will be used to manage interactive stacking & unstacking
+    // when stacked, tail nodes must be excluded from the force model
+    // i.e. the force simulation uses only the leading child node
+    // ideally we'd still like all links to influence the animation. Problem: the stacked nodes 
+    // stacking a node means removing it from the force model AND letting all its clicks 'through to the keeper'
+    // for any node we must call split(1) to get the head of its list
+    nodes.filter(IsFrameShape).forEach( gn => {
+        ChildrenOf(gn).forEach( lnk => {
+            lnk.target = gn.inLinks[0].source;
+            lnk.strength = 100;
+            })
+        });
+    console.log(links);
+    AppendFrameShapes(); // don't forget the parentheses!
+    rst = getNodeFromID('RST');
+    console.log(rst);
+
+    // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
+    simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
+
+    RunSim();
+
+} // end AfterLoad()
+//-------------------------------------------------------------------------------
+
+// used in ticked() to ensure objects never disappear out of frame
+function bounded(x,a,b) {
+    if ( x < a ) x = a;
+    if ( x > b ) x = b;
+    return x;
+}
+
+//-------------------------------------------------------------------------------
+// after each tick we have to expressly assign new values to SVG attributes, otherwise nothing changes
+// we can adjust the data here as well eg set velocity to zero
+// to do: if the node is a container, we should allow for extra border
+// to do: needs to allow for extra border around any nested container
+function NodeHalfWidth(d)  {  // horizontal distance from centre to left/right edge
+    return d.r;
+
+}
+function NodeHalfHeight(d)  {  
+    return d.r;
+
+}
+
+function RightBoundary(d) {
+    return (NodeCentre(d)[0] + NodeHalfWidth(d));
+}
+
+function LeftBoundary(d) {
+    return (NodeCentre(d)[0] - NodeHalfWidth(d));
+}
+
+function BottomBoundary(d) {
+    return (NodeCentre(d)[1] + NodeHalfHeight(d));
+}
+
+function TopBoundary(d) {
+    return (NodeCentre(d)[1] - NodeHalfHeight(d));
+}
+
+function IsStackedLeaf(d) {
+    p = ParentOf(d);
+    return ( p.stacked && d != LeadingChildOf(p));
+}
+
+//-------------------------------------------------------------------------------
+// a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
+function SetLineAttributes(d)   {
+    // this = the HTML SVG element, d = the d3 datum
+    if ( IsHierLink(d) && IsFrameShape(d.target) ) 
+        this.setAttribute('visibility','hidden');
+    else {
+        this.setAttribute('visibility','visible');
+        [x1,y1] = NodeCentre( d.source );
+        this.setAttribute('x1',x1);
+        this.setAttribute('y1',y1);
+        [x2,y2] = NodeCentre( d.target );
+        this.setAttribute('x2',x2);
+        this.setAttribute('y2',y2);
+        d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
+    }
+}
+
+//-------------------------------------------------------------------------------
+function SetCircleAttributes(d,i)   {
+      //  console.log(this);
+        return(this);
+    // this.setAttribute('cx', d => { d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); return d.x } );
+}
+
+
+//-------------------------------------------------------------------------------
+
+function ticked() { // invoked just before each 'repaint' so we can decide exactly how to render
+// attr() takes a function as second argument
+// the datum (updated with new coordinates) is passed by reference to that function
+
+// tweaking the datum for each container to ensure that its minimum bounding rectangle always 
+// unstacked nodes are free to wander hence we want the frame to move and 
+
+// first stacked nodes are obscured by continuously shunting them under 
+// expect nested frames (stacked subgroup rectangles) will stay with their leading
+// works OK except the parent frame picks up the 
+
+nodes.filter( IsStackedLeaf ).forEach( d => {
+        [d.x, d.y] = NodeCentre( LeadingChildOf( ParentOf(d) ) ); 
+    } );
+
+// TO DO: if stacking results in frames that look empty we should move them to the 
+// eg after collapsing all ME IDs under their Ult Parent. All their OCH frames look empty
+
+// only now can we decide where to put the frames
+nodes.filter( IsFrameShape ).forEach( d => {
+    visible_children = VisibleChildrenOf(d);
+    if ( visible_children.length ) {
+        xMax = Math.max( ...visible_children.map( RightBoundary ) );
+        xMin = Math.min( ...visible_children.map( LeftBoundary ) );
+        yMax = Math.max( ...visible_children.map( BottomBoundary ) );
+        yMin = Math.min( ...visible_children.map( TopBoundary ) );
+        d.x = xMin; // [d.x, d.y] are the coords as read and updated by the simulation -- whereas we 
+        d.y = yMin;
+        d.width = xMax - xMin;
+        d.height = yMax - yMin;
+    } } );
+    
+// TO DO : what happens when the IP owns (only) the container AR node? Does the line disappear?
+// less likely if a container IP jointly owns an AR.
+// always stay within internal boundary, but without avoiding edge
+
+    gLinkZone.selectAll('line').each( SetLineAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
+    gLink.selectAll('line').each( SetLineAttributes );
+
+
+    gNode.selectAll('circle')
+        .each( SetCircleAttributes )
+        .attr('cx', d => { d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); return d.x } )
+        .attr('cy', d => { d.y = bounded(d.y, 3*radius-height/2, height/2-3*radius); return d.y } )
+        // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on
+        .classed('selected', d => d.selected)
+        .classed('head', HasStackedParent)
+        .attr('visibility', d => IsActiveNode(d) ? 'visible' : 'hidden' )
+        .attr('fill',NodeColour)
+        ;
+
+    gNode.selectAll('rect')
+        .attr('x', d => { d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); return d.x } )
+        .attr('y', d => { d.y = bounded(d.y, 3*radius-height/2, height/2-3*radius); return d.y } )
+        .attr( 'height', d => d.height )
+        .attr( 'width', d => d.width )
+        .classed('selected', d => d.selected)
+        .classed('head', HasStackedParent)
+        .attr('visibility', d => IsActiveNode(d) ? 'visible' : 'hidden' )
+        .attr('fill',NodeColour)
+        ;
+// to do: what about group frames with no visible child node 
+
+    gGroup.selectAll('rect')
+        .attr('x', d => d.x - radius )
+        .attr('y', d => d.y - radius )
+        // NOTE the following adjustments are only required if/when static data is modified, typically after a user click
+        .attr( 'height', d => d.height + 2*radius )
+        .attr( 'width', d => d.width + 2*radius )
+        .classed('selected', d => d.selected)  
+        .attr('visibility', d => HasVisibleChild(d) ? 'visible' : 'hidden' )
+     ;
+};
+
+//-------------------------------------------------------------------------------
+// problem with conflicting frames of reference
+// how to translate from DOM to SVG coordinates
+// d3 scale continuous scales
+//-------------------------------------------------------------------------------
+
+function handleDragStart(e,d) {
+    simulation.stop(); // prevents crazy flicker while dragging
+}
+
+//-------------------------------------------------------------------------------
+
+function handleDrag(e,d) {
+    // for real time visual feedback
+    d.x = e.x;
+    d.y = e.y;
+    ticked();
+}
+
+//-------------------------------------------------------------------------------
+
+function handleDrop(e,d) {
+    // console.log(e);
+    // e.subject is [a reference to] the d3 datum object
+    // 
+
+    if ( e.sourceEvent.shiftKey ) {
+        d.cogX = d.x;
+        d.cogY = d.y;
+        RunSim();
+    } else {
+        if ( !frozen ) {
+            simulation.restart();
+        }
+    }
+    ticked();
+}
+
+//-------------------------------------------------------------------------------
+
+function initDrag(e,d) { // assumes SVG element has been created
+    // only active nodes can be dragged
+    gNode.selectAll('rect').call(drag);
+    gNode.selectAll('circle').call(drag);
+}
+
+//-------------------------------------------------------------------------------
+
+let drag = d3.drag()
+    .on( 'start', handleDragStart)
+    .on( 'end', handleDrop)  
+    .on( 'drag', handleDrag)
+    ;
+
+// find your root SVG element
+var svg = document.querySelector('svg');
+// create an SVGPoint for future math
+var pt = svg.createSVGPoint();
+// get point in global SVG space
+
+function cursorPoint(evt) {
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+//-------------------------------------------------------------------------------
+
+class Vertex {
+    constructor() {
+    }
+
+}
+//-------------------------------------------------------------------------------
+
+class CircleNode extends Vertex {
+    constructor() {
+        super();
+    }
+
+    show() {
+      //  return this.present() + ', it is a ' + this.model;
+    }
+}
+//-------------------------------------------------------------------------------
+
+class RectNode extends Vertex {
+    constructor() {
+    }
+}
+//-------------------------------------------------------------------------------
+
+class Edge {
+    constructor() {
+    }
+}
+//-------------------------------------------------------------------------------
+
+
+
+
+//-------------------------------------------------------------------------------
+
+
+LoadData(); // async means control is returned immediately, before any data 
+// anything else we can do now that doesn't depend on nodes & links?
+
+</script>
+</body>
+</html>

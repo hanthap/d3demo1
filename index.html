@@ -71,7 +71,8 @@ function AppendNodeDatum(d,i) { // forEach will pass (datum, index)
       edges_promise = supabaseClient 
         .from("edges")
         .select("*");
-
+        
+//  destructure the results & rename for clarity
 let { data: nodes, error: node_error } = await nodes_promise; 
 
       if (node_error) {
