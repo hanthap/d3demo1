@@ -1,0 +1,50 @@
+table EDGE
+	lineageTag: 2e5626bf-b0cc-44cc-abae-248576a4d0eb
+
+	column FROM_NODE_ID
+		dataType: string
+		lineageTag: 9b413277-0aee-4661-b93b-fc7b06f426ec
+		summarizeBy: none
+		sourceColumn: FROM_NODE_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TO_NODE_ID
+		dataType: string
+		lineageTag: 13cd6be5-7c91-41ce-b77d-dfa52928989d
+		summarizeBy: none
+		sourceColumn: TO_NODE_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column EDGE_TXT
+		dataType: string
+		lineageTag: 943727da-f15f-4985-9410-9f611ddbafef
+		summarizeBy: none
+		sourceColumn: EDGE_TXT
+
+		annotation SummarizationSetBy = Automatic
+
+	column EDGE_CDE
+		dataType: string
+		lineageTag: 03f51c40-823c-4688-bb17-70b81365a8e6
+		summarizeBy: none
+		sourceColumn: EDGE_CDE
+
+		annotation SummarizationSetBy = Automatic
+
+	partition EDGE = m
+		mode: import
+		source =
+				let
+				    Source = Json.Document(Web.Contents("https://hfunworrmdfxzdtmbvth.supabase.co/rest/v1/edges?select=*", [Headers=[#"Content-Type"="application/json", Accept="application/json", apikey="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU", Authorization="Bearer: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU"]])),
+				    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+				    #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to Table", "Column1", {"FROM_NODE_ID", "TO_NODE_ID", "EDGE_TXT", "EDGE_CDE"}, {"FROM_NODE_ID", "TO_NODE_ID", "EDGE_TXT", "EDGE_CDE"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Column1",{{"FROM_NODE_ID", type text}, {"TO_NODE_ID", type text}, {"EDGE_TXT", type text}, {"EDGE_CDE", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

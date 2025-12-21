@@ -1,0 +1,66 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.4.0/schema.json",
+  "name": "6588914d97fb1b752b8d",
+  "position": {
+    "x": 9.72644376899696,
+    "y": 0,
+    "z": 0,
+    "height": 201.33738601823708,
+    "width": 525.22796352583589,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "EDGE"
+                    }
+                  },
+                  "Property": "EDGE_CDE"
+                }
+              },
+              "queryRef": "edges?select=*.EDGE_CDE",
+              "nativeQueryRef": "EDGE_CDE"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "EDGE"
+                    }
+                  },
+                  "Property": "EDGE_TXT"
+                }
+              },
+              "queryRef": "edges?select=*.EDGE_TXT",
+              "nativeQueryRef": "EDGE_TXT"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "EDGE"
+                    }
+                  },
+                  "Property": "FROM_NODE_ID"
+                }
+              },
+              "queryRef": "edges?select=*.FROM_NODE_ID",
+              "nativeQueryRef": "FROM_NODE_ID"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

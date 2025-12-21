@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "edges_test"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "b0115357-8fab-40a4-b3f9-9c7a31aea1a9"
+  }
+}

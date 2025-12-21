@@ -1,0 +1,18 @@
+model Model
+	culture: en-AU
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-AU
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["EDGE"]
+
+annotation PBI_ProTooling = ["TMDLView_Desktop","DevMode"]
+
+ref table EDGE
+
+ref cultureInfo en-AU
+
