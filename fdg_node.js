@@ -164,10 +164,11 @@ function AppendNodeDatum(d,i) {
     d.charge = -40;
     d.cogX = 0;
     d.cogY = 0;
-    d.height = 2 * radius;
-    d.width = 2 * radius;
     d.weight = 0.1;
-    d.r = radius;
+    d.r = d.NODE_MASS * radius / 35; // size proportional to weight
+    d.height = 2 * d.r;
+    d.width = 2 * d.r;
+
     d.stacked = 0;
     d.selected = 0;
     d.xhover = 0;
@@ -183,13 +184,13 @@ function getNodeFromID( NODE_ID ) {
 //-------------------------------------------------------------------------------
 
 function NodeRadius(d) { 
-    return radius;
+    return d.r;
 }
 
 //-------------------------------------------------------------------------------
 
 function CollideRadius(d) { // used for collision detection, even if the node is a rect
-    return d.r + 3; // +3 = extra to allow for stroke-width of circle element 
+    return d.r + 10; // +3 = extra to allow for stroke-width of circle element 
 }
 
 //-------------------------------------------------------------------------------

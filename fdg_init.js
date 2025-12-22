@@ -60,7 +60,7 @@ const supabaseClient = supabase.createClient(
 
 //-------------------------------------------------------------------------------
 
-// used in ticked() to ensure objects never disappear out of frame
+// used in ticked(), drag() to ensure objects never disappear out of frame
 function bounded(x,a,b) {
     if ( x < a ) x = a;
     if ( x > b ) x = b;
