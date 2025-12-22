@@ -113,8 +113,8 @@ async function TestUpdate() {
 
 let update_promise  = supabaseClient
   .from('nodes')
-  .update({ NODE_TXT: 'foobar' })
-  .eq('NODE_ID', 'RST')
+  .update({ LAST_MOD_TS: new Date().toISOString() })
+  .eq('NODE_ID', 'XXX')
   .select();
 
 const { data: u_data, error: e } = await update_promise; 
@@ -139,9 +139,9 @@ const { data: u_data, error: e } = await update_promise;
 
             const gNode = svg.append("g"); // involved parties
 
-   loadData(); // no "await" therefore returns a promise
+//   loadData(); // no "await" therefore returns a promise
 
-// TestUpdate() ;
+ TestUpdate() ;
 
 
 
