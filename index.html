@@ -16,8 +16,24 @@
   <script>
     // Initialize Supabase client
 
-  var nodes = [];
+ var nodes = [];
   var mapNodes; // key,value lookup dict
+
+class MyNode {
+    
+    constructor(d) {
+            this.NODE_ID = d.NODE_ID;
+            this.NODE_TXT = d.NODE_TXT;
+            this.LAST_MOD_TS = d.LAST_MOD_TS;
+            // this.label = `${this.NODE_ID} = ${this.NODE_TXT}`;
+    }
+
+    label() {
+        return `${this.NODE_ID} = ${this.NODE_TXT}`;
+    }
+}
+
+
 
 
   function NodeInfo(d) {
@@ -53,19 +69,12 @@ function AppendShapes(rs) {
 }
 
 
-function AppendNodeDatum(d,i) { // forEach will pass (datum, index)
-      d.label = `${i} ${d.NODE_ID} = ${d.NODE_TXT}`;
-      return d; // not used
-}
-
-
-
     const supabaseClient = supabase.createClient(
       APP_CONFIG.supabaseUrl,
       APP_CONFIG.supabaseAnonKey
   );
 
-    async function loadData() { // must be async, to allow "await"
+async function loadData() { // must be async, to allow "await"
       
       nodes_promise = supabaseClient 
         .from("nodes")
@@ -76,13 +85,14 @@ function AppendNodeDatum(d,i) { // forEach will pass (datum, index)
         .select("*");
         
 //  destructure the results & rename for clarity
-let { data: nodes, error: node_error } = await nodes_promise; 
+let { data : nodes,  error: node_error } = await nodes_promise; 
 
       if (node_error) {
         console.error(node_error);
         return;
       }
-      nodes.forEach(AppendNodeDatum);
+
+      nodes = nodes.map(obj => new MyNode(obj));
 
       AppendShapes(nodes);
 
@@ -97,12 +107,12 @@ let { data: edges, error: edge_error } = await edges_promise;
       d3.select("#chart")
         .selectAll("p") // DOM elements in scope
         .data(nodes)
-        .enter() // anti-join: nodes not currently bound to any of these in-scope "p" elements
+        .enter() // anti-join: "new" nodes = those not currently bound to any of these in-scope "p" elements
         .append("p") // create a new element for each not found
-        .text(d => d.label);
+        .text(d => d.label());
 
     console.log(nodes);
-    console.log(edges);
+   // console.log(edges);
 
 
 
@@ -124,9 +134,8 @@ const { data: u_data, error: e } = await update_promise;
 
 
 
-            var width = window.innerWidth, height = window.innerHeight;
+      var width = window.innerWidth, height = window.innerHeight;
       console.log(`width=${width} height=${height}`);
-
 
 
          var svg = d3.select('body').append('svg')
@@ -139,9 +148,9 @@ const { data: u_data, error: e } = await update_promise;
 
             const gNode = svg.append("g"); // involved parties
 
-//   loadData(); // no "await" therefore returns a promise
+loadData(); // no "await" therefore returns a promise
 
- TestUpdate() ;
+// TestUpdate() ;
 
 
 
