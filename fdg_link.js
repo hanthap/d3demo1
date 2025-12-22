@@ -4,7 +4,7 @@ var filteredLinks = [];
 // Lookup LinkColour using EDGE_CDE from edges.csv
 var edgePalette = d3.scaleOrdinal()
     .domain( [ 'OCH', 'ME', 'FZ', 'D' ])
-    .range( [ 'blue', 'green', 'grey', 'pink', 'yellow' ]);
+    .range( [ 'blue', 'green', 'grey', 'pink', 'orange' ]);
 
 
  //-------------------------------------------------------------------------------
@@ -55,12 +55,26 @@ function LinkInfo(d) {
 
 //-------------------------------------------------------------------------------
 
-function LinkColour(d) {
+function LinkColour(d) { // drives stroke colour
     try {
         return edgePalette( d.EDGE_CDE );
     } catch (e) { };
 }
 
+//-------------------------------------------------------------------------------
+
+function LinkThickness(d) { // drives stroke-width
+    try {
+        return d.EDGE_MASS / 20;
+    } catch (e) { };
+}
+
+
+function LinkZoneThickness(d) { // drives stroke-width
+    try {
+        return 6 + d.EDGE_MASS / 20;
+    } catch (e) { };
+}
 //-------------------------------------------------------------------------------
 
 function IsActiveLink(d) {
@@ -92,6 +106,7 @@ function AppendLines(rs) {
         .on('click',handleClickLinkZone)
         .on('mouseover',handleMouseOverLinkZone)
         .on('mouseout',handleMouseOutLinkZone)
+        .attr('stroke-width',LinkZoneThickness)
         .append('title') // simpler tooltip using HTML elements
         .text(LinkInfo)
         ;
@@ -100,17 +115,14 @@ function AppendLines(rs) {
         .join('line') // create a line element bound to datum (in its __datum__ element)
         .on('click',handleClickLinkZone)    
         .attr('stroke',LinkColour)
+        .attr('stroke-width',LinkThickness)
         ;
 
 }
 
 //-------------------------------------------------------------------------------
 // a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
-
-// DEBUG: NodeCentre is returning the unbounded coordinates of the node, so links to nodes that are constrained within frames are drawn incorrectly
-// that is, the 'true' co-ordinates of the mouse pointer are used, not the constrained ones
-// simplest fix is to apply the boundary to the mouse pointer too
-
+// TO DO: optimize to avoid double calls
 function SetLineAttributes(d)   {
     // this = the HTML SVG element, d = the d3 datum
     if ( IsHierLink(d) && IsFrameShape(d.target) ) 

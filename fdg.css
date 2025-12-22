@@ -91,11 +91,13 @@
                 opacity: 1;
             }
 
-            .linkzone {
-                stroke:blue;
-                stroke-opacity: 0;
-                stroke-width: 8;
+            line {
                 stroke-linecap: round;
+            }
+
+            .linkzone {
+                stroke: yellowgreen;
+                stroke-opacity: 0;
             }
 
             line:hover {
