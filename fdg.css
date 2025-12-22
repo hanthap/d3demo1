@@ -93,6 +93,7 @@
 
             line {
                 stroke-linecap: round;
+                stroke-opacity: 0.2;
             }
 
             .linkzone {
