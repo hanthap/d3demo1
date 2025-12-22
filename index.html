@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>D3 + Supabase Example</title>
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
 </head>
 <body>
   <h1>Supabase Data with D3</h1>
@@ -58,14 +61,14 @@ function AppendNodeDatum(d,i) { // forEach will pass (datum, index)
 
 
     const supabaseClient = supabase.createClient(
-      "https://hfunworrmdfxzdtmbvth.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU"
-    );
+      APP_CONFIG.supabaseUrl,
+      APP_CONFIG.supabaseAnonKey
+  );
 
     async function loadData() { // must be async, to allow "await"
       
       nodes_promise = supabaseClient 
-        .from("vertices")
+        .from("nodes")
         .select("*");
 
       edges_promise = supabaseClient 
@@ -92,16 +95,34 @@ let { data: edges, error: edge_error } = await edges_promise;
 
       // Use d3 to bind data
       d3.select("#chart")
-        .selectAll("p")
+        .selectAll("p") // DOM elements in scope
         .data(nodes)
-        .enter() // subset with no DOM elements
+        .enter() // anti-join: nodes not currently bound to any of these in-scope "p" elements
         .append("p") // create a new element for each not found
         .text(d => d.label);
 
     console.log(nodes);
     console.log(edges);
 
+
+
     }
+
+
+async function TestUpdate() {
+
+let update_promise  = supabaseClient
+  .from('nodes')
+  .update({ NODE_TXT: 'foobar' })
+  .eq('NODE_ID', 'RST')
+  .select();
+
+const { data: u_data, error: e } = await update_promise; 
+
+   console.log(u_data);
+}
+
+
 
             var width = window.innerWidth, height = window.innerHeight;
       console.log(`width=${width} height=${height}`);
@@ -118,7 +139,10 @@ let { data: edges, error: edge_error } = await edges_promise;
 
             const gNode = svg.append("g"); // involved parties
 
-    loadData(); // no "await" therefore returns a promise
+   loadData(); // no "await" therefore returns a promise
+
+// TestUpdate() ;
+
 
 
   </script>
