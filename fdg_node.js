@@ -2,10 +2,10 @@ var radius = 16;
 var nodes = [];
 var mapNodes; // key,value lookup dict
 
-// Lookup NodeColour using SRCE_CDE from vertices.csv
+// Lookup NodeColour using SRCE_CDE
 var sourcePalette = d3.scaleOrdinal()
     .domain( [ 'XDX', 'OCR', 'GHI' ])
-    .range( [ 'gold', 'red', 'blue' ]);
+    .range( [ 'green', 'red', 'blue' ]);
 
     //-------------------------------------------------------------------------------
 // after each tick we have to expressly assign new values to SVG attributes, otherwise nothing changes
