@@ -165,8 +165,9 @@ function handleDragStart(e,d) {
 
 function handleDrag(e,d) {
     // for real time visual feedback
-    d.x = e.x;
-    d.y = e.y;
+    // simplistic boundary check
+     d.x = bounded(e.x, 3*radius-width/2, width/2-3*radius) 
+     d.y = bounded(e.y, 3*radius-height/2, height/2-3*radius)
     ticked();
 }
 

@@ -106,6 +106,11 @@ function AppendLines(rs) {
 
 //-------------------------------------------------------------------------------
 // a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
+
+// DEBUG: NodeCentre is returning the unbounded coordinates of the node, so links to nodes that are constrained within frames are drawn incorrectly
+// that is, the 'true' co-ordinates of the mouse pointer are used, not the constrained ones
+// simplest fix is to apply the boundary to the mouse pointer too
+
 function SetLineAttributes(d)   {
     // this = the HTML SVG element, d = the d3 datum
     if ( IsHierLink(d) && IsFrameShape(d.target) ) 

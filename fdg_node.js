@@ -196,7 +196,7 @@ function CollideRadius(d) { // used for collision detection, even if the node is
 
 function NodeCentre(d) {
     if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
-    else return [ d.x, d.y ];
+    else return [ d.x, d.y ];  
 }
 
 //-------------------------------------------------------------------------------
@@ -285,9 +285,10 @@ function AppendFrameShapes() {
 //-------------------------------------------------------------------------------
 function SetCircleAttributes(d,i)   {
       //  console.log(this);
-        return(this);
-    // this.setAttribute('cx', d => { d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); return d.x } );
-}
+      //  this.setAttribute('cx', d => { d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); return d.x } );
+     //  return(this);
+}      
+ 
 
 //-------------------------------------------------------------------------------
 
@@ -327,9 +328,10 @@ function ParentOf(d) {
     } else return d;
 }
 
-        //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 
-        // true if n is [a descendant of] either of the vertices of edge e
-        function IsAtVertexOf(  e, n ) {
-            return HasAncestor( e.source, n ) || HasAncestor( e.target, n );
-        }
+// true if n is [a descendant of] either of the vertices of edge e
+function IsAtVertexOf(  e, n ) {
+    return HasAncestor( e.source, n ) || HasAncestor( e.target, n );
+}
+

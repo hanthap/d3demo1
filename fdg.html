@@ -23,7 +23,6 @@
 
 async function LoadData() {
     // this queues both promises (and their associated "then" statements) via parallel threads
-  // Initialize Supabase client
 
     const nodePromise = supabaseClient
         .from("nodes")
