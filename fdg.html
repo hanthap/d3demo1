@@ -3,6 +3,7 @@
         <script src="https://d3js.org/d3.v7.min.js"></script>
         <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="config.js"></script>
         <style type="text/css">
 
             circle {
@@ -735,12 +736,12 @@ async function LoadData() {
     // this queues both promises (and their associated "then" statements) via parallel threads
   // Initialize Supabase client
     const supabaseClient = supabase.createClient(
-      "https://hfunworrmdfxzdtmbvth.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU"
+        APP_CONFIG.supabaseUrl,
+        APP_CONFIG.supabaseAnonKey
     );
 
     const nodePromise = supabaseClient
-        .from("vertices")
+        .from("nodes")
         .select("*");
 
 let { data: nodelist, error } = await nodePromise; 
