@@ -41,6 +41,46 @@ class Node {
     }
 
 
+   //-------------------------------------------------------------------------------
+
+static OnClick( k, d ) {
+    x = this;
+    console.log(d); // the d3 datum
+    console.log(k); // the click event
+    console.log(this); // the DOM element (circle)
+
+    // use loc.x and loc.y here
+
+    // fill colour now done with 
+    currentobject = d;
+    // toggle 'selected' status of the clicked node
+    d.selected =  ! d.selected
+
+    // optionally, toggle the selected status of directly linked neighbours
+    if ( k.ctrlKey ) {
+        d.inLinks.forEach ( f => f.source.selected ^= 1 );
+        d.outLinks.forEach ( f => f.target.selected ^= 1 );
+    }
+
+    if ( k.shiftKey ) {
+        // stack/unstack the parent node (affecting all its subnodes)
+        d.inLinks.forEach ( f => f.source.selected ^= 1 );
+        d.outLinks.forEach ( f => f.target.selected ^= 1 );
+        p = ParentOf(d);
+        p.stacked ^= 1; // toggle
+        // try catch because p could have no children => slice[1] returns undefined
+        try {
+            ChildrenOf(p).slice(1).forEach( c => ( c.stacked = p.stacked ));
+        } catch { }
+        simulation.stop();
+        RunSim();
+        }
+
+    ticked();
+
+}
+
+
 }
 
 
@@ -87,44 +127,7 @@ function HasAncestor(a,d) {
     return ( d.outLinks.filter( e => IsHierLink(e) && e.target == a ).length ); // simplistic and non-recursive
 }
 
-   //-------------------------------------------------------------------------------
 
-function handleClickNode( k, d ) {
-    x = this;
-    console.log(d); // the d3 datum
-    console.log(k); // the click event
-    console.log(this); // the DOM element (circle)
-
-    // use loc.x and loc.y here
-
-    // fill colour now done with 
-    currentobject = d;
-    // toggle 'selected' status of the clicked node
-    d.selected =  ! d.selected
-
-    // optionally, toggle the selected status of directly linked neighbours
-    if ( k.ctrlKey ) {
-        d.inLinks.forEach ( f => f.source.selected ^= 1 );
-        d.outLinks.forEach ( f => f.target.selected ^= 1 );
-    }
-
-    if ( k.shiftKey ) {
-        // stack/unstack the parent node (affecting all its subnodes)
-        d.inLinks.forEach ( f => f.source.selected ^= 1 );
-        d.outLinks.forEach ( f => f.target.selected ^= 1 );
-        p = ParentOf(d);
-        p.stacked ^= 1; // toggle
-        // try catch because p could have no children => slice[1] returns undefined
-        try {
-            ChildrenOf(p).slice(1).forEach( c => ( c.stacked = p.stacked ));
-        } catch { }
-        simulation.stop();
-        RunSim();
-        }
-
-    ticked();
-
-}
 
    //-------------------------------------------------------------------------------
 
@@ -256,7 +259,7 @@ function AppendShapes(rs) {
             .join('circle')  // append a new circle shape bound to that datum
                 .on('mouseover',handleMouseOverNode) // for popup if implemented
                 .on('mouseout',handleMouseOutNode)
-                .on('click',handleClickNode)
+                .on('click',Node.OnClick)
                 .on('dblclick',handleDblClickNode)
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
@@ -270,13 +273,12 @@ function AppendShapes(rs) {
                 .classed('leaf',true)
                 .on('mouseover',handleMouseOverNode) // for popup if implemented
                 .on('mouseout',handleMouseOutNode)
-                .on('click',handleClickNode)
+                .on('click',Node.OnClick)
                 .on('dblclick',handleDblClickNode)
                 .attr('width',d => d.width)
                 .attr('height',d => d.height)
                 .attr('fill',Node.FillColour)
-                .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
-                // can we append a custom element that supports CSS eg 
+                .append('title') 
                 .text(Node.TitleText)
                 ;
 }
