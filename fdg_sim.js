@@ -63,7 +63,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 // works OK except the parent frame picks up the 
 
 nodes.filter( IsStackedLeaf ).forEach( d => {
-        [d.x, d.y] = NodeCentre( LeadingChildOf( ParentOf(d) ) ); 
+        [d.x, d.y] = Node.Centre( LeadingChildOf( ParentOf(d) ) ); 
     } );
 
 // TO DO: if stacking results in frames that look empty we should move them to the 

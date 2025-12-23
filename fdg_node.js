@@ -111,7 +111,7 @@ static OnDblClick(e,d) {
 //-------------------------------------------------------------------------------
 
 static AppendDatum(d,i) {
-    d.index = i;
+  //  d.index = i; // this can be misleading
     d.charge = -40;
     d.cogX = 0;
     d.cogY = 0;
@@ -128,14 +128,25 @@ static AppendDatum(d,i) {
 //-------------------------------------------------------------------------------
 // called from AppendLinkDatum() in fdg_link.js
 static GetFromID( NODE_ID ) {
-    return ( nodes[ mapNodes.get(NODE_ID).index ] );
-}
-
-
-}
+   // return ( nodes[ mapNodes.get(NODE_ID).index ] );
+   // old code seems needlessly complicated
+    // AND index might not be the same as the position in nodes[] if some nodes are filtered out
+    return ( mapNodes.get(NODE_ID) );
+    }
 
 
 //-------------------------------------------------------------------------------
+// TO DO: return current true centroid for dynamically-resized group rects
+static Centre(d) {
+    if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
+    else return [ d.x, d.y ];  
+}
+
+
+}
+//-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
+
 // after each tick we have to expressly assign new values to SVG attributes, otherwise nothing changes
 // we can adjust the data here as well eg set velocity to zero
 // to do: if the node is a container, we should allow for extra border
@@ -151,19 +162,19 @@ function NodeHalfHeight(d)  {
 }
 
 function RightBoundary(d) {
-    return (NodeCentre(d)[0] + NodeHalfWidth(d));
+    return (Node.Centre(d)[0] + NodeHalfWidth(d));
 }
 
 function LeftBoundary(d) {
-    return (NodeCentre(d)[0] - NodeHalfWidth(d));
+    return (Node.Centre(d)[0] - NodeHalfWidth(d));
 }
 
 function BottomBoundary(d) {
-    return (NodeCentre(d)[1] + NodeHalfHeight(d));
+    return (Node.Centre(d)[1] + NodeHalfHeight(d));
 }
 
 function TopBoundary(d) {
-    return (NodeCentre(d)[1] - NodeHalfHeight(d));
+    return (Node.Centre(d)[1] - NodeHalfHeight(d));
 }
 
 function IsStackedLeaf(d) {
@@ -249,12 +260,6 @@ function CollideRadius(d) { // used for collision detection, even if the node is
 
 //-------------------------------------------------------------------------------
 
-function NodeCentre(d) {
-    if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
-    else return [ d.x, d.y ];  
-}
-
-
 
 //-------------------------------------------------------------------------------
 
@@ -262,15 +267,13 @@ function NodeCharge(d) {
     return d.charge;
 }
 
-
-
 //-------------------------------------------------------------------------------
 // if we only create circles for nodes that are initially active, how to switch from passive to active later in the session?
 // might be easier up front to create a circle for every node in scope and decide whether to show or hide using CSS attributes
 function AppendShapes(rs) {
     nodes = rs; // the 'master' array used by d3 to render shapes
     // we also want to access each datum via its unique NODE_ID string
-    mapNodes = new Map ( nodes.map((x,i) => ( [x.NODE_ID, x ]) ) );
+    mapNodes = new Map ( nodes.map( x => ( [x.NODE_ID, x ]) ) );
 
     // create the SVG visual element
     gNode.selectAll('circle') // in case we've already got some

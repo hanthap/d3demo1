@@ -1,7 +1,7 @@
 var links = [];
 var filteredLinks = [];
 
-// Lookup LinkColour using EDGE_CDE from edges.csv
+// Lookup LinkColour using EDGE_CDE
 var edgePalette = d3.scaleOrdinal()
     .domain( [ 'OCH', 'ME', 'FZ', 'D' ])
     .range( [ 'blue', 'green', 'grey', 'pink', 'orange' ]);
@@ -12,7 +12,7 @@ var edgePalette = d3.scaleOrdinal()
 function IsHierLink(d) {
     return ( false 
       //  || ( 'ME').includes( d.EDGE_CDE )
-        || ( 'OCH').includes( d.EDGE_CDE )
+        || ( 'H').includes( d.EDGE_CDE )
         // to do: a Golden ID with exactly 2 visible nodes COULD be more simply represented as a connecting line
         // instead of a frame rectangle
     );
@@ -29,7 +29,7 @@ function LinkScope(d) {
 
 //-------------------------------------------------------------------------------
 
-function AppendLinkDatum(d,i) {
+function AppendLinkDatum(d) {
 
 try { 
     // bind to its live vertex objects
@@ -49,8 +49,8 @@ try {
 // to do: in case either node is stacked look for any links that are obscured by this one and display their info too
 function LinkInfo(d) {
     try {
-        return d.EDGE_TXT + '\n\nFrom: ' + NodeInfo(d.source) + '\n\nTo: ' + NodeInfo(d.target);
-    } catch (e) { };
+        return d.EDGE_TXT + '\n\nFrom: ' + Node.TitleText(d.source) + '\n\nTo: ' + Node.TitleText(d.target);
+    } catch (e) { console.log(e);  };
 }
 
 //-------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ function LinkThickness(d) { // drives stroke-width
 
 function LinkZoneThickness(d) { // drives stroke-width
     try {
-        return 6 + d.EDGE_MASS / 20;
+        return 20 + d.EDGE_MASS / 20;
     } catch (e) { };
 }
 //-------------------------------------------------------------------------------
@@ -129,10 +129,10 @@ function SetLineAttributes(d)   {
         this.setAttribute('visibility','hidden');
     else {
         this.setAttribute('visibility','visible');
-        [x1,y1] = NodeCentre( d.source );
+        [x1,y1] = Node.Centre( d.source );
         this.setAttribute('x1',x1);
         this.setAttribute('y1',y1);
-        [x2,y2] = NodeCentre( d.target );
+        [x2,y2] = Node.Centre( d.target );
         this.setAttribute('x2',x2);
         this.setAttribute('y2',y2);
         d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
