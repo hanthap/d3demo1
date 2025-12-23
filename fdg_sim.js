@@ -92,9 +92,10 @@ nodes.filter( IsFrameShape ).forEach( d => {
 
 
     gNode.selectAll('circle')
-        .each( SetCircleAttributes )
-        .attr('cx', d => { d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); return d.x } )
-        .attr('cy', d => { d.y = bounded(d.y, 3*radius-height/2, height/2-3*radius); return d.y } )
+    // CAN WE MOVE THESE 2 LINES UP TO THE INITIAL CREATION AppendShapes() ??
+         .attr('cx', Node.BoundedX ) // This is a callback, so why do we need to assign it again on each tick
+         .attr('cy', Node.BoundedY )
+
         // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on
         .classed('selected', d => d.selected)
         .classed('head', HasStackedParent)
@@ -102,8 +103,8 @@ nodes.filter( IsFrameShape ).forEach( d => {
         ;
 
     gNode.selectAll('rect')
-        .attr('x', d => { d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); return d.x } )
-        .attr('y', d => { d.y = bounded(d.y, 3*radius-height/2, height/2-3*radius); return d.y } )
+        .attr('x', Node.BoundedX )
+        .attr('y', Node.BoundedY )
         .attr( 'height', d => d.height )
         .attr( 'width', d => d.width )
         .classed('selected', d => d.selected)
@@ -113,7 +114,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
 // to do: what about group frames with no visible child node 
 
     gGroup.selectAll('rect')
-        .attr('x', d => d.x - radius )
+        .attr('x', d => d.x - radius ) // extra margin to accommodate rounded corners
         .attr('y', d => d.y - radius )
         // NOTE the following adjustments are only required if/when static data is modified, typically after a user click
         .attr( 'height', d => d.height + 2*radius )

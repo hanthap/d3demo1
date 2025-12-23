@@ -36,7 +36,7 @@ let { data: nodelist, error } = await nodePromise;
       }
 
        console.log(nodelist); 
-       nodelist.forEach(AppendNodeDatum);
+       nodelist.forEach(Node.AppendDatum);
        AppendShapes( nodelist );
 
 
@@ -82,8 +82,6 @@ function AfterLoad() {
         });
     console.log(links);
     AppendFrameShapes(); // don't forget the parentheses!
-    rst = getNodeFromID('RST');
-    console.log(rst);
 
     // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
     simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();

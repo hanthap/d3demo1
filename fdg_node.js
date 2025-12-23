@@ -7,6 +7,7 @@ var sourcePalette = d3.scaleOrdinal()
     .domain( [ 'XDX', 'OCR', 'GHI' ])
     .range( [ 'green', 'red', 'blue' ]);
 
+//-------------------------------------------------------------------------------
 
 class Node {
 
@@ -20,8 +21,25 @@ class Node {
         this.NODE_TXT = NODE_TXT;
     }
 
+    //-------------------------------------------------------------------------------
+
     static Radius(d) {
         return d.r;
+    }
+
+    //-------------------------------------------------------------------------------
+
+    static BoundedX(d) {
+        d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); 
+        return d.x;
+    }
+
+    //-------------------------------------------------------------------------------
+
+
+    static BoundedY(d) {
+        d.y = bounded(d.y, 3*radius-height/2, height/2-3*radius); 
+        return d.y;
     }
 
     //-------------------------------------------------------------------------------
@@ -32,7 +50,7 @@ class Node {
         } catch (e) { };
     }
 
-//-------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------
 
     static TitleText(d) {
         if ( d.NODE_TXT ) {
@@ -40,51 +58,84 @@ class Node {
         }
     }
 
+   //-------------------------------------------------------------------------------
+
+    static OnClick( k, d ) {
+        x = this;
+        console.log(d); // the d3 datum
+        console.log(k); // the click event
+        console.log(this); // the DOM element (circle)
+
+        // use loc.x and loc.y here
+
+        // fill colour now done with 
+        currentobject = d;
+        // toggle 'selected' status of the clicked node
+        d.selected =  ! d.selected
+
+        // optionally, toggle the selected status of directly linked neighbours
+        if ( k.ctrlKey ) {
+            d.inLinks.forEach ( f => f.source.selected ^= 1 );
+            d.outLinks.forEach ( f => f.target.selected ^= 1 );
+        }
+
+        if ( k.shiftKey ) {
+            // stack/unstack the parent node (affecting all its subnodes)
+            d.inLinks.forEach ( f => f.source.selected ^= 1 );
+            d.outLinks.forEach ( f => f.target.selected ^= 1 );
+            p = ParentOf(d);
+            p.stacked ^= 1; // toggle
+            // try catch because p could have no children => slice[1] returns undefined
+            try {
+                ChildrenOf(p).slice(1).forEach( c => ( c.stacked = p.stacked ));
+            } catch { }
+            simulation.stop();
+            RunSim();
+            }
+
+        ticked();
+
+    }
+
 
    //-------------------------------------------------------------------------------
 
-static OnClick( k, d ) {
-    x = this;
-    console.log(d); // the d3 datum
-    console.log(k); // the click event
-    console.log(this); // the DOM element (circle)
+static OnDblClick(e,d) {
+    // console.log(d)
+    // ParentOf(d).stacked = true
+    ticked()
+   }
 
-    // use loc.x and loc.y here
 
-    // fill colour now done with 
-    currentobject = d;
-    // toggle 'selected' status of the clicked node
-    d.selected =  ! d.selected
 
-    // optionally, toggle the selected status of directly linked neighbours
-    if ( k.ctrlKey ) {
-        d.inLinks.forEach ( f => f.source.selected ^= 1 );
-        d.outLinks.forEach ( f => f.target.selected ^= 1 );
-    }
+//-------------------------------------------------------------------------------
 
-    if ( k.shiftKey ) {
-        // stack/unstack the parent node (affecting all its subnodes)
-        d.inLinks.forEach ( f => f.source.selected ^= 1 );
-        d.outLinks.forEach ( f => f.target.selected ^= 1 );
-        p = ParentOf(d);
-        p.stacked ^= 1; // toggle
-        // try catch because p could have no children => slice[1] returns undefined
-        try {
-            ChildrenOf(p).slice(1).forEach( c => ( c.stacked = p.stacked ));
-        } catch { }
-        simulation.stop();
-        RunSim();
-        }
+static AppendDatum(d,i) {
+    d.index = i;
+    d.charge = -40;
+    d.cogX = 0;
+    d.cogY = 0;
+    d.weight = 0.1;
+    d.r = d.NODE_MASS * radius / 35; // size proportional to weight
+    d.height = 2 * d.r;
+    d.width = 2 * d.r;
+    d.stacked = 0;
+    d.selected = 0;
+    d.xhover = 0;
+    return d;
+}
 
-    ticked();
-
+//-------------------------------------------------------------------------------
+// called from AppendLinkDatum() in fdg_link.js
+static GetFromID( NODE_ID ) {
+    return ( nodes[ mapNodes.get(NODE_ID).index ] );
 }
 
 
 }
 
 
-    //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 // after each tick we have to expressly assign new values to SVG attributes, otherwise nothing changes
 // we can adjust the data here as well eg set velocity to zero
 // to do: if the node is a container, we should allow for extra border
@@ -128,14 +179,6 @@ function HasAncestor(a,d) {
 }
 
 
-
-   //-------------------------------------------------------------------------------
-
-function handleDblClickNode(e,d) {
-    // console.log(d)
-    // ParentOf(d).stacked = true
-    ticked()
-   }
    
  //-------------------------------------------------------------------------------
 
@@ -197,30 +240,6 @@ function IsActiveNode(d) {
     return ( NodeScope(d) && IsVisibleNode(d) && !IsFrameShape(d) );
 }
 
-//-------------------------------------------------------------------------------
-
-function AppendNodeDatum(d,i) {
-    d.index = i;
-    d.charge = -40;
-    d.cogX = 0;
-    d.cogY = 0;
-    d.weight = 0.1;
-    d.r = d.NODE_MASS * radius / 35; // size proportional to weight
-    d.height = 2 * d.r;
-    d.width = 2 * d.r;
-
-    d.stacked = 0;
-    d.selected = 0;
-    d.xhover = 0;
-    return d;
-}
-
-//-------------------------------------------------------------------------------
-
-function getNodeFromID( NODE_ID ) {
-    return ( nodes[ mapNodes.get(NODE_ID).index ] );
-}
-
 
 //-------------------------------------------------------------------------------
 
@@ -260,12 +279,17 @@ function AppendShapes(rs) {
                 .on('mouseover',handleMouseOverNode) // for popup if implemented
                 .on('mouseout',handleMouseOutNode)
                 .on('click',Node.OnClick)
-                .on('dblclick',handleDblClickNode)
+                .on('dblclick',Node.OnDblClick)
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
+
+// DO THESE 2 LINES WORK HERE OR ONLY IN TICKED() ??
+                .attr('cx', Node.BoundedX ) // if this is a callback, why do we need to pass it again on each tick
+                .attr('cy', Node.BoundedY )
+
                 .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
                 // can we append a custom element that supports CSS eg (stackoverflow)
-                .text(Node.TitleText)
+                   .text(Node.TitleText)
                 ;
     gNode.selectAll('rect') // in case we've already got some
         .data(nodes.filter(IsRectShape))
@@ -274,12 +298,12 @@ function AppendShapes(rs) {
                 .on('mouseover',handleMouseOverNode) // for popup if implemented
                 .on('mouseout',handleMouseOutNode)
                 .on('click',Node.OnClick)
-                .on('dblclick',handleDblClickNode)
+                .on('dblclick',Node.OnDblClick)
                 .attr('width',d => d.width)
                 .attr('height',d => d.height)
                 .attr('fill',Node.FillColour)
                 .append('title') 
-                .text(Node.TitleText)
+                  .text(Node.TitleText)
                 ;
 }
 
@@ -303,14 +327,6 @@ function AppendFrameShapes() {
             ;
 
 }
-
-//-------------------------------------------------------------------------------
-function SetCircleAttributes(d,i)   {
-      //  console.log(this);
-      //  this.setAttribute('cx', d => { d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); return d.x } );
-     //  return(this);
-}      
- 
 
 //-------------------------------------------------------------------------------
 

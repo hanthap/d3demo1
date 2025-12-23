@@ -33,8 +33,8 @@ function AppendLinkDatum(d,i) {
 
 try { 
     // bind to its live vertex objects
-    d.source = getNodeFromID( d.FROM_NODE_ID );
-    d.target = getNodeFromID( d.TO_NODE_ID );
+    d.source = Node.GetFromID( d.FROM_NODE_ID );
+    d.target = Node.GetFromID( d.TO_NODE_ID );
     d.distance = 10;
     d.strength = 0.1;
    // console.log(d);
