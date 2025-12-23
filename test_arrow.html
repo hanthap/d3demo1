@@ -1,0 +1,20 @@
+<svg width="300" height="100">
+  <defs>
+
+    <marker id="arrow" markerWidth="6" markerHeight="6" refX="6" refY="2" orient="auto">
+      <polygon points="0 0, 6 2, 0 4" fill="black" />
+    </marker> 
+
+    <marker id="circle" markerWidth="6" markerHeight="6" refX="4" refY="4">
+        <circle cx="4" cy="4" r="2" fill="black" />
+    </marker>
+
+</defs>
+
+  <polyline points="15,40 100,40 200,40" stroke="red" stroke-width="2" fill="none" marker-start="url(#circle)" marker-mid="url(#arrow)" marker-end="url(#arrow)" />
+
+  <polyline points="200,80 100,80 15,80" stroke="red" stroke-width="2" fill="none" marker-start="url(#circle)" marker-mid="url(#arrow)" marker-end="url(#circle)" />
+
+
+</svg>
+
