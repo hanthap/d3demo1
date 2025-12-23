@@ -7,6 +7,43 @@ var sourcePalette = d3.scaleOrdinal()
     .domain( [ 'XDX', 'OCR', 'GHI' ])
     .range( [ 'green', 'red', 'blue' ]);
 
+
+class Node {
+
+    constructor( NODE_ID, NODE_TYPE, NODE_MASS, SRCE_CDE, CUST_TYPE_CDE, EDGE_CDE, NODE_TXT ) {
+        this.NODE_ID = NODE_ID;
+        this.NODE_TYPE = NODE_TYPE;
+        this.NODE_MASS = NODE_MASS;
+        this.SRCE_CDE = SRCE_CDE;
+        this.CUST_TYPE_CDE = CUST_TYPE_CDE;
+        this.EDGE_CDE = EDGE_CDE;
+        this.NODE_TXT = NODE_TXT;
+    }
+
+    static Radius(d) {
+        return d.r;
+    }
+
+    //-------------------------------------------------------------------------------
+
+    static FillColour(d) {
+        try {
+            return sourcePalette( d.SRCE_CDE );
+        } catch (e) { };
+    }
+
+//-------------------------------------------------------------------------------
+
+    static TitleText(d) {
+        if ( d.NODE_TXT ) {
+            return d.NODE_TXT.replace(/\|/g,'\n');
+        }
+    }
+
+
+}
+
+
     //-------------------------------------------------------------------------------
 // after each tick we have to expressly assign new values to SVG attributes, otherwise nothing changes
 // we can adjust the data here as well eg set velocity to zero
@@ -181,11 +218,6 @@ function getNodeFromID( NODE_ID ) {
     return ( nodes[ mapNodes.get(NODE_ID).index ] );
 }
 
-//-------------------------------------------------------------------------------
-
-function NodeRadius(d) { 
-    return d.r;
-}
 
 //-------------------------------------------------------------------------------
 
@@ -200,13 +232,7 @@ function NodeCentre(d) {
     else return [ d.x, d.y ];  
 }
 
-//-------------------------------------------------------------------------------
 
-function NodeInfo(d) {
-    if ( d.NODE_TXT ) {
-        return d.NODE_TXT.replace(/\|/g,'\n');
-    }
-}
 
 //-------------------------------------------------------------------------------
 
@@ -214,13 +240,6 @@ function NodeCharge(d) {
     return d.charge;
 }
 
-//-------------------------------------------------------------------------------
-
-function NodeColour(d) {
-    try {
-        return sourcePalette( d.SRCE_CDE );
-    } catch (e) { };
-}
 
 
 //-------------------------------------------------------------------------------
@@ -239,11 +258,11 @@ function AppendShapes(rs) {
                 .on('mouseout',handleMouseOutNode)
                 .on('click',handleClickNode)
                 .on('dblclick',handleDblClickNode)
-                .attr('r',NodeRadius)
-                .attr('fill',NodeColour)
+                .attr('r',Node.Radius)
+                .attr('fill',Node.FillColour)
                 .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
                 // can we append a custom element that supports CSS eg (stackoverflow)
-                .text(NodeInfo)
+                .text(Node.TitleText)
                 ;
     gNode.selectAll('rect') // in case we've already got some
         .data(nodes.filter(IsRectShape))
@@ -255,10 +274,10 @@ function AppendShapes(rs) {
                 .on('dblclick',handleDblClickNode)
                 .attr('width',d => d.width)
                 .attr('height',d => d.height)
-                .attr('fill',NodeColour)
+                .attr('fill',Node.FillColour)
                 .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
                 // can we append a custom element that supports CSS eg 
-                .text(NodeInfo)
+                .text(Node.TitleText)
                 ;
 }
 
@@ -278,7 +297,7 @@ function AppendFrameShapes() {
             .on('mouseover', handleMouseOverFrame) // for popup
             .on('mouseout', handleMouseOutFrame)
             .append('title')
-                .text(NodeInfo)
+                .text(Node.TitleText)
             ;
 
 }

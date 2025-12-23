@@ -99,7 +99,6 @@ nodes.filter( IsFrameShape ).forEach( d => {
         .classed('selected', d => d.selected)
         .classed('head', HasStackedParent)
         .attr('visibility', d => IsActiveNode(d) ? 'visible' : 'hidden' )
-        .attr('fill',NodeColour)
         ;
 
     gNode.selectAll('rect')
@@ -110,7 +109,6 @@ nodes.filter( IsFrameShape ).forEach( d => {
         .classed('selected', d => d.selected)
         .classed('head', HasStackedParent)
         .attr('visibility', d => IsActiveNode(d) ? 'visible' : 'hidden' )
-        .attr('fill',NodeColour)
         ;
 // to do: what about group frames with no visible child node 
 
