@@ -125,6 +125,7 @@ function AppendLines(rs) {
 // TO DO: optimize to avoid double calls
 function SetLineAttributes(d)   {
     // this = the HTML SVG element, d = the d3 datum
+    // don't show link from child to its parent container - TO DO: should we also hide direct a shortcut link from grandchild to grandparent container?
     if ( IsHierLink(d) && IsFrameShape(d.target) ) 
         this.setAttribute('visibility','hidden');
     else {

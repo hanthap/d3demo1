@@ -136,12 +136,12 @@ static GetFromID( NODE_ID ) {
 
 
 //-------------------------------------------------------------------------------
-// TO DO: return current true centroid for dynamically-resized group rects
+// 
 static Centre(d) {
-    if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
+    if ( IsFrameShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ]
+    else if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
     else return [ d.x, d.y ];  
 }
-
 
 }
 //-------------------------------------------------------------------------------
