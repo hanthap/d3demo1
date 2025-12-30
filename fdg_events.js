@@ -21,6 +21,10 @@
 
         function handleClickLinkZone(e,d) {
             // to do: should we toggle?
+       //     console.log(d.source)
+            sPoints = Link.PolyLinePoints(d);
+            console.log(sPoints)
+
             d.source.selected ^= 1;
             d.target.selected ^= 1;
             d.selected ^= 1;

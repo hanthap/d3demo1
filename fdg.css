@@ -111,7 +111,14 @@
                 stroke-opacity: 1;
             }
 
-            svg {
-                stroke:black;
-                stroke-width: 2;
+
+            polyline.arrow { /* directed line with arrow */
+            fill: none;
+            stroke: blue;
+            stroke-width: 2;
+            marker-mid: url(#arrow);
+            }
+
+            polygon.arrowhead {
+                fill : red;
             }

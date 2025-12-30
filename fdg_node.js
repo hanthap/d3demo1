@@ -143,6 +143,12 @@ static Centre(d) {
     else return [ d.x, d.y ];  
 }
 
+// Given 2 circle nodes with different radii, calculate the shortest path from perimeter to perimeter, with a node at the visual midpoint (for a central arrowhead)
+// this ensures the line's terminal arrowhead will just touch the outer perimeter of the destination node
+
+
+
+
 }
 //-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------

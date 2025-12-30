@@ -1,3 +1,31 @@
+class Link {
+
+static PolyLinePoints( d ) {
+    var dDest = d.target, dOrig = d.source;
+
+    var yDelta = dDest.y - dOrig.y ;
+    var xDelta = dDest.x - dOrig.x;
+    var h = Math.hypot(xDelta,yDelta); // hypotenuse = distance between centres
+    // move to the perimeter of the "from" circle
+    var xStart = dOrig.x + ( xDelta * dOrig.r / h ); 
+    var yStart = dOrig.y + ( yDelta * dOrig.r / h );
+
+    // move to the perimeter of the "to" circle
+    var xEnd = dDest.x - ( xDelta * dDest.r / h );
+    var yEnd = dDest.y - ( yDelta * dDest.r / h );
+
+    // visual midpoint = half-way along the visible path, NOT half-way between node centres
+    var xMid = ( xStart + xEnd ) / 2; 
+    var yMid = ( yStart + yEnd ) / 2;
+
+  return `${xStart},${yStart} ${xMid},${yMid} ${xEnd},${yEnd}`
+}
+
+
+}
+
+
+
 var links = [];
 var filteredLinks = [];
 
@@ -18,6 +46,9 @@ function IsHierLink(d) {
     );
 
 }
+
+
+
 
 //-------------------------------------------------------------------------------
 
@@ -110,13 +141,23 @@ function AppendLines(rs) {
         .append('title') // simpler tooltip using HTML elements
         .text(LinkInfo)
         ;
-    gLink.selectAll('line')
+    // gLink.selectAll('line')
+    //     .data(filteredLinks.filter(LinkScope))
+    //     .join('line') // create a line element bound to datum (in its __datum__ element)
+    //     .on('click',handleClickLinkZone)    
+    //     .attr('stroke',LinkColour)
+    //     .attr('stroke-width',LinkThickness)
+    //     ;
+
+    gLink.selectAll('polyline')
         .data(filteredLinks.filter(LinkScope))
-        .join('line') // create a line element bound to datum (in its __datum__ element)
+        .join('polyline') // create a polyline element bound to datum (in its __datum__ element)
         .on('click',handleClickLinkZone)    
         .attr('stroke',LinkColour)
         .attr('stroke-width',LinkThickness)
         ;
+
+
 
 }
 
@@ -125,17 +166,13 @@ function AppendLines(rs) {
 // TO DO: optimize to avoid double calls
 function SetLineAttributes(d)   {
     // this = the HTML SVG element, d = the d3 datum
-    // don't show link from child to its parent container - TO DO: should we also hide direct a shortcut link from grandchild to grandparent container?
+    // don't show link from child to its parent container - TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
     if ( IsHierLink(d) && IsFrameShape(d.target) ) 
         this.setAttribute('visibility','hidden');
     else {
-        this.setAttribute('visibility','visible');
-        [x1,y1] = Node.Centre( d.source );
-        this.setAttribute('x1',x1);
-        this.setAttribute('y1',y1);
-        [x2,y2] = Node.Centre( d.target );
-        this.setAttribute('x2',x2);
-        this.setAttribute('y2',y2);
-        d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
+       this.setAttribute('visibility','visible');
+       this.setAttribute('points', Link.PolyLinePoints(d) );
+       d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
+       d3.select(this).classed('arrow',true);
     }
 }

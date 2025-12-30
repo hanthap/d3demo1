@@ -43,7 +43,8 @@ function RunSim() {
         ;
     ticked();
     // the simulation starts running by default - we don't always want it to
-    if (frozen) simulation.stop();
+    if (frozen) 
+        simulation.stop();
     initDrag();
 }
 
@@ -88,7 +89,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
 // always stay within internal boundary, but without avoiding edge
 
     gLinkZone.selectAll('line').each( SetLineAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
-    gLink.selectAll('line').each( SetLineAttributes );
+    gLink.selectAll('polyline').each( SetLineAttributes );
 
 
     gNode.selectAll('circle')

@@ -45,6 +45,18 @@
                 .attr("height",1)
                 .attr("width",0.05);
 
+            const arrow = defs
+                .append("marker")
+                .attr("id","arrow") //  to invoke as polyline marker
+                .attr("markerWidth",6)
+                .attr("markerHeight",6)
+                .attr("refX",6)
+                .attr("refY",2)
+                .attr("orient","auto")
+                    .append("polygon")
+                    .attr("points","0 0, 6 2, 0 4")
+                    .attr("class","arrowhead");
+
 
 // find your root SVG element
 var svg = document.querySelector('svg');
