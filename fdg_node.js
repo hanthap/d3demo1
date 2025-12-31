@@ -30,7 +30,8 @@ class Node {
     //-------------------------------------------------------------------------------
 
     static BoundedX(d) {
-        d.x = bounded(d.x, 3*radius-width/2, width/2-3*radius); 
+        // bounded node centre needs to consider node's radius as well as the static viewport width, adjusted for corner radius of rounded frame
+        d.x = bounded(d.x, d.r - width/2 - 2*radius, width/2-3*radius); 
         return d.x;
     }
 
@@ -38,7 +39,8 @@ class Node {
 
 
     static BoundedY(d) {
-        d.y = bounded(d.y, 3*radius-height/2, height/2-3*radius); 
+        // bounded node centre needs to consider node's radius as well as the static viewport height, adjusted for corner radius of rounded frame
+        d.y = bounded(d.y, d.r - height/2 - 2*radius, height/2-3*radius); 
         return d.y;
     }
 
@@ -173,7 +175,7 @@ static OnMouseOver(e,d) {
 
 static OnMouseOut(e,d) {
         if ( e.button) return; //  ignore if still dragging 
-            // fill colour now done with CSS "hover"
+            // fill colour now done with CSS ":hover"
             currentobject = null;           
     }
 
