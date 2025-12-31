@@ -1,5 +1,28 @@
 class Link {
 
+//-------------------------------------------------------------------------------
+
+//function AppendLinkDatum(d) {
+static AppendDatum(d,i) {
+
+try { 
+    // bind to its live vertex objects
+    d.source = Node.GetFromID( d.FROM_NODE_ID );
+    d.target = Node.GetFromID( d.TO_NODE_ID );
+    d.distance = 10;
+    d.strength = 0.1;
+   // console.log(d);
+    return d; // only if we didn't throw an error eg 'no such node'
+} catch ( e ) {
+        console.log(e)
+    }
+}
+
+//-------------------------------------------------------------------------------
+
+// Given 2 circle nodes with different radii, calculate the shortest path from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
+// this ensures the line's terminal arrowhead will just touch the outer perimeter of the destination node.
+
 static PolyLinePoints( d ) {
     var dDest = d.target, dOrig = d.source;
 
@@ -22,8 +45,127 @@ static PolyLinePoints( d ) {
 }
 
 
+//-------------------------------------------------------------------------------
+
+static StrokeColour(d) { // drives stroke colour
+    try {
+        return edgePalette( d.EDGE_CDE );
+    } catch (e) { };
 }
 
+
+//-------------------------------------------------------------------------------
+
+static StrokeWidth(d) { // stroke-width of visible polyline
+    try {
+        return d.EDGE_MASS / 20;
+    } catch (e) { };
+}
+
+
+//-------------------------------------------------------------------------------
+
+static ZoneWidth(d) { // width of extended click zone
+    try {
+        return 20 + d.EDGE_MASS / 20;
+    } catch (e) { };
+}
+
+
+//-------------------------------------------------------------------------------
+
+static TitleText(d) {
+// to do: in case either node is stacked look for any links that are obscured by this one and display their info too
+    try {
+        return d.EDGE_TXT + '\n\nFrom: ' + Node.TitleText(d.source) + '\n\nTo: ' + Node.TitleText(d.target);
+    } catch (e) { console.log(e);  };
+}
+
+//-------------------------------------------------------------------------------
+
+static Strength(d) {  // callback for d3.forceLink()
+    return 0.1;
+}
+
+//-------------------------------------------------------------------------------
+
+static Distance(d) { // callback for d3.forceLink()
+    return IsHierLink(d) ? 0 : d.distance ;
+}
+
+
+
+//-------------------------------------------------------------------------------
+
+static OnClick(e,d) {
+    // to do: should we toggle?
+//     console.log(d.source)
+//     sPoints = Link.PolyLinePoints(d);
+//     console.log(sPoints)
+
+    d.source.selected ^= 1;
+    d.target.selected ^= 1;
+    d.selected ^= 1;
+    ticked();
+}
+
+
+    //-------------------------------------------------------------------------------
+    //        function HoverLink( d, bHovering ) {
+    static Hover( d, bHovering ) {
+
+        gNode.selectAll("circle")
+            .filter( c => c == d.source || c == d.target )
+            .classed( 'xhover', bHovering );
+
+        gNode.selectAll("rect") // leaf
+            .filter( c => c == d.source || c == d.target )
+            .classed( 'xhover', bHovering );
+
+        gNode.selectAll("rect") // frame
+            .filter( c => c == d.source || c == d.target )
+            .classed( 'xhover', bHovering );
+            // TO DO : make this recursive
+
+    }
+
+    //-------------------------------------------------------------------------------
+
+    // function handleMouseOverLinkZone(e,d) {
+    static OnMouseOver(e,d) {
+        Link.Hover( d, true );
+    }
+
+    //-------------------------------------------------------------------------------
+
+    //function handleMouseOutLinkZone(e,d) {
+    static OnMouseOut(e,d) {
+        Link.Hover( d, false );
+    }
+
+
+
+//-------------------------------------------------------------------------------
+// a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
+// TO DO: optimize to avoid double calls
+//function SetLineAttributes(d)   {
+static SetAttributes(d)   {
+    // this = the HTML SVG element, d = the d3 datum
+    // don't show link from child to its parent container - TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
+    if ( IsHierLink(d) && IsFrameShape(d.target) ) 
+        this.setAttribute('visibility','hidden');
+    else {
+       this.setAttribute('visibility','visible');
+       this.setAttribute('points', Link.PolyLinePoints(d) );
+       d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
+       d3.select(this).classed('arrow',true);
+    }
+}
+
+
+
+
+}
 
 
 var links = [];
@@ -58,71 +200,15 @@ function LinkScope(d) {
 }
 
 
-//-------------------------------------------------------------------------------
-
-function AppendLinkDatum(d) {
-
-try { 
-    // bind to its live vertex objects
-    d.source = Node.GetFromID( d.FROM_NODE_ID );
-    d.target = Node.GetFromID( d.TO_NODE_ID );
-    d.distance = 10;
-    d.strength = 0.1;
-   // console.log(d);
-    return d; // only if we didn't throw an error eg 'no such node'
-} catch ( e ) {
-        console.log(e)
-    }
-}
 
 
-//-------------------------------------------------------------------------------
-// to do: in case either node is stacked look for any links that are obscured by this one and display their info too
-function LinkInfo(d) {
-    try {
-        return d.EDGE_TXT + '\n\nFrom: ' + Node.TitleText(d.source) + '\n\nTo: ' + Node.TitleText(d.target);
-    } catch (e) { console.log(e);  };
-}
 
-//-------------------------------------------------------------------------------
-
-function LinkColour(d) { // drives stroke colour
-    try {
-        return edgePalette( d.EDGE_CDE );
-    } catch (e) { };
-}
-
-//-------------------------------------------------------------------------------
-
-function LinkThickness(d) { // drives stroke-width
-    try {
-        return d.EDGE_MASS / 20;
-    } catch (e) { };
-}
-
-
-function LinkZoneThickness(d) { // drives stroke-width
-    try {
-        return 20 + d.EDGE_MASS / 20;
-    } catch (e) { };
-}
 //-------------------------------------------------------------------------------
 
 function IsActiveLink(d) {
     return true;
 }
 
-//-------------------------------------------------------------------------------
-
-function LinkStrength(d) {
-    return 0.1;
-}
-
-//-------------------------------------------------------------------------------
-
-function LinkDistance(d) {
-    return IsHierLink(d) ? 0 : d.distance ;
-}
 
 
 //-------------------------------------------------------------------------------
@@ -134,45 +220,21 @@ function AppendLines(rs) {
     gLinkZone.selectAll('line')
         .data(filteredLinks.filter(LinkScope))
         .join('line')
-        .on('click',handleClickLinkZone)
-        .on('mouseover',handleMouseOverLinkZone)
-        .on('mouseout',handleMouseOutLinkZone)
-        .attr('stroke-width',LinkZoneThickness)
+        .on('click',Link.OnClick)
+        .on('mouseover',Link.OnMouseOver)
+        .on('mouseout',Link.OnMouseOut)
+        .attr('stroke-width',Link.ZoneWidth)
         .append('title') // simpler tooltip using HTML elements
-        .text(LinkInfo)
+        .text(Link.TitleText)
         ;
-    // gLink.selectAll('line')
-    //     .data(filteredLinks.filter(LinkScope))
-    //     .join('line') // create a line element bound to datum (in its __datum__ element)
-    //     .on('click',handleClickLinkZone)    
-    //     .attr('stroke',LinkColour)
-    //     .attr('stroke-width',LinkThickness)
-    //     ;
 
     gLink.selectAll('polyline')
         .data(filteredLinks.filter(LinkScope))
         .join('polyline') // create a polyline element bound to datum (in its __datum__ element)
-        .on('click',handleClickLinkZone)    
-        .attr('stroke',LinkColour)
-        .attr('stroke-width',LinkThickness)
+        .on('click',Link.OnClick)     // can we let all events pass through to zone behind?
+        .attr('stroke',Link.StrokeColour)
+        .attr('stroke-width',Link.StrokeWidth)
         ;
 
-
-
 }
 
-//-------------------------------------------------------------------------------
-// a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
-// TO DO: optimize to avoid double calls
-function SetLineAttributes(d)   {
-    // this = the HTML SVG element, d = the d3 datum
-    // don't show link from child to its parent container - TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
-    if ( IsHierLink(d) && IsFrameShape(d.target) ) 
-        this.setAttribute('visibility','hidden');
-    else {
-       this.setAttribute('visibility','visible');
-       this.setAttribute('points', Link.PolyLinePoints(d) );
-       d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
-       d3.select(this).classed('arrow',true);
-    }
-}

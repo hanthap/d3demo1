@@ -1,47 +1,4 @@
-        //-------------------------------------------------------------------------------
 
-        function HoverLink( d, bHovering ) {
-
-            gNode.selectAll("circle")
-                .filter( c => c == d.source || c == d.target )
-                .classed( 'xhover', bHovering );
-
-            gNode.selectAll("rect") // leaf
-                .filter( c => c == d.source || c == d.target )
-                .classed( 'xhover', bHovering );
-
-            gNode.selectAll("rect") // frame
-                .filter( c => c == d.source || c == d.target )
-                .classed( 'xhover', bHovering );
-                // TO DO : make this recursive
-
-        }
-
-        //-------------------------------------------------------------------------------
-
-        function handleClickLinkZone(e,d) {
-            // to do: should we toggle?
-       //     console.log(d.source)
-            sPoints = Link.PolyLinePoints(d);
-            console.log(sPoints)
-
-            d.source.selected ^= 1;
-            d.target.selected ^= 1;
-            d.selected ^= 1;
-            ticked();
-        }
-
-        //-------------------------------------------------------------------------------
-
-        function handleMouseOverLinkZone(e,d) {
-            HoverLink( d, true );
-        }
-
-       //-------------------------------------------------------------------------------
-
-       function handleMouseOutLinkZone(e,d) {
-            HoverLink( d, false );
-        }
     //-------------------------------------------------------------------------------
 
     function handleMouseOverNode(e,d) {

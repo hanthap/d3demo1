@@ -14,11 +14,10 @@ function RunSim() {
         // see https://observablehq.com/@lvngd/rectangular-collision-detection
         // so instead we use many-body repulsion as a workaround
         // or maybe a one-body translation (after-the-fact exclusion), without momentum etc
-        .force('collide', d3.forceCollide().radius(CollideRadius))
+        .force('collide', d3.forceCollide().radius(Node.CollideRadius))
     
         // electrostatic forces attract/repel based on charge 
-        .force('my-charge', d3.forceManyBody()
-            .strength(NodeCharge))
+        .force('my-charge', d3.forceManyBody().strength(Node.Charge))
 
         // default centre is (0,0) within the viewBox coords
         // d3.forceCenter() tries to keep the overall centre of mass in a fixed location
@@ -32,8 +31,8 @@ function RunSim() {
 
         // each edge can act as a spring between 2 nodes (like a covalent bond)
         .force('my-link', d3.forceLink()
-            .distance(LinkDistance)
-            .strength(LinkStrength)
+            .distance(Link.Distance)
+            .strength(Link.Strength)
             .links(filteredLinks.filter(LinkScope))
             .iterations(2)
             )
@@ -88,8 +87,8 @@ nodes.filter( IsFrameShape ).forEach( d => {
 // less likely if a container IP jointly owns an AR.
 // always stay within internal boundary, but without avoiding edge
 
-    gLinkZone.selectAll('line').each( SetLineAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
-    gLink.selectAll('polyline').each( SetLineAttributes );
+    gLinkZone.selectAll('line').each( Link.SetAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
+    gLink.selectAll('polyline').each( Link.SetAttributes );
 
 
     gNode.selectAll('circle')
@@ -100,7 +99,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
         // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on
         .classed('selected', d => d.selected)
         .classed('head', HasStackedParent)
-        .attr('visibility', d => IsActiveNode(d) ? 'visible' : 'hidden' )
+        .attr('visibility', Node.Visibility )
         ;
 
     gNode.selectAll('rect')
@@ -110,7 +109,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
         .attr( 'width', d => d.width )
         .classed('selected', d => d.selected)
         .classed('head', HasStackedParent)
-        .attr('visibility', d => IsActiveNode(d) ? 'visible' : 'hidden' )
+        .attr('visibility', Node.Visibility )
         ;
 // to do: what about group frames with no visible child node 
 

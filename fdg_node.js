@@ -44,6 +44,13 @@ class Node {
 
     //-------------------------------------------------------------------------------
 
+    static Visibility(d) {
+        return IsActiveNode(d) ? 'visible' : 'hidden'
+        // what if it's a frame rect? Then we look at whether there's a visible child.
+    }
+
+    //-------------------------------------------------------------------------------
+
     static FillColour(d) {
         try {
             return sourcePalette( d.SRCE_CDE );
@@ -128,12 +135,8 @@ static AppendDatum(d,i) {
 //-------------------------------------------------------------------------------
 // called from AppendLinkDatum() in fdg_link.js
 static GetFromID( NODE_ID ) {
-   // return ( nodes[ mapNodes.get(NODE_ID).index ] );
-   // old code seems needlessly complicated
-    // AND index might not be the same as the position in nodes[] if some nodes are filtered out
     return ( mapNodes.get(NODE_ID) );
     }
-
 
 //-------------------------------------------------------------------------------
 // 
@@ -143,9 +146,20 @@ static Centre(d) {
     else return [ d.x, d.y ];  
 }
 
-// Given 2 circle nodes with different radii, calculate the shortest path from perimeter to perimeter, with a node at the visual midpoint (for a central arrowhead)
-// this ensures the line's terminal arrowhead will just touch the outer perimeter of the destination node
 
+//-------------------------------------------------------------------------------
+
+//function CollideRadius(d) { 
+static CollideRadius(d) { // called by d3.forceCollide().radius(...)
+    return d.r + 10; // +3 = extra to allow for stroke-width of circle element 
+}
+
+//-------------------------------------------------------------------------------
+
+// function NodeCharge(d) {
+static Charge(d) { // called by d3.forceManyBody().strength(...)
+    return d.charge;
+}
 
 
 
@@ -258,20 +272,10 @@ function IsActiveNode(d) {
 }
 
 
-//-------------------------------------------------------------------------------
-
-function CollideRadius(d) { // used for collision detection, even if the node is a rect
-    return d.r + 10; // +3 = extra to allow for stroke-width of circle element 
-}
 
 //-------------------------------------------------------------------------------
 
 
-//-------------------------------------------------------------------------------
-
-function NodeCharge(d) {
-    return d.charge;
-}
 
 //-------------------------------------------------------------------------------
 // if we only create circles for nodes that are initially active, how to switch from passive to active later in the session?

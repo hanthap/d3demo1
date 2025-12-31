@@ -51,7 +51,7 @@ let { data: linklist, error: link_error } = await linkPromise;
         return;
       }
 
-       linklist.forEach(AppendLinkDatum);
+       linklist.forEach(Link.AppendDatum);
        AppendLines( linklist );
 
     // async means even LoadData() runs in a new thread. Control immediately returns
