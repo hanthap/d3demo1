@@ -1,19 +1,4 @@
 
-    //-------------------------------------------------------------------------------
-
-    function handleMouseOverNode(e,d) {
-            // fill colour now done with CSS "hover"
-            currentobject = d;
-        }
-
-    //-------------------------------------------------------------------------------
-
-    function handleMouseOutNode(e,d) {
-            if ( e.button) return; //  ignore if still dragging 
-             // fill colour now done with CSS "hover"
-             currentobject = null;           
-        }
-    
    
 
    //-------------------------------------------------------------------------------

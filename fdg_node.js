@@ -162,6 +162,25 @@ static Charge(d) { // called by d3.forceManyBody().strength(...)
 }
 
 
+//-------------------------------------------------------------------------------
+
+// function handleMouseOverNode(e,d) {
+static OnMouseOver(e,d) {
+        // fill colour now done with CSS "hover"
+        currentobject = d;
+    }
+
+//-------------------------------------------------------------------------------
+
+// function handleMouseOutNode(e,d) {
+static OnMouseOut(e,d) {
+        if ( e.button) return; //  ignore if still dragging 
+            // fill colour now done with CSS "hover"
+            currentobject = null;           
+    }
+
+
+
 
 }
 //-------------------------------------------------------------------------------
@@ -289,8 +308,8 @@ function AppendShapes(rs) {
     gNode.selectAll('circle') // in case we've already got some
         .data(nodes.filter(IsRoundedShape)) // see comment above - how best to hide a circle when its group is visible and vice versa
             .join('circle')  // append a new circle shape bound to that datum
-                .on('mouseover',handleMouseOverNode) // for popup if implemented
-                .on('mouseout',handleMouseOutNode)
+                .on('mouseover',Node.OnMouseOver) // for popup if implemented
+                .on('mouseout',Node.OnMouseOut)
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
                 .attr('r',Node.Radius)
@@ -308,8 +327,8 @@ function AppendShapes(rs) {
         .data(nodes.filter(IsRectShape))
             .join('rect') // append a new rect shape bound to that datum
                 .classed('leaf',true)
-                .on('mouseover',handleMouseOverNode) // for popup if implemented
-                .on('mouseout',handleMouseOutNode)
+                .on('mouseover',Node.OnMouseOver) // for popup if implemented
+                .on('mouseout',Node.OnMouseOut)
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
                 .attr('width',d => d.width)
@@ -331,6 +350,7 @@ function AppendFrameShapes() {
             .join('rect') // append a new rectangular frame bound to this 
             .attr('rx', d => IsRoundedShape(d) ? 2*radius : 0 ) // for rounded corners
             .attr('ry', d => IsRoundedShape(d) ? 2*radius : 0 ) 
+            .attr('fill',Node.FillColour) // same as if it was a collapsed circle
             .classed('frame',true)
             .on('click', handleClickFrame)
             .on('mouseover', handleMouseOverFrame) // for popup
