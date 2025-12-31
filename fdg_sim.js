@@ -71,12 +71,12 @@ nodes.filter( IsStackedLeaf ).forEach( d => {
 
 // only now can we decide where to put the frames
 nodes.filter( IsFrameShape ).forEach( d => {
-    visible_children = VisibleChildrenOf(d);
-    if ( visible_children.length ) {
-        xMax = Math.max( ...visible_children.map( RightBoundary ) );
-        xMin = Math.min( ...visible_children.map( LeftBoundary ) );
-        yMax = Math.max( ...visible_children.map( BottomBoundary ) );
-        yMin = Math.min( ...visible_children.map( TopBoundary ) );
+    visible_descendants = VisibleDescendantsOf(d); // TO DO: implement recursively as VisibleDescendantsOf() ; also, allow nesting of containers.
+    if ( visible_descendants.length ) {
+        xMax = Math.max( ...visible_descendants.map( RightBoundary ) ); // generate a list of right boundaries, then get the max value
+        xMin = Math.min( ...visible_descendants.map( LeftBoundary ) );
+        yMax = Math.max( ...visible_descendants.map( BottomBoundary ) );
+        yMin = Math.min( ...visible_descendants.map( TopBoundary ) );
         d.x = xMin; // [d.x, d.y] are the coords as read and updated by the simulation -- whereas we 
         d.y = yMin;
         d.width = xMax - xMin;
@@ -88,12 +88,12 @@ nodes.filter( IsFrameShape ).forEach( d => {
 // always stay within internal boundary, but without avoiding edge
 
     gLinkZone.selectAll('line').each( Link.SetAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
-    gLink.selectAll('polyline').each( Link.SetAttributes );
+    gLink.selectAll('polyline').each( Link.SetAttributes ); // seems we need to call this every tick, but why?
 
 
     gNode.selectAll('circle')
     // CAN WE MOVE THESE 2 LINES UP TO THE INITIAL CREATION AppendShapes() ??
-         .attr('cx', Node.BoundedX ) // This is a callback, so why do we need to assign it again on each tick
+         .attr('cx', Node.BoundedX ) // This is a callback, so why do we need to assign it again on each tick? Is it because it writes back to d.x ?
          .attr('cy', Node.BoundedY )
 
         // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on

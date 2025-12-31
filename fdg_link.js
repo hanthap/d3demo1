@@ -20,7 +20,7 @@ try {
 
 //-------------------------------------------------------------------------------
 
-// Given 2 circle nodes with different radii, calculate the shortest path from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
+// Given 2 circle nodes with different radii, calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
 // this ensures the line's terminal arrowhead will just touch the outer perimeter of the destination node.
 
 static PolyLinePoints( d ) {
@@ -29,15 +29,15 @@ static PolyLinePoints( d ) {
     var yDelta = dDest.y - dOrig.y ;
     var xDelta = dDest.x - dOrig.x;
     var h = Math.hypot(xDelta,yDelta); // hypotenuse = distance between centres
-    // move to the perimeter of the "from" circle
+    // move origin to the perimeter of the "from" circle
     var xStart = dOrig.x + ( xDelta * dOrig.r / h ); 
     var yStart = dOrig.y + ( yDelta * dOrig.r / h );
 
-    // move to the perimeter of the "to" circle
+    // move target to the perimeter of the "to" circle
     var xEnd = dDest.x - ( xDelta * dDest.r / h );
     var yEnd = dDest.y - ( yDelta * dDest.r / h );
 
-    // visual midpoint = half-way along the visible path, NOT half-way between node centres
+    // visual midpoint = half-way along the visible line segment, NOT half-way between node centres
     var xMid = ( xStart + xEnd ) / 2; 
     var yMid = ( yStart + yEnd ) / 2;
 
@@ -111,7 +111,7 @@ static OnClick(e,d) {
 
 
     //-------------------------------------------------------------------------------
-    //        function HoverLink( d, bHovering ) {
+
     static Hover( d, bHovering ) {
 
         gNode.selectAll("circle")
@@ -131,24 +131,20 @@ static OnClick(e,d) {
 
     //-------------------------------------------------------------------------------
 
-    // function handleMouseOverLinkZone(e,d) {
     static OnMouseOver(e,d) {
         Link.Hover( d, true );
     }
 
     //-------------------------------------------------------------------------------
 
-    //function handleMouseOutLinkZone(e,d) {
     static OnMouseOut(e,d) {
         Link.Hover( d, false );
     }
 
-
-
 //-------------------------------------------------------------------------------
 // a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
 // TO DO: optimize to avoid double calls
-//function SetLineAttributes(d)   {
+
 static SetAttributes(d)   {
     // this = the HTML SVG element, d = the d3 datum
     // don't show link from child to its parent container - TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
@@ -181,15 +177,10 @@ var edgePalette = d3.scaleOrdinal()
     // to do: handle multiple containership hierarchies => need a priority order in case of 
 function IsHierLink(d) {
     return ( false 
-      //  || ( 'ME').includes( d.EDGE_CDE )
         || ( 'H').includes( d.EDGE_CDE )
-        // to do: a Golden ID with exactly 2 visible nodes COULD be more simply represented as a connecting line
-        // instead of a frame rectangle
     );
 
 }
-
-
 
 
 //-------------------------------------------------------------------------------
@@ -200,16 +191,11 @@ function LinkScope(d) {
 }
 
 
-
-
-
 //-------------------------------------------------------------------------------
 
 function IsActiveLink(d) {
     return true;
 }
-
-
 
 //-------------------------------------------------------------------------------
 

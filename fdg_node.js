@@ -23,6 +23,13 @@ class Node {
 
     //-------------------------------------------------------------------------------
 
+
+    static KeyId(d) {
+        return d.NODE_ID;
+    }
+
+    //-------------------------------------------------------------------------------
+
     static Radius(d) {
         return d.r;
     }
@@ -288,12 +295,6 @@ function IsActiveNode(d) {
     return ( NodeScope(d) && IsVisibleNode(d) && !IsFrameShape(d) );
 }
 
-
-
-//-------------------------------------------------------------------------------
-
-
-
 //-------------------------------------------------------------------------------
 // if we only create circles for nodes that are initially active, how to switch from passive to active later in the session?
 // might be easier up front to create a circle for every node in scope and decide whether to show or hide using CSS attributes
@@ -304,14 +305,16 @@ function AppendShapes(rs) {
 
     // create the SVG visual element
     gNode.selectAll('circle') // in case we've already got some
-        .data(nodes.filter(IsRoundedShape)) // see comment above - how best to hide a circle when its group is visible and vice versa
+        .data(nodes.filter(IsRoundedShape), Node.KeyId) // optional 2nd arg = stable key 
+        // see comment above - how best to hide a circle when its group is visible and vice versa
             .join('circle')  // append a new circle shape bound to that datum
+                .attr('id', Node.KeyId)
+                .attr('r',Node.Radius)
+                .attr('fill',Node.FillColour)
                 .on('mouseover',Node.OnMouseOver) // for popup if implemented
                 .on('mouseout',Node.OnMouseOut)
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
-                .attr('r',Node.Radius)
-                .attr('fill',Node.FillColour)
 
 // DO THESE 2 LINES WORK HERE OR ONLY IN TICKED() ??
                 .attr('cx', Node.BoundedX ) // if this is a callback, why do we need to pass it again on each tick
@@ -322,8 +325,9 @@ function AppendShapes(rs) {
                    .text(Node.TitleText)
                 ;
     gNode.selectAll('rect') // in case we've already got some
-        .data(nodes.filter(IsRectShape))
+        .data(nodes.filter(IsRectShape), Node.KeyId)
             .join('rect') // append a new rect shape bound to that datum
+                .attr('id', Node.KeyId)
                 .classed('leaf',true)
                 .on('mouseover',Node.OnMouseOver) // for popup if implemented
                 .on('mouseout',Node.OnMouseOut)
@@ -344,8 +348,9 @@ function AppendShapes(rs) {
 function AppendFrameShapes() {
     console.log(nodes.filter(IsFrameShape));
     gGroup.selectAll('rect') // in case we've already got some
-        .data(nodes.filter(IsFrameShape)) // for each datum in scope
+        .data(nodes.filter(IsFrameShape), Node.KeyId) 
             .join('rect') // append a new rectangular frame bound to this 
+            .attr('id', Node.KeyId)
             .attr('rx', d => IsRoundedShape(d) ? 2*radius : 0 ) // for rounded corners
             .attr('ry', d => IsRoundedShape(d) ? 2*radius : 0 ) 
             .attr('fill',Node.FillColour) // same as if it was a collapsed circle
@@ -373,6 +378,24 @@ function ChildrenOf(d) {
 function VisibleChildrenOf(d) {
         return ChildrenOf(d).filter(IsVisibleNode);
 }
+
+
+//-------------------------------------------------------------------------------
+//  NB: result includes the start node and everything nested within (if visible)
+function VisibleDescendantsOf(start, visited = new Set(), result = []) {
+  if (visited.has(start)) // avoid cycles
+    return result;
+
+  visited.add(start); 
+  result.push(start);
+
+  for (const child of VisibleChildrenOf(start) || []) {
+    VisibleDescendantsOf(child, visited, result);
+  }
+
+  return result;
+}
+
 
 //-------------------------------------------------------------------------------
 

@@ -3,6 +3,15 @@
 
    //-------------------------------------------------------------------------------
 
+   // TO DO: rewrite top down using VisibleDescendantsOf(node)
+// dlist = VisibleDescendantsOf(d);
+// idlist = dlist.map(d => d.NODE_ID); // list of descendant ids
+
+// const elist = d3.selectAll("circle")
+//   .filter(e => idlist.contains(e.id));
+
+
+
    function HoverFrame( d, bHovering ) {
 
     gNode.selectAll("circle")
@@ -15,7 +24,7 @@
     
     // same for group rectangles
     gGroup.selectAll("rect")
-        .filter( c => HasAncestor(d, c) )
+        .filter( c => HasAncestor(d, c) ) 
         .classed( 'xhover', bHovering );
 
    }
