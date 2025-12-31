@@ -50,8 +50,9 @@
                 .attr("id","arrow") //  to invoke as polyline marker
                 .attr("markerWidth",6)
                 .attr("markerHeight",6)
-                .attr("refX",6)
+                .attr("refX",3) // anchor at 3 = 6/2 so the centre of the arrow is at the exact centre of the polyline
                 .attr("refY",2)
+                .attr("class","arrowhead")
                 .attr("orient","auto")
                     .append("polygon")
                     .attr("points","0 0, 6 2, 0 4")

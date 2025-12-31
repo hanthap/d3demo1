@@ -1,17 +1,29 @@
 
             circle {
-                stroke-width: 1;
-                opacity: 0.1;
+
+                fill-opacity: 0.1;
                 stroke:black;
+                stroke-opacity: 0.1;
+                stroke-width: 1;
+
             }
 
             circle.xhover {
-                opacity: 0.6;
-                stroke:blue
+                stroke:blue;
+                stroke-dasharray: 5,5,5,5,5,5;
+                stroke-opacity: 1;
             }
 
+            circle:hover { /* built in pseudo-class  */
+                stroke:blue;
+                stroke-dasharray: 5,5,5,5,5,5;
+                stroke-opacity: 1;
+            }
+
+
+
             circle.selected {
-                opacity:1;
+                fill-opacity:1;
             }
 
             circle.stacked {
@@ -50,7 +62,7 @@
                 stroke-opacity: 0.1;
             }
 
-            rect.leaf:hover {
+            rect.leaf:hover { /* built in pseudo-class  */
                 stroke:blue;
                 opacity: 0.6;
             }
@@ -74,7 +86,7 @@
                 fill-opacity: 0.1;
             }
 
-            rect.frame:hover {
+            rect.frame:hover { /* built in pseudo-class  */
                 stroke:blue;
                 stroke-dasharray: 5,5,5,5,5,5;
                 stroke-opacity: 1;
@@ -95,7 +107,7 @@
                 stroke-opacity: 0;
             }
 
-            line:hover {
+            line:hover { /* built in pseudo-class  */
                 stroke-opacity: 0.5;
             }
 
@@ -106,6 +118,7 @@
 
             polyline.arrow { /* directed line with arrow */
                 fill: none;
+                stroke-opacity: 0.1;
                 stroke: blue;
                 stroke-width: 2;
                 marker-mid: url(#arrow);
@@ -113,4 +126,5 @@
 
             polygon.arrowhead {
                 fill : red;
+                opacity: 0.1;
             }

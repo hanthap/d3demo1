@@ -164,22 +164,18 @@ static Charge(d) { // called by d3.forceManyBody().strength(...)
 
 //-------------------------------------------------------------------------------
 
-// function handleMouseOverNode(e,d) {
 static OnMouseOver(e,d) {
-        // fill colour now done with CSS "hover"
+        // fill colour now done with CSS ":hover"
         currentobject = d;
     }
 
 //-------------------------------------------------------------------------------
 
-// function handleMouseOutNode(e,d) {
 static OnMouseOut(e,d) {
         if ( e.button) return; //  ignore if still dragging 
             // fill colour now done with CSS "hover"
             currentobject = null;           
     }
-
-
 
 
 }
