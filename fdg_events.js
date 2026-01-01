@@ -8,7 +8,7 @@
 
     nList = VisibleDescendantsOf(d);
      nList.forEach( n => { 
-            Node.SelectAll(n) // returns a d3 Selection wrapper
+            Node.ElementsOf(n) // returns a d3 Selection wrapper
                 .classed( 'xhover', bHovering )  ;
             } 
         );

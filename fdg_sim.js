@@ -15,6 +15,8 @@ function RunSim() {
         // so instead we use many-body repulsion as a workaround
         // or maybe a one-body translation (after-the-fact exclusion), without momentum etc
         .force('collide', d3.forceCollide().radius(Node.CollideRadius))
+
+    // TO DO : for certain nodes, add an exclusion force to move outside of any container shape that is NOT one of its ancestors
     
         // electrostatic forces attract/repel based on charge 
         .force('my-charge', d3.forceManyBody().strength(Node.Charge))
@@ -52,11 +54,10 @@ function RunSim() {
 //-------------------------------------------------------------------------------
 
 function ticked() { // invoked just before each 'repaint' so we can decide exactly how to render
-// attr() takes a function as second argument
+// attr() takes a callback function as second argument
 // the datum (updated with new coordinates) is passed by reference to that function
 
 // tweaking the datum for each container to ensure that its minimum bounding rectangle always 
-// unstacked nodes are free to wander hence we want the frame to move and 
 
 // first stacked nodes are obscured by continuously shunting them under 
 // expect nested frames (stacked subgroup rectangles) will stay with their leading
@@ -66,26 +67,24 @@ nodes.filter( IsStackedLeaf ).forEach( d => {
         [d.x, d.y] = Node.Centre( LeadingChildOf( ParentOf(d) ) ); 
     } );
 
-// TO DO: if stacking results in frames that look empty we should move them to the 
-// eg after collapsing all ME IDs under their Ult Parent. All their OCH frames look empty
 
 // only now can we decide where to put the frames
 nodes.filter( IsFrameShape ).forEach( d => {
-    visible_descendants = VisibleDescendantsOf(d); // TO DO: implement recursively as VisibleDescendantsOf() ; also, allow nesting of containers.
+    visible_descendants = VisibleDescendantsOf(d); 
     if ( visible_descendants.length ) {
         xMax = Math.max( ...visible_descendants.map( RightBoundary ) ); // generate a list of right boundaries, then get the max value
         xMin = Math.min( ...visible_descendants.map( LeftBoundary ) );
         yMax = Math.max( ...visible_descendants.map( BottomBoundary ) );
         yMin = Math.min( ...visible_descendants.map( TopBoundary ) );
-        d.x = xMin; // [d.x, d.y] are the coords as read and updated by the simulation -- whereas we 
+        d.x = xMin; 
         d.y = yMin;
         d.width = xMax - xMin;
         d.height = yMax - yMin;
     } } );
     
-// TO DO : what happens when the IP owns (only) the container AR node? Does the line disappear?
-// less likely if a container IP jointly owns an AR.
-// always stay within internal boundary, but without avoiding edge
+// TO DO : If a container node is empty it should be collapsed and rendered as a leaf node
+
+
 
     gLinkZone.selectAll('line').each( Link.SetAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
     gLink.selectAll('polyline').each( Link.SetAttributes ); // seems we need to call this every tick, but why?

@@ -13,6 +13,7 @@
     </head>
     <body onkeydown="handleKeyDown();">
         <script src="fdg_init.js"></script>
+        <script src="fdg_graph.js"></script>
         <script src="fdg_node.js"></script>
         <script src="fdg_link.js"></script>
         <script src="fdg_events.js"></script>
@@ -90,8 +91,10 @@ function AfterLoad() {
         // debug
     RunSim();
     pqr = Node.GetFromID( 'PQR' )
+    pqr_kids = ChildrenOf(pqr)
     pqr_desc = VisibleDescendantsOf(pqr)
     console.log(pqr_desc)
+    console.log(pqr_kids)
     
 
 

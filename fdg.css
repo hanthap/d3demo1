@@ -22,9 +22,16 @@
                 /* mix-blend-mode: difference; fill colour auto contrasts with background */
 }
 
-
-
-
+    /* will use these for foreignObject child div styling */
+    div.circleinfo {
+        font-size: 8px;
+        justify-content: center;
+        display: flex;
+        height: 100%;
+        width: 100%;
+        align-items: center;
+        font-family: Helvetica;
+    }
 
 
             circle.selected {

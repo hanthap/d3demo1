@@ -3,7 +3,7 @@
             var simPassive;
             var frozen = false;
 
-            var fencePosts = [];
+            // var fencePosts = [];
 
 
             var x; // last clicked node
@@ -39,15 +39,9 @@
 
             const defs = svg.append("defs");
 
-            const pattern = defs
-                .append("pattern")
-                .attr("id", "green-pattern")
-                .attr("height",1)
-                .attr("width",0.05);
-
             const arrow = defs
                 .append("marker")
-                .attr("id","arrow") //  to invoke as polyline marker
+                .attr("id","arrow") //  to invoke this polyline marker and apply it to multiple instances
                 .attr("markerWidth",6)
                 .attr("markerHeight",6)
                 .attr("refX",3) // anchor at 3 = 6/2 so the centre of the arrow is at the exact centre of the polyline

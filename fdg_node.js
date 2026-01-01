@@ -4,8 +4,8 @@ var mapNodes; // key,value lookup dict
 
 // Lookup NodeColour using SRCE_CDE
 var sourcePalette = d3.scaleOrdinal()
-    .domain( [ 'XDX', 'OCR', 'GHI' ])
-    .range( [ 'green', 'red', 'blue' ]);
+    .domain( [ 'G', 'R', 'B', 'M', 'C', 'Y'])
+    .range( [ 'green', 'red', 'blue', 'magenta', 'cyan', 'yellow' ] );
 
 //-------------------------------------------------------------------------------
 
@@ -23,8 +23,7 @@ class Node {
 
     //-------------------------------------------------------------------------------
 
-
-    static KeyId(d) {
+    static UniqueId(d) {
         return d.NODE_ID;
     }
 
@@ -32,6 +31,16 @@ class Node {
 
     static Radius(d) {
         return d.r;
+    }
+    //-------------------------------------------------------------------------------
+
+    static Width(d) {
+        return 2*d.r;
+    }
+    //-------------------------------------------------------------------------------
+
+    static Height(d) {
+        return 2*d.r;
     }
 
     //-------------------------------------------------------------------------------
@@ -155,15 +164,16 @@ static GetFromID( NODE_ID ) {
     }
 
 //-------------------------------------------------------------------------------
-// return a d3 selection of all circles & rects with matching key id
-static SelectAll( d ) {
-    return d3.selectAll("circle, rect").filter(e => e.NODE_ID === Node.KeyId(d));
+// return a d3 selection of all circles & rects bound to node n
+static ElementsOf( n ) {
+    return d3.selectAll("circle, rect").filter(e => e.NODE_ID === Node.UniqueId(n));
+    // return d3.selectAll("circle, rect").filter(e => e.__data__ === n ); // why doesn't this work?
     }
 
 //-------------------------------------------------------------------------------
 
 static BringToFront( d ) {
-     Node.SelectAll( d ).raise(); 
+     Node.ElementsOf( d ).raise(); 
     }
 
 //-------------------------------------------------------------------------------
@@ -287,10 +297,6 @@ BUG: HHOLD stacks & unstacks nicely but only when OCH hierarchy is disabled, som
 */
 function IsFrameShape(d) {
     return false
-    || ( 'GENH' ).includes( d.CUST_TYPE_CDE ) // households
-    || ( 'GRP').includes( d.CUST_TYPE_CDE ) // ultimate parents
-    || ( 'OCH').includes( d.SRCE_CDE ) // golden ids
-    || ( ( 'AF').includes( d.SRCE_CDE ) && HasVisibleChild(d)  ) // does this work?
     || HasVisibleChild(d) ;
 }
 
@@ -322,44 +328,46 @@ function AppendShapes(rs) {
     // we also want to access each datum via its unique NODE_ID string
     mapNodes = new Map ( nodes.map( x => ( [x.NODE_ID, x ]) ) );
 
+// TO DO: create a mini 'g' group for each node, then append circle & foreignObject as siblings inside that group
+
     // create the SVG visual element
-    gNode.selectAll('circle') // in case we've already got some
-        .data(nodes.filter(IsRoundedShape), Node.KeyId) // optional 2nd arg = stable key 
-        // see comment above - how best to hide a circle when its group is visible and vice versa
+    circles = gNode.selectAll('circle') // in case we've already got some
+        .data(nodes.filter(IsRoundedShape), Node.UniqueId) // optional 2nd arg = stable key 
             .join('circle')  // append a new circle shape bound to that datum
-                .attr('id', Node.KeyId)
+                .attr('id', Node.UniqueId) // for easy lookup later
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
 
-                .on('mouseover',Node.OnMouseOver) // for popup if implemented
-                .on('mouseout',Node.OnMouseOut)
-                .on('mousedown',Node.OnMouseDown)
+                .on('mouseover',Node.OnMouseOver) // called at each tranisition, including nested elements, unlike mouseenter
+                .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
+//                .on('mousedown',Node.OnMouseDown)
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
 
 // DO THESE 2 LINES WORK HERE OR ONLY IN TICKED() ??
                 .attr('cx', Node.BoundedX ) // if this is a callback, why do we need to pass it again on each tick
-                .attr('cy', Node.BoundedY )
+                .attr('cy', Node.BoundedY ) // could be because it writes back to d.x and d.y ?
+                ;
 
+// works ok - title can be nested inside circle element
+       circles
                 .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
                 // can we append a custom element that supports CSS eg (stackoverflow)
                    .text(Node.TitleText)
                 ;
-    gNode.selectAll('rect') // in case we've already got some
-        .data(nodes.filter(IsRectShape), Node.KeyId)
-            .join('rect') // append a new rect shape bound to that datum
-                .attr('id', Node.KeyId)
-                .classed('leaf',true)
-                .on('mouseover',Node.OnMouseOver) // for popup if implemented
-                .on('mouseout',Node.OnMouseOut)
-                .on('click',Node.OnClick)
-                .on('dblclick',Node.OnDblClick)
-                .attr('width',d => d.width)
-                .attr('height',d => d.height)
-                .attr('fill',Node.FillColour)
-                .append('title') 
-                  .text(Node.TitleText)
-                ;
+
+    // TO DO: these should NOT be nested inside circle elements. Circles and ForeignObjkect need to be SIBLINGS inside a mini SVG node 'g' group
+        circles
+            .append("foreignObject") // add a second child element per node-group. 
+                .attr("x", d => -d.r) // relative to parent 'g' element
+                .attr("y", d => -d.r)
+                .attr("width", Node.Width)
+                .attr("height", Node.Height)
+                .append("xhtml:div") // add a grandchild DIV element inside the foreignObject - we need the strictness of XHTML when inside an SVG 
+                    .classed("circleinfo", true)   // for CSS styling  
+                    .html(Node.TitleText);
+
+
 }
 
 //-------------------------------------------------------------------------------
@@ -369,11 +377,11 @@ function AppendShapes(rs) {
 function AppendFrameShapes() {
     console.log(nodes.filter(IsFrameShape));
     gGroup.selectAll('rect') // in case we've already got some
-        .data(nodes.filter(IsFrameShape), Node.KeyId) 
+        .data(nodes.filter(IsFrameShape), Node.UniqueId) 
             .join('rect') // append a new rectangular frame bound to this 
-            .attr('id', Node.KeyId)
-            .attr('rx', d => IsRoundedShape(d) ? 2*radius : 0 ) // for rounded corners
-            .attr('ry', d => IsRoundedShape(d) ? 2*radius : 0 ) 
+            .attr('id', Node.UniqueId)
+            .attr('rx', 2*radius ) // for rounded corners
+            .attr('ry', 2*radius ) 
            .attr('fill',Node.FillColour) // same as if it was a collapsed circle
            // gradients are static defs, so we can't set them per-node here
             .classed('frame',true)

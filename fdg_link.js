@@ -2,11 +2,10 @@ class Link {
 
 //-------------------------------------------------------------------------------
 
-//function AppendLinkDatum(d) {
 static AppendDatum(d,i) {
 
 try { 
-    // bind to its live vertex objects
+    // bind Link to its live vertex objects
     d.source = Node.GetFromID( d.FROM_NODE_ID );
     d.target = Node.GetFromID( d.TO_NODE_ID );
     d.distance = 10;
@@ -22,6 +21,7 @@ try {
 
 // Given 2 circle nodes with different radii, calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
 // this ensures the line's terminal arrowhead will just touch the outer perimeter of the destination node.
+// TO DO: adjust for variable boundary stroke widths
 
 static PolyLinePoints( d ) {
     var dDest = d.target, dOrig = d.source;
@@ -167,7 +167,7 @@ static SetAttributes(d)   {
 var links = [];
 var filteredLinks = [];
 
-// Lookup LinkColour using EDGE_CDE
+// Lookup Link.Colour using EDGE_CDE
 var edgePalette = d3.scaleOrdinal()
     .domain( [ 'OCH', 'ME', 'FZ', 'D' ])
     .range( [ 'blue', 'green', 'grey', 'pink', 'orange' ]);
