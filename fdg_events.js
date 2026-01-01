@@ -2,44 +2,31 @@
    
 
    //-------------------------------------------------------------------------------
-
-   // TO DO: rewrite top down using VisibleDescendantsOf(node)
-// dlist = VisibleDescendantsOf(d);
-// idlist = dlist.map(d => d.NODE_ID); // list of descendant ids
-
-// const elist = d3.selectAll("circle")
-//   .filter(e => idlist.contains(e.id));
-
-
+    // set or unset the 'xhover' class for node d plus all its visible descendants
 
    function HoverFrame( d, bHovering ) {
 
-    gNode.selectAll("circle")
-        .filter( c => HasAncestor(d, c) )
-        .classed( 'xhover', bHovering );
+    nList = VisibleDescendantsOf(d);
+     nList.forEach( n => { 
+            Node.SelectAll(n) // returns a d3 Selection wrapper
+                .classed( 'xhover', bHovering )  ;
+            } 
+        );
     
-    gNode.selectAll("rect")
-        .filter( c => HasAncestor(d, c) )
-        .classed( 'xhover', bHovering );
-    
-    // same for group rectangles
-    gGroup.selectAll("rect")
-        .filter( c => HasAncestor(d, c) ) 
-        .classed( 'xhover', bHovering );
-
    }
 
    //-------------------------------------------------------------------------------
 
    function handleMouseOverFrame(e, d) {
-        HoverFrame( d, true )
+    // MouseOver also fires when entering any child element
+        HoverFrame( d, true );
    }
 
    //-------------------------------------------------------------------------------
 
    function handleMouseOutFrame(e, d) {
     if ( e.button) return; //  ignore if still dragging 
-        HoverFrame( d, false )
+        HoverFrame( d, false );
    }
 
 
@@ -58,7 +45,7 @@
             c.weight = 1
         } ) ;
         simulation.stop();
-        RunSim()
+        RunSim();
     }
 
     if ( e.shiftKey )  {
