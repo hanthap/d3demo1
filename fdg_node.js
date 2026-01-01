@@ -74,6 +74,13 @@ class Node {
         }
     }
 
+    //-------------------------------------------------------------------------------
+
+    static OnMouseDown( e, d ) {
+        Node.BringToFront(d);
+        console.log(d);
+    }
+
    //-------------------------------------------------------------------------------
 
     static OnClick( k, d ) {
@@ -323,8 +330,10 @@ function AppendShapes(rs) {
                 .attr('id', Node.KeyId)
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
+
                 .on('mouseover',Node.OnMouseOver) // for popup if implemented
                 .on('mouseout',Node.OnMouseOut)
+                .on('mousedown',Node.OnMouseDown)
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
 
@@ -365,7 +374,8 @@ function AppendFrameShapes() {
             .attr('id', Node.KeyId)
             .attr('rx', d => IsRoundedShape(d) ? 2*radius : 0 ) // for rounded corners
             .attr('ry', d => IsRoundedShape(d) ? 2*radius : 0 ) 
-            .attr('fill',Node.FillColour) // same as if it was a collapsed circle
+           .attr('fill',Node.FillColour) // same as if it was a collapsed circle
+           // gradients are static defs, so we can't set them per-node here
             .classed('frame',true)
             .on('click', handleClickFrame)
             .on('mouseover', handleMouseOverFrame) // for popup
