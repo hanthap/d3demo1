@@ -148,6 +148,18 @@ static GetFromID( NODE_ID ) {
     }
 
 //-------------------------------------------------------------------------------
+// return a d3 selection of all circles & rects with matching key id
+static SelectAll( d ) {
+    return d3.selectAll("circle, rect").filter(e => e.NODE_ID === Node.KeyId(d));
+    }
+
+//-------------------------------------------------------------------------------
+
+static BringToFront( d ) {
+     Node.SelectAll( d ).raise(); 
+    }
+
+//-------------------------------------------------------------------------------
 // 
 static Centre(d) {
     if ( IsFrameShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ]

@@ -86,7 +86,14 @@ function AfterLoad() {
     // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
     simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
 
+
+        // debug
     RunSim();
+    pqr = Node.GetFromID( 'PQR' )
+    pqr_desc = VisibleDescendantsOf(pqr)
+    console.log(pqr_desc)
+    
+
 
 } // end AfterLoad()
 
@@ -96,6 +103,7 @@ function AfterLoad() {
 
 LoadData(); // async means control is returned immediately, before any data 
 // anything else we can do now that doesn't depend on nodes & links?
+
 
 </script>
 </body>
