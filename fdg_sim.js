@@ -122,3 +122,4 @@ nodes.filter( IsFrameShape ).forEach( d => {
         .attr('visibility', d => HasVisibleChild(d) ? 'visible' : 'hidden' )
      ;
 };
+

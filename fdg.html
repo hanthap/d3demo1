@@ -93,9 +93,15 @@ function AfterLoad() {
     pqr = Node.GetFromID( 'PQR' )
     pqr_kids = ChildrenOf(pqr)
     pqr_desc = VisibleDescendantsOf(pqr)
-    console.log(pqr_desc)
-    console.log(pqr_kids)
-    
+  //  console.log(pqr_desc)
+  //  console.log(pqr_kids)
+    mno = Node.GetFromID( 'MNO' )
+    console.log(mno);
+    mno_sel = Node.GetSelection( mno, 'rect' );
+    console.log(mno_sel);
+    mno_rect = mno_sel._groups[0][0];
+   console.log(mno_rect);  
+     console.log(mno_rect.getBBox());  // returns SVGRect { x: ..., y: ..., width: ..., height: ... }
 
 
 } // end AfterLoad()

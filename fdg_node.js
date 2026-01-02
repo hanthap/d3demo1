@@ -53,7 +53,6 @@ class Node {
 
     //-------------------------------------------------------------------------------
 
-
     static BoundedY(d) {
         // bounded node centre needs to consider node's radius as well as the static viewport height, adjusted for corner radius of rounded frame
         d.y = bounded(d.y, d.r - height/2 - 2*radius, height/2-3*radius); 
@@ -93,12 +92,12 @@ class Node {
    //-------------------------------------------------------------------------------
 
     static OnClick( k, d ) {
-        x = this;
-        console.log(d); // the d3 datum
-        console.log(k); // the click event
-        console.log(this); // the DOM element (circle)
-
-        // use loc.x and loc.y here
+       // console.log(d); // the d3 datum
+       // console.log(k); // the click event
+        console.log(k.target.getBBox()); // the DOM element (circle) - not a D3 selection
+        console.log(mno_rect.getBBox()); 
+        console.log(BoxesOverlap(k.target, mno_rect)); 
+        // Oddly, this works if BoxesOverlap() is defined outside a class, but not if it's a static method of a class. 
 
         // fill colour now done with 
         currentobject = d;
@@ -138,12 +137,9 @@ static OnDblClick(e,d) {
     ticked()
    }
 
-
-
 //-------------------------------------------------------------------------------
 
 static AppendDatum(d,i) {
-  //  d.index = i; // this can be misleading
     d.charge = -40;
     d.cogX = 0;
     d.cogY = 0;
@@ -164,16 +160,15 @@ static GetFromID( NODE_ID ) {
     }
 
 //-------------------------------------------------------------------------------
-// return a d3 selection of all circles & rects bound to node n
-static ElementsOf( n ) {
-    return d3.selectAll("circle, rect").filter(e => e.NODE_ID === Node.UniqueId(n));
-    // return d3.selectAll("circle, rect").filter(e => e.__data__ === n ); // why doesn't this work?
+// return a d3 selection of all {circles & rects} bound to node datum d
+static GetSelection( d, types="circle, rect" ) {
+    return d3.selectAll(types).filter(e => e.NODE_ID === Node.UniqueId(d));
     }
 
 //-------------------------------------------------------------------------------
 
 static BringToFront( d ) {
-     Node.ElementsOf( d ).raise(); 
+     Node.GetSelection( d ).raise(); 
     }
 
 //-------------------------------------------------------------------------------
@@ -187,18 +182,15 @@ static Centre(d) {
 
 //-------------------------------------------------------------------------------
 
-//function CollideRadius(d) { 
 static CollideRadius(d) { // called by d3.forceCollide().radius(...)
     return d.r + 10; // +3 = extra to allow for stroke-width of circle element 
 }
 
 //-------------------------------------------------------------------------------
 
-// function NodeCharge(d) {
 static Charge(d) { // called by d3.forceManyBody().strength(...)
     return d.charge;
 }
-
 
 //-------------------------------------------------------------------------------
 
@@ -215,9 +207,8 @@ static OnMouseOut(e,d) {
             currentobject = null;           
     }
 
-
 }
-//-------------------------------------------------------------------------------
+
 //-------------------------------------------------------------------------------
 
 // after each tick we have to expressly assign new values to SVG attributes, otherwise nothing changes
@@ -411,7 +402,7 @@ function VisibleChildrenOf(d) {
 
 
 //-------------------------------------------------------------------------------
-//  NB: result includes the start node and everything nested within (if visible)
+//  Recursive depth-first search, result includes the start node and everything nested within (if visible)
 function VisibleDescendantsOf(start, visited = new Set(), result = []) {
   if (visited.has(start)) // avoid cycles
     return result;
@@ -457,3 +448,28 @@ function IsAtVertexOf(  e, n ) {
     return HasAncestor( e.source, n ) || HasAncestor( e.target, n );
 }
 
+//-------------------------------------------------------------------------------
+
+class Frame extends Node {
+
+    static IsExclusive(d) {
+        // to decide whether non-members are forced out by collision detection
+        return ( d.CUST_TYPE_CDE == 'EXCLUSIVE' );
+    }
+
+}
+
+//-------------------------------------------------------------------------------
+
+function BoxesOverlap( boxA, boxB ) {
+        // boxA and boxB are DOM elements with getBBox() method
+        a = boxA.getBBox();
+        b = boxB.getBBox();
+        return !( a.x + a.width < b.x || 
+                  a.x > b.x + b.width || 
+                  a.y + a.height < b.y ||
+                  a.y > b.y + b.height );
+    }
+    //-------------------------------------------------------------------------------
+
+   
