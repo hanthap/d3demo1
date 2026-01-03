@@ -24,6 +24,10 @@ function RunSim() {
         // default centre is (0,0) within the viewBox coords
         // d3.forceCenter() tries to keep the overall centre of mass in a fixed location
         .force('centre', d3.forceCenter().strength(1))
+        
+        // push out any non-member circle nodes
+        // TO DO: must define active_frames and active_circles arrays first
+        .force("active_exclusion", active_exclusion) 
 
         // a centre of gravity helps to avoid explosive repulsion (& can also be used as an anchor for related groups clusters)
         .force('cogX', d3.forceX( d => d.cogX )
@@ -48,8 +52,6 @@ function RunSim() {
         simulation.stop();
     initDrag();
 }
-
-
 
 //-------------------------------------------------------------------------------
 
@@ -100,7 +102,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
         .classed('head', HasStackedParent)
         .attr('visibility', Node.Visibility )
         ;
-
+/*
     gNode.selectAll('rect')
         .attr('x', Node.BoundedX )
         .attr('y', Node.BoundedY )
@@ -110,6 +112,8 @@ nodes.filter( IsFrameShape ).forEach( d => {
         .classed('head', HasStackedParent)
         .attr('visibility', Node.Visibility )
         ;
+*/
+
 // to do: what about group frames with no visible child node 
 
     gGroup.selectAll('rect')
@@ -119,7 +123,91 @@ nodes.filter( IsFrameShape ).forEach( d => {
         .attr( 'height', d => d.height + 2*radius )
         .attr( 'width', d => d.width + 2*radius )
         .classed('selected', d => d.selected)  
-        .attr('visibility', d => HasVisibleChild(d) ? 'visible' : 'hidden' )
+        .attr('visibility', Frame.Visibility )
      ;
 };
+
+//-------------------------------------------------------------------------------
+
+// Custom force to push out non-member circle nodes
+function active_exclusion(alpha) {
+            // full cartesian join, filtered for efficiency
+            // for each visible container frame rect with active exclusion enabled
+            // TO DO : create active_frames list (only once per simulation run, not on every tick)
+
+            return active_exclusion; // disabled for now, need to define active_frames and active_circles arrays first
+
+            active_frames.forEach( n => { // outer loop
+            var // TO DO : use getBBox()  instead. The datum values do not allow for the outer margin for rounded corners
+              nx1 = n.x, // left 
+              nx2 = n.x + n.width, // right
+              ny1 = n.y, // top
+              ny2 = n.y + n.height; // bottom
+
+            // for visible circle nodes with active exclusion enabled
+            // TO DO : create active_circles list (only once per simulation run, not on every tick)
+            active_circles.forEach( m => { // inner loop
+
+              if ( false // TO DO: circle m is NOT a descendant of frame n 
+                    )
+                { 
+                  try {
+                    var
+                        x_int = segInt( m.x, m.x+m.width, nx1, nx2), // horizontal intersection
+                        y_int = segInt( m.y, m.y+m.height, ny1, ny2), // vertical intersection
+                        [x,y] = [x_int[2], y_int[2]],
+                        overlap_area = x * y ; 
+                  } catch (e) { 
+                      console.log(e);
+                      overlap_area = 0 
+                      }
+
+                if (overlap_area) { // the 2 rects actually do overlap
+                    nudge_factor = 20 * alpha / Math.max( m.area + n.area ) ; // for smooth animation
+                   [x,y] = escape_vector( m, n ); // "shortest way out" 
+                    n.x += padding + x * nudge_factor * m.area ; // nudge n away from m
+                    m.x -= padding + x * nudge_factor * n.area; // x recoil 
+                    n.y += padding + y * nudge_factor * m.area; // nudge n away from m
+                    m.y -= padding + y * nudge_factor * n.area; // y recoil 
+
+                  }
+              }
+            });
+          });
+
+          return active_exclusion; // return self, enabling a chain of forces if needed
+          // ticked(); // this might help reduce some jitter when a shape bounces between 2 neighbours
+        }
+
+//----------------------------------------------------------------
+
+// what's the 'shortest way out'?
+
+function escape_vector( m, n ) {
+  
+  // Which list item has the smallest absolute value?
+  x = [n.x-(m.x+m.width), (n.x+n.width)-m.x ] ;
+  x = x.reduce((min, num) => Math.abs(num) < Math.abs(min) ? num : min );
+
+  y = [n.y-(m.y+m.height), (n.y+n.height)-m.y ] ;
+  y = y.reduce((min, num) => Math.abs(num) < Math.abs(min) ? num : min );
+
+  return Math.abs(x) < Math.abs(y) ? [-x,0] : [0,-y]
+
+}
+
+//--------------------------------------------------------------------
+
+// does the line segment a1-a2 intersect with b1-b2 ?
+
+function segInt(a1, a2, b1, b2) {
+    // Ensure a1 <= a2 and b1 <= b2
+    var leftBound = Math.max(a1, b1),
+      rightBound = Math.min(a2, b2);
+  // console.log([leftBound, rightBound]);
+    // Check if there's an actual intersection
+    return (leftBound <= rightBound) ? [leftBound, rightBound, (rightBound-leftBound) ] : [null,null,0];
+}
+
+//-------------------------------------------------------------------------------
 
