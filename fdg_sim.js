@@ -49,12 +49,13 @@ function RunSim() {
     ticked();
 
         // adding this extra collide sim helps reduce overlap and jitter even more
-          simulationExclusion = d3.forceSimulation(nodes.filter(IsActiveNode))
+          simulationExclusion = d3.forceSimulation() // no need to give it a node array
           .force("active_exclusion", active_exclusion) 
-        // .alphaDecay(0.2)
-          .on("tick", ticked)
+         // .alphaTarget(0.9) // freeze if/when alpha drops below this threshold
+          .alphaDecay(0.1)
+        //  .on("tick", ticked)
          // .iterations(30)
-          .tick(60) 
+         // .tick(60) 
          ;
 
     // the simulation starts running by default - we don't always want it to
@@ -162,7 +163,6 @@ function active_exclusion(alpha) {
      //       console.log(`Checking frame ${n.NODE_ID}`);
             
             active_circles.forEach( m => { // inner loop
-
               if ( !(n.descendants.includes(m)) ) // circle m is NOT a descendant of frame n 
                 { 
          //    console.log(`Checking node ${m.NODE_ID}`);
@@ -174,12 +174,15 @@ function active_exclusion(alpha) {
                         y_int = segInt( m.y, m.y+m.height, ny1, ny2), // vertical intersection
                         [x,y] = [x_int[2], y_int[2]],
                         overlap_area = x * y ; 
+
                   } catch (e) { 
                       console.log(e);
                       overlap_area = 0 
                       }
 
                 if (overlap_area) { // the 2 rects actually do overlap
+                    if (m.NODE_ID == 'XXX' ) console.log(`Frame ${n.NODE_ID}, Node ${m.NODE_ID} overlap area ${overlap_area}`);
+
              //       console.log(`Excluding node ${m.NODE_ID}`);
                     nudge_factor = 2 * alpha; //  / Math.max( m.area + n.area ) ; // for smooth animation
                    [x,y] = escape_vector( m, n ); // "shortest way out" 

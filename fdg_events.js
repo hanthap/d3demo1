@@ -128,6 +128,7 @@ function handleDrop(e,d) {
     } else {
         if ( !frozen ) {
             simulation.restart();
+            simulationExclusion.restart();
         }
     }
     ticked();

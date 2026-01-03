@@ -1,6 +1,7 @@
             var width = window.innerWidth, height = window.innerHeight;
             var simulation;
             var simPassive;
+            var simulationExclusion;
             var frozen = false;
 
             // var fencePosts = [];
