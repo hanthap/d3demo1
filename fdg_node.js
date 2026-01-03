@@ -207,6 +207,8 @@ static OnMouseOut(e,d) {
             currentobject = null;           
     }
 
+
+
 }
 
 //-------------------------------------------------------------------------------
@@ -400,23 +402,11 @@ function VisibleChildrenOf(d) {
         return ChildrenOf(d).filter(IsVisibleNode);
 }
 
-
 //-------------------------------------------------------------------------------
-//  Recursive depth-first search, result includes the start node and everything nested within (if visible)
-function VisibleDescendantsOf(start, visited = new Set(), result = []) {
-  if (visited.has(start)) // avoid cycles
-    return result;
 
-  visited.add(start); 
-  result.push(start);
-
-  for (const child of VisibleChildrenOf(start) || []) {
-    VisibleDescendantsOf(child, visited, result);
-  }
-
-  return result;
+function VisibleDescendantsOf(d) {
+    return d.descendants.filter( IsVisibleNode );
 }
-
 
 //-------------------------------------------------------------------------------
 
@@ -472,4 +462,22 @@ function BoxesOverlap( boxA, boxB ) {
     }
     //-------------------------------------------------------------------------------
 
-   
+//-------------------------------------------------------------------------------
+
+// Depth first search to return a list of all descendants of a given start node
+// called by Graph.CacheAllDescendants()
+// TO DO: look at making this a static function of class Node (or Graph ?)
+
+
+function AllDescendantsOf(start, visited = new Set(), result = []) {
+  if (visited.has(start)) // avoid cycles
+    return result;
+
+  visited.add(start); 
+  result.push(start);
+
+  for (const child of ChildrenOf(start) || []) {
+    AllDescendantsOf(child, visited, result);
+  }
+  return result;
+}
