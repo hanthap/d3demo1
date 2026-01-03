@@ -27,7 +27,7 @@ function RunSim() {
         
         // push out any non-member circle nodes
         // TO DO: must define active_frames and active_circles arrays first
-        .force("active_exclusion", active_exclusion) 
+       // .force("active_exclusion", active_exclusion) 
 
         // a centre of gravity helps to avoid explosive repulsion (& can also be used as an anchor for related groups clusters)
         .force('cogX', d3.forceX( d => d.cogX )
@@ -47,6 +47,16 @@ function RunSim() {
         .on('tick',ticked)
         ;
     ticked();
+
+        // adding this extra collide sim helps reduce overlap and jitter even more
+          simulationExclusion = d3.forceSimulation(nodes.filter(IsActiveNode))
+          .force("active_exclusion", active_exclusion) 
+        // .alphaDecay(0.2)
+          .on("tick", ticked)
+         // .iterations(30)
+          .tick(60) 
+         ;
+
     // the simulation starts running by default - we don't always want it to
     if (frozen) 
         simulation.stop();
@@ -131,26 +141,33 @@ nodes.filter( IsFrameShape ).forEach( d => {
 
 // Custom force to push out non-member circle nodes
 function active_exclusion(alpha) {
+
+            const padding = 2; // extra gap between rect and circle
+            var nudge_factor;                   
+
+
             // full cartesian join, filtered for efficiency
             // for each visible container frame rect with active exclusion enabled
-            // TO DO : create active_frames list (only once per simulation run, not on every tick)
 
-            return active_exclusion; // disabled for now, need to define active_frames and active_circles arrays first
+            // return active_exclusion; // disabled for now, need to define active_frames and active_circles arrays first
 
             active_frames.forEach( n => { // outer loop
-            var // TO DO : use getBBox()  instead. The datum values do not allow for the outer margin for rounded corners
-              nx1 = n.x, // left 
-              nx2 = n.x + n.width, // right
-              ny1 = n.y, // top
-              ny2 = n.y + n.height; // bottom
+            var // TO DO : use getBBox()  instead. The d3 datum values do not allow for the outer margin for rounded corners
+              nx1 = n.x - 2*radius, // left 
+              nx2 = n.x + n.width + 4*radius, // right
+              ny1 = n.y - 2*radius, // top
+              ny2 = n.y + n.height + 4*radius; // bottom
 
             // for visible circle nodes with active exclusion enabled
-            // TO DO : create active_circles list (only once per simulation run, not on every tick)
+     //       console.log(`Checking frame ${n.NODE_ID}`);
+            
             active_circles.forEach( m => { // inner loop
 
-              if ( false // TO DO: circle m is NOT a descendant of frame n 
-                    )
+              if ( !(n.descendants.includes(m)) ) // circle m is NOT a descendant of frame n 
                 { 
+         //    console.log(`Checking node ${m.NODE_ID}`);
+
+                  // do the rect and circle overlap?
                   try {
                     var
                         x_int = segInt( m.x, m.x+m.width, nx1, nx2), // horizontal intersection
@@ -163,17 +180,17 @@ function active_exclusion(alpha) {
                       }
 
                 if (overlap_area) { // the 2 rects actually do overlap
-                    nudge_factor = 20 * alpha / Math.max( m.area + n.area ) ; // for smooth animation
+             //       console.log(`Excluding node ${m.NODE_ID}`);
+                    nudge_factor = 2 * alpha; //  / Math.max( m.area + n.area ) ; // for smooth animation
                    [x,y] = escape_vector( m, n ); // "shortest way out" 
-                    n.x += padding + x * nudge_factor * m.area ; // nudge n away from m
-                    m.x -= padding + x * nudge_factor * n.area; // x recoil 
-                    n.y += padding + y * nudge_factor * m.area; // nudge n away from m
-                    m.y -= padding + y * nudge_factor * n.area; // y recoil 
-
+              //     console.log(`Escape vector ${x},${y}`);
+                    m.x -= padding + x * nudge_factor; // nudge m away from n 
+                    m.y -= padding + y * nudge_factor; // nudge m away from n 
                   }
               }
             });
           });
+          ticked();
 
           return active_exclusion; // return self, enabling a chain of forces if needed
           // ticked(); // this might help reduce some jitter when a shape bounces between 2 neighbours

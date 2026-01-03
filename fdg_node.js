@@ -1,6 +1,8 @@
 var radius = 16;
 var nodes = [];
 var mapNodes; // key,value lookup dict
+var active_frames = []; // frames in scope of active exclusion
+var active_circles = []; // circles in scope of active exclusion
 
 // Lookup NodeColour using SRCE_CDE
 var sourcePalette = d3.scaleOrdinal()
@@ -207,7 +209,12 @@ static OnMouseOut(e,d) {
             currentobject = null;           
     }
 
+//-------------------------------------------------------------------------------
 
+static IsExclusive(d) {
+    // to decide whether this node's circle is in scope of active_exclusion force
+    return ( !HasVisibleChild(d) ); // for now, all circle nodes may be excluded
+    }
 
 }
 
@@ -251,11 +258,9 @@ function IsStackedLeaf(d) {
 //-------------------------------------------------------------------------------
 // to do: return true iff node d is a member of { a, descendants of a } including
 // need to make this recursive
-function HasAncestor(a,d) {
+function HasAncestor_DEPRECATED(a,d) {
     return ( d.outLinks.filter( e => IsHierLink(e) && e.target == a ).length ); // simplistic and non-recursive
 }
-
-
    
  //-------------------------------------------------------------------------------
 
@@ -278,16 +283,7 @@ function IsRoundedShape(d) {
 }
 
 //-------------------------------------------------------------------------------
-/*
-
-TO DO: allow for multiple parallel hierarchies, each of which can be represented 
-each hierarchy could be defined by a group of link types eg 'GOLDEN', 
-frame shapes are colour-coded with round square 
-When multiple hierarchies are stackable we need to set priority rules to 
-BUG: HHOLD stacks & unstacks nicely but only when OCH hierarchy is disabled, something to do with
-
-
-*/
+// TO DO: decide whether a leaf node can ever be a frame shape
 function IsFrameShape(d) {
     return false
     || HasVisibleChild(d) ;
@@ -371,7 +367,7 @@ function AppendFrameShapes() {
     console.log(nodes.filter(IsFrameShape));
     gGroup.selectAll('rect') // in case we've already got some
         .data(nodes.filter(IsFrameShape), Node.UniqueId) 
-            .join('rect') // append a new rectangular frame bound to this 
+            .join('rect') // append a new rectangular frame bound to this node datum
             .attr('id', Node.UniqueId)
             .attr('rx', 2*radius ) // for rounded corners
             .attr('ry', 2*radius ) 
@@ -434,7 +430,7 @@ function ParentOf(d) {
 //-------------------------------------------------------------------------------
 
 // true if n is [a descendant of] either of the vertices of edge e
-function IsAtVertexOf(  e, n ) {
+function IsAtVertexOf_DEPRECATED(  e, n ) {
     return HasAncestor( e.source, n ) || HasAncestor( e.target, n );
 }
 
@@ -442,9 +438,9 @@ function IsAtVertexOf(  e, n ) {
 
 class Frame extends Node {
 
-    static IsExclusive(d) {
-        // to decide whether non-members are forced out by collision detection
-        return ( d.CUST_TYPE_CDE == 'EXCLUSIVE' );
+    static IsExclusive(d) {  
+        // to decide whether non-members will be pushed out by active_exclusion force
+        return ( HasVisibleChild(d) ); // for now, all frame rects are exclusive    
     }
 
     //-------------------------------------------------------------------------------
@@ -452,6 +448,8 @@ class Frame extends Node {
     static Visibility(d) {
         return HasVisibleChild(d) ? 'visible' : 'hidden'
     }
+
+
 
 }
 
@@ -469,7 +467,7 @@ function BoxesOverlap( boxA, boxB ) {
 
 //-------------------------------------------------------------------------------
 
-// Depth first search to return a list of all descendants of a given start node
+// Depth-first search to return a list of all descendants of a given start node
 // called by Graph.CacheAllDescendants()
 // TO DO: look at making this a static function of class Node (or Graph ?)
 

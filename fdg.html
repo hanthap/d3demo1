@@ -84,8 +84,8 @@ function AfterLoad() {
     console.log(links);
     AppendFrameShapes(); // don't forget the parentheses!
 
-    Graph.CacheAllDescendants(); // precompute descendant lists for all nodes
-
+    Graph.CacheAllDescendants(); // precompute descendant lists, for each node
+    Graph.CacheAllExclusiveNodes(); // precompute lists of circles and frames in scope of active_exclusion force
 
     // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
     simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
