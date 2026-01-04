@@ -181,6 +181,11 @@ static Centre(d) {
     else return [ d.x, d.y ];  
 }
 
+static Centre2(d) {
+    if ( IsFrameShape(d) ) return { 'x': ( d.x + radius + d.width/2), 'y': (d.y + radius + d.height/2) };
+    else if ( IsRectShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y + d.height/2) };
+    else return { 'x': d.x, 'y': d.y };  
+}
 
 //-------------------------------------------------------------------------------
 

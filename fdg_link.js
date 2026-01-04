@@ -8,7 +8,7 @@ try {
     // bind Link to its live vertex objects
     d.source = Node.GetFromID( d.FROM_NODE_ID );
     d.target = Node.GetFromID( d.TO_NODE_ID );
-    d.distance = 10;
+    d.distance = 20;
     d.strength = 0.1;
    // console.log(d);
     return d; // only if we didn't throw an error eg 'no such node'
@@ -25,17 +25,28 @@ try {
 
 static PolyLinePoints( d ) {
     var dDest = d.target, dOrig = d.source;
-
-    var yDelta = dDest.y - dOrig.y ;
-    var xDelta = dDest.x - dOrig.x;
+    var cDest = Node.Centre2(dDest);
+    var cOrig = Node.Centre2(dOrig);
+  //  console.log(cDest);
+  //  console.log(cOrig);
+   // var yDelta = dDest.y - dOrig.y ;
+   // var xDelta = dDest.x - dOrig.x;
+    var yDelta = cDest.y - cOrig.y ;
+    var xDelta = cDest.x - cOrig.x;
+       console.log(cDest);
+ 
     var h = Math.hypot(xDelta,yDelta); // hypotenuse = distance between centres
     // move origin to the perimeter of the "from" circle
-    var xStart = dOrig.x + ( xDelta * dOrig.r / h ); 
-    var yStart = dOrig.y + ( yDelta * dOrig.r / h );
+//    var xStart = dOrig.x + ( xDelta * dOrig.r / h ); 
+//    var yStart = dOrig.y + ( yDelta * dOrig.r / h );
+    var xStart = cOrig.x + ( xDelta * dOrig.r / h ); 
+    var yStart = cOrig.y + ( yDelta * dOrig.r / h );
 
     // move target to the perimeter of the "to" circle
-    var xEnd = dDest.x - ( xDelta * dDest.r / h );
-    var yEnd = dDest.y - ( yDelta * dDest.r / h );
+//    var xEnd = dDest.x - ( xDelta * dDest.r / h );
+//    var yEnd = dDest.y - ( yDelta * dDest.r / h );
+    var xEnd = cDest.x - ( xDelta * dDest.r / h );
+    var yEnd = cDest.y - ( yDelta * dDest.r / h );
 
     // visual midpoint = half-way along the visible line segment, NOT half-way between node centres
     var xMid = ( xStart + xEnd ) / 2; 
@@ -67,7 +78,7 @@ static StrokeWidth(d) { // stroke-width of visible polyline
 
 static ZoneWidth(d) { // width of extended click zone
     try {
-        return 20 + d.EDGE_MASS / 20;
+        return 20 + d.EDGE_MASS / 40;
     } catch (e) { };
 }
 
