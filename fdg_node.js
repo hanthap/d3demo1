@@ -13,15 +13,8 @@ var sourcePalette = d3.scaleOrdinal()
 
 class Node {
 
-    constructor( NODE_ID, NODE_TYPE, NODE_MASS, SRCE_CDE, CUST_TYPE_CDE, EDGE_CDE, NODE_TXT ) {
-        this.NODE_ID = NODE_ID;
-        this.NODE_TYPE = NODE_TYPE;
-        this.NODE_MASS = NODE_MASS;
-        this.SRCE_CDE = SRCE_CDE;
-        this.CUST_TYPE_CDE = CUST_TYPE_CDE;
-        this.EDGE_CDE = EDGE_CDE;
-        this.NODE_TXT = NODE_TXT;
-    }
+    constructor(  ) {
+        }
 
     //-------------------------------------------------------------------------------
 
@@ -63,9 +56,21 @@ class Node {
 
     //-------------------------------------------------------------------------------
 
+    static HalfWidth(d)  {  // horizontal distance from centre to left/right edge
+        return d.r ; 
+    }
+
+    //-------------------------------------------------------------------------------
+
+    static HalfHeight(d)  {  
+        return d.r ;
+    }
+
+    //-------------------------------------------------------------------------------
+
     static Visibility(d) {
         return IsActiveNode(d) ? 'visible' : 'hidden'
-        // what if it's a frame rect? Then we look at whether there's a visible child.
+        // Overloaded in Frame subclass
     }
 
     //-------------------------------------------------------------------------------
@@ -175,14 +180,14 @@ static BringToFront( d ) {
 
 //-------------------------------------------------------------------------------
 // 
-static Centre(d) {
+static Centre_DEPRECATED(d) {
     if ( IsFrameShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ]
     else if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
     else return [ d.x, d.y ];  
 }
 
 static Centre2(d) {
-    if ( IsFrameShape(d) ) return { 'x': ( d.x + radius + d.width/2), 'y': (d.y + radius + d.height/2) };
+    if ( IsFrameShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y +  d.height/2) };
     else if ( IsRectShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y + d.height/2) };
     else return { 'x': d.x, 'y': d.y };  
 }
@@ -218,7 +223,7 @@ static OnMouseOut(e,d) {
 
 static IsExclusive(d) {
     // to decide whether this node's circle is in scope of active_exclusion force
-    return ( !HasVisibleChild(d) ); // for now, all circle nodes may be excluded
+    return ( !HasVisibleChild(d) ); // for now, all leaf nodes may be excluded
     }
 
 }
@@ -230,29 +235,21 @@ static IsExclusive(d) {
 // to do: if the node is a container, we should allow for extra border
 // to do: needs to allow for extra border around any nested container
 
-function NodeHalfWidth(d)  {  // horizontal distance from centre to left/right edge
-    return d.r;
-
-}
-function NodeHalfHeight(d)  {  
-    return d.r;
-
-}
 
 function RightBoundary(d) {
-    return (Node.Centre(d)[0] + NodeHalfWidth(d));
+    return (Node.Centre2(d).x + Node.HalfWidth(d));
 }
 
 function LeftBoundary(d) {
-    return (Node.Centre(d)[0] - NodeHalfWidth(d));
+    return (Node.Centre2(d).x - Node.HalfWidth(d));
 }
 
 function BottomBoundary(d) {
-    return (Node.Centre(d)[1] + NodeHalfHeight(d));
+    return (Node.Centre2(d).y + Node.HalfHeight(d));
 }
 
 function TopBoundary(d) {
-    return (Node.Centre(d)[1] - NodeHalfHeight(d));
+    return (Node.Centre2(d).y - Node.HalfHeight(d));
 }
 
 function IsStackedLeaf(d) {
@@ -369,7 +366,7 @@ function AppendShapes(rs) {
     // this might have to wait until we've finished loading edges as well
 
 function AppendFrameShapes() {
-    console.log(nodes.filter(IsFrameShape));
+//    console.log(nodes.filter(IsFrameShape));
     gGroup.selectAll('rect') // in case we've already got some
         .data(nodes.filter(IsFrameShape), Node.UniqueId) 
             .join('rect') // append a new rectangular frame bound to this node datum

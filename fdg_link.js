@@ -21,7 +21,8 @@ try {
 
 // Given 2 circle nodes with different radii, calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
 // this ensures the line's terminal arrowhead will just touch the outer perimeter of the destination node.
-// TO DO: adjust for variable boundary stroke widths
+// TO DO: adjust for variable boundary stroke widths of source and target nodes
+// TO DO: adjust for non-circular nodes. If the circle is inside the rect, the line goes to the nearest outer edge of the rect, not the centre
 
 static PolyLinePoints( d ) {
     var dDest = d.target, dOrig = d.source;
@@ -37,14 +38,10 @@ static PolyLinePoints( d ) {
  
     var h = Math.hypot(xDelta,yDelta); // hypotenuse = distance between centres
     // move origin to the perimeter of the "from" circle
-//    var xStart = dOrig.x + ( xDelta * dOrig.r / h ); 
-//    var yStart = dOrig.y + ( yDelta * dOrig.r / h );
     var xStart = cOrig.x + ( xDelta * dOrig.r / h ); 
     var yStart = cOrig.y + ( yDelta * dOrig.r / h );
 
-    // move target to the perimeter of the "to" circle
-//    var xEnd = dDest.x - ( xDelta * dDest.r / h );
-//    var yEnd = dDest.y - ( yDelta * dDest.r / h );
+    // move target to the perimeter of the "to" circle (node)
     var xEnd = cDest.x - ( xDelta * dDest.r / h );
     var yEnd = cDest.y - ( yDelta * dDest.r / h );
 

@@ -77,7 +77,9 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 // works OK except the parent frame picks up the 
 
 nodes.filter( IsStackedLeaf ).forEach( d => {
-        [d.x, d.y] = Node.Centre( LeadingChildOf( ParentOf(d) ) ); 
+       // [d.x, d.y] = Node.Centre( LeadingChildOf( ParentOf(d) ) ); 
+       c = Node.Centre2( LeadingChildOf( ParentOf(d) ) ); 
+        [d.x, d.y] = [ c.x, c.y ];
     } );
 
 
@@ -92,7 +94,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
         d.x = xMin; 
         d.y = yMin;
         d.width = xMax - xMin;
-        d.height = yMax - yMin;
+        d.height =yMax - yMin;
     } } );
     
 // TO DO : If a container node is empty it should be collapsed and rendered as a leaf node
@@ -181,7 +183,7 @@ function active_exclusion(alpha) {
                       }
 
                 if (overlap_area) { // the 2 rects actually do overlap
-                    if (m.NODE_ID == 'XXX' ) console.log(`Frame ${n.NODE_ID}, Node ${m.NODE_ID} overlap area ${overlap_area}`);
+               //     if (m.NODE_ID == 'XXX' ) console.log(`Frame ${n.NODE_ID}, Node ${m.NODE_ID} overlap area ${overlap_area}`);
 
              //       console.log(`Excluding node ${m.NODE_ID}`);
                     nudge_factor = 2 * alpha; //  / Math.max( m.area + n.area ) ; // for smooth animation
