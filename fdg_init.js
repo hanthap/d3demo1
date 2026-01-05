@@ -19,6 +19,8 @@
                 .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
                 // interesting behaviour when window resizes - ALMOST good
                 .attr('style', 'max-width:100%; height:auto; height:intrinsic;')
+               // .attr('preserveAspectRatio','none');
+
 
             // groups are passive shapes in the background
             const gGroup = svg.append('g')

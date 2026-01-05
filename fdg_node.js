@@ -154,9 +154,11 @@ static AppendDatum(d,i) {
     d.r = d.NODE_MASS * radius / 35; // size proportional to weight
     d.height = 2 * d.r;
     d.width = 2 * d.r;
-    d.stacked = 0;
+    d.stacked = 0; // deprecated
     d.selected = 0;
-    d.xhover = 0;
+    d.xhover = 0; // deprecated
+    d.closed = 0; // 1 <=> node is a set container, but now collapsed & displayed as a circle (with rolled-up subtotal weights etc)
+    // TO DO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
     return d;
 }
 

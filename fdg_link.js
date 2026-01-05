@@ -30,11 +30,8 @@ static PolyLinePoints( d ) {
     var cOrig = Node.Centre(dOrig);
   //  console.log(cDest);
   //  console.log(cOrig);
-   // var yDelta = dDest.y - dOrig.y ;
-   // var xDelta = dDest.x - dOrig.x;
     var yDelta = cDest.y - cOrig.y ;
     var xDelta = cDest.x - cOrig.x;
-   //    console.log(cDest);
  
     var h = Math.hypot(xDelta,yDelta); // hypotenuse = distance between centres
     // move origin to the perimeter of the "from" circle
