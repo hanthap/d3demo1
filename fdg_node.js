@@ -30,12 +30,12 @@ class Node {
     //-------------------------------------------------------------------------------
 
     static Width(d) {
-        return 2*d.r;
+        return 2*d.r; // TO DO: handle frame shapes
     }
     //-------------------------------------------------------------------------------
 
     static Height(d) {
-        return 2*d.r;
+        return 2*d.r; // TO DO: handle frame shapes
     }
 
     //-------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ class Node {
     //-------------------------------------------------------------------------------
 
     static HalfWidth(d)  {  // horizontal distance from centre to left/right edge
-        return d.r ; 
+        return d.r ;
     }
 
     //-------------------------------------------------------------------------------
@@ -92,8 +92,8 @@ class Node {
     //-------------------------------------------------------------------------------
 
     static OnMouseDown( e, d ) {
-        Node.BringToFront(d);
-        console.log(d);
+     //   Node.BringToFront(d);
+      //  console.log(d);
     }
 
    //-------------------------------------------------------------------------------
@@ -101,20 +101,20 @@ class Node {
     static OnClick( k, d ) {
        // console.log(d); // the d3 datum
        // console.log(k); // the click event
-        console.log(k.target.getBBox()); // the DOM element (circle) - not a D3 selection
+        console.log(k.target.getBBox()); // the DOM element (circle) - not a D3 selection object
         console.log(mno_rect.getBBox()); 
         console.log(BoxesOverlap(k.target, mno_rect)); 
         // Oddly, this works if BoxesOverlap() is defined outside a class, but not if it's a static method of a class. 
 
-        // fill colour now done with 
+        // fill colour now done with CSS
         currentobject = d;
         // toggle 'selected' status of the clicked node
-        d.selected =  ! d.selected
+        d.selected ^= 1;
 
-        // optionally, toggle the selected status of directly linked neighbours
+        // optionally, propagate the selected status to directly linked neighbours
         if ( k.ctrlKey ) {
-            d.inLinks.forEach ( f => f.source.selected ^= 1 );
-            d.outLinks.forEach ( f => f.target.selected ^= 1 );
+            d.inLinks.forEach ( f => { f.source.selected = d.selected } );
+            d.outLinks.forEach ( f => { f.target.selected = d.selected } );
         }
 
         if ( k.shiftKey ) {
@@ -180,11 +180,11 @@ static BringToFront( d ) {
 
 //-------------------------------------------------------------------------------
 // 
-static Centre_DEPRECATED(d) {
-    if ( IsFrameShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ]
-    else if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
-    else return [ d.x, d.y ];  
-}
+// static Centre_DEPRECATED(d) {
+//     if ( IsFrameShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ]
+//     else if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
+//     else return [ d.x, d.y ];  
+// }
 
 static Centre2(d) {
     if ( IsFrameShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y +  d.height/2) };
@@ -195,7 +195,7 @@ static Centre2(d) {
 //-------------------------------------------------------------------------------
 
 static CollideRadius(d) { // called by d3.forceCollide().radius(...)
-    return d.r + 10; // +3 = extra to allow for stroke-width of circle element 
+    return d.r + 20; // +3 = extra to allow for stroke-width of circle element 
 }
 
 //-------------------------------------------------------------------------------
@@ -234,6 +234,7 @@ static IsExclusive(d) {
 // we can adjust the data here as well eg set velocity to zero
 // to do: if the node is a container, we should allow for extra border
 // to do: needs to allow for extra border around any nested container
+
 
 
 function RightBoundary(d) {
@@ -403,7 +404,8 @@ function VisibleChildrenOf(d) {
 //-------------------------------------------------------------------------------
 
 function VisibleDescendantsOf(d) {
-    return d.descendants.filter( IsVisibleNode );
+   // return d.descendants.filter( IsVisibleNode );
+   return d.descendants.filter( IsActiveNode ); // inlcudes frames?
 }
 
 //-------------------------------------------------------------------------------

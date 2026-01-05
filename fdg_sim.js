@@ -85,8 +85,12 @@ nodes.filter( IsStackedLeaf ).forEach( d => {
 
 // only now can we decide where to put the frames
 nodes.filter( IsFrameShape ).forEach( d => {
-    visible_descendants = VisibleDescendantsOf(d); 
+    visible_descendants = VisibleDescendantsOf(d);  // includes frames?
     if ( visible_descendants.length ) {
+
+      // PROBLEM: outer superset has to wait until all innersets have been positioned
+      // TO DO: use depth-first method 
+
         xMax = Math.max( ...visible_descendants.map( RightBoundary ) ); // generate a list of right boundaries, then get the max value
         xMin = Math.min( ...visible_descendants.map( LeftBoundary ) );
         yMax = Math.max( ...visible_descendants.map( BottomBoundary ) );
@@ -97,8 +101,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
         d.height =yMax - yMin;
     } } );
     
-// TO DO : If a container node is empty it should be collapsed and rendered as a leaf node
-
+// TO DO : If a 'container' node is empty it should be rendered as a circle(?), not hidden
 
 
     gLinkZone.selectAll('line').each( Link.SetAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
@@ -127,7 +130,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
         ;
 */
 
-// to do: what about group frames with no visible child node 
+// to do: what about group frames with no visible child node - these should probably be shown as circles?
 
     gGroup.selectAll('rect')
         .attr('x', d => d.x - radius ) // extra margin to accommodate rounded corners
@@ -142,7 +145,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
 
 //-------------------------------------------------------------------------------
 
-// Custom force to push out non-member circle nodes
+// Custom force to push out non-member circle nodes - needs work!
 function active_exclusion(alpha) {
 
             const padding = 2; // extra gap between rect and circle
@@ -162,12 +165,10 @@ function active_exclusion(alpha) {
               ny2 = n.y + n.height + 4*radius; // bottom
 
             // for visible circle nodes with active exclusion enabled
-     //       console.log(`Checking frame ${n.NODE_ID}`);
             
             active_circles.forEach( m => { // inner loop
               if ( !(n.descendants.includes(m)) ) // circle m is NOT a descendant of frame n 
                 { 
-         //    console.log(`Checking node ${m.NODE_ID}`);
 
                   // do the rect and circle overlap?
                   try {
@@ -183,12 +184,9 @@ function active_exclusion(alpha) {
                       }
 
                 if (overlap_area) { // the 2 rects actually do overlap
-               //     if (m.NODE_ID == 'XXX' ) console.log(`Frame ${n.NODE_ID}, Node ${m.NODE_ID} overlap area ${overlap_area}`);
 
-             //       console.log(`Excluding node ${m.NODE_ID}`);
-                    nudge_factor = 2 * alpha; //  / Math.max( m.area + n.area ) ; // for smooth animation
+                    nudge_factor = 2 * alpha; // for smooth animation
                    [x,y] = escape_vector( m, n ); // "shortest way out" 
-              //     console.log(`Escape vector ${x},${y}`);
                     m.x -= padding + x * nudge_factor; // nudge m away from n 
                     m.y -= padding + y * nudge_factor; // nudge m away from n 
                   }
@@ -204,6 +202,8 @@ function active_exclusion(alpha) {
 //----------------------------------------------------------------
 
 // what's the 'shortest way out'?
+// TO DO: make sure the frame rect is stationary while the node is nudged outwards
+// this was originally written for scenario where both nodes could move
 
 function escape_vector( m, n ) {
   
