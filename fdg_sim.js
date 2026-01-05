@@ -78,7 +78,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 
 nodes.filter( IsStackedLeaf ).forEach( d => {
        // [d.x, d.y] = Node.Centre( LeadingChildOf( ParentOf(d) ) ); 
-       c = Node.Centre2( LeadingChildOf( ParentOf(d) ) ); 
+       c = Node.Centre( LeadingChildOf( ParentOf(d) ) ); 
         [d.x, d.y] = [ c.x, c.y ];
     } );
 
@@ -88,7 +88,7 @@ nodes.filter( IsFrameShape ).forEach( d => {
     visible_descendants = VisibleDescendantsOf(d);  // includes frames?
     if ( visible_descendants.length ) {
 
-      // PROBLEM: outer superset has to wait until all innersets have been positioned
+      // PROBLEM: outer superset has to wait until all innersets have been positioned & sized
       // TO DO: use depth-first method 
 
         xMax = Math.max( ...visible_descendants.map( RightBoundary ) ); // generate a list of right boundaries, then get the max value

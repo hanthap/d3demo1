@@ -186,7 +186,7 @@ static BringToFront( d ) {
 //     else return [ d.x, d.y ];  
 // }
 
-static Centre2(d) {
+static Centre(d) {
     if ( IsFrameShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y +  d.height/2) };
     else if ( IsRectShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y + d.height/2) };
     else return { 'x': d.x, 'y': d.y };  
@@ -238,19 +238,19 @@ static IsExclusive(d) {
 
 
 function RightBoundary(d) {
-    return (Node.Centre2(d).x + Node.HalfWidth(d));
+    return (Node.Centre(d).x + Node.HalfWidth(d));
 }
 
 function LeftBoundary(d) {
-    return (Node.Centre2(d).x - Node.HalfWidth(d));
+    return (Node.Centre(d).x - Node.HalfWidth(d));
 }
 
 function BottomBoundary(d) {
-    return (Node.Centre2(d).y + Node.HalfHeight(d));
+    return (Node.Centre(d).y + Node.HalfHeight(d));
 }
 
 function TopBoundary(d) {
-    return (Node.Centre2(d).y - Node.HalfHeight(d));
+    return (Node.Centre(d).y - Node.HalfHeight(d));
 }
 
 function IsStackedLeaf(d) {
