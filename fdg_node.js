@@ -181,12 +181,6 @@ static BringToFront( d ) {
     }
 
 //-------------------------------------------------------------------------------
-// 
-// static Centre_DEPRECATED(d) {
-//     if ( IsFrameShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ]
-//     else if ( IsRectShape(d) ) return [ ( d.x + d.width/2), (d.y + d.height/2) ];
-//     else return [ d.x, d.y ];  
-// }
 
 static Centre(d) {
     if ( IsFrameShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y +  d.height/2) };
@@ -367,11 +361,12 @@ function AppendShapes(rs) {
 //-------------------------------------------------------------------------------
 
     // this might have to wait until we've finished loading edges as well
-
+    // TO DO: handle nested frames in correct sequence to ensure conntainers are in back of their contents
 function AppendFrameShapes() {
 //    console.log(nodes.filter(IsFrameShape));
     gGroup.selectAll('rect') // in case we've already got some
-        .data(nodes.filter(IsFrameShape), Node.UniqueId) 
+        .data(nodes.filter(IsFrameShape), Node.UniqueId)  // TO DO: ensure they are in correct z-order
+        // this could mean sorting nodes[] first, or using d3's .sort() method after all shapes have been created
             .join('rect') // append a new rectangular frame bound to this node datum
             .attr('id', Node.UniqueId)
             .attr('rx', 2*radius ) // for rounded corners

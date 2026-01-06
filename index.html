@@ -51,7 +51,7 @@ function AppendShapes(rs) {
     nodes = rs; // the 'master' array used by d3 to render shapes
     // we also want to access each datum via its unique NODE_ID string
     mapNodes = new Map ( nodes.map((x,i) => ( [x.NODE_ID, x ]) ) );
-  console.log(mapNodes);  
+  // console.log(mapNodes);  
     // create the SVG visual element
     gNode.selectAll('circle') // in case we've already got some
         .data(nodes.filter(IsRoundedShape)) // see comment above - how best to hide a circle when its group is visible and vice versa
