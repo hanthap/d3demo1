@@ -141,7 +141,7 @@ class Node {
 static OnDblClick(e,d) {
     // console.log(d)
     // ParentOf(d).stacked = true
-    ticked()
+    ticked();
    }
 
 //-------------------------------------------------------------------------------
@@ -326,7 +326,7 @@ function AppendShapes(rs) {
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
 
-                .on('mouseover',Node.OnMouseOver) // called at each tranisition, including nested elements, unlike mouseenter
+                .on('mouseover',Node.OnMouseOver) // called at each transition, including nested elements, unlike mouseenter
                 .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
 //                .on('mousedown',Node.OnMouseDown)
                 .on('click',Node.OnClick)
@@ -374,14 +374,17 @@ function AppendFrameShapes() {
            .attr('fill',Node.FillColour) // same as if it was a collapsed circle
            // gradients are static defs, so we can't set them per-node here
             .classed('frame',true)
-            .on('click', handleClickFrame)
-            .on('mouseover', handleMouseOverFrame) // for popup
-            .on('mouseout', handleMouseOutFrame)
+            .on('click', Frame.OnClick)
+            .on('mouseover', Frame.OnMouseOver) 
+            .on('mouseout', Frame.OnMouseOut)
             .append('title')
                 .text(Node.TitleText)
             ;
 
 }
+
+
+
 
 //-------------------------------------------------------------------------------
 
@@ -448,6 +451,66 @@ class Frame extends Node {
 
     static Visibility(d) {
         return HasVisibleChild(d) ? 'visible' : 'hidden'
+    }
+
+   //-------------------------------------------------------------------------------
+    // set or unset the 'xhover' class for node d plus all its descendants
+
+   static Hover( d, bHovering ) {
+
+    d3.selectAll('circle, rect') 
+        .filter( e => d.descendants.includes(e) ) 
+        .classed( 'xhover', bHovering ) ;
+    } 
+
+   //-------------------------------------------------------------------------------
+
+   static OnMouseOver(e, d) {
+    // MouseOver also fires when entering any child element
+        Frame.Hover( d, true );
+   }
+
+   //-------------------------------------------------------------------------------
+
+   static OnMouseOut(e, d) {
+    if ( e.button) return; //  ignore if still dragging 
+        Frame.Hover( d, false );
+   }
+
+   //-------------------------------------------------------------------------------
+
+
+   
+   static OnClick(e,d) {
+    x = d;
+    d.selected ^= 1;
+    // to do: if ctrl key set (x,y) at persistent centre of gravity for all child nodes
+    // and increase their gravitational weight
+    // the frame should naturally shrink as a result
+    if ( e.ctrlKey )  {
+        loc = cursorPoint(e);
+        ChildrenOf(d).slice(1).forEach( c => {
+            [ c.cogX, c.cogY ] = [ loc.x, loc.y ]
+            c.weight = 1
+        } ) ;
+        simulation.stop();
+        RunSim();
+    }
+
+    if ( e.shiftKey )  {
+       // stack/unstack status of the frame node (affecting all its subnodes)
+            ChildrenOf(d).slice(1).forEach( c  => ( c.stacked = d.stacked ));
+            simulation.stop();
+            RunSim();
+        } 
+    else 
+        // to do: make this recursive
+    ChildrenOf(d).forEach( c => {
+            c.selected = d.selected;
+            ChildrenOf(c).forEach( gc => { gc.selected = d.selected } );
+         } ) ; // set all children on or off
+         ticked();
+
     }
 
 

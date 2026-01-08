@@ -32,9 +32,32 @@ static CacheAllExclusiveNodes() {
  }
 
 
+static ReorderFrameShapes() {
+    // ensure that existing frame shapes are rendered with superset containers behind their nested subsets.
+    gGroup.selectAll('rect') 
+        .data(nodes.filter(IsFrameShape), Node.UniqueId)  
+        .sort( (a,b) => d3.ascending( a.zIndex, b.zIndex ) ); // lower zIndex at back   
+    }
+
 }
 
- /* To do:
-    load data
-    
- */
+
+function bfs(start, graph) {
+  const visited = new Set();
+  const queue = [start];
+
+  visited.add(start);
+
+  while (queue.length > 0) {
+    const node = queue.shift();
+    console.log(node);
+
+    for (const child of graph[node] || []) {
+      if (!visited.has(child)) {
+        visited.add(child);
+        queue.push(child);
+        }
+      }
+    }
+  return visited;
+};
