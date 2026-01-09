@@ -24,40 +24,49 @@ static CacheAllDescendants() {
     //-------------------------------------------------------------------------------
 
 static CacheAllExclusiveNodes() {
-        // called from fdg_init.js after all nodes and links have been loaded
-        // upddate the global active_frames[] and active_circles[] arrays
-        active_frames = nodes.filter( Frame.IsExclusive );    
-        active_circles = nodes.filter( Node.IsExclusive );    
+    // called from fdg_init.js after all nodes and links have been loaded
+    // upddate the global active_frames[] and active_circles[] arrays
+    active_frames = nodes.filter( Frame.IsExclusive );    
+    active_circles = nodes.filter( Node.IsExclusive );    
 
  }
 
+  //-------------------------------------------------------------------------------
 
-static ReorderFrameShapes() {
+
+static CacheSortedFrames() {
+
+    let root_frames = nodes.filter(IsFrameShape).filter(Frame.IsNotNested);
+    sorted_frames = FlattenByGeneration(root_frames); // global, in fdg_nodes.js
+}
+
+static ApplyFrameOrder() {
     // ensure that existing frame shapes are rendered with superset containers behind their nested subsets.
-    gGroup.selectAll('rect') 
-        .data(nodes.filter(IsFrameShape), Node.UniqueId)  
-        .sort( (a,b) => d3.ascending( a.zIndex, b.zIndex ) ); // lower zIndex at back   
-    }
+    gGroup.selectAll('.frame') 
+        .data(sorted_frames, Node.UniqueId) // sorted_frames initialised by Graph.CacheSortedFrames()
+        .order();
 
 }
 
+}
 
-function bfs(start, graph) {
-  const visited = new Set();
-  const queue = [start];
+//-------------------------------------------------------------------------------
+// Called by Graph.CacheSortedFrames() 
 
-  visited.add(start);
+function FlattenByGeneration(roots) {
+  const result = new Set(); // prevent duplicates, preserves insertion order
+  const queue = [...roots];   // start with top-level objects
 
   while (queue.length > 0) {
     const node = queue.shift();
-    console.log(node);
-
-    for (const child of graph[node] || []) {
-      if (!visited.has(child)) {
-        visited.add(child);
-        queue.push(child);
-        }
-      }
+    result.add(node);
+    let clist = ChildrenOf(node);
+    if ( clist && clist.length > 0 ) {
+      queue.push(...clist);
+     }
     }
-  return visited;
-};
+ 
+  return [...result]; // convert set to array 
+ }
+
+

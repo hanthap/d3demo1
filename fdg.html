@@ -82,10 +82,13 @@ function AfterLoad() {
             })
         });
     console.log(links);
-    AppendFrameShapes(); // don't forget the parentheses!
 
     Graph.CacheAllDescendants(); // precompute descendant lists, for each node
     Graph.CacheAllExclusiveNodes(); // precompute lists of circles and frames in scope of active_exclusion force
+    Graph.CacheSortedFrames(); // pre-compute the z-order of nested frames
+
+    AppendFrameShapes(); // don't forget the parentheses!
+
 
     // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
     simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
@@ -101,13 +104,17 @@ function AfterLoad() {
     pqr_desc = VisibleDescendantsOf(pqr)
   //  console.log(pqr_desc)
   //  console.log(pqr_kids)
-    mno = Node.GetFromID( 'MNO' )
-    console.log(mno);
-    mno_sel = Node.GetSelection( mno, 'rect' );
-    console.log(mno_sel);
-    mno_rect = mno_sel._groups[0][0];
-   console.log(mno_rect);  
-     console.log(mno_rect.getBBox());  // returns SVGRect { x: ..., y: ..., width: ..., height: ... }
+    msn = Node.GetFromID( 'MSN' )
+    console.log(msn);
+//    mno_sel = Node.GetSelection( mno, 'rect' );
+//    console.log(mno_sel);
+//    mno_rect = mno_sel._groups[0][0];
+ //  console.log(mno_rect);  
+  //  console.log(mno_rect.getBBox());  // returns SVGRect { x: ..., y: ..., width: ..., height: ... }
+ //   flist = d3.selectAll('.frame').data().filter(Frame.IsNotNested); // get the root node data
+
+//   console.log(flist);
+   console.log(sorted_frames);
 
 
 } // end AfterLoad()

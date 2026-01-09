@@ -3,6 +3,7 @@ var nodes = [];
 var mapNodes; // key,value lookup dict
 var active_frames = []; // frames in scope of active exclusion
 var active_circles = []; // circles in scope of active exclusion
+var sorted_frames = []; // determines the z-order of frame rects
 
 // Lookup NodeColour using SRCE_CDE
 var sourcePalette = d3.scaleOrdinal()
@@ -222,6 +223,17 @@ static IsExclusive(d) {
     return ( !HasVisibleChild(d) ); // for now, all leaf nodes may be excluded
     }
 
+//-------------------------------------------------------------------------------
+
+static ParentsOf(d) {
+    return d.outLinks.filter(n => n.EDGE_CDE == 'H' ).map(e => e.target);
+}
+
+//-------------------------------------------------------------------------------
+
+
+
+
 }
 
 //-------------------------------------------------------------------------------
@@ -365,8 +377,9 @@ function AppendShapes(rs) {
 function AppendFrameShapes() {
 //    console.log(nodes.filter(IsFrameShape));
     gGroup.selectAll('rect') // in case we've already got some
-        .data(nodes.filter(IsFrameShape), Node.UniqueId)  // TO DO: ensure they are in correct z-order
-        // this could mean sorting nodes[] first, or using d3's .sort() method after all shapes have been created
+  //      .data(nodes.filter(IsFrameShape), Node.UniqueId)  // TO DO: ensure they are in correct z-order
+      .data(sorted_frames, Node.UniqueId)  // TO DO: ensure they are in correct z-order
+
             .join('rect') // append a new rectangular frame bound to this node datum
             .attr('id', Node.UniqueId)
             .attr('rx', 2*radius ) // for rounded corners
@@ -380,6 +393,9 @@ function AppendFrameShapes() {
             .append('title')
                 .text(Node.TitleText)
             ;
+
+
+
 
 }
 
@@ -431,6 +447,9 @@ function ParentOf(d) {
     } else return d;
 }
 
+
+
+
 //-------------------------------------------------------------------------------
 
 // true if n is [a descendant of] either of the vertices of edge e
@@ -439,6 +458,8 @@ function IsAtVertexOf_DEPRECATED(  e, n ) {
 }
 
 //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
+
 
 class Frame extends Node {
 
@@ -510,6 +531,17 @@ class Frame extends Node {
             ChildrenOf(c).forEach( gc => { gc.selected = d.selected } );
          } ) ; // set all children on or off
          ticked();
+
+    }
+
+//-------------------------------------------------------------------------------
+// Y/N is this frame nested inside any others? (True <=> it's either a circle or a top-level superset frame)
+// this is a frame AND so is at least one of its containers
+    static IsNotNested(d) {
+        return ( Node.ParentsOf(d)
+            .filter(IsFrameShape)
+            .length == 0
+        );
 
     }
 
