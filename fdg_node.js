@@ -118,21 +118,7 @@ class Node {
             d.outLinks.forEach ( f => { f.target.selected = d.selected } );
         }
 
-        if ( k.shiftKey ) {
-            // stack/unstack the parent node (affecting all its subnodes)
-            d.inLinks.forEach ( f => f.source.selected ^= 1 );
-            d.outLinks.forEach ( f => f.target.selected ^= 1 );
-            p = ParentOf(d);
-            p.stacked ^= 1; // toggle
-            // try catch because p could have no children => slice[1] returns undefined
-            try {
-                ChildrenOf(p).slice(1).forEach( c => ( c.stacked = p.stacked ));
-            } catch { }
-            simulation.stop();
-            RunSim();
-            }
-
-        ticked();
+       ticked();
 
     }
 
@@ -373,26 +359,22 @@ function AppendShapes(rs) {
 //-------------------------------------------------------------------------------
 
     // this might have to wait until we've finished loading edges as well
-    // TO DO: handle nested frames in correct sequence to ensure conntainers are in back of their contents
 function AppendFrameShapes() {
-//    console.log(nodes.filter(IsFrameShape));
     gGroup.selectAll('rect') // in case we've already got some
-  //      .data(nodes.filter(IsFrameShape), Node.UniqueId)  // TO DO: ensure they are in correct z-order
-      .data(sorted_frames, Node.UniqueId)  // TO DO: ensure they are in correct z-order
-
-            .join('rect') // append a new rectangular frame bound to this node datum
-            .attr('id', Node.UniqueId)
-            .attr('rx', 2*radius ) // for rounded corners
-            .attr('ry', 2*radius ) 
-           .attr('fill',Node.FillColour) // same as if it was a collapsed circle
-           // gradients are static defs, so we can't set them per-node here
-            .classed('frame',true)
-            .on('click', Frame.OnClick)
-            .on('mouseover', Frame.OnMouseOver) 
-            .on('mouseout', Frame.OnMouseOut)
-            .append('title')
-                .text(Node.TitleText)
-            ;
+      .data(sorted_frames, Node.UniqueId) 
+        .join('rect') // append a new rectangular frame bound to this node datum
+        .attr('id', Node.UniqueId)
+        .attr('rx', 2*radius ) // for rounded corners
+        .attr('ry', 2*radius ) 
+        .attr('fill',Node.FillColour) // same as if it was a collapsed circle
+        // gradients are static defs, so we can't set them per-node here
+        .classed('frame',true)
+        .on('click', Frame.OnClick)
+        .on('mouseover', Frame.OnMouseOver) 
+        .on('mouseout', Frame.OnMouseOut)
+        .append('title')
+            .text(Node.TitleText)
+        ;
 
 
 
@@ -545,6 +527,13 @@ class Frame extends Node {
 
     }
 
+    static RectX(d) { return d.x - radius }; // extra margin to accommodate rounded corners
+
+    static RectY(d) { return d.y - radius };
+
+    static RectHeight(d) { return d.height + 2*radius } ;
+
+    static RectWidth(d) { return d.width + 2*radius } ;
 
 
 }

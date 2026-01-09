@@ -72,33 +72,27 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 
 // tweaking the datum for each container to ensure that its minimum bounding rectangle always 
 
-// first stacked nodes are obscured by continuously shunting them under 
-// expect nested frames (stacked subgroup rectangles) will stay with their leading
-// works OK except the parent frame picks up the 
-
-nodes.filter( IsStackedLeaf ).forEach( d => {
-       // [d.x, d.y] = Node.Centre( LeadingChildOf( ParentOf(d) ) ); 
-       c = Node.Centre( LeadingChildOf( ParentOf(d) ) ); 
-        [d.x, d.y] = [ c.x, c.y ];
-    } );
-
 
 // only now can we decide where to put the frames
-nodes.filter( IsFrameShape ).forEach( d => {
-    visible_descendants = VisibleDescendantsOf(d);  // includes frames?
+[...sorted_frames].reverse().filter( IsFrameShape ) // filter because sorted_frames actually includes non-frame nodes... 
+.forEach( d => {
+    // TO DO: assuming nodes are correctly pre-sorted, we only need to look at visible children, not all descendants
+    visible_descendants = VisibleDescendantsOf(d);  
     if ( visible_descendants.length ) {
 
       // PROBLEM: outer superset has to wait until all innersets have been positioned & sized
-      // TO DO: use depth-first method 
+      // TO DO: use sorted_frames in reverse
 
         xMax = Math.max( ...visible_descendants.map( RightBoundary ) ); // generate a list of right boundaries, then get the max value
         xMin = Math.min( ...visible_descendants.map( LeftBoundary ) );
         yMax = Math.max( ...visible_descendants.map( BottomBoundary ) );
         yMin = Math.min( ...visible_descendants.map( TopBoundary ) );
+
+        // to add buffer around nested subsets, we should process sorted_frames in reverse order.
         d.x = xMin; 
         d.y = yMin;
-        d.width = xMax - xMin;
-        d.height =yMax - yMin;
+        d.width = xMax - xMin ;
+        d.height =yMax - yMin ;
     } } );
     
 // TO DO : If a 'container' node is empty it should be rendered as a circle(?), not hidden
@@ -115,29 +109,18 @@ nodes.filter( IsFrameShape ).forEach( d => {
 
         // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on
         .classed('selected', d => d.selected)
-        .classed('head', HasStackedParent)
         .attr('visibility', Node.Visibility )
         ;
-/*
-    gNode.selectAll('rect')
-        .attr('x', Node.BoundedX )
-        .attr('y', Node.BoundedY )
-        .attr( 'height', d => d.height )
-        .attr( 'width', d => d.width )
-        .classed('selected', d => d.selected)
-        .classed('head', HasStackedParent)
-        .attr('visibility', Node.Visibility )
-        ;
-*/
 
 // to do: what about group frames with no visible child node - these should probably be shown as circles?
 
     gGroup.selectAll('rect')
-        .attr('x', d => d.x - radius ) // extra margin to accommodate rounded corners
-        .attr('y', d => d.y - radius )
-        // NOTE the following adjustments are only required if/when static data is modified, typically after a user click
-        .attr( 'height', d => d.height + 2*radius )
-        .attr( 'width', d => d.width + 2*radius )
+        // size & position change continuously
+        .attr('x', Frame.RectX ) 
+        .attr('y', Frame.RectY )
+        .attr( 'height', Frame.RectHeight)
+        .attr( 'width', Frame.RectWidth )
+        // The following adjustments are only required when static data is modified, typically after a user click
         .classed('selected', d => d.selected)  
         .attr('visibility', Frame.Visibility )
      ;
