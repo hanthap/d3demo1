@@ -93,21 +93,13 @@ class Node {
     //-------------------------------------------------------------------------------
 
     static OnMouseDown( e, d ) {
-     //   Node.BringToFront(d);
+        // Node.BringToFront(d);
       //  console.log(d);
     }
 
    //-------------------------------------------------------------------------------
 
     static OnClick( k, d ) {
-       // console.log(d); // the d3 datum
-       // console.log(k); // the click event
-        console.log(k.target.getBBox()); // the DOM element (circle) - not a D3 selection object
-        console.log(mno_rect.getBBox()); 
-        console.log(BoxesOverlap(k.target, mno_rect)); 
-        // Oddly, this works if BoxesOverlap() is defined outside a class, but not if it's a static method of a class. 
-
-        // fill colour now done with CSS
         currentobject = d;
         // toggle 'selected' status of the clicked node
         d.selected ^= 1;
@@ -122,12 +114,9 @@ class Node {
 
     }
 
-
    //-------------------------------------------------------------------------------
 
 static OnDblClick(e,d) {
-    // console.log(d)
-    // ParentOf(d).stacked = true
     ticked();
    }
 
@@ -190,7 +179,6 @@ static Charge(d) { // called by d3.forceManyBody().strength(...)
 //-------------------------------------------------------------------------------
 
 static OnMouseOver(e,d) {
-        // fill colour now done with CSS ":hover"
         currentobject = d;
     }
 
@@ -198,7 +186,6 @@ static OnMouseOver(e,d) {
 
 static OnMouseOut(e,d) {
         if ( e.button) return; //  ignore if still dragging 
-            // fill colour now done with CSS ":hover"
             currentobject = null;           
     }
 
@@ -218,8 +205,6 @@ static ParentsOf(d) {
 //-------------------------------------------------------------------------------
 
 
-
-
 }
 
 //-------------------------------------------------------------------------------
@@ -228,7 +213,6 @@ static ParentsOf(d) {
 // we can adjust the data here as well eg set velocity to zero
 // to do: if the node is a container, we should allow for extra border
 // to do: needs to allow for extra border around any nested container
-
 
 
 function RightBoundary(d) {
@@ -264,7 +248,6 @@ function HasAncestor_DEPRECATED(a,d) {
 // which nodes do we care about? include active & passive nodes
 function NodeScope(d) {
     return true;
-    // return ( 'OCH', 'ME', 'FZ').includes( d.EDGE_CDE )
 }
 
 //-------------------------------------------------------------------------------
@@ -279,12 +262,7 @@ function IsRoundedShape(d) {
     return d.NODE_TYPE == 'ID';
 }
 
-//-------------------------------------------------------------------------------
-// TO DO: decide whether a leaf node can ever be a frame shape
-function IsFrameShape(d) {
-    return false
-    || HasVisibleChild(d) ;
-}
+
 
 //-------------------------------------------------------------------------------
 
@@ -323,10 +301,8 @@ function AppendShapes(rs) {
                 .attr('id', Node.UniqueId) // for easy lookup later
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
-
                 .on('mouseover',Node.OnMouseOver) // called at each transition, including nested elements, unlike mouseenter
                 .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
-//                .on('mousedown',Node.OnMouseDown)
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
 
@@ -356,30 +332,7 @@ function AppendShapes(rs) {
 
 }
 
-//-------------------------------------------------------------------------------
 
-    // this might have to wait until we've finished loading edges as well
-function AppendFrameShapes() {
-    gGroup.selectAll('rect') // in case we've already got some
-      .data(sorted_frames, Node.UniqueId) 
-        .join('rect') // append a new rectangular frame bound to this node datum
-        .attr('id', Node.UniqueId)
-        .attr('rx', 2*radius ) // for rounded corners
-        .attr('ry', 2*radius ) 
-        .attr('fill',Node.FillColour) // same as if it was a collapsed circle
-        // gradients are static defs, so we can't set them per-node here
-        .classed('frame',true)
-        .on('click', Frame.OnClick)
-        .on('mouseover', Frame.OnMouseOver) 
-        .on('mouseout', Frame.OnMouseOut)
-        .append('title')
-            .text(Node.TitleText)
-        ;
-
-
-
-
-}
 
 
 
@@ -430,8 +383,6 @@ function ParentOf(d) {
 }
 
 
-
-
 //-------------------------------------------------------------------------------
 
 // true if n is [a descendant of] either of the vertices of edge e
@@ -440,132 +391,3 @@ function IsAtVertexOf_DEPRECATED(  e, n ) {
 }
 
 //-------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------
-
-
-class Frame extends Node {
-
-    static IsExclusive(d) {  
-        // to decide whether non-members will be pushed out by active_exclusion force
-        return ( HasVisibleChild(d) ); // for now, all frame rects are exclusive    
-    }
-
-    //-------------------------------------------------------------------------------
-
-    static Visibility(d) {
-        return HasVisibleChild(d) ? 'visible' : 'hidden'
-    }
-
-   //-------------------------------------------------------------------------------
-    // set or unset the 'xhover' class for node d plus all its descendants
-
-   static Hover( d, bHovering ) {
-
-    d3.selectAll('circle, rect') 
-        .filter( e => d.descendants.includes(e) ) 
-        .classed( 'xhover', bHovering ) ;
-    } 
-
-   //-------------------------------------------------------------------------------
-
-   static OnMouseOver(e, d) {
-    // MouseOver also fires when entering any child element
-        Frame.Hover( d, true );
-   }
-
-   //-------------------------------------------------------------------------------
-
-   static OnMouseOut(e, d) {
-    if ( e.button) return; //  ignore if still dragging 
-        Frame.Hover( d, false );
-   }
-
-   //-------------------------------------------------------------------------------
-
-
-   
-   static OnClick(e,d) {
-    x = d;
-    d.selected ^= 1;
-    // to do: if ctrl key set (x,y) at persistent centre of gravity for all child nodes
-    // and increase their gravitational weight
-    // the frame should naturally shrink as a result
-    if ( e.ctrlKey )  {
-        loc = cursorPoint(e);
-        ChildrenOf(d).slice(1).forEach( c => {
-            [ c.cogX, c.cogY ] = [ loc.x, loc.y ]
-            c.weight = 1
-        } ) ;
-        simulation.stop();
-        RunSim();
-    }
-
-    if ( e.shiftKey )  {
-       // stack/unstack status of the frame node (affecting all its subnodes)
-            ChildrenOf(d).slice(1).forEach( c  => ( c.stacked = d.stacked ));
-            simulation.stop();
-            RunSim();
-        } 
-    else 
-        // to do: make this recursive
-    ChildrenOf(d).forEach( c => {
-            c.selected = d.selected;
-            ChildrenOf(c).forEach( gc => { gc.selected = d.selected } );
-         } ) ; // set all children on or off
-         ticked();
-
-    }
-
-//-------------------------------------------------------------------------------
-// Y/N is this frame nested inside any others? (True <=> it's either a circle or a top-level superset frame)
-// this is a frame AND so is at least one of its containers
-    static IsNotNested(d) {
-        return ( Node.ParentsOf(d)
-            .filter(IsFrameShape)
-            .length == 0
-        );
-
-    }
-
-    static RectX(d) { return d.x - radius }; // extra margin to accommodate rounded corners
-
-    static RectY(d) { return d.y - radius };
-
-    static RectHeight(d) { return d.height + 2*radius } ;
-
-    static RectWidth(d) { return d.width + 2*radius } ;
-
-
-}
-
-//-------------------------------------------------------------------------------
-
-function BoxesOverlap( boxA, boxB ) {
-        // boxA and boxB are DOM elements with getBBox() method
-        a = boxA.getBBox();
-        b = boxB.getBBox();
-        return !( a.x + a.width < b.x || 
-                  a.x > b.x + b.width || 
-                  a.y + a.height < b.y ||
-                  a.y > b.y + b.height );
-    }
-
-//-------------------------------------------------------------------------------
-
-// Depth-first search to return a list of all descendants of a given start node
-// called by Graph.CacheAllDescendants()
-// TO DO: look at making this a static function of class Node (or Graph ?)
-
-
-function AllDescendantsOf(start, visited = new Set(), result = []) {
-  if (visited.has(start)) // avoid cycles
-    return result;
-
-  visited.add(start); 
-  result.push(start);
-
-  for (const child of ChildrenOf(start) || []) {
-    AllDescendantsOf(child, visited, result);
-  }
-  return result;
-}

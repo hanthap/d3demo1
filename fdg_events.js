@@ -35,16 +35,15 @@ function handleKeyDown(d) {
 // d3 scale continuous scales
 //-------------------------------------------------------------------------------
 
-function handleDragStart(e,d) {
-    simulation.stop(); // prevents crazy flicker while dragging
-     Node.BringToFront(e.subject);
-}
 
 //-------------------------------------------------------------------------------
 
 function handleDrag(e,d) {
     // for real time visual feedback
     // simplistic boundary check
+   simulation.stop(); // prevents crazy flicker while dragging
+   simulationExclusion.stop(); 
+    Node.BringToFront(e.subject);
    d.x = bounded(e.x, 3*radius-width/2, width/2-3*radius) 
    d.y = bounded(e.y, 3*radius-height/2, height/2-3*radius)
     ticked();
@@ -81,7 +80,6 @@ function initDrag(e,d) { // assumes SVG element has been created
 //-------------------------------------------------------------------------------
 
 let drag = d3.drag()
-    .on( 'start', handleDragStart)
-    .on( 'end', handleDrop)  
     .on( 'drag', handleDrag)
+    .on( 'end', handleDrop)  
     ;
