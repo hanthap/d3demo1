@@ -126,37 +126,32 @@
                 opacity: 1;
             }
 
-            line {
-                /* stroke-linecap: round; */
-                stroke-opacity: 0.1;
-            }
-
-       
-
-            line:hover { /* built in pseudo-class  */
-                stroke-opacity: 1;
-                stroke-dasharray: 3,3;
-            }
-
-     .linkzone {
+            .linkzone {
                 stroke: yellow;
                 stroke-opacity: 0;
             }
 
-            line.selected {
-                stroke-opacity: 1;
-            }
-
-
             polyline.arrow { /* directed line with arrow */
-                fill: none;
-                stroke-opacity: 0.1;
-                stroke: blue;
-                stroke-width: 2;
+                stroke: rgba(0,0,0,0.1); /* opacity is 4th arg, so the marker can inherit */
+                fill: rgba(0,0,0,0.1);
+                stroke-width: 1.5;
                 marker-mid: url(#arrow);
             }
 
             polygon.arrowhead {
-                fill : purple;
-                opacity: 0.1;
+                fill: context-fill; 
+                stroke: none;
+            }
+
+
+            polyline:hover, line:hover, polyline.xhover, line.xhover  { /* built in pseudo-class  */
+                stroke: rgba(0,0,0,1); /* opacity is 4th arg, so the marker can inherit */
+                fill: rgba(0,0,0,1);
+                stroke-dasharray: 3,3;
+            }
+
+            polyline.selected {
+                stroke: rgba(0,0,0,1); /* opacity is 4th arg, so the marker can inherit */
+                fill: rgba(0,0,0,1);
+                stroke-dasharray: none;
             }

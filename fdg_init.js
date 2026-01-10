@@ -27,6 +27,11 @@
                 .classed( 'group', true )
                 ;
 
+//            const gNodeAR = svg.append('g'); // arrangements
+            
+            const gNode = svg.append("g");
+
+            // links are rendered in front of circles 
             const gLinkZone = svg.append('g')
                 .classed( 'linkzone', true )
                 ;
@@ -35,10 +40,7 @@
                 .classed( 'edge', true )
                 ;
 
-            const gNodeAR = svg.append('g'); // arrangements
-            
-            
-            const gNode = svg.append("g"); // involved parties
+
 
             const defs = svg.append("defs");
 
@@ -51,8 +53,11 @@
                 .attr("refY",2)
                 .attr("class","arrowhead")
                 .attr("orient","auto")
+                .attr("markerUnits","strokeWidth") // should inherit
                     .append("polygon")
                     .attr("points","0 0, 6 2, 0 4")
+                    .attr("stroke","none") // not "context-stroke"
+                    .attr("fill","context-fill") // use rgba() in polyline to control alpha (opacity)
                     .attr("class","arrowhead");
 
 

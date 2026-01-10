@@ -112,7 +112,8 @@ static OnClick(e,d) {
 
     //-------------------------------------------------------------------------------
 
-    static Hover( d, bHovering ) {
+    static Hover( e, d, bHovering ) {
+
 
         gNode.selectAll("circle")
             .filter( c => c == d.source || c == d.target )
@@ -129,16 +130,18 @@ static OnClick(e,d) {
 
     }
 
+
     //-------------------------------------------------------------------------------
 
     static OnMouseOver(e,d) {
-        Link.Hover( d, true );
+        Link.Hover( e, d, true );
     }
 
     //-------------------------------------------------------------------------------
 
     static OnMouseOut(e,d) {
-        Link.Hover( d, false );
+       // console.log(e);
+        Link.Hover( e, d, false );
     }
 
 //-------------------------------------------------------------------------------
