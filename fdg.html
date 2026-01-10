@@ -86,7 +86,7 @@ function AfterLoad() {
 
     Graph.CacheAllDescendants(); // precompute descendant lists, for each node
     Graph.CacheAllExclusiveNodes(); // precompute lists of circles and frames in scope of active_exclusion force
-    Graph.CacheSortedFrames(); // pre-compute the z-order of nested frames
+    Graph.CacheSortedNodes(); // pre-compute the z-order of nested frames
 
     AppendFrameShapes(); // don't forget the parentheses!
 
@@ -115,7 +115,7 @@ function AfterLoad() {
  //   flist = d3.selectAll('.frame').data().filter(Frame.IsNotNested); // get the root node data
 
 //   console.log(flist);
-   console.log(sorted_frames);
+   console.log(sorted_nodes);
 
 
 } // end AfterLoad()

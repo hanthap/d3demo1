@@ -34,16 +34,16 @@ static CacheAllExclusiveNodes() {
   //-------------------------------------------------------------------------------
 
 
-static CacheSortedFrames() {
+static CacheSortedNodes() {
 
     let root_frames = nodes.filter(IsFrameShape).filter(Frame.IsNotNested);
-    sorted_frames = FlattenByGeneration(root_frames); // global, in fdg_nodes.js
+    sorted_nodes = FlattenByGeneration(root_frames); // global, in fdg_nodes.js
 }
 
 static ApplyFrameOrder() {
     // ensure that existing frame shapes are rendered with superset containers behind their nested subsets.
     gGroup.selectAll('.frame') 
-        .data(sorted_frames, Node.UniqueId) // sorted_frames initialised by Graph.CacheSortedFrames()
+        .data(sorted_nodes, Node.UniqueId) // sorted_nodes initialised by Graph.CacheSortedNodes()
         .order();
 
 }
@@ -51,7 +51,7 @@ static ApplyFrameOrder() {
 }
 
 //-------------------------------------------------------------------------------
-// Called by Graph.CacheSortedFrames() 
+// Called by Graph.CacheSortedNodes() 
 
 function FlattenByGeneration(roots) {
   const result = new Set(); // prevent duplicates, preserves insertion order

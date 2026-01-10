@@ -3,7 +3,7 @@ var nodes = [];
 var mapNodes; // key,value lookup dict
 var active_frames = []; // frames in scope of active exclusion
 var active_circles = []; // circles in scope of active exclusion
-var sorted_frames = []; // determines the z-order of frame rects
+var sorted_nodes = []; // flat array determines the z-order, especially of frame rects
 
 // Lookup NodeColour using SRCE_CDE
 var sourcePalette = d3.scaleOrdinal()

@@ -74,21 +74,21 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 
 
 // only now can we decide where to put the frames
-[...sorted_frames].reverse().filter( IsFrameShape ) // filter because sorted_frames actually includes non-frame nodes... 
+[...sorted_nodes].reverse().filter( IsFrameShape ) // filter because sorted_nodes actually includes non-frame nodes... 
 .forEach( d => {
     // TO DO: assuming nodes are correctly pre-sorted, we only need to look at visible children, not all descendants
     visible_descendants = VisibleDescendantsOf(d);  
     if ( visible_descendants.length ) {
 
       // PROBLEM: outer superset has to wait until all innersets have been positioned & sized
-      // TO DO: use sorted_frames in reverse
+      // TO DO: use sorted_nodes in reverse
 
         xMax = Math.max( ...visible_descendants.map( RightBoundary ) ); // generate a list of right boundaries, then get the max value
         xMin = Math.min( ...visible_descendants.map( LeftBoundary ) );
         yMax = Math.max( ...visible_descendants.map( BottomBoundary ) );
         yMin = Math.min( ...visible_descendants.map( TopBoundary ) );
 
-        // to add buffer around nested subsets, we should process sorted_frames in reverse order.
+        // to add buffer around nested subsets, we should process sorted_nodes in reverse order.
         d.x = xMin; 
         d.y = yMin;
         d.width = xMax - xMin ;
