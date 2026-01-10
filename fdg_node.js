@@ -203,6 +203,14 @@ static ParentsOf(d) {
 }
 
 //-------------------------------------------------------------------------------
+// Y/N is this a 'top-level' ('root') node within the graph dataset? 
+    static IsNotNested(d) {
+        return ( Node.ParentsOf(d)
+            .filter(IsFrameShape)
+            .length == 0
+        );
+
+    }
 
 
 }

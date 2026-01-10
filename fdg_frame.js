@@ -54,16 +54,7 @@ class Frame extends Node {
 
     }
 
-//-------------------------------------------------------------------------------
-// Y/N is this frame nested inside any others? (True <=> it's either a circle or a top-level superset frame)
-// this is a frame AND so is at least one of its containers
-    static IsNotNested(d) {
-        return ( Node.ParentsOf(d)
-            .filter(IsFrameShape)
-            .length == 0
-        );
 
-    }
 
     static RectX(d) { return d.x - radius }; // extra margin to accommodate rounded corners
 
@@ -114,7 +105,7 @@ function AllDescendantsOf(start, visited = new Set(), result = []) {
     // this has to wait until we've finished loading graph data, & cached derived variables
 function AppendFrameShapes() {
     gGroup.selectAll('rect') // in case we've already got some
-      .data(sorted_nodes, Node.UniqueId) 
+      .data(sorted_nodes.filter(IsFrameShape), Node.UniqueId) 
         .join('rect') // append a new rectangular frame bound to this node datum
         .attr('id', Node.UniqueId)
         .attr('rx', 2*radius ) // for rounded corners

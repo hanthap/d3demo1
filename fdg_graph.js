@@ -36,8 +36,8 @@ static CacheAllExclusiveNodes() {
 
 static CacheSortedNodes() {
 
-    let root_frames = nodes.filter(IsFrameShape).filter(Frame.IsNotNested);
-    sorted_nodes = FlattenByGeneration(root_frames); // global, in fdg_nodes.js
+    let root_nodes = nodes.filter(Node.IsNotNested); 
+    sorted_nodes = FlattenByGeneration(root_nodes); // global, in fdg_nodes.js
 }
 
 static ApplyFrameOrder() {
