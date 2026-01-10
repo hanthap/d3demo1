@@ -46,6 +46,7 @@ function handleDrag(e,d) {
     Node.BringToFront(e.subject);
    d.x = bounded(e.x, 3*radius-width/2, width/2-3*radius) 
    d.y = bounded(e.y, 3*radius-height/2, height/2-3*radius)
+
     ticked();
 }
 
@@ -73,7 +74,7 @@ function handleDrop(e,d) {
 
 function initDrag(e,d) { // assumes SVG element has been created
     // only active nodes can be dragged
-    gNode.selectAll('rect').call(drag);
+  //  gNode.selectAll('rect').call(drag);
     gNode.selectAll('circle').call(drag);
 }
 

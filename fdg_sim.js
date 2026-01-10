@@ -39,7 +39,7 @@ function RunSim() {
         .force('my-link', d3.forceLink()
             .distance(Link.Distance)
             .strength(Link.Strength)
-            .links(filteredLinks.filter(LinkScope))
+            .links(links.filter(LinkScope))
             .iterations(2)
             )
         .alphaTarget(0.3) // freeze if/when alpha drops below this threshold
@@ -61,6 +61,8 @@ function RunSim() {
     // the simulation starts running by default - we don't always want it to
     if (frozen) 
         simulation.stop();
+        simulationExclusion.stop();
+
     initDrag();
 }
 
@@ -73,33 +75,35 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 // tweaking the datum for each container to ensure that its minimum bounding rectangle always 
 
 
-// only now can we decide where to put the frames
+// only now can we decide where to put the frames, working from leaf (innermost) to root (outermost)
 [...sorted_nodes].reverse().filter( IsFrameShape ) // filter because sorted_nodes actually includes non-frame nodes... 
 .forEach( d => {
     // TO DO: assuming nodes are correctly pre-sorted, we only need to look at visible children, not all descendants
-    visible_descendants = VisibleDescendantsOf(d);  
-    if ( visible_descendants.length ) {
+    // BUT  NO!!! Switching to Children only causes strange side-effect, where other frames expand in the same dimension, by 50%.
+    // Descendants prevents this problem, not sure exactly why.
+    visible_children = VisibleDescendantsOf(d);   
+    if ( visible_children.length ) {
 
       // PROBLEM: outer superset has to wait until all innersets have been positioned & sized
       // TO DO: use sorted_nodes in reverse
 
-        xMax = Math.max( ...visible_descendants.map( RightBoundary ) ); // generate a list of right boundaries, then get the max value
-        xMin = Math.min( ...visible_descendants.map( LeftBoundary ) );
-        yMax = Math.max( ...visible_descendants.map( BottomBoundary ) );
-        yMin = Math.min( ...visible_descendants.map( TopBoundary ) );
+        xMax = Math.max( ...visible_children.map( RightBoundary ) ); // generate a list of right boundaries, then get the max value
+        xMin = Math.min( ...visible_children.map( LeftBoundary ) );
+        yMax = Math.max( ...visible_children.map( BottomBoundary ) );
+        yMin = Math.min( ...visible_children.map( TopBoundary ) );
 
         // to add buffer around nested subsets, we should process sorted_nodes in reverse order.
         d.x = xMin; 
         d.y = yMin;
-        d.width = xMax - xMin ;
+        d.width = xMax - xMin;
         d.height =yMax - yMin ;
     } } );
     
 // TO DO : If a 'container' node is empty it should be rendered as a circle(?), not hidden
 
 
-    gLinkZone.selectAll('line').each( Link.SetAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
-    gLink.selectAll('polyline').each( Link.SetAttributes ); // seems we need to call this every tick, but why?
+    gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
+   gLink.selectAll('polyline').each( Link.SetAttributes ); // seems we need to call this explicitly every tick, but why? 
 
 
     gNode.selectAll('circle')

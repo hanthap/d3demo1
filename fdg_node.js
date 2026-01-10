@@ -1,5 +1,6 @@
 var radius = 16;
 var nodes = [];
+
 var mapNodes; // key,value lookup dict
 var active_frames = []; // frames in scope of active exclusion
 var active_circles = []; // circles in scope of active exclusion
@@ -14,7 +15,8 @@ var sourcePalette = d3.scaleOrdinal()
 
 class Node {
 
-    constructor(  ) {
+    constructor( d ) {
+        this.d = d;
         }
 
     //-------------------------------------------------------------------------------
@@ -100,7 +102,7 @@ class Node {
    //-------------------------------------------------------------------------------
 
     static OnClick( k, d ) {
-        currentobject = d;
+        mouseover_object = d;
         // toggle 'selected' status of the clicked node
         d.selected ^= 1;
 
@@ -179,14 +181,14 @@ static Charge(d) { // called by d3.forceManyBody().strength(...)
 //-------------------------------------------------------------------------------
 
 static OnMouseOver(e,d) {
-        currentobject = d;
+        mouseover_object = d;
     }
 
 //-------------------------------------------------------------------------------
 
 static OnMouseOut(e,d) {
         if ( e.button) return; //  ignore if still dragging 
-            currentobject = null;           
+            mouseover_object = null;           
     }
 
 //-------------------------------------------------------------------------------
@@ -203,7 +205,7 @@ static ParentsOf(d) {
 }
 
 //-------------------------------------------------------------------------------
-// Y/N is this a 'top-level' ('root') node within the graph dataset? 
+// Y/N is this a 'top-level' ('root') node, within the graph context? 
     static IsNotNested(d) {
         return ( Node.ParentsOf(d)
             .filter(IsFrameShape)
@@ -244,13 +246,6 @@ function IsStackedLeaf(d) {
     return ( p.stacked && d != LeadingChildOf(p));
 }
 
-//-------------------------------------------------------------------------------
-// to do: return true iff node d is a member of { a, descendants of a } including
-// need to make this recursive
-function HasAncestor_DEPRECATED(a,d) {
-    return ( d.outLinks.filter( e => IsHierLink(e) && e.target == a ).length ); // simplistic and non-recursive
-}
-   
  //-------------------------------------------------------------------------------
 
 // which nodes do we care about? include active & passive nodes
@@ -269,8 +264,6 @@ function IsRectShape(d) {
 function IsRoundedShape(d) {
     return d.NODE_TYPE == 'ID';
 }
-
-
 
 //-------------------------------------------------------------------------------
 
@@ -337,19 +330,13 @@ function AppendShapes(rs) {
                     .classed("circleinfo", true)   // for CSS styling  
                     .html(Node.TitleText);
 
-
 }
-
-
-
-
-
 
 //-------------------------------------------------------------------------------
 
 function ChildrenOf(d) {
     if ( d.inLinks ) {
-            return ( d.inLinks.filter( IsHierLink ).map( e => e.source ) )
+            return ( d.inLinks.filter( Link.IsHier ).map( e => e.source ) )
     } else return [];
 
 }
@@ -377,25 +364,18 @@ function LeadingChildOf(d) {
 //-------------------------------------------------------------------------------
 function HasStackedParent(d) {  // if visible we'll use a different colour
 // parent is currently stacked // TO DO and has 2+ non-hidden children
-    return ( d.outLinks.filter(IsHierLink).filter( e => e.target.stacked).length );
+    return ( d.outLinks.filter(Link.IsHier).filter( e => e.target.stacked).length );
     // at least one outward edge points to a node that is stacked
 }
 
 //-------------------------------------------------------------------------------
 function ParentOf(d) {
     if ( d.outLinks ) {
-        t = d.outLinks.filter( IsHierLink );
+        t = d.outLinks.filter( Link.IsHier );
         // if more than 1, just pick the first for now.. might need to take a different approach
         return( t.length ? t[0].target : d ); 
     } else return d;
 }
 
-
-//-------------------------------------------------------------------------------
-
-// true if n is [a descendant of] either of the vertices of edge e
-function IsAtVertexOf_DEPRECATED(  e, n ) {
-    return HasAncestor( e.source, n ) || HasAncestor( e.target, n );
-}
 
 //-------------------------------------------------------------------------------

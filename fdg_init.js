@@ -9,7 +9,7 @@
 
             var x; // last clicked node
             const shape = "circle";
-            var currentobject = null;
+            var mouseover_object = null;
 
 
             var svg = d3.select('body').append('svg')

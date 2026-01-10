@@ -52,9 +52,9 @@ let { data: linklist, error: link_error } = await linkPromise;
         console.error(link_error);
         return;
       }
+      links = linklist;
+       links.forEach(Link.AppendDatum);
 
-       linklist.forEach(Link.AppendDatum);
-       AppendLines( linklist );
 
     // async means even LoadData() runs in a new thread. Control immediately returns
     // only within this function can we reliably delay AfterLoad() until 
@@ -89,7 +89,7 @@ function AfterLoad() {
     Graph.CacheSortedNodes(); // pre-compute the z-order of nested frames
 
     AppendFrameShapes(); // don't forget the parentheses!
-
+    AppendLines();
 
     // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
     simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
