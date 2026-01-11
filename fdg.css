@@ -15,27 +15,18 @@
 
 
             circle {
-
                 fill-opacity: 0.1;
                 stroke:black;
                 stroke-opacity: 0.1;
                 stroke-width: 1;
-
             }
 
-            circle.xhover {
-                stroke:blue;
+            circle.xhover, circle:hover {
                 stroke-dasharray: 3,3;
                 stroke-opacity: 1;
                 mix-blend-mode: difference; 
             }
 
-            circle:hover { /* built in pseudo-class  */
-                /* stroke:blue; */
-                stroke-dasharray: 3,3;
-                stroke-opacity: 1;
-                /* mix-blend-mode: difference; fill colour auto contrasts with background */
-}
 
     /* will use these for foreignObject child div styling */
     div.circleinfo {
@@ -95,31 +86,20 @@
             }
 
             rect.frame {
+                stroke:black;
                 stroke-width: 1;
                 stroke-opacity: 0.1;
                 fill-opacity: 0.1;
- 
-            }
-
+             }
 
             rect.frame.selected {
                 stroke-opacity: 1;
-                stroke:black;
-                fill-opacity: 0.2;
+                fill-opacity: 0.3;
             }
 
-            rect.frame.xhover { /* for inferred only */
-                /* stroke:purple; */
+            rect.frame.xhover,  rect.frame:hover { 
                 stroke-dasharray: 3,3;
                 stroke-opacity: 1;
-                /* fill-opacity: 0.1; */
-            }
-
-            rect.frame:hover { /* built in pseudo-class  */
-                /* stroke:blue; */
-                stroke-dasharray: 3,3;
-                stroke-opacity: 1;
-                /* fill-opacity: 0.1; */
             }
 
             .edge {
@@ -131,7 +111,7 @@
                 stroke-opacity: 0;
             }
 
-            polyline.arrow { /* directed line with arrow */
+            polyline.arrow { /* directed line, with arrow */
                 stroke: rgba(0,0,0,0.1); /* opacity is 4th arg, so the marker can inherit */
                 fill: rgba(0,0,0,0.1);
                 stroke-width: 1.5;
@@ -139,19 +119,18 @@
             }
 
             polygon.arrowhead {
-                fill: context-fill; 
+                fill: context-fill; /* inherit polyline's RGBA colour INCLUDING opacity (alpha) */
                 stroke: none;
             }
 
+            polyline.selected {
+                stroke: rgba(0,0,0,1); /* opacity is 4th arg, so the marker can inherit */
+                fill: rgba(0,0,0,1); /* just for the arrowhead */
+                stroke-dasharray: none;
+            }
 
             polyline:hover, line:hover, polyline.xhover, line.xhover  { /* built in pseudo-class  */
                 stroke: rgba(0,0,0,1); /* opacity is 4th arg, so the marker can inherit */
                 fill: rgba(0,0,0,1);
                 stroke-dasharray: 3,3;
-            }
-
-            polyline.selected {
-                stroke: rgba(0,0,0,1); /* opacity is 4th arg, so the marker can inherit */
-                fill: rgba(0,0,0,1);
-                stroke-dasharray: none;
             }
