@@ -24,6 +24,7 @@ try {
 // this ensures the line's terminal arrowhead will just touch the outer perimeter of the destination node.
 // TO DO: adjust for variable boundary stroke widths of source and target nodes
 // TO DO: adjust for non-circular nodes. If the circle is inside the rect, the line goes to the nearest outer edge of the rect, not the centre
+// TO DO: handle scenario where source node overlaps the destination (or vice versa)
 
 static PolyLinePointTuple( d ) {
     var dDest = d.target, dOrig = d.source;
@@ -50,7 +51,7 @@ static PolyLinePointTuple( d ) {
     return { 'start': { 'x': xStart, 'y': yStart },
              'mid' :  { 'x': xMid,   'y': yMid },
              'end':   { 'x': xEnd,   'y': yEnd }
-            }
+            };
 }
 
 //-------------------------------------------------------------------------------
@@ -61,10 +62,11 @@ static PolyLinePointString( d ) {
 }
 
 //-------------------------------------------------------------------------------
+// TO DO: for opacity < 1, map colour names to RBGA expressions
 
 static StrokeColour(d) { // drives stroke colour
     try {
-        return edgePalette( d.EDGE_CDE );
+        return sourcePalette( d.EDGE_CDE );
     } catch (e) { };
 }
 
@@ -114,20 +116,18 @@ static OnClick(e,d) {
 
     static Hover( e, d, bHovering ) {
 
+        gLink.selectAll('polyline')
+            .filter( p => p == d ) // bound to the same datum 
+            .classed( 'xhover', bHovering );
 
         gNode.selectAll("circle")
             .filter( c => c == d.source || c == d.target )
             .classed( 'xhover', bHovering );
 
-        gNode.selectAll("rect") // leaf
+        gGroup.selectAll("rect") // frame
             .filter( c => c == d.source || c == d.target )
             .classed( 'xhover', bHovering );
-
-        gNode.selectAll("rect") // frame
-            .filter( c => c == d.source || c == d.target )
-            .classed( 'xhover', bHovering );
-            // TO DO : make this recursive
-
+            // TO DO : apply to all nested frames and circles
     }
 
 
@@ -170,17 +170,7 @@ static IsHier(d) {
 
 }
 
-
 }
-
-
-// Lookup Link.Colour using EDGE_CDE
-var edgePalette = d3.scaleOrdinal()
-    .domain( [ 'OCH', 'ME', 'FZ', 'D' ])
-    .range( [ 'blue', 'green', 'grey', 'pink', 'orange' ]);
-
-
-
 
 
 //-------------------------------------------------------------------------------
@@ -209,27 +199,29 @@ function AppendLines() {
         .on('mouseout',Link.OnMouseOut)
         .attr('stroke-width',LinkZone.StrokeWidth)
         .append('title') // simpler tooltip using HTML elements
-        .text(Link.TitleText)
+            .text(Link.TitleText)
         ;
 
-    gLink.selectAll('polyline')
+    gLink.selectAll('polyline') // this layer ignores mouse events, so they pass through to LinkZone
         .data(links.filter(LinkScope))
-        .join('polyline') // create a polyline element bound to datum (in its __datum__ element)
-        .on('click',Link.OnClick)     // can we let all events pass through to zone behind?
-        .on('mouseover',Link.OnMouseOver)
-        .on('mouseout',Link.OnMouseOut)        
+        .join('polyline') 
         .attr('stroke',Link.StrokeColour)
         .attr('stroke-width',Link.StrokeWidth)
-        .attr('points',Link.PolyLinePointString) // is this more efficient?
         ;
 
 }
 
+
+//=====================================================================================================================
+
 class LinkZone extends Link {
 
 static SetAttributes(d)   {
+
     // this = the HTML SVG element, d = the d3 datum
-    // don't show link from child to its parent container - TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
+    // don't show link from child to its parent container - 
+    // TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
+
     if ( Link.IsHier(d) && IsFrameShape(d.target) ) 
         this.setAttribute('visibility','hidden');
     else {
@@ -246,7 +238,7 @@ static SetAttributes(d)   {
 
 static StrokeWidth(d) { // width of extended click zone
     try {
-        return Link.StrokeWidth(d) + 6;
+        return Link.StrokeWidth(d) + 4;
     } catch (e) { };
 }
 

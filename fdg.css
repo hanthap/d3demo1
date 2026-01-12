@@ -24,7 +24,7 @@
             circle.xhover, circle:hover {
                 stroke-dasharray: 3,3;
                 stroke-opacity: 1;
-                mix-blend-mode: difference; 
+                /* mix-blend-mode: difference;  */
             }
 
 
@@ -102,35 +102,40 @@
                 stroke-opacity: 1;
             }
 
-            .edge {
-                opacity: 1;
+            g.edge {
+                pointer-events: none; /* let mouse events pass through to LinkZone */
             }
 
-            .linkzone {
+            g.linkzone { 
                 stroke: yellow;
                 stroke-opacity: 0;
             }
 
-            polyline.arrow { /* directed line, with arrow */
-                stroke: rgba(0,0,0,0.1); /* opacity is 4th arg, so the marker can inherit */
-                fill: rgba(0,0,0,0.1);
+            polyline.arrow { /* directed line, with arrow, all transparent (opacity < 1) */
+                stroke: rgba(0,0,0,0.1); 
+                fill: rgba(0,0,0,0.1); /* opacity is 4th arg, this is the only way the marker can inherit */
                 stroke-width: 1.5;
                 marker-mid: url(#arrow);
+
             }
 
             polygon.arrowhead {
-                fill: context-fill; /* inherit polyline's RGBA colour INCLUDING opacity (alpha) */
-                stroke: none;
+                fill: context-fill; /* inherit polyline's RGBA fill colour INCLUDING opacity (alpha) */
+                stroke: none; 
             }
 
             polyline.selected {
-                stroke: rgba(0,0,0,1); /* opacity is 4th arg, so the marker can inherit */
-                fill: rgba(0,0,0,1); /* just for the arrowhead */
+                stroke: black;
+                fill: black; /* polyline has no fill but its marker arrow does */
                 stroke-dasharray: none;
             }
 
-            polyline:hover, line:hover, polyline.xhover, line.xhover  { /* built in pseudo-class  */
-                stroke: rgba(0,0,0,1); /* opacity is 4th arg, so the marker can inherit */
-                fill: rgba(0,0,0,1);
+            polyline.xhover { 
+                stroke: black;
+                fill: black;
                 stroke-dasharray: 3,3;
+            }
+
+            line:hover { 
+                stroke-opacity: 0;
             }

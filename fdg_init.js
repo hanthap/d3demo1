@@ -27,20 +27,18 @@
                 .classed( 'group', true )
                 ;
 
-//            const gNodeAR = svg.append('g'); // arrangements
-            
-            const gNode = svg.append("g");
+            const gNode = svg.append("g"); // circles
 
-            // links are rendered in front of circles 
+            // links are rendered in front of circles. 
+            
+            // first the extended click zones, for better visual feedback & easier clicking
             const gLinkZone = svg.append('g')
                 .classed( 'linkzone', true )
                 ;
-
+            // then the polyline edge arrows themselves (with events passing through)
             const gLink = svg.append('g')
                 .classed( 'edge', true )
                 ;
-
-
 
             const defs = svg.append("defs");
 
