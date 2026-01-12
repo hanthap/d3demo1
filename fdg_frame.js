@@ -45,12 +45,25 @@ class Frame extends Node {
     x = d;
     d.selected ^= 1;
 
-        // to do: make this recursive
     ChildrenOf(d).forEach( c => {
             c.selected = d.selected;
+            // TO DO: this only goes down to grandchildren. Should use d.descendants
             ChildrenOf(c).forEach( gc => { gc.selected = d.selected } );
          } ) ; // set all children on or off
+
+        if ( e.ctrlKey ) {
+            // testing only - 
+            d.IS_GROUP = false;
+
+             ChildrenOf(d).forEach( c => { c.has_shape = 0 } );
+
+            AppendShapes(); 
+            AppendFrameShapes();
+            
+        }         
+
          ticked();
+
 
     }
 

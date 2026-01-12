@@ -95,7 +95,7 @@ class Node {
    //-------------------------------------------------------------------------------
 
     static OnClick( k, d ) {
-        mouseover_object = d;
+       // mouseover_object = d; // redundant
         // toggle 'selected' status of the clicked node
         d.selected ^= 1;
 
@@ -212,7 +212,7 @@ static ParentsOf(d) {
 
     static HasShape(d) {
         // TO DO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFrame(d) == False
-        return true;
+        return d.has_shape;
     }
 
 //-------------------------------------------------------------------------------
