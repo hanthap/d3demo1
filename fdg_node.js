@@ -6,7 +6,7 @@ var active_frames = []; // frames in scope of active exclusion
 var active_circles = []; // circles in scope of active exclusion
 var sorted_nodes = []; // flat array determines the z-order, especially of frame rects
 
-// Lookup NodeColour using SRCE_CDE
+// Lookup Node.Colour using SRCE_CDE
 var sourcePalette = d3.scaleOrdinal()
     .domain( [ 'G', 'R', 'B', 'M', 'C', 'Y'])
     .range( [ 'green', 'red', 'blue', 'magenta', 'cyan', 'yellow' ] );
@@ -92,13 +92,6 @@ class Node {
         }
     }
 
-    //-------------------------------------------------------------------------------
-
-    static OnMouseDown( e, d ) {
-        // Node.BringToFront(d);
-      //  console.log(d);
-    }
-
    //-------------------------------------------------------------------------------
 
     static OnClick( k, d ) {
@@ -134,8 +127,8 @@ static AppendDatum(d,i) {
     d.width = 2 * d.r;
     d.stacked = 0; // deprecated
     d.selected = 0;
-    d.xhover = 0; // deprecated
-    d.closed = 0; // 1 <=> node is a set container, but now collapsed & displayed as a circle (with rolled-up subtotal weights etc)
+    // d.xhover = 0; // deprecated
+    d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
     // TO DO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
     return d;
 }
@@ -149,7 +142,7 @@ static GetFromID( NODE_ID ) {
 //-------------------------------------------------------------------------------
 // return a d3 selection of all {circles & rects} bound to node datum d
 static GetSelection( d, types="circle, rect" ) {
-    return d3.selectAll(types).filter(e => e.NODE_ID === Node.UniqueId(d));
+    return d3.selectAll(types).filter(e => e === d ); // .filter() handles whatever you throw at it.
     }
 
 //-------------------------------------------------------------------------------
@@ -161,7 +154,7 @@ static BringToFront( d ) {
 //-------------------------------------------------------------------------------
 
 static Centre(d) {
-    if ( IsFrameShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y +  d.height/2) };
+    if ( Node.ShowAsFrame(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y +  d.height/2) };
     else if ( IsRectShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y + d.height/2) };
     else return { 'x': d.x, 'y': d.y };  
 }
@@ -208,12 +201,31 @@ static ParentsOf(d) {
 // Y/N is this a 'top-level' ('root') node, within the graph context? 
     static IsNotNested(d) {
         return ( Node.ParentsOf(d)
-            .filter(IsFrameShape)
+            .filter(Node.ShowAsFrame)
             .length == 0
         );
 
     }
 
+//-------------------------------------------------------------------------------
+// Decide whether we want a DOM shape element (visible or not) to be bound to this node 
+
+    static HasShape(d) {
+        // TO DO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFrame(d) == False
+        return true;
+    }
+
+//-------------------------------------------------------------------------------
+
+    static ShowAsFrame(d) {
+        return d.IS_GROUP && Node.HasShape(d) && HasVisibleChild(d);
+    }
+
+//-------------------------------------------------------------------------------
+
+    static ShowAsCircle(d) {
+        return Node.HasShape(d) && !Node.ShowAsFrame(d);
+    }
 
 }
 
@@ -241,10 +253,10 @@ function TopBoundary(d) {
     return (Node.Centre(d).y - Node.HalfHeight(d));
 }
 
-function IsStackedLeaf(d) {
-    p = ParentOf(d);
-    return ( p.stacked && d != LeadingChildOf(p));
-}
+// function IsStackedLeaf(d) {
+//     p = ParentOf(d);
+//     return ( p.stacked && d != LeadingChildOf(p));
+// }
 
  //-------------------------------------------------------------------------------
 
@@ -282,35 +294,29 @@ function IsVisibleNode(d) {
 // only active (unstacked) nodes will drive the simulation
 
 function IsActiveNode(d) {
-    return ( NodeScope(d) && IsVisibleNode(d) && !IsFrameShape(d) );
+    return ( NodeScope(d) && IsVisibleNode(d) && !Node.ShowAsFrame(d) );
 }
 
 //-------------------------------------------------------------------------------
 // if we only create circles for nodes that are initially active, how to switch from passive to active later in the session?
 // might be easier up front to create a circle for every node in scope and decide whether to show or hide using CSS attributes
 function AppendShapes(rs) {
-    nodes = rs; // the 'master' array used by d3 to render shapes
-    // we also want to access each datum via its unique NODE_ID string
-    mapNodes = new Map ( nodes.map( x => ( [x.NODE_ID, x ]) ) );
-
+ 
 // TO DO: create a mini 'g' group for each node, then append circle & foreignObject as siblings inside that group
 
-    // create the SVG visual element
+    // create & bind the SVG visual elements
     circles = gNode.selectAll('circle') // in case we've already got some
-        .data(nodes.filter(IsRoundedShape), Node.UniqueId) // optional 2nd arg = stable key 
+        .data(nodes.filter(Node.ShowAsCircle), Node.UniqueId) // optional 2nd arg = stable key 
             .join('circle')  // append a new circle shape bound to that datum
-                .attr('id', Node.UniqueId) // for easy lookup later
+                .attr('id', Node.UniqueId) // for efficient upsert & delete of DOM bindings
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
                 .on('mouseover',Node.OnMouseOver) // called at each transition, including nested elements, unlike mouseenter
                 .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
-
-// DO THESE 2 LINES WORK HERE OR ONLY IN TICKED() ??
-                .attr('cx', Node.BoundedX ) // if this is a callback, why do we need to pass it again on each tick
-                .attr('cy', Node.BoundedY ) // could be because it writes back to d.x and d.y ?
                 ;
+
 
 // works ok - title can be nested inside circle element
        circles

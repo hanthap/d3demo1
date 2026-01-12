@@ -104,45 +104,6 @@ static Distance(d) { // callback for d3.forceLink()
 
 //-------------------------------------------------------------------------------
 
-static OnClick(e,d) {
-    d.selected ^= 1;
-    d.source.selected = d.selected;
-    d.target.selected = d.selected;
-    ticked();
-}
-
-
-    //-------------------------------------------------------------------------------
-
-    static Hover( e, d, bHovering ) {
-
-        gLink.selectAll('polyline')
-            .filter( p => p == d ) // bound to the same datum 
-            .classed( 'xhover', bHovering );
-
-        gNode.selectAll("circle")
-            .filter( c => c == d.source || c == d.target )
-            .classed( 'xhover', bHovering );
-
-        gGroup.selectAll("rect") // frame
-            .filter( c => c == d.source || c == d.target )
-            .classed( 'xhover', bHovering );
-            // TO DO : apply to all nested frames and circles
-    }
-
-
-    //-------------------------------------------------------------------------------
-
-    static OnMouseOver(e,d) {
-        Link.Hover( e, d, true );
-    }
-
-    //-------------------------------------------------------------------------------
-
-    static OnMouseOut(e,d) {
-       // console.log(e);
-        Link.Hover( e, d, false );
-    }
 
 //-------------------------------------------------------------------------------
 // a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
@@ -151,7 +112,7 @@ static OnClick(e,d) {
 static SetAttributes(d)   {
     // this = the HTML SVG element, d = the d3 datum
     // don't show link from child to its parent container - TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
-    if ( Link.IsHier(d) && IsFrameShape(d.target) ) 
+    if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) 
         this.setAttribute('visibility','hidden');
     else {
        this.setAttribute('visibility','visible');
@@ -194,9 +155,9 @@ function AppendLines() {
     gLinkZone.selectAll('line')
         .data(links.filter(LinkScope))
         .join('line')
-        .on('click',Link.OnClick)
-        .on('mouseover',Link.OnMouseOver)
-        .on('mouseout',Link.OnMouseOut)
+        .on('click',LinkZone.OnClick)
+        .on('mouseover',LinkZone.OnMouseOver)
+        .on('mouseout',LinkZone.OnMouseOut)
         .attr('stroke-width',LinkZone.StrokeWidth)
         .append('title') // simpler tooltip using HTML elements
             .text(Link.TitleText)
@@ -222,7 +183,7 @@ static SetAttributes(d)   {
     // don't show link from child to its parent container - 
     // TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
 
-    if ( Link.IsHier(d) && IsFrameShape(d.target) ) 
+    if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) 
         this.setAttribute('visibility','hidden');
     else {
         this.setAttribute('visibility','visible');
@@ -242,6 +203,41 @@ static StrokeWidth(d) { // width of extended click zone
     } catch (e) { };
 }
 
+static OnClick(e,d) {
+    d.selected ^= 1;
+    d.source.selected = d.selected;
+    d.target.selected = d.selected;
+    ticked();
+}
 
+    //-------------------------------------------------------------------------------
+
+    static Hover( d, bHovering ) {
+
+        gLink.selectAll('polyline')
+            .filter( p => p == d ) // bound to the same datum 
+            .classed( 'xhover', bHovering );
+
+        gNode.selectAll("circle")
+            .filter( c => c == d.source || c == d.target )
+            .classed( 'xhover', bHovering );
+
+        gGroup.selectAll("rect") // frame
+            .filter( c => c == d.source || c == d.target )
+            .classed( 'xhover', bHovering );
+            // TO DO : apply to all nested frames and circles
+    }
+
+    //-------------------------------------------------------------------------------
+
+    static OnMouseOver(e,d) {
+        LinkZone.Hover( d, true );
+    }
+
+    //-------------------------------------------------------------------------------
+
+    static OnMouseOut(e,d) {
+        LinkZone.Hover( d, false );
+    }
 
 }
