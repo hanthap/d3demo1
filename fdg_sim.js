@@ -15,8 +15,6 @@ function RunSim() {
         // so instead we use many-body repulsion as a workaround
         // or maybe a one-body translation (after-the-fact exclusion), without momentum etc
         .force('collide', d3.forceCollide().radius(Node.CollideRadius))
-
-    // TO DO : for certain nodes, add an exclusion force to move outside of any container shape that is NOT one of its ancestors
     
         // electrostatic forces attract/repel based on charge 
         .force('my-charge', d3.forceManyBody().strength(Node.Charge))
@@ -76,23 +74,22 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 
 
 // only now can we decide where to put the frames, working from leaf (innermost) to root (outermost)
-[...sorted_nodes].reverse().filter( IsFrameShape ) // filter because sorted_nodes actually includes non-frame nodes... 
+[...sorted_nodes].reverse().filter( Node.ShowAsFrame ) // filter because sorted_nodes actually includes non-frame nodes... 
 .forEach( d => {
-    // TO DO: assuming nodes are correctly pre-sorted, we only need to look at visible children, not all descendants
+    // TO DO: assuming nodes are correctly pre-sorted, I thought we should only need to look at visible children, not all descendants
     // BUT  NO!!! Switching to Children only causes strange side-effect, where other frames expand in the same dimension, by 50%.
-    // Descendants prevents this problem, not sure exactly why.
+    // Including descendants prevents this problem, not sure exactly why.
     visible_children = VisibleDescendantsOf(d);   
     if ( visible_children.length ) {
 
       // PROBLEM: outer superset has to wait until all innersets have been positioned & sized
-      // TO DO: use sorted_nodes in reverse
 
         xMax = Math.max( ...visible_children.map( RightBoundary ) ); // generate a list of right boundaries, then get the max value
         xMin = Math.min( ...visible_children.map( LeftBoundary ) );
         yMax = Math.max( ...visible_children.map( BottomBoundary ) );
         yMin = Math.min( ...visible_children.map( TopBoundary ) );
 
-        // to add buffer around nested subsets, we should process sorted_nodes in reverse order.
+        // TO DO add buffer margin around nested subsets
         d.x = xMin; 
         d.y = yMin;
         d.width = xMax - xMin;
@@ -102,13 +99,12 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 // TO DO : If a 'container' node is empty it should be rendered as a circle(?), not hidden
 
 
-    gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); // "each()" is a d3 method. The passed function can receive 3 inputs: d (the datum), i (counter) *AND* the HTML DOM (SVG) element itself, via 'this';
-   gLink.selectAll('polyline').each( Link.SetAttributes ); // seems we need to call this explicitly every tick, but why? 
+    gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); 
+   gLink.selectAll('polyline').each( Link.SetAttributes ); 
 
 
     gNode.selectAll('circle')
-    // CAN WE MOVE THESE 2 LINES UP TO THE INITIAL CREATION AppendShapes() ??
-         .attr('cx', Node.BoundedX ) // This is a callback, so why do we need to assign it again on each tick? Is it because it writes back to d.x ?
+         .attr('cx', Node.BoundedX ) 
          .attr('cy', Node.BoundedY )
 
         // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on

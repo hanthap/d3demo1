@@ -105,7 +105,7 @@ function AllDescendantsOf(start, visited = new Set(), result = []) {
     // this has to wait until we've finished loading graph data, & cached derived variables
 function AppendFrameShapes() {
     gGroup.selectAll('rect') // in case we've already got some
-      .data(sorted_nodes.filter(IsFrameShape), Node.UniqueId) 
+      .data(sorted_nodes.filter(Node.ShowAsFrame), Node.UniqueId) 
         .join('rect') // append a new rectangular frame bound to this node datum
         .attr('id', Node.UniqueId)
         .attr('rx', 2*radius ) // for rounded corners
@@ -123,11 +123,4 @@ function AppendFrameShapes() {
 
 
 
-}
-
-//-------------------------------------------------------------------------------
-// TO DO: decide whether a leaf node can ever be a frame shape
-function IsFrameShape(d) {
-    return false
-    || HasVisibleChild(d) ;
 }

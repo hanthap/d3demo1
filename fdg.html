@@ -30,16 +30,22 @@ async function LoadData() {
         .from("nodes")
         .select("*");
 
-let { data: nodelist, error } = await nodePromise; 
+let { data: nodelist, node_error } = await nodePromise; 
 
-      if (error) {
-        console.error(error);
+      if (node_error) {
+        console.error(node_error);
         return;
       }
 
-       console.log(nodelist); 
+//       console.log(nodelist); 
+
+
+
        nodelist.forEach(Node.AppendDatum);
-       AppendShapes( nodelist );
+       nodes = nodelist;
+
+// before calling Link.AppendDatum() we need to enable Node.GetFromID()
+       mapNodes = new Map ( nodes.map( x => ( [x.NODE_ID, x ]) ) );
 
 
 const linkPromise = supabaseClient
@@ -65,6 +71,10 @@ let { data: linklist, error: link_error } = await linkPromise;
 //-------------------------------------------------------------------------------
 // final init steps that have to wait until nodes AND links are both populated 
 function AfterLoad() {
+    
+
+    AppendShapes();
+
     // collect all immediate links into/out of each node regardless of type
     nodes.forEach( d => { 
         d.inLinks  = links.filter( x => ( x.TO_NODE_ID   == d.NODE_ID ) ); 
@@ -76,7 +86,7 @@ function AfterLoad() {
     // ideally we'd still like all links to influence the animation. Problem: the stacked nodes 
     // stacking a node means removing it from the force model AND letting all its clicks 'through to the keeper'
     // for any node we must call split(1) to get the head of its list
-    nodes.filter(IsFrameShape).forEach( gn => {
+    nodes.filter(Node.ShowAsFrame).forEach( gn => {
         ChildrenOf(gn).forEach( lnk => {
             lnk.target = gn.inLinks[0].source;
             lnk.strength = 100;
