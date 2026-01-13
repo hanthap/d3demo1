@@ -4,8 +4,6 @@
             var simulationExclusion;
             var frozen = false;
 
-            // var fencePosts = [];
-
 
             var x; // last clicked node
             const shape = "circle";
@@ -22,7 +20,7 @@
                // .attr('preserveAspectRatio','none');
 
 
-            // groups are passive shapes in the background
+            // group frames are passive shapes in the background
             const gGroup = svg.append('g')
                 .classed( 'group', true )
                 ;

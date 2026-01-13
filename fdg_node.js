@@ -72,7 +72,7 @@ class Node {
     //-------------------------------------------------------------------------------
 
     static Visibility(d) {
-        return IsActiveNode(d) ? 'visible' : 'hidden'
+        return Node.IsActive(d) ? 'visible' : 'hidden'
         // Overloaded in Frame subclass
     }
 
@@ -227,6 +227,13 @@ static ParentsOf(d) {
         return Node.HasShape(d) && !Node.ShowAsFrame(d);
     }
 
+//-------------------------------------------------------------------------------
+
+    static IsActive(d) { // participates in force simulations
+        return Node.ShowAsCircle(d);
+    }
+
+
 }
 
 //-------------------------------------------------------------------------------
@@ -293,9 +300,6 @@ function IsVisibleNode(d) {
 //-------------------------------------------------------------------------------
 // only active (unstacked) nodes will drive the simulation
 
-function IsActiveNode(d) {
-    return ( NodeScope(d) && IsVisibleNode(d) && !Node.ShowAsFrame(d) );
-}
 
 //-------------------------------------------------------------------------------
 // if we only create circles for nodes that are initially active, how to switch from passive to active later in the session?
@@ -315,6 +319,7 @@ function AppendShapes(rs) {
                 .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
+                .call(drag) // attach d3's special listener object
                 ;
 
 
@@ -357,7 +362,7 @@ function VisibleChildrenOf(d) {
 
 function VisibleDescendantsOf(d) {
    // return d.descendants.filter( IsVisibleNode );
-   return d.descendants.filter( IsActiveNode ); // inlcudes frames?
+   return d.descendants.filter( Node.IsActive ); // inlcudes frames?
 }
 
 //-------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 function RunSim() {
     // to do: override default settings that influence movement for the first few seconds
     // just for the currently-active subset of nodes controlling the animation
-    simulation = d3.forceSimulation(nodes.filter(IsActiveNode))
+    simulation = d3.forceSimulation(nodes.filter(Node.IsActive))
 
         // nodes can touch but should not overlap
         // d3.forceCollide() is a built-in algorithm that works for circles based on centre & radius, 

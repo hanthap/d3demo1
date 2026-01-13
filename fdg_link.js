@@ -70,7 +70,6 @@ static StrokeColour(d) { // drives stroke colour
     } catch (e) { };
 }
 
-
 //-------------------------------------------------------------------------------
 
 static StrokeWidth(d) { // stroke-width of visible polyline
@@ -116,7 +115,7 @@ static SetAttributes(d)   {
         this.setAttribute('visibility','hidden');
     else {
        this.setAttribute('visibility','visible');
-      this.setAttribute('points', Link.PolyLinePointString(d) ); // why can we not move this into AppendLines()?
+      this.setAttribute('points', Link.PolyLinePointString(d) ); 
        d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
        d3.select(this).classed('arrow',true);
     }
@@ -210,34 +209,34 @@ static OnClick(e,d) {
     ticked();
 }
 
-    //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 
-    static Hover( d, bHovering ) {
+static Hover( d, bHovering ) {
 
-        gLink.selectAll('polyline')
-            .filter( p => p == d ) // bound to the same datum 
-            .classed( 'xhover', bHovering );
+    gLink.selectAll('polyline')
+        .filter( p => p == d ) // bound to the same datum 
+        .classed( 'xhover', bHovering );
 
-        gNode.selectAll("circle")
-            .filter( c => c == d.source || c == d.target )
-            .classed( 'xhover', bHovering );
+    gNode.selectAll("circle")
+        .filter( c => c == d.source || c == d.target )
+        .classed( 'xhover', bHovering );
 
-        gGroup.selectAll("rect") // frame
-            .filter( c => c == d.source || c == d.target )
-            .classed( 'xhover', bHovering );
-            // TO DO : apply to all nested frames and circles
-    }
+    gGroup.selectAll("rect") // frame
+        .filter( c => c == d.source || c == d.target )
+        .classed( 'xhover', bHovering );
+        // TO DO : apply to all nested frames and circles
+}
 
-    //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 
-    static OnMouseOver(e,d) {
-        LinkZone.Hover( d, true );
-    }
+static OnMouseOver(e,d) {
+    LinkZone.Hover( d, true );
+}
 
-    //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 
-    static OnMouseOut(e,d) {
-        LinkZone.Hover( d, false );
-    }
+static OnMouseOut(e,d) {
+    LinkZone.Hover( d, false );
+}
 
 }
