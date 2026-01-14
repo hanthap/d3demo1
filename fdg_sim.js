@@ -37,7 +37,7 @@ function RunSim() {
         .force('my-link', d3.forceLink()
             .distance(Link.Distance)
             .strength(Link.Strength)
-            .links(links.filter(LinkScope))
+            .links(links.filter(Link.ShowAsLine))
             .iterations(2)
             )
         .alphaTarget(0.3) // freeze if/when alpha drops below this threshold
@@ -61,7 +61,7 @@ function RunSim() {
         simulation.stop();
         simulationExclusion.stop();
 
-    initDrag();
+    // initDrag();
 }
 
 //-------------------------------------------------------------------------------

@@ -62,20 +62,23 @@ static PolyLinePointString( d ) {
 }
 
 //-------------------------------------------------------------------------------
-// TO DO: for opacity < 1, map colour names to RBGA expressions
 
-static StrokeColour(d) { // drives stroke colour
-    try {
-        return sourcePalette( d.EDGE_CDE );
-    } catch (e) { };
+static StrokeColour(d) { 
+    let c = sourcePalette( d.COLOUR_CDE );
+    if ( d == mouseover_object ) { return 'black' }
+    return 'rgba(' + c + ( d.selected ? ',1)' : ',0.2)' );
+}
+
+//-------------------------------------------------------------------------------
+
+static FillColour(d) { // drives arrowhead colour
+    return Link.StrokeColour(d);
 }
 
 //-------------------------------------------------------------------------------
 
 static StrokeWidth(d) { // stroke-width of visible polyline
-    try {
         return d.EDGE_MASS / 20;
-    } catch (e) { };
 }
 
 //-------------------------------------------------------------------------------
@@ -99,11 +102,6 @@ static Distance(d) { // callback for d3.forceLink()
     return Link.IsHier(d) ? 0 : d.distance ;
 }
 
-
-
-//-------------------------------------------------------------------------------
-
-
 //-------------------------------------------------------------------------------
 // a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
 // Called once for link and again for linkzone
@@ -114,10 +112,14 @@ static SetAttributes(d)   {
     if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) 
         this.setAttribute('visibility','hidden');
     else {
-       this.setAttribute('visibility','visible');
-      this.setAttribute('points', Link.PolyLinePointString(d) ); 
-       d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
-       d3.select(this).classed('arrow',true);
+        this.setAttribute('visibility','visible');
+        this.setAttribute('points', Link.PolyLinePointString(d) ); 
+        d3.select(this)
+            .classed('selected',d.selected)
+            .classed('arrow',true)
+            .style('stroke', Link.StrokeColour ) 
+            .style('fill', Link.FillColour );  // for arrowhead
+
     }
 }
 
@@ -130,16 +132,15 @@ static IsHier(d) {
 
 }
 
-}
+ //-------------------------------------------------------------------------------
 
-
-//-------------------------------------------------------------------------------
-
-function LinkScope(d) {
+static ShowAsLine(d) {
 // a link is in scope if both vertices are in scope
-    return ( NodeScope(d.source) && NodeScope(d.target) );
+    // return ( NodeScope(d.source) && NodeScope(d.target) );
+    return ( Node.HasShape(d.source) && Node.HasShape(d.target) );
 }
 
+}
 
 //-------------------------------------------------------------------------------
 
@@ -152,7 +153,7 @@ function IsActiveLink(d) {
 function AppendLines() {
 
     gLinkZone.selectAll('line')
-        .data(links.filter(LinkScope))
+        .data(links.filter(Link.ShowAsLine))
         .join('line')
         .on('click',LinkZone.OnClick)
         .on('mouseover',LinkZone.OnMouseOver)
@@ -163,9 +164,9 @@ function AppendLines() {
         ;
 
     gLink.selectAll('polyline') // this layer ignores mouse events, so they pass through to LinkZone
-        .data(links.filter(LinkScope))
+        .data(links.filter(Link.ShowAsLine))
         .join('polyline') 
-        .attr('stroke',Link.StrokeColour)
+        .style('stroke',Link.StrokeColour)
         .attr('stroke-width',Link.StrokeWidth)
         ;
 
@@ -195,12 +196,15 @@ static SetAttributes(d)   {
     }
 }
 
+//-------------------------------------------------------------------------------
 
 static StrokeWidth(d) { // width of extended click zone
     try {
         return Link.StrokeWidth(d) + 4;
     } catch (e) { };
 }
+
+//-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
     d.selected ^= 1;
@@ -212,10 +216,12 @@ static OnClick(e,d) {
 //-------------------------------------------------------------------------------
 
 static Hover( d, bHovering ) {
-
+ 
     gLink.selectAll('polyline')
         .filter( p => p == d ) // bound to the same datum 
-        .classed( 'xhover', bHovering );
+        .classed( 'xhover', bHovering ) // for CSS dash-array
+        .each(d => { mouseover_object = bHovering ? d : null })
+        ;
 
     gNode.selectAll("circle")
         .filter( c => c == d.source || c == d.target )

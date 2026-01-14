@@ -111,9 +111,7 @@
                 stroke-opacity: 0;
             }
 
-            polyline.arrow { /* directed line, with arrow, all transparent (opacity < 1) */
-                stroke: rgba(0,0,0,0.1); 
-                fill: rgba(0,0,0,0.1); /* opacity is 4th arg, this is the only way the marker can inherit */
+            polyline.arrow { /* directed line, with arrow */
                 stroke-width: 1.5;
                 marker-mid: url(#arrow);
 
@@ -125,17 +123,13 @@
             }
 
             polyline.selected {
-                stroke: black;
-                fill: black; /* polyline has no fill but its marker arrow does */
                 stroke-dasharray: none;
             }
 
             polyline.xhover { 
-                stroke: black;
-                fill: black;
                 stroke-dasharray: 3,3;
             }
 
-            line:hover { 
+            /* line:hover { 
                 stroke-opacity: 0;
-            }
+            }  */

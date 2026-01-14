@@ -72,44 +72,34 @@ let { data: linklist, error: link_error } = await linkPromise;
 // final init steps that have to wait until nodes AND links are both populated 
 function AfterLoad() {
     
-
-    AppendShapes();
-
     // collect all immediate links into/out of each node regardless of type
     nodes.forEach( d => { 
         d.inLinks  = links.filter( x => ( x.TO_NODE_ID   == d.NODE_ID ) ); 
         d.outLinks = links.filter( x => ( x.FROM_NODE_ID == d.NODE_ID ) );
     } );
-    // these will be used to manage interactive stacking & unstacking
-    // when stacked, tail nodes must be excluded from the force model
-    // i.e. the force simulation uses only the leading child node
-    // ideally we'd still like all links to influence the animation. Problem: the stacked nodes 
-    // stacking a node means removing it from the force model AND letting all its clicks 'through to the keeper'
-    // for any node we must call split(1) to get the head of its list
+ 
     nodes.filter(Node.ShowAsFrame).forEach( gn => {
         ChildrenOf(gn).forEach( lnk => {
             lnk.target = gn.inLinks[0].source;
             lnk.strength = 100;
             })
         });
-    console.log(links);
 
-    Graph.CacheAllDescendants(); // precompute descendant lists, for each node
-    Graph.CacheAllExclusiveNodes(); // precompute lists of circles and frames in scope of active_exclusion force
-    Graph.CacheSortedNodes(); // pre-compute the z-order of nested frames
+    // precompute & store lists
+    Graph.CacheAllDescendants();    // descendants, per node
+    Graph.CacheAllExclusiveNodes(); // circles and frames in scope of active_exclusion force
+    Graph.CacheSortedNodes();       // z-order of nested frames
 
-    AppendFrameShapes(); // don't forget the parentheses!
+    AppendShapes(); 
+    AppendFrameShapes(); 
     AppendLines();
 
     // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
     simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
 
-
-
-
-
-        // debug
     RunSim();
+
+     // debug
     pqr = Node.GetFromID( 'PQR' )
     pqr_kids = ChildrenOf(pqr)
     pqr_desc = VisibleDescendantsOf(pqr)
@@ -120,8 +110,8 @@ function AfterLoad() {
 //    mno_sel = Node.GetSelection( mno, 'rect' );
 //    console.log(mno_sel);
 //    mno_rect = mno_sel._groups[0][0];
- //  console.log(mno_rect);  
-  //  console.log(mno_rect.getBBox());  // returns SVGRect { x: ..., y: ..., width: ..., height: ... }
+//    console.log(mno_rect);  
+//    console.log(mno_rect.getBBox());  // returns SVGRect { x: ..., y: ..., width: ..., height: ... }
  
 //   console.log(flist);
    console.log(sorted_nodes);

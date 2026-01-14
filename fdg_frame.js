@@ -39,38 +39,41 @@ class Frame extends Node {
 
    //-------------------------------------------------------------------------------
 
-
    
    static OnClick(e,d) {
 
-    d.selected ^= 1;
+    if ( ! e.ctrlKey ) {
 
-    ChildrenOf(d).forEach( c => {
-        c.selected = d.selected;
-        // TO DO: this only goes down to grandchildren. Should use d.descendants
-        ChildrenOf(c).forEach( gc => { gc.selected = d.selected } );
-        } ) ; // set all children on or off
+        d.selected ^= 1;
 
-    if ( e.ctrlKey ) {
-        // testing only - collapse the frame into a circle, refresh attributes
+        ChildrenOf(d).forEach( c => {
+            c.selected = d.selected;
+            // TO DO: this only goes down to grandchildren. Should use d.descendants
+            ChildrenOf(c).forEach( gc => { gc.selected = d.selected } );
+            } ) ; // set all children on or off
+
+    }
+
+    if ( e.ctrlKey ) { // TEST ONLY
+        // collapse the frame into a circle, refresh attributes
         // set circle node's x & y to midpoint of the frame
         let nc = Node.Centre(d); // must grab this before we set d.IS_GROUP = false;
         d.x = nc.x;
         d.y = nc.y;
+
         d.IS_GROUP = false;
 
+        // should be all descendants
         ChildrenOf(d).forEach( c => { c.has_shape = 0 } );
 
         AppendShapes(); 
         AppendFrameShapes();
         AppendLines();
-        // All we want is for the new circle to be centred at (nc.x, nc.y), not at top left of old frame
-        // Calling RunSim() has unwanted side-effects: dragging ANY circle causes others to move in real time
+        // NOTE! Calling RunSim() has unwanted side-effects, in that dragging ANY circle causes others to move in real time
         
         }         
 
-         ticked();
-
+    ticked();
 
     }
 
