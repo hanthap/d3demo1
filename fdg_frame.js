@@ -56,10 +56,8 @@ class Frame extends Node {
 
     if ( e.ctrlKey ) { // TEST ONLY
         // collapse the frame into a circle, refresh attributes
-        // set circle node's x & y to midpoint of the frame
-        let nc = Node.Centre(d); // must grab this before we set d.IS_GROUP = false;
-        d.x = nc.x;
-        d.y = nc.y;
+        // set circle node's x & y to logical coordinates of the click event
+        [d.x, d.y] = d3.pointer(e);
 
         d.IS_GROUP = false;
 
@@ -70,6 +68,7 @@ class Frame extends Node {
         AppendFrameShapes();
         AppendLines();
         // NOTE! Calling RunSim() has unwanted side-effects, in that dragging ANY circle causes others to move in real time
+        // BUT, not doing so means new circles don't move until a drag-drop is completed.
         
         }         
 
