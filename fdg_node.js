@@ -232,6 +232,14 @@ static ParentsOf(d) {
         return Node.ShowAsCircle(d);
     }
 
+    static HasMembers(d) { // typically, a circle that represents a collapsed (non-empty) set
+        return ChildrenOf(d).length > 0 ;
+    }
+
+    static IsLeaf(d) { // even if it's currently buried inside a collapsed frame (and therefore indirectly affecting forces)
+        return ChildrenOf(d).length == 0 ;
+    }
+
 
 static OnDragStart(e,d) {
     simulation.stop(); // prevents crazy flicker while dragging
@@ -350,7 +358,7 @@ function AppendShapes(rs) {
                 .attr('id', Node.UniqueId) // for efficient upsert & delete of DOM bindings
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
-               // .style('fill','rgb(1,0,0)')
+                .classed('has_members',Node.HasMembers)
                 .on('mouseover',Node.OnMouseOver) // called at each transition, including nested elements, unlike mouseenter
                 .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
                 .on('click',Node.OnClick)
