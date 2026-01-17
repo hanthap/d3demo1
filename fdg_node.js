@@ -8,9 +8,9 @@ var sorted_nodes = []; // flat array determines the z-order, especially of frame
 
 // Lookup Node.Colour using SRCE_CDE
 var sourcePalette = d3.scaleOrdinal()
-    .domain( [ 'G', 'R', 'B', 'M', 'C', 'Y'])
-//    .range( [ 'green', 'red', 'blue', 'magenta', 'cyan', 'yellow' ] );
-    .range( [ '0,255,0', '255,0,0', '0,0,255', '255,0,255', '0,255,255', '1,1,0' ] );
+    .domain( [ 'G', 'R', 'B', 'M', 'C', 'Y', 'K'])
+//    .range( [ 'green', 'red', 'blue', 'magenta', 'cyan', 'yellow', 'black' ] );
+    .range( [ '0,255,0', '255,0,0', '0,0,255', '255,0,255', '0,255,255', '255,255,0', '0,0,0' ] );
 
 //-------------------------------------------------------------------------------
 
@@ -96,7 +96,27 @@ class Node {
     static OnClick( k, d ) {
        // mouseover_object = d; // redundant
         // toggle 'selected' status of the clicked node
-        d.selected ^= 1;
+  // expand a collapsed node so it appears as a frame with visible child nodes
+        let clicked_element = gNode   
+            .selectAll('circle')
+            .filter(c => c == d);
+
+        if ( k.ctrlKey && Node.HasMembers(d) ) { 
+
+            d.IS_GROUP = true;
+            clicked_element.attr('visibility', Node.Visibility );
+
+            // should this be all descendants?
+            ChildrenOf(d).forEach( c => { c.has_shape = 1 } );
+
+            AppendShapes(); 
+            AppendFrameShapes();
+            AppendLines();
+        } else {
+            d.selected ^= 1;
+            clicked_element.classed('selected', d => d.selected)
+        }
+
 
         // optionally, propagate the selected status to directly linked neighbours
         if ( k.ctrlKey ) {
