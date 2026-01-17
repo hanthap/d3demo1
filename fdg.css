@@ -96,7 +96,8 @@
                 fill-opacity: 0.3;
             }
 
-            rect.frame.xhover,  rect.frame:hover, circle:hover { 
+            rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover { 
+                stroke:black;
                 stroke-dasharray: 3,3;
                 stroke-opacity: 1;
             }
