@@ -1,10 +1,26 @@
 
+// no need to drop and recreate the simulation. Just feed it latest data
+
+function RefreshSimData() {
+  simulation.nodes(nodes.filter(Node.IsActive));
+  simulation.force('my-link').links(links.filter(Link.ShowAsLine));
+
+}
+
+
 
 //-------------------------------------------------------------------------------
 
 function RunSim() {
     // to do: override default settings that influence movement for the first few seconds
     // just for the currently-active subset of nodes controlling the animation
+
+    // first kill any previous sims
+    try {
+    simulation.stop(); // prevents crazy flicker while dragging
+    simulationExclusion.stop(); 
+} catch(e) { };
+
     simulation = d3.forceSimulation(nodes.filter(Node.IsActive))
 
         // nodes can touch but should not overlap

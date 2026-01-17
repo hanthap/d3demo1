@@ -67,8 +67,16 @@ class Frame extends Node {
         AppendShapes(); 
         AppendFrameShapes();
         AppendLines();
-        // NOTE! Calling RunSim() has unwanted side-effects, in that dragging ANY circle causes others to move in real time
-        // BUT, not doing so means new circles don't move until a drag-drop is completed.
+        RefreshSimData(); // does this work?
+            // RunSim(); // this does too much 
+            // restarting sims doesn't help
+            //simulation.restart();
+            // simulationExclusion.restart();
+        // NOTE! Calling RunSim() here has unwanted side-effects, in that any further dragging ANY circle causes others to move in real time, with flicker
+        // movement seems to be consistent with the main sim's centre force
+        // BUT, not doing so means the new circle is inert until a drag-drop is completed. after which all is back to normal. Go figure!
+        // simply re-expanding does NOT fix the problem. But clicking THAT inert circle does - ONLY for THAT collapsed circle. 
+        // Others remain inert until clicked
         
         }         
 

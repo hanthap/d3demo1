@@ -96,15 +96,15 @@ class Node {
     static OnClick( k, d ) {
        // mouseover_object = d; // redundant
         // toggle 'selected' status of the clicked node
-  // expand a collapsed node so it appears as a frame with visible child nodes
         let clicked_element = gNode   
             .selectAll('circle')
             .filter(c => c == d);
 
-        if ( k.ctrlKey && Node.HasMembers(d) ) { 
+        if ( k.ctrlKey && Node.HasMembers(d) ) {       
+            // expand a collapsed node so it appears as a frame with visible child nodes
 
             d.IS_GROUP = true;
-            clicked_element.attr('visibility', Node.Visibility );
+            clicked_element.attr('visibility', Node.Visibility);
 
             // should this be all descendants?
             ChildrenOf(d).forEach( c => { c.has_shape = 1 } );
@@ -112,14 +112,15 @@ class Node {
             AppendShapes(); 
             AppendFrameShapes();
             AppendLines();
+            RefreshSimData();
         } else {
             d.selected ^= 1;
             clicked_element.classed('selected', d => d.selected)
         }
 
 
-        // optionally, propagate the selected status to directly linked neighbours
-        if ( k.ctrlKey ) {
+        // optionally, propagate the selected status to all directly linked neighbours
+        if ( k.shiftKey ) {
             d.inLinks.forEach ( f => { f.source.selected = d.selected } );
             d.outLinks.forEach ( f => { f.target.selected = d.selected } );
         }
@@ -269,16 +270,8 @@ static OnDragStart(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnDrag(e,d) {
-    // for real time visual feedback
-    // simplistic boundary check
- //  simulation.stop(); // prevents crazy flicker while dragging
-//   simulationExclusion.stop(); 
-//    Node.BringToFront(e.subject);
     d.x = e.x;
     d.y = e.y;
-   //d.x = bounded(e.x, 3*radius-width/2, width/2-3*radius) 
-   //d.y = bounded(e.y, 3*radius-height/2, height/2-3*radius)
-
     ticked();
 }
 
@@ -286,10 +279,6 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
 
-    if ( e.sourceEvent.shiftKey ) {
-        d.cogX = d.x;
-        d.cogY = d.y;
-        } 
 
     if ( !frozen ) {
         RunSim();
