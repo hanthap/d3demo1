@@ -1,135 +1,100 @@
-  html, body {
+html, body {
     margin: 0;
     padding: 0;
     width: 100%;
     height: 100%;
     overflow: hidden; /* prevents scrollbars */
-  }
+}
 
-  svg {
+svg {
     width: 100%;
     height: 100%;
     display: block; /* removes inline-gap issues */
-  }
+}
 
+circle {
+    fill-opacity: 0.1;
+    stroke:black;
+    stroke-opacity: 0.1;
+    stroke-width: 1;
+}
 
+circle.xhover, circle:hover {
+    stroke-dasharray: 3,3;
+    stroke-opacity: 1;
+    /* mix-blend-mode: difference;  */
+}
 
-            circle {
-                fill-opacity: 0.1;
-                stroke:black;
-                stroke-opacity: 0.1;
-                stroke-width: 1;
-            }
+/* will use these for foreignObject child div styling */
+div.circleinfo {
+    font-size: 8px;
+    justify-content: center;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    font-family: Helvetica;
+}
 
-            circle.xhover, circle:hover {
-                stroke-dasharray: 3,3;
-                stroke-opacity: 1;
-                /* mix-blend-mode: difference;  */
-            }
+circle.selected {
+    fill-opacity:1;
+    stroke: none;
+    stroke-opacity: 1;
+}
 
+circle.has_members {
+    stroke: black;
+}
 
-    /* will use these for foreignObject child div styling */
-    div.circleinfo {
-        font-size: 8px;
-        justify-content: center;
-        display: flex;
-        height: 100%;
-        width: 100%;
-        align-items: center;
-        font-family: Helvetica;
+.blink_me {
+    animation: blinker 0.5s cubic-bezier(1,1) infinite alternate;
+}
+
+@keyframes blinker {
+    50% { opacity: 0 ;}
+}
+
+rect.frame {
+    stroke:black;
+    stroke-width: 1;
+    stroke-opacity: 0.1;
+    fill-opacity: 0.1;
     }
 
+rect.frame.selected {
+    stroke-opacity: 1;
+    fill-opacity: 0.3;
+}
 
-            circle.selected {
-                fill-opacity:1;
-                stroke: none;
-                 stroke-opacity: 1;
-            }
+rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover { 
+    stroke:black;
+    stroke-dasharray: 3,3;
+    stroke-opacity: 1;
+}
 
-            circle.stacked {
-                display:none;
-            }
+g.edge {
+    pointer-events: none; /* let mouse events pass through to LinkZone */
+}
 
-            circle.has_members {
-                stroke: black;
-            }
+g.linkzone { 
+    stroke: yellow;
+    stroke-opacity: 0;
+}
 
-            .blink_me {
-                animation: blinker 1.7s cubic-bezier(.5,0,1,1) infinite alternate;
-            }
+polyline.arrow { /* directed line, with arrow */
+    stroke-width: 1.5;
+    marker-mid: url(#arrow);
+}
 
-            @keyframes blinker {
-                50% { opacity: 0 ;}
-            }
+polygon.arrowhead {
+    fill: context-fill; /* inherit polyline's RGBA fill colour INCLUDING opacity (alpha) */
+    stroke: none; 
+}
 
-            rect.leaf.selected {
-                stroke:black;
-                stroke-opacity: 1;
-                fill-opacity: 1;
-            }
+polyline.selected {
+    stroke-dasharray: none;
+}
 
-            rect.leaf.xhover {
-                /* stroke:blue; */
-                opacity: 0.6;
-            }
-
-            rect.leaf {
-                stroke-width: 3;
-                fill-opacity: 0.1;
-                stroke-opacity: 0.1;
-            }
-
-            rect.leaf:hover { /* built in pseudo-class  */
-                stroke:blue;
-                opacity: 0.6;
-            }
-
-            rect.frame {
-                stroke:black;
-                stroke-width: 1;
-                stroke-opacity: 0.1;
-                fill-opacity: 0.1;
-             }
-
-            rect.frame.selected {
-                stroke-opacity: 1;
-                fill-opacity: 0.3;
-            }
-
-            rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover { 
-                stroke:black;
-                stroke-dasharray: 3,3;
-                stroke-opacity: 1;
-            }
-
-            g.edge {
-                pointer-events: none; /* let mouse events pass through to LinkZone */
-            }
-
-            g.linkzone { 
-                stroke: yellow;
-                stroke-opacity: 0;
-            }
-
-            polyline.arrow { /* directed line, with arrow */
-                stroke-width: 1.5;
-                marker-mid: url(#arrow);
-
-            }
-
-            polygon.arrowhead {
-                fill: context-fill; /* inherit polyline's RGBA fill colour INCLUDING opacity (alpha) */
-                stroke: none; 
-            }
-
-            polyline.selected {
-                stroke-dasharray: none;
-            }
-
-            polyline.xhover { 
-                stroke-dasharray: 3,3;
-            }
-
-            /* line:hover { 
-                stroke-opacity: 0;
-            }  */
+polyline.xhover { 
+    stroke-dasharray: 3,3;
+}

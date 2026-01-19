@@ -109,6 +109,10 @@ class Node {
             // should this be all descendants?
             ChildrenOf(d).forEach( c => { c.has_shape = 1 } );
 
+
+
+
+
             AppendShapes(); 
             AppendFrameShapes();
             AppendLines();
@@ -121,6 +125,7 @@ class Node {
 
         // optionally, propagate the selected status to all directly linked neighbours
         if ( k.shiftKey ) {
+            clicked_element.classed('blink_me',true); // test
             d.inLinks.forEach ( f => { f.source.selected = d.selected } );
             d.outLinks.forEach ( f => { f.target.selected = d.selected } );
         }
@@ -145,9 +150,7 @@ static AppendDatum(d,i) {
     d.r = d.NODE_MASS * radius / 35; // size proportional to weight
     d.height = 2 * d.r;
     d.width = 2 * d.r;
-    d.stacked = 0; // deprecated
     d.selected = 0;
-    // d.xhover = 0; // deprecated
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
     // TO DO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
     return d;
@@ -279,12 +282,10 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
 
-
     if ( !frozen ) {
-        RunSim();
+        UnfreezeSim();
         }
 }
-
 
 }
 

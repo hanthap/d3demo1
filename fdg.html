@@ -97,7 +97,7 @@ function AfterLoad() {
     // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
     simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
 
-    RunSim();
+    RunSim(); 
 
      // debug
     pqr = Node.GetFromID( 'PQR' )

@@ -64,20 +64,17 @@ class Frame extends Node {
         // should be all descendants
         ChildrenOf(d).forEach( c => { c.has_shape = 0 } );
 
+            // TO DO: recalculate and cache the 'effective' endpoints for links that reference a leaf node that is now hidden (as a descendant node)
+            // scan the list of edges and set this node d as the effective end point in place of any descendants of d
+            // if both ends now point to d then the link will not be in 
+            //  likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
+
+
+
         AppendShapes(); 
         AppendFrameShapes();
         AppendLines();
         RefreshSimData(); // does this work?
-            // RunSim(); // this does too much 
-            // restarting sims doesn't help
-            //simulation.restart();
-            // simulationExclusion.restart();
-        // NOTE! Calling RunSim() here has unwanted side-effects, in that any further dragging ANY circle causes others to move in real time, with flicker
-        // movement seems to be consistent with the main sim's centre force
-        // BUT, not doing so means the new circle is inert until a drag-drop is completed. after which all is back to normal. Go figure!
-        // simply re-expanding does NOT fix the problem. But clicking THAT inert circle does - ONLY for THAT collapsed circle. 
-        // Others remain inert until clicked
-        
         }         
 
     ticked();

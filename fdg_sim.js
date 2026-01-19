@@ -7,7 +7,12 @@ function RefreshSimData() {
 
 }
 
+//-------------------------------------------------------------------------------
 
+function UnfreezeSim() {
+    simulation.restart(); 
+    simulationExclusion.restart(); 
+} 
 
 //-------------------------------------------------------------------------------
 
@@ -16,10 +21,8 @@ function RunSim() {
     // just for the currently-active subset of nodes controlling the animation
 
     // first kill any previous sims
-    try {
-    simulation.stop(); // prevents crazy flicker while dragging
-    simulationExclusion.stop(); 
-} catch(e) { };
+    if ( simulation) { simulation.stop(); }
+    if ( simulationExclusion ) { simulationExclusion.stop(); }
 
     simulation = d3.forceSimulation(nodes.filter(Node.IsActive))
 
@@ -77,7 +80,6 @@ function RunSim() {
         simulation.stop();
         simulationExclusion.stop();
 
-    // initDrag();
 }
 
 //-------------------------------------------------------------------------------
