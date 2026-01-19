@@ -30,36 +30,32 @@ async function LoadData() {
         .from("nodes")
         .select("*");
 
-let { data: nodelist, node_error } = await nodePromise; 
+    let { data: nodelist, node_error } = await nodePromise; 
 
       if (node_error) {
         console.error(node_error);
         return;
       }
 
-//       console.log(nodelist); 
-
-
-
        nodelist.forEach(Node.AppendDatum);
        nodes = nodelist;
 
-// before calling Link.AppendDatum() we need to enable Node.GetFromID()
+    // before calling Link.AppendDatum() we need to enable Node.GetFromID()
        mapNodes = new Map ( nodes.map( x => ( [x.NODE_ID, x ]) ) );
 
 
-const linkPromise = supabaseClient
+    const linkPromise = supabaseClient
         .from("edges")
         .select("*");
 
-let { data: linklist, error: link_error } = await linkPromise; 
+    let { data: linklist, error: link_error } = await linkPromise; 
 
-      if (link_error) {
+    if (link_error) {
         console.error(link_error);
         return;
       }
-      links = linklist;
-       links.forEach(Link.AppendDatum);
+    links = linklist;
+    links.forEach(Link.AppendDatum);
 
 
     // async means even LoadData() runs in a new thread. Control immediately returns
@@ -98,24 +94,6 @@ function AfterLoad() {
     simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
 
     RunSim(); 
-
-     // debug
-    pqr = Node.GetFromID( 'PQR' )
-    pqr_kids = ChildrenOf(pqr)
-    pqr_desc = VisibleDescendantsOf(pqr)
-  //  console.log(pqr_desc)
-  //  console.log(pqr_kids)
-    msn = Node.GetFromID( 'MSN' )
-    console.log(msn);
-//    mno_sel = Node.GetSelection( mno, 'rect' );
-//    console.log(mno_sel);
-//    mno_rect = mno_sel._groups[0][0];
-//    console.log(mno_rect);  
-//    console.log(mno_rect.getBBox());  // returns SVGRect { x: ..., y: ..., width: ..., height: ... }
- 
-//   console.log(flist);
-   console.log(sorted_nodes);
-
 
 } // end AfterLoad()
 

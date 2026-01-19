@@ -108,16 +108,11 @@ class Node {
 
             // should this be all descendants?
             ChildrenOf(d).forEach( c => { c.has_shape = 1 } );
-
-
-
-
-
             AppendShapes(); 
             AppendFrameShapes();
             AppendLines();
             RefreshSimData();
-        } else {
+        } else { // toggle foreground/selected status
             d.selected ^= 1;
             clicked_element.classed('selected', d => d.selected)
         }

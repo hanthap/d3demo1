@@ -39,11 +39,35 @@ class Frame extends Node {
 
    //-------------------------------------------------------------------------------
 
-   
+static ToCircle(d, bCollapsed, cXcY) {
+        // collapse the frame into a circle at cXcY, refresh attributes
+        [d.x, d.y] = cXcY;
+
+        d.IS_GROUP = false;
+
+        if ( bCollapsed ) { 
+        // should be all descendants
+        ChildrenOf(d).forEach( c => { c.has_shape = 0 } );
+        }
+            // TO DO: recalculate and cache the 'effective' endpoints for links that reference a leaf node that is now hidden (as a descendant node)
+            // scan the list of edges and set this node d as the effective end point in place of any descendants of d
+            // if both ends now point to d then the link will not be in 
+            //  likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
+
+        AppendShapes(); 
+        AppendFrameShapes();
+        AppendLines();
+        RefreshSimData(); 
+
+}
+
+   //-------------------------------------------------------------------------------
+
+
    static OnClick(e,d) {
 
     if ( ! e.ctrlKey ) {
-
+        // simple click => toggle selected status
         d.selected ^= 1;
 
         ChildrenOf(d).forEach( c => {
@@ -54,34 +78,24 @@ class Frame extends Node {
 
     }
 
-    if ( e.ctrlKey ) { // TEST ONLY
-        // collapse the frame into a circle, refresh attributes
-        // set circle node's x & y to logical coordinates of the click event
-        [d.x, d.y] = d3.pointer(e);
-
-        d.IS_GROUP = false;
-
-        // should be all descendants
-        ChildrenOf(d).forEach( c => { c.has_shape = 0 } );
-
-            // TO DO: recalculate and cache the 'effective' endpoints for links that reference a leaf node that is now hidden (as a descendant node)
-            // scan the list of edges and set this node d as the effective end point in place of any descendants of d
-            // if both ends now point to d then the link will not be in 
-            //  likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
-
-
-
-        AppendShapes(); 
-        AppendFrameShapes();
-        AppendLines();
-        RefreshSimData(); // does this work?
+    if ( e.ctrlKey ) { 
+        Frame.ToCircle(d, !e.shiftKey, d3.pointer(e)); // ctrl+SHIFT => do NOT hide children
         }         
 
     ticked();
 
     }
 
+    //-------------------------------------------------------------------------------
 
+    // because smartphone doesn't have a shift key
+   static OnDblClick(e,d) { //  show as a circle linked to all its children
+            Frame.ToCircle(d, false, d3.pointer(e)); // false => do not collapse
+            ticked();
+
+   }
+
+   //-------------------------------------------------------------------------------
 
     static RectX(d) { return d.x - radius }; // extra margin to accommodate rounded corners
 
@@ -141,6 +155,7 @@ function AppendFrameShapes() {
         // gradients are static defs, so we can't set them per-node here
         .classed('frame',true) // CSS selectors can use ".frame" 
         .on('click', Frame.OnClick)
+        .on('dblclick', Frame.OnDblClick)
         .on('mouseover', Frame.OnMouseOver) 
         .on('mouseout', Frame.OnMouseOut)
         .append('title')
