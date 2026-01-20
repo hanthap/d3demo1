@@ -140,6 +140,24 @@ static ShowAsLine(d) {
     return ( Node.HasShape(d.source) && Node.HasShape(d.target) );
 }
 
+//-------------------------------------------------------------------------------
+
+static Coefficients(d) { // get linear interpolation parameters m (slope) and c (intercept)
+
+    var 
+        cDest = Node.Centre(d.target)
+        cOrig = Node.Centre(d.source)
+        m = null, 
+        c = null;
+
+    try {
+        m = (cDest.y - cOrig.y)  / ( cDest.x - cOrig.x);
+        c = cOrig.y - m * cOrig.x;
+    } catch (e) { };
+
+    return { 'm' : m, 'c' : c };
+}
+
 }
 
 //-------------------------------------------------------------------------------
@@ -207,6 +225,7 @@ static StrokeWidth(d) { // width of extended click zone
 //-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
+    console.log(Link.Coefficients(d));
     d.selected ^= 1;
     d.source.selected = d.selected;
     d.target.selected = d.selected;
