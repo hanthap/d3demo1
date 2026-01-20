@@ -70,6 +70,18 @@ class Node {
         return d.r ;
     }
 
+   //-------------------------------------------------------------------------------
+
+    static ContactPoint(d,node) { 
+        if ( true || Node.ShowAsFrame(d) ) { //  DIY polymorphism 
+            return Frame.ContactPoint(d,node);
+        }
+        if ( Node.ShowAsCircle(d) ) {
+            return {x: d.x, y: d.y, r: d.r};
+        }
+ 
+}
+
     //-------------------------------------------------------------------------------
 
     static Visibility(d) {
@@ -118,7 +130,7 @@ class Node {
         }
 
 
-        // optionally, propagate the selected status to all directly linked neighbours
+        // optionally, propagate the selected status to all directly-linked neighbours
         if ( k.shiftKey ) {
             clicked_element.classed('blink_me',true); // test
             d.inLinks.forEach ( f => { f.source.selected = d.selected } );
@@ -173,7 +185,6 @@ static BringToFront( d ) {
 
 static Centre(d) {
     if ( Node.ShowAsFrame(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y +  d.height/2) };
-    else if ( IsRectShape(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y + d.height/2) };
     else return { 'x': d.x, 'y': d.y };  
 }
 
@@ -255,7 +266,7 @@ static ParentsOf(d) {
         return ChildrenOf(d).length > 0 ;
     }
 
-    static IsLeaf(d) { // even if it's currently buried inside a collapsed frame (and therefore indirectly affecting forces)
+    static IsLeaf(d) { // visible or not, but still affects the simulation (directly or via rollup subtotal)
         return ChildrenOf(d).length == 0 ;
     }
 
@@ -308,10 +319,6 @@ function TopBoundary(d) {
     return (Node.Centre(d).y - Node.HalfHeight(d));
 }
 
-// function IsStackedLeaf(d) {
-//     p = ParentOf(d);
-//     return ( p.stacked && d != LeadingChildOf(p));
-// }
 
  //-------------------------------------------------------------------------------
 
@@ -345,8 +352,6 @@ function IsVisibleNode(d) {
     return ( (!p.stacked) || d == LeadingChildOf(p) );
 }
 
-//-------------------------------------------------------------------------------
-// only active (unstacked) nodes will drive the simulation
 
 
 //-------------------------------------------------------------------------------

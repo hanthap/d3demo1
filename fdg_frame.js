@@ -13,6 +13,54 @@ class Frame extends Node {
         return HasVisibleChild(d) ? 'visible' : 'hidden'
     }
 
+//-------------------------------------------------------------------------------
+// returns point where the rendered boundary of d is intersected by a line segment between centres of d and node
+// partitions the space into 4 quadrants with origin at centre of d.  Compares angles to determine which quadrant contains the 
+// centre of [node] and therefore which one of the rect sides will contain the intersection
+
+static ContactPoint(d,node) { 
+
+const
+        hypot = Math.hypot(d.width,d.height),
+        sine = d.height / hypot,
+        crit_rad = Math.asin(sine),
+        crit_deg = crit_rad * (180 / Math.PI),
+        dx = node.x - d.x,
+        dy = node.y - d.y,
+        test_hypot = Math.hypot(dx,dy),
+        test_rad = Math.asin(dy/test_hypot),
+        test_deg = test_rad * (180 / Math.PI),
+        quadrant =  test_deg < crit_deg ? 0 : // left
+                    test_deg < (180-crit_deg) ? 1 : // top 
+                    test_deg < (180+crit_deg) ? 2 : // right
+                    test_deg < (360-crit_deg) ? 3 : // bottom
+                    0 // left
+            ;
+
+
+const rect = { 
+        label: d.NODE_TXT,
+        left: d.x, 
+        right: d.x + d.width, 
+        top: d.y, 
+        bottom: d.y+d.height,
+        // width: d.width,
+        // height: d.height,
+        // hypot,
+        // sine,
+        // crit_rad,
+        crit_deg,
+        test_x: node.x,
+        test_y: node.y,
+        dx,
+        dy,
+        // test_hypot,
+        test_deg,
+        quadrant
+    };
+return rect;
+}
+
    //-------------------------------------------------------------------------------
     // set or unset the 'xhover' class for node d plus all its descendants
 
@@ -165,4 +213,47 @@ function AppendFrameShapes() {
 
 
 
+}
+
+
+function lineRectIntersections({ a, b, c }, { left, right, top, bottom }) {
+  const points = [];
+
+  // Helper to add a point if it's within the rectangle bounds
+  function addIfOnVerticalEdge(x, y) {
+    if (y >= top && y <= bottom) points.push({ x, y });
+  }
+
+  function addIfOnHorizontalEdge(x, y) {
+    if (x >= left && x <= right) points.push({ x, y });
+  }
+
+  // Intersect with x = left and x = right (if b != 0)
+  if (b !== 0) {
+    const yLeft = (-a * left - c) / b;
+    addIfOnVerticalEdge(left, yLeft);
+
+    const yRight = (-a * right - c) / b;
+    addIfOnVerticalEdge(right, yRight);
+  }
+
+  // Intersect with y = top and y = bottom (if a != 0)
+  if (a !== 0) {
+    const xTop = (-b * top - c) / a;
+    addIfOnHorizontalEdge(xTop, top);
+
+    const xBottom = (-b * bottom - c) / a;
+    addIfOnHorizontalEdge(xBottom, bottom);
+  }
+
+  // Remove duplicates (e.g. line passing exactly through a corner)
+  const unique = [];
+  for (const p of points) {
+    if (!unique.some(q => Math.abs(q.x - p.x) < 1e-9 && Math.abs(q.y - p.y) < 1e-9)) {
+      unique.push(p);
+    }
+  }
+
+  // You’ll usually get 0, 1, or 2 points
+  return unique;
 }

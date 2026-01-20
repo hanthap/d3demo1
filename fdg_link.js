@@ -145,8 +145,8 @@ static ShowAsLine(d) {
 static Coefficients(d) { // get linear interpolation parameters m (slope) and c (intercept)
 
     var 
-        cDest = Node.Centre(d.target)
-        cOrig = Node.Centre(d.source)
+        cDest = Node.Centre(d.target),
+        cOrig = Node.Centre(d.source),
         m = null, 
         c = null;
 
@@ -155,7 +155,52 @@ static Coefficients(d) { // get linear interpolation parameters m (slope) and c 
         c = cOrig.y - m * cOrig.x;
     } catch (e) { };
 
-    return { 'm' : m, 'c' : c };
+    return { m, c };
+}
+
+//-------------------------------------------------------------------------------
+// generalised formula: aX + bY + c = 0 (immune to divide-by=zero)
+
+static LineGeneralForm(d) {
+    const 
+        cDest = Node.Centre(d.target),
+        cOrig = Node.Centre(d.source),
+        a = cOrig.y - cDest.y,
+        b = cDest.x - cOrig.x,
+        c = -(a * cOrig.x + b * cOrig.y);
+
+  return { a, b, c };
+}
+
+//-------------------------------------------------------------------------------
+
+// geometry we can pre-compute once per link, before nodes derive the intersection with their own boundary
+// NOTE we stick with screen coordinates througout, so 'top' y is less than 'bottom' y (and amgle is flipped accordingly)
+
+static AngleInfo(d) {
+
+const
+        c0 = { x: d.source.x, y: d.source.y, id: d.source.NODE_ID},
+        c1 = { x: d.target.x, y: d.target.y, id: d.target.NODE_ID},
+        dx = c1.x - c0.x,
+        dy = c1.y - c0.y,
+        radians = Math.atan2(dy, dx),
+        degrees = radians * (180 / Math.PI); 
+const info = 
+{
+    c0, c1, dx, dy, radians, degrees
+};
+
+return info;
+
+}
+
+//-------------------------------------------------------------------------------
+static ContactPoints(d) {
+
+    const p1 = Node.ContactPoint(d.source,d.target);
+    const p2 = Node.ContactPoint(d.target,d.source);
+    return { p1, p2 };
 }
 
 }
@@ -225,7 +270,7 @@ static StrokeWidth(d) { // width of extended click zone
 //-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
-    console.log(Link.Coefficients(d));
+    console.log( Link.AngleInfo(d) );
     d.selected ^= 1;
     d.source.selected = d.selected;
     d.target.selected = d.selected;
