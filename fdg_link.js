@@ -174,10 +174,10 @@ static LineGeneralForm(d) {
 
 //-------------------------------------------------------------------------------
 
-// geometry we can pre-compute once per link, before nodes derive the intersection with their own boundary
+// geometry we can pre-compute once per link, before nodes find the intersection with their own boundary
 // NOTE we stick with screen coordinates througout, so 'top' y is less than 'bottom' y (and amgle is flipped accordingly)
 
-static AngleInfo(d) {
+static Theta(d) {
 
 const
         c0 = { x: d.source.x, y: d.source.y, id: d.source.NODE_ID},
@@ -186,6 +186,7 @@ const
         dy = c1.y - c0.y,
         radians = Math.atan2(dy, dx),
         degrees = radians * (180 / Math.PI); 
+        
 const info = 
 {
     c0, c1, dx, dy, radians, degrees
@@ -197,10 +198,10 @@ return info;
 
 //-------------------------------------------------------------------------------
 static ContactPoints(d) {
-
-    const p1 = Node.ContactPoint(d.source,d.target);
-    const p2 = Node.ContactPoint(d.target,d.source);
-    return { p1, p2 };
+    const theta = Link.Theta(d), // congruent angle 
+    p0 = Node.ContactPoint(d.source,theta,+1),
+    p1 = Node.ContactPoint(d.target,theta,-1); // negative sign for incoming ray
+    return { p0, p1 };
 }
 
 }
@@ -270,7 +271,9 @@ static StrokeWidth(d) { // width of extended click zone
 //-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
-    console.log( Link.AngleInfo(d) );
+    console.log( Link.Theta(d) );
+    console.log( Link.ContactPoints(d) );
+
     d.selected ^= 1;
     d.source.selected = d.selected;
     d.target.selected = d.selected;

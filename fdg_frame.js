@@ -14,29 +14,22 @@ class Frame extends Node {
     }
 
 //-------------------------------------------------------------------------------
-// returns point where the rendered boundary of d is intersected by a line segment between centres of d and node
-// partitions the space into 4 quadrants with origin at centre of d.  Compares angles to determine which quadrant contains the 
-// centre of [node] and therefore which one of the rect sides will contain the intersection
+// returns point where the rendered boundary of d is intersected by a ray with angle theta and origin at centrepoint of d
+// partitions the space into 4 quadrants  Compares angles to determine which quadrant contains the ray and therefore 
+// which one of the rect sides will contain the intersection point.
 
-static ContactPoint(d,node) { 
+static ContactPoint(d,theta,sign=1) { 
 
 const
-        hypot = Math.hypot(d.width,d.height),
-        sine = d.height / hypot,
-        crit_rad = Math.asin(sine),
-        crit_deg = crit_rad * (180 / Math.PI),
-        dx = node.x - d.x,
-        dy = node.y - d.y,
-        test_hypot = Math.hypot(dx,dy),
-        test_rad = Math.asin(dy/test_hypot),
-        test_deg = test_rad * (180 / Math.PI),
-        quadrant =  test_deg < crit_deg ? 0 : // left
-                    test_deg < (180-crit_deg) ? 1 : // top 
-                    test_deg < (180+crit_deg) ? 2 : // right
-                    test_deg < (360-crit_deg) ? 3 : // bottom
+        t = sign * theta.degrees,
+        crit_rad = Math.atan2(d.width,d.height),
+        c = crit_rad * (180 / Math.PI),
+        quadrant =  t < c -180 ? 0 : // left
+                    t < -c ? 1 : // top 
+                    t < c ? 2 : // right
+                    t < 180-c ? 3 : // bottom
                     0 // left
             ;
-
 
 const rect = { 
         label: d.NODE_TXT,
@@ -44,19 +37,12 @@ const rect = {
         right: d.x + d.width, 
         top: d.y, 
         bottom: d.y+d.height,
-        // width: d.width,
-        // height: d.height,
-        // hypot,
-        // sine,
-        // crit_rad,
-        crit_deg,
-        test_x: node.x,
-        test_y: node.y,
-        dx,
-        dy,
-        // test_hypot,
-        test_deg,
-        quadrant
+        deg_crit : c,
+        deg_test : t,
+        quadrant,
+        sign,
+        width: d.width,
+        height: d.height
     };
 return rect;
 }

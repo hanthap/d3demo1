@@ -72,12 +72,12 @@ class Node {
 
    //-------------------------------------------------------------------------------
 
-    static ContactPoint(d,node) { 
+    static ContactPoint(d,theta,sign=1) {  // sign is needed to clarify from/to direction of the ray
         if ( true || Node.ShowAsFrame(d) ) { //  DIY polymorphism 
-            return Frame.ContactPoint(d,node);
+            return Frame.ContactPoint(d,theta,sign);
         }
         if ( Node.ShowAsCircle(d) ) {
-            return {x: d.x, y: d.y, r: d.r};
+            return Node.ContactPoint(d,theta,sign);
         }
  
 }
@@ -415,22 +415,7 @@ function VisibleChildrenOf(d) {
 //-------------------------------------------------------------------------------
 
 function VisibleDescendantsOf(d) {
-   // return d.descendants.filter( IsVisibleNode );
-   return d.descendants.filter( Node.IsActive ); // inlcudes frames?
-}
-
-//-------------------------------------------------------------------------------
-
-function LeadingChildOf(d) {
-        c = ChildrenOf(d);
-        return ( c.length ? c[0] : d ); // self-contained?
-}
-
-//-------------------------------------------------------------------------------
-function HasStackedParent(d) {  // if visible we'll use a different colour
-// parent is currently stacked // TO DO and has 2+ non-hidden children
-    return ( d.outLinks.filter(Link.IsHier).filter( e => e.target.stacked).length );
-    // at least one outward edge points to a node that is stacked
+   return d.descendants.filter( Node.IsActive ); // includes frames?
 }
 
 //-------------------------------------------------------------------------------
@@ -441,10 +426,6 @@ function ParentOf(d) {
         return( t.length ? t[0].target : d ); 
     } else return d;
 }
-
-
-//-------------------------------------------------------------------------------
-
 
 
 //-------------------------------------------------------------------------------
@@ -473,26 +454,10 @@ function handleKeyDown(d) {
     ticked();
 }
 
-
-
 //-------------------------------------------------------------------------------
-// problem with conflicting frames of reference
-// how to translate from DOM to SVG coordinates
-// d3 scale continuous scales
-
-//-------------------------------------------------------------------------------
-
-
-//-------------------------------------------------------------------------------
-
-// function initDrag(e,d) { // assumes SVG element has been created
-//     // only active nodes can be dragged
-//     gNode.selectAll('circle').call(drag);
-// }
-
-//-------------------------------------------------------------------------------
-// drag & drop are synthetic events managed by d3. ".on()" only listens for raw DOM events
+// drag & drop are synthetic events managed by d3. ".on()" only listens for 'raw' DOM events
 // d3's drag listener is applied to circle elements via d3 selection ".call(drag)" method.
+
 let drag = d3.drag()
     .on('start', Node.OnDragStart)
     .on('drag', Node.OnDrag)
