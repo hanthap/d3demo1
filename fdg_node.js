@@ -72,15 +72,19 @@ class Node {
 
    //-------------------------------------------------------------------------------
 
-    static ContactPoint(d,theta,sign=1) {  // sign is needed to clarify from/to direction of the ray
-        if ( true || Node.ShowAsFrame(d) ) { //  DIY polymorphism 
-            return Frame.ContactPoint(d,theta,sign);
+    static ContactPoint(d,theta) {  
+        if ( Node.ShowAsFrame(d) ) { //  DIY polymorphism 
+            return Frame.ContactPoint(d,theta);
         }
         if ( Node.ShowAsCircle(d) ) {
-            return Node.ContactPoint(d,theta,sign);
+            // where does the ray intersect the circle?
+            return {
+                    x: d.x + d.r * Math.cos(theta),
+                    y: d.y + d.r * Math.sin(theta)
+            };
+
         }
- 
-}
+ }
 
     //-------------------------------------------------------------------------------
 
@@ -112,18 +116,9 @@ class Node {
             .selectAll('circle')
             .filter(c => c == d);
 
-        if ( k.ctrlKey && Node.HasMembers(d) ) {       
-            // expand a collapsed node so it appears as a frame with visible child nodes
-
-            d.IS_GROUP = true;
+        if ( k.ctrlKey && Node.HasMembers(d) ) {      
             clicked_element.attr('visibility', Node.Visibility);
-
-            // should this be all descendants?
-            ChildrenOf(d).forEach( c => { c.has_shape = 1 } );
-            AppendShapes(); 
-            AppendFrameShapes();
-            AppendLines();
-            RefreshSimData();
+            Node.ToFrame(d);
         } else { // toggle foreground/selected status
             d.selected ^= 1;
             clicked_element.classed('selected', d => d.selected)
@@ -143,7 +138,27 @@ class Node {
 
    //-------------------------------------------------------------------------------
 
+// expand a collapsed node so it appears as a frame with visible child nodes
+static ToFrame(d) {
+
+    if ( Node.HasMembers(d) ) {
+
+            d.IS_GROUP = true;
+
+            // should this be all descendants?
+            ChildrenOf(d).forEach( c => { c.has_shape = 1 } );
+            AppendShapes(); 
+            AppendFrameShapes();
+            AppendLines();
+            RefreshSimData();
+        }
+
+}
+
+   //-------------------------------------------------------------------------------
+
 static OnDblClick(e,d) {
+    Node.ToFrame(d);
     ticked();
    }
 

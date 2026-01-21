@@ -26,7 +26,7 @@ try {
 // TO DO: adjust for non-circular nodes. If the circle is inside the rect, the line goes to the nearest outer edge of the rect, not the centre
 // TO DO: handle scenario where source node overlaps the destination (or vice versa)
 
-static PolyLinePointTuple( d ) {
+static PolyLinePointTuple_deprecated( d ) {
     var dDest = d.target, dOrig = d.source;
     var cDest = Node.Centre(dDest);
     var cOrig = Node.Centre(dOrig);
@@ -54,6 +54,21 @@ static PolyLinePointTuple( d ) {
             };
 }
 
+//-------------------------------------------------------------------------------
+
+static PolyLinePointTuple( d ) {
+
+    const cp = Link.ContactPoints(d);
+
+    // visual midpoint = half-way along the visible line segment, NOT half-way between node centres
+    var xMid = ( cp.p0.x + cp.p1.x ) / 2; 
+    var yMid = ( cp.p0.y + cp.p1.y ) / 2;
+
+    return { 'start': { 'x': cp.p0.x , 'y': cp.p0.y },
+             'mid' :  { 'x': xMid,   'y': yMid },
+             'end':   {  'x': cp.p1.x , 'y': cp.p1.y  }
+            };
+}
 //-------------------------------------------------------------------------------
 
 static PolyLinePointString( d ) {
@@ -140,23 +155,6 @@ static ShowAsLine(d) {
     return ( Node.HasShape(d.source) && Node.HasShape(d.target) );
 }
 
-//-------------------------------------------------------------------------------
-
-static Coefficients(d) { // get linear interpolation parameters m (slope) and c (intercept)
-
-    var 
-        cDest = Node.Centre(d.target),
-        cOrig = Node.Centre(d.source),
-        m = null, 
-        c = null;
-
-    try {
-        m = (cDest.y - cOrig.y)  / ( cDest.x - cOrig.x);
-        c = cOrig.y - m * cOrig.x;
-    } catch (e) { };
-
-    return { m, c };
-}
 
 //-------------------------------------------------------------------------------
 // generalised formula: aX + bY + c = 0 (immune to divide-by=zero)
@@ -180,16 +178,19 @@ static LineGeneralForm(d) {
 static Theta(d) {
 
 const
-        c0 = { x: d.source.x, y: d.source.y, id: d.source.NODE_ID},
-        c1 = { x: d.target.x, y: d.target.y, id: d.target.NODE_ID},
+        c0 = Node.Centre(d.source), // careful with rect
+        c1 = Node.Centre(d.target),
         dx = c1.x - c0.x,
         dy = c1.y - c0.y,
-        radians = Math.atan2(dy, dx),
-        degrees = radians * (180 / Math.PI); 
+        theta_out = Math.atan2( dy,  dx),
+        theta_in =  Math.atan2(-dy, -dx),
+        deg_out = theta_out * (180 / Math.PI), // range [-180,+180] 
+        deg_in = theta_in * (180 / Math.PI) // range [-180,+180] 
+        ; 
         
 const info = 
 {
-    c0, c1, dx, dy, radians, degrees
+    c0, c1, dx, dy, theta_in, theta_out, deg_out, deg_in
 };
 
 return info;
@@ -198,11 +199,12 @@ return info;
 
 //-------------------------------------------------------------------------------
 static ContactPoints(d) {
-    const theta = Link.Theta(d), // congruent angle 
-    p0 = Node.ContactPoint(d.source,theta,+1),
-    p1 = Node.ContactPoint(d.target,theta,-1); // negative sign for incoming ray
+
+    const t = Link.Theta(d),
+    p0 = Node.ContactPoint(d.source,t.theta_out),
+    p1 = Node.ContactPoint(d.target,t.theta_in); 
     return { p0, p1 };
-}
+    }
 
 }
 
@@ -273,6 +275,7 @@ static StrokeWidth(d) { // width of extended click zone
 static OnClick(e,d) {
     console.log( Link.Theta(d) );
     console.log( Link.ContactPoints(d) );
+    console.log( Link.PolyLinePointTuple(d) );
 
     d.selected ^= 1;
     d.source.selected = d.selected;

@@ -14,24 +14,31 @@ class Frame extends Node {
     }
 
 //-------------------------------------------------------------------------------
-// returns point where the rendered boundary of d is intersected by a ray with angle theta and origin at centrepoint of d
-// partitions the space into 4 quadrants  Compares angles to determine which quadrant contains the ray and therefore 
+// returns point where the rendered boundary of rect d intersects a ray with angle theta and origin at centrepoint of d
+// Partitions the space into 4 quadrants  Compares angles to determine which quadrant contains the ray and therefore 
 // which one of the rect sides will contain the intersection point.
 
-static ContactPoint(d,theta,sign=1) { 
+static ContactPoint(d,theta) { 
 
 const
-        t = sign * theta.degrees,
-        crit_rad = Math.atan2(d.width,d.height),
-        c = crit_rad * (180 / Math.PI),
-        quadrant =  t < c -180 ? 0 : // left
-                    t < -c ? 1 : // top 
-                    t < c ? 2 : // right
-                    t < 180-c ? 3 : // bottom
-                    0 // left
-            ;
+        t = theta * (180 / Math.PI),        
+        crit_rad = Math.atan2(d.height,d.width), // y,x
+        c = crit_rad * (180 / Math.PI), // range [0,90]
 
-const rect = { 
+        // NOTE : this is ONLY valid for rects with d.x and d.y at top left corner. (Not circles)
+        v =   t < c -180 ?  { side: 'left',   dim: 'x', k: d.x } :
+              t < 0-c ?     { side: 'top',    dim: 'y', k: d.y } :
+              t < c ?       { side: 'right',  dim: 'x', k: d.x+d.width } :
+              t < 180-c ?   { side: 'bottom', dim: 'y', k: d.y+d.height } :
+                            { side: 'left',   dim: 'x', k: d.x },
+
+  // TO DO : fix this.. 
+
+        point = v.dim == 'x' ? { x: v.k, y: v.k * Math.sin(theta) } :
+                               { y: v.k, x: v.k * Math.cos(theta) } ;
+
+/*
+const info = { 
         label: d.NODE_TXT,
         left: d.x, 
         right: d.x + d.width, 
@@ -39,12 +46,16 @@ const rect = {
         bottom: d.y+d.height,
         deg_crit : c,
         deg_test : t,
-        quadrant,
-        sign,
+        v,
+        point,
         width: d.width,
         height: d.height
     };
-return rect;
+
+console.log(info);
+*/
+
+return point;
 }
 
    //-------------------------------------------------------------------------------
@@ -74,12 +85,13 @@ return rect;
    //-------------------------------------------------------------------------------
 
 static ToCircle(d, bCollapsed, cXcY) {
-        // collapse the frame into a circle at cXcY, refresh attributes
+        // replace the frame with a circle at cXcY, refresh attributes
         [d.x, d.y] = cXcY;
+        d.width = d.height = 2*d.r; // referred to by Node.ContactPoints()
 
         d.IS_GROUP = false;
 
-        if ( bCollapsed ) { 
+        if ( bCollapsed ) {  // hide its contents
         // should be all descendants
         ChildrenOf(d).forEach( c => { c.has_shape = 0 } );
         }
