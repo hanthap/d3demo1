@@ -14,28 +14,30 @@ class Frame extends Node {
     }
 
 //-------------------------------------------------------------------------------
-// returns point where the rendered boundary of rect d intersects a ray with angle theta and origin at centrepoint of d
+// returns point where the rendered boundary of rect d intersects a ray with angle theta (from atan2) and origin at centrepoint of d
 // Partitions the space into 4 quadrants  Compares angles to determine which quadrant contains the ray and therefore 
 // which one of the rect sides will contain the intersection point.
 
 static ContactPoint(d,theta) { 
 
 const
-        t = theta * (180 / Math.PI),        
-        crit_rad = Math.atan2(d.height,d.width), // y,x
+        t = theta * (180 / Math.PI),  // just for clarity      
+        crit_rad = Math.atan2( Frame.Height(d), Frame.Width(d) ), // allow for outer margin
         c = crit_rad * (180 / Math.PI), // range [0,90]
 
-        // NOTE : this is ONLY valid for rects with d.x and d.y at top left corner. (Not circles)
-        v =   t < c -180 ?  { side: 'left',   dim: 'x', k: d.x } :
-              t < 0-c ?     { side: 'top',    dim: 'y', k: d.y } :
-              t < c ?       { side: 'right',  dim: 'x', k: d.x+d.width } :
-              t < 180-c ?   { side: 'bottom', dim: 'y', k: d.y+d.height } :
-                            { side: 'left',   dim: 'x', k: d.x },
+        v =   t < c -180 ?  { side: 'left',   dim: 'x', k: Frame.Left(d),   a: -theta } :
+              t < 0-c ?     { side: 'top',    dim: 'y', k: Frame.Top(d),    a: theta-Math.PI/2 } :
+              t < c ?       { side: 'right',  dim: 'x', k: Frame.Right(d),  a: theta+Math.PI } :
+              t < 180-c ?   { side: 'bottom', dim: 'y', k: Frame.Bottom(d), a: -theta-Math.PI/2 } :
+                            { side: 'left',   dim: 'x', k: Frame.Left(d),   a: -theta },
 
-  // TO DO : fix this.. 
 
-        point = v.dim == 'x' ? { x: v.k, y: v.k * Math.sin(theta) } :
-                               { y: v.k, x: v.k * Math.cos(theta) } ;
+        point = v.dim == 'x' ? { x: v.k, y: Frame.Centre(d).y + ( Frame.HalfWidth(d)  * Math.tan(v.a) ) } :
+                               { y: v.k, x: Frame.Centre(d).x + ( Frame.HalfHeight(d) * Math.tan(v.a) ) } ;
+
+  // TO DO : what if the point falls at a rounded corner (within Frame.CornerRadius of that corner)
+
+
 
 /*
 const info = { 
@@ -98,7 +100,7 @@ static ToCircle(d, bCollapsed, cXcY) {
             // TO DO: recalculate and cache the 'effective' endpoints for links that reference a leaf node that is now hidden (as a descendant node)
             // scan the list of edges and set this node d as the effective end point in place of any descendants of d
             // if both ends now point to d then the link will not be in 
-            //  likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
+            // likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
 
         AppendShapes(); 
         AppendFrameShapes();
@@ -143,15 +145,31 @@ static ToCircle(d, bCollapsed, cXcY) {
 
    //-------------------------------------------------------------------------------
 
-    static RectX(d) { return d.x - radius }; // extra margin to accommodate rounded corners
+   // currently assumes that x, y, height & width are determined by visible child circles
 
-    static RectY(d) { return d.y - radius };
+    static Centre(d) { return { x: d.x + d.width/2, y: d.y + d.height/2 }    }
 
-    static RectHeight(d) { return d.height + 2*radius } ;
+    static Left(d) { return d.x - Frame.Margin(d) }; 
 
-    static RectWidth(d) { return d.width + 2*radius } ;
+    static Top(d) { return d.y - Frame.Margin(d) };
+ 
+    static Right(d) { return d.x + d.width + Frame.Margin(d) }; 
 
+    static Bottom(d) { return d.y + d.height + Frame.Margin(d) };
+ 
+    static Width(d) { return d.width + 2*Frame.Margin(d) } ;
 
+    static Height(d) { return d.height + 2*Frame.Margin(d) } ;
+
+    static HalfWidth(d)  { return d.width/2 + Frame.Margin(d) };
+
+    static HalfHeight(d) { return d.height/2 + Frame.Margin(d) };
+
+    static CornerRadius(d) { return 2*radius };
+
+    static Margin(d) { return radius };
+
+ 
 }
 
 //-------------------------------------------------------------------------------
@@ -193,10 +211,10 @@ function AllDescendantsOf(start, visited = new Set(), result = []) {
 function AppendFrameShapes() {
     gGroup.selectAll('rect') // in case we've already got some
       .data(sorted_nodes.filter(Node.ShowAsFrame), Node.UniqueId) 
-        .join('rect') // append a new rectangular frame bound to this node datum
-        .attr('id', Node.UniqueId)
-        .attr('rx', 2*radius ) // for rounded corners
-        .attr('ry', 2*radius ) 
+        .join('rect') // one-step upsert|delete based on matching UniqueId
+        .attr('id', Node.UniqueId) //primary key
+        .attr('rx', Frame.CornerRadius)
+        .attr('ry', Frame.CornerRadius)
         .attr('fill',Node.FillColour) // same as if it was a collapsed circle
         // gradients are static defs, so we can't set them per-node here
         .classed('frame',true) // CSS selectors can use ".frame" 
@@ -213,45 +231,3 @@ function AppendFrameShapes() {
 
 }
 
-
-function lineRectIntersections({ a, b, c }, { left, right, top, bottom }) {
-  const points = [];
-
-  // Helper to add a point if it's within the rectangle bounds
-  function addIfOnVerticalEdge(x, y) {
-    if (y >= top && y <= bottom) points.push({ x, y });
-  }
-
-  function addIfOnHorizontalEdge(x, y) {
-    if (x >= left && x <= right) points.push({ x, y });
-  }
-
-  // Intersect with x = left and x = right (if b != 0)
-  if (b !== 0) {
-    const yLeft = (-a * left - c) / b;
-    addIfOnVerticalEdge(left, yLeft);
-
-    const yRight = (-a * right - c) / b;
-    addIfOnVerticalEdge(right, yRight);
-  }
-
-  // Intersect with y = top and y = bottom (if a != 0)
-  if (a !== 0) {
-    const xTop = (-b * top - c) / a;
-    addIfOnHorizontalEdge(xTop, top);
-
-    const xBottom = (-b * bottom - c) / a;
-    addIfOnHorizontalEdge(xBottom, bottom);
-  }
-
-  // Remove duplicates (e.g. line passing exactly through a corner)
-  const unique = [];
-  for (const p of points) {
-    if (!unique.some(q => Math.abs(q.x - p.x) < 1e-9 && Math.abs(q.y - p.y) < 1e-9)) {
-      unique.push(p);
-    }
-  }
-
-  // You’ll usually get 0, 1, or 2 points
-  return unique;
-}

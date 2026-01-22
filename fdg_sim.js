@@ -117,7 +117,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 // TO DO : If a 'container' node is empty it should be rendered as a circle(?), not hidden
 
 
-    gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); 
+   gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); 
    gLink.selectAll('polyline').each( Link.SetAttributes ); 
 
 
@@ -133,11 +133,11 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 // to do: what about group frames with no visible child node - these should probably be shown as circles?
 
     gGroup.selectAll('rect')
-        // size & position change continuously
-        .attr('x', Frame.RectX ) 
-        .attr('y', Frame.RectY )
-        .attr( 'height', Frame.RectHeight)
-        .attr( 'width', Frame.RectWidth )
+        // the raw d.x, d.y values are not adjusted to allow for margins
+        .attr('x', Frame.Left ) 
+        .attr('y', Frame.Top )
+        .attr('height', Frame.Height )
+        .attr('width', Frame.Width )
         // The following adjustments are only required when static data is modified, typically after a user click
         .classed('selected', d => d.selected)  
         .attr('visibility', Frame.Visibility )
