@@ -68,8 +68,32 @@ function bounded(x,a,b) {
     if ( x > b ) x = b;
     return x;
 }
+//-------------------------------------------------------------------------------
+
 
 // function cursorPoint_deprecated(evt) {
 //     pt.x = evt.clientX; pt.y = evt.clientY;
 //     return pt.matrixTransform(svg.getScreenCTM().inverse());
-//     }
+//     }\
+
+//-------------------------------------------------------------------------------
+
+
+const logicalSize = 500; // width and height in logical units
+
+function updateViewBox() {
+  const W = parseFloat(svg.style("width"));
+  const H = parseFloat(svg.style("height"));
+
+  const s = Math.min(W, H);
+  const scale = logicalSize / s;
+
+  const x0 = -logicalSize/2;
+  const y0 = -logicalSize/2;
+
+  svg.attr("viewBox", `${x0} ${y0} ${logicalSize} ${logicalSize}`);
+}
+
+
+updateViewBox();
+window.addEventListener("resize", updateViewBox);
