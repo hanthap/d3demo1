@@ -4,7 +4,7 @@ var nodes = [];
 var mapNodes; // key,value lookup dict
 var active_frames = []; // frames in scope of active exclusion
 var active_circles = []; // circles in scope of active exclusion
-var sorted_nodes = []; // flat array determines the z-order, especially of frame rects
+var sorted_nodes = []; // flat array determines the z-order, especially of nested frame rects
 
 // Lookup Node.Colour using SRCE_CDE
 var sourcePalette = d3.scaleOrdinal()
@@ -18,6 +18,7 @@ class Node {
 
     constructor( d ) {
         this.d = d;
+        d.obj = this; 
         }
 
     //-------------------------------------------------------------------------------
@@ -34,18 +35,21 @@ class Node {
     //-------------------------------------------------------------------------------
 
     static Width(d) {
-        return 2*d.r; // TO DO: handle frame shapes
+        return 2*d.r; 
     }
     //-------------------------------------------------------------------------------
 
     static Height(d) {
-        return 2*d.r; // TO DO: handle frame shapes
+        return 2*d.r; 
     }
 
     //-------------------------------------------------------------------------------
-
+    // prevent the shape from crossing the perimeter of the SVG viewport
     static BoundedX(d) {
         // bounded node centre needs to consider node's radius as well as the static viewport width, adjusted for corner radius of rounded frame
+
+
+
         d.x = bounded(d.x, d.r - width/2 - 2*radius, width/2-3*radius); 
         return d.x;
     }
@@ -79,6 +83,7 @@ class Node {
         if ( Node.ShowAsCircle(d) ) {
             // where does the ray intersect the circle?
             return {
+                // TO DO: adjust for stroke width
                     x: d.x + d.r * Math.cos(theta),
                     y: d.y + d.r * Math.sin(theta)
             };
@@ -215,7 +220,35 @@ static Charge(d) { // called by d3.forceManyBody().strength(...)
     return d.charge;
 }
 
+/*-------------------------------------------------------------------------------
+
+// NOTE: d3.forceX(), d3.forceY() are not needed
+
 //-------------------------------------------------------------------------------
+
+static COGX(d) { // passed to d3.forceX()
+    return d.cogX;
+}
+
+//-------------------------------------------------------------------------------
+
+static COGY(d) { // passed to d3.forceY()
+    return d.cogY;
+} 
+
+//-------------------------------------------------------------------------------
+
+static ForceX(d) { // passed to d3.forceX().strength()
+    return d.weight;
+}
+
+//-------------------------------------------------------------------------------
+
+static ForceY(d) { // passed to d3.forceX().strength()
+    return (width/height) * d.weight;
+}
+
+//-------------------------------------------------------------------------------*/
 
 static OnMouseOver(e,d) {
         mouseover_object = d;
@@ -370,9 +403,9 @@ function IsVisibleNode(d) {
 
 
 //-------------------------------------------------------------------------------
-// if we only create circles for nodes that are initially active, how to switch from passive to active later in the session?
+// AppendShapes is not just for initial setup. Called after user interaction, also handles update & delete.
 // might be easier up front to create a circle for every node in scope and decide whether to show or hide using CSS attributes
-function AppendShapes(rs) {
+function AppendShapes() {
  
 // TO DO: create a mini 'g' group for each node, then append circle & foreignObject as siblings inside that group
 

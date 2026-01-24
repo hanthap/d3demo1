@@ -6,18 +6,14 @@
 
 
             var x; // last clicked node
-            const shape = "circle";
             var mouseover_object = null;
 
 
             var svg = d3.select('body').append('svg')
-                .attr('width',width)
-                .attr('height',height)
+                .attr('width',window.innerWidth)
+                .attr('height', window.innerHeight)
                 // set origin to centre of svg
                 .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
-                // interesting behaviour when window resizes - ALMOST good
-                .attr('style', 'max-width:100%; height:auto; height:intrinsic;')
-               // .attr('preserveAspectRatio','none');
 
 
             // group frames are passive shapes in the background
@@ -43,24 +39,19 @@
             const arrow = defs
                 .append("marker")
                 .attr("id","arrow") //  to invoke this polyline marker and apply it to multiple instances
+                // these attributes cannot be set using CSS
                 .attr("markerWidth",6)
                 .attr("markerHeight",6)
                 .attr("refX",3) // anchor at 3 = 6/2 so the centre of the arrow is at the exact centre of the polyline
                 .attr("refY",2)
-                .attr("class","arrowhead")
                 .attr("orient","auto")
                 .attr("markerUnits","strokeWidth") // should inherit
                     .append("polygon")
-                    .attr("points","0 0, 6 2, 0 4")
-                    .attr("stroke","none") // not "context-stroke"
-                    .attr("fill","context-fill") // use rgba() in polyline to control alpha (opacity)
-                    .attr("class","arrowhead");
+                    .attr("class","arrowhead")
+                    .attr("points","0 0, 6 2, 0 4");
 
-
-// find your root SVG element
-var svg = document.querySelector('svg');
-// create an SVGPoint for future math
-var pt = svg.createSVGPoint();
+// create an SVGPoint for future math - but do we even need it?
+// const pt = svg.node().createSVGPoint(); 
 // get point in global SVG space
 
 const supabaseClient = supabase.createClient(
@@ -71,17 +62,14 @@ const supabaseClient = supabase.createClient(
 
 //-------------------------------------------------------------------------------
 
-// used in ticked(), drag() to ensure objects never disappear out of frame
+// used in ticked(), drag() to ensure objects never disappear out of viewport window
 function bounded(x,a,b) {
     if ( x < a ) x = a;
     if ( x > b ) x = b;
     return x;
 }
 
-
-
-
-function cursorPoint(evt) {
-    pt.x = evt.clientX; pt.y = evt.clientY;
-    return pt.matrixTransform(svg.getScreenCTM().inverse());
-    }
+// function cursorPoint_deprecated(evt) {
+//     pt.x = evt.clientX; pt.y = evt.clientY;
+//     return pt.matrixTransform(svg.getScreenCTM().inverse());
+//     }

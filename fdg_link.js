@@ -18,43 +18,14 @@ try {
     }
 }
 
+
 //-------------------------------------------------------------------------------
 
 // Given 2 circle nodes with different radii, calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
 // this ensures the line's terminal arrowhead will just touch the outer perimeter of the destination node.
-// TO DO: adjust for variable boundary stroke widths of source and target nodes
 // TO DO: adjust for non-circular nodes. If the circle is inside the rect, the line goes to the nearest outer edge of the rect, not the centre
 // TO DO: handle scenario where source node overlaps the destination (or vice versa)
 
-static PolyLinePointTuple_deprecated( d ) {
-    var dDest = d.target, dOrig = d.source;
-    var cDest = Node.Centre(dDest);
-    var cOrig = Node.Centre(dOrig);
-  //  console.log(cDest);
-  //  console.log(cOrig);
-    var yDelta = cDest.y - cOrig.y ;
-    var xDelta = cDest.x - cOrig.x;
- 
-    var h = Math.hypot(xDelta,yDelta); // hypotenuse = distance between centres
-    // move origin to the perimeter of the "from" circle
-    var xStart = cOrig.x + ( xDelta * dOrig.r / h ); 
-    var yStart = cOrig.y + ( yDelta * dOrig.r / h );
-
-    // move target to the perimeter of the "to" circle (node)
-    var xEnd = cDest.x - ( xDelta * dDest.r / h );
-    var yEnd = cDest.y - ( yDelta * dDest.r / h );
-
-    // visual midpoint = half-way along the visible line segment, NOT half-way between node centres
-    var xMid = ( xStart + xEnd ) / 2; 
-    var yMid = ( yStart + yEnd ) / 2;
-
-    return { 'start': { 'x': xStart, 'y': yStart },
-             'mid' :  { 'x': xMid,   'y': yMid },
-             'end':   { 'x': xEnd,   'y': yEnd }
-            };
-}
-
-//-------------------------------------------------------------------------------
 
 static PolyLinePointTuple( d ) {
 

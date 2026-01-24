@@ -4,6 +4,7 @@ class Frame extends Node {
 
     static IsExclusive(d) {  
         // to decide whether non-members will be pushed out by active_exclusion force
+        // TO DO: a frame is exclusive iff it is in the foreground ??
         return ( HasVisibleChild(d) ); // for now, all frame rects are exclusive    
     }
 
@@ -37,26 +38,6 @@ const
 
   // TO DO : what if the point falls at a rounded corner (within Frame.CornerRadius of that corner)
 
-
-
-/*
-const info = { 
-        label: d.NODE_TXT,
-        left: d.x, 
-        right: d.x + d.width, 
-        top: d.y, 
-        bottom: d.y+d.height,
-        deg_crit : c,
-        deg_test : t,
-        v,
-        point,
-        width: d.width,
-        height: d.height
-    };
-
-console.log(info);
-*/
-
 return point;
 }
 
@@ -80,7 +61,7 @@ return point;
    //-------------------------------------------------------------------------------
 
    static OnMouseOut(e, d) {
-    if ( e.button) return; //  ignore if still dragging 
+    if (e.button) return; //  ignore if still dragging 
         Frame.Hover( d, false );
    }
 
@@ -94,14 +75,13 @@ static ToCircle(d, bCollapsed, cXcY) {
         d.IS_GROUP = false;
 
         if ( bCollapsed ) {  // hide its contents
-        // should be all descendants
-        ChildrenOf(d).forEach( c => { c.has_shape = 0 } );
-        }
-            // TO DO: recalculate and cache the 'effective' endpoints for links that reference a leaf node that is now hidden (as a descendant node)
+            // should be all descendants
+            ChildrenOf(d).forEach( c => { c.has_shape = 0 } );
+            // TO DO: recalculate and cache the 'effective' node-pair for links that reference a leaf node that is now hidden (as a descendant node)
             // scan the list of edges and set this node d as the effective end point in place of any descendants of d
             // if both ends now point to d then the link will not be in 
             // likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
-
+            }
         AppendShapes(); 
         AppendFrameShapes();
         AppendLines();

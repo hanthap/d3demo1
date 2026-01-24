@@ -7,9 +7,10 @@ html, body {
 }
 
 svg {
-    width: 100%;
-    height: 100%;
     display: block; /* removes inline-gap issues */
+    box-sizing: border-box;
+    border: 1px solid red; 
+    width: 100vw; height: 100vh;
 }
 
 circle {
@@ -81,6 +82,7 @@ g.linkzone {
     stroke-opacity: 0;
 }
 
+
 polyline.arrow { /* directed line, with arrow */
     stroke-width: 1.5;
     marker-mid: url(#arrow);
@@ -89,6 +91,8 @@ polyline.arrow { /* directed line, with arrow */
 polygon.arrowhead {
     fill: context-fill; /* inherit polyline's RGBA fill colour INCLUDING opacity (alpha) */
     stroke: none; 
+
+
 }
 
 polyline.selected {
