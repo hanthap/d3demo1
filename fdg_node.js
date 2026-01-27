@@ -16,6 +16,8 @@ var sourcePalette = d3.scaleOrdinal()
 
 class Node {
 
+    static DragStartPos;
+
     constructor( d ) {
         this.d = d;
         d.obj = this; 
@@ -117,9 +119,16 @@ class Node {
     static OnClick( k, d ) {
        // mouseover_object = d; // redundant
         // toggle 'selected' status of the clicked node
+        console.log('enter Node.OnClick')
+        
         let clicked_element = gNode   
             .selectAll('circle')
             .filter(c => c == d);
+        
+            console.log(clicked_element);
+            // DEBUG: if the element is already in foreground , the whole event happens twice 
+            // appearance is the toggle doesn't happen 
+            // EndDrag event happens AND the OnClick ) 
 
         if ( k.ctrlKey && Node.HasMembers(d) ) {      
             clicked_element.attr('visibility', Node.Visibility);
@@ -139,7 +148,18 @@ class Node {
 
        ticked();
 
+        console.log('exit Node.OnClick')
+
+
     }
+
+   //-------------------------------------------------------------------------------
+
+static OnMouseDown(e,d) {
+   console.log('Enter Node.OnMouseDown')
+   Node.BringToFront(e.subject);
+      console.log('Exit Node.OnMouseDown')
+}
 
    //-------------------------------------------------------------------------------
 
@@ -198,13 +218,14 @@ static GetSelection( d, types="circle, rect" ) {
 //-------------------------------------------------------------------------------
 
 static BringToFront( d ) {
+    console.debug('Node.BringToFront');
      Node.GetSelection( d ).raise(); 
     }
 
 //-------------------------------------------------------------------------------
 
 static Centre(d) {
-    if ( Node.ShowAsFrame(d) ) return { 'x': ( d.x + d.width/2), 'y': (d.y +  d.height/2) };
+    if ( Node.ShowAsFrame(d) ) return Frame.Centre(d); // DIY polymorphism
     else return { 'x': d.x, 'y': d.y };  
 }
 
@@ -257,7 +278,8 @@ static OnMouseOver(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnMouseOut(e,d) {
-        if ( e.button) return; //  ignore if still dragging 
+    // TO DO: when dragging over LinkZone, we lose :hover style. Need to manage .xhover class explicitly when dragging
+     if ( Node.DragStartPos || e.button ) return; //  ignore if still dragging 
             mouseover_object = null;           
     }
 
@@ -318,15 +340,23 @@ static ParentsOf(d) {
         return ChildrenOf(d).length == 0 ;
     }
 
+//-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
+    console.log('Enter Node.OnDragStart');
+    // TO DO: add more info about the drag?
+    Node.DragStartPos = [e.x, e.y];
+    e.sourceEvent.target.classList.toggle("dragging",true); 
+ //   console.log(e.sourceEvent.target);
     simulation.stop(); // prevents crazy flicker while dragging
     simulationExclusion.stop(); 
-    Node.BringToFront(e.subject);
+   Node.BringToFront(e.subject);
+    console.log('Exit Node.OnDragStart');
 }
 //-------------------------------------------------------------------------------
 
 static OnDrag(e,d) {
+    // TO DO : ignore MouseOver with Links = so the dashed outline always stays with the circle being dragged (or perhaps with the circle it's dragged over)
     d.x = e.x;
     d.y = e.y;
     ticked();
@@ -335,13 +365,35 @@ static OnDrag(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnDragEnd(e,d) {
+   // console.log(e,d);
+ const p = Node.DragStartPos;
+ Node.DragStartPos = null; 
+ console.debug('Node.OnDragEnd');
+ e.sourceEvent.target.classList.toggle("dragging", false); 
+//    console.log(e.sourceEvent.target);
+  const dx = e.x - p[0];
+  const dy = e.y - p[1];
+  const dist = Math.hypot(dx, dy);
+  const CLICK_THRESHOLD = 3; // pixels
 
-    if ( !frozen ) {
-        UnfreezeSim();
-        }
+  if (dist < CLICK_THRESHOLD) {
+        console.debug('Manually calling Node.OnClick.');
+        Node.OnClick(e,d);
+       // e.sourceEvent.cancelBubble = true;
+    }
+
+ else if ( !frozen ) {
+    UnfreezeSim();
+    }
+
+  console.debug('Exit Node.OnDragEnd');
+
 }
 
+
 }
+
+
 
 //-------------------------------------------------------------------------------
 
@@ -419,6 +471,7 @@ function AppendShapes() {
                 .classed('has_members',Node.HasMembers)
                 .on('mouseover',Node.OnMouseOver) // called at each transition, including nested elements, unlike mouseenter
                 .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
+                .on('mousedown',Node.OnMouseDown) 
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
                 .call(drag) // attach d3's special listener object

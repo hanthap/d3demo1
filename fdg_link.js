@@ -257,6 +257,8 @@ static OnClick(e,d) {
 //-------------------------------------------------------------------------------
 
 static Hover( d, bHovering ) {
+
+    if ( Node.DragStartPos ) return; // don't react if user is dragging a circle
  
     gLink.selectAll('polyline')
         .filter( p => p == d ) // bound to the same datum 

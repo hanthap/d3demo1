@@ -13,8 +13,11 @@
                 .attr('width',window.innerWidth)
                 .attr('height', window.innerHeight)
                 // set origin to centre of svg
-                .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
-
+                 .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
+                .on("mousedown", (event) => {
+                     if (event.target === svg.node()) {
+                       console.log("Clicked on empty SVG background");
+                       } } );
 
             // group frames are passive shapes in the background
             const gGroup = svg.append('g')
@@ -74,26 +77,48 @@ function bounded(x,a,b) {
 // function cursorPoint_deprecated(evt) {
 //     pt.x = evt.clientX; pt.y = evt.clientY;
 //     return pt.matrixTransform(svg.getScreenCTM().inverse());
-//     }\
+//     }
 
 //-------------------------------------------------------------------------------
 
 
-const logicalSize = 500; // width and height in logical units
+class MainWindow{
 
-function updateViewBox() {
+static logicalSize = 500; // width and height in logical units
+static lastDPR = window.devicePixelRatio;
+
+
+static OnResize() {
+const sz = MainWindow.logicalSize;
   const W = parseFloat(svg.style("width"));
   const H = parseFloat(svg.style("height"));
 
   const s = Math.min(W, H);
-  const scale = logicalSize / s;
+  const scale = sz / s;
 
-  const x0 = -logicalSize/2;
-  const y0 = -logicalSize/2;
+  const x0 = -sz/2;
+  const y0 = -sz/2;
 
-  svg.attr("viewBox", `${x0} ${y0} ${logicalSize} ${logicalSize}`);
+  svg.attr("viewBox", `${x0} ${y0} ${sz} ${sz}`);
+  }
+
+//-------------------------------------------------------------------------------
+
+static WatchZoom() {
+  const currentDPR = window.devicePixelRatio;
+  if (currentDPR !== MainWindow.lastDPR) {
+     MainWindow.lastDPR = currentDPR;
+    MainWindow.OnResize();
+  }
+  requestAnimationFrame(MainWindow.WatchZoom);
 }
 
+//-------------------------------------------------------------------------------
 
-updateViewBox();
-window.addEventListener("resize", updateViewBox);
+
+}
+
+MainWindow.OnResize();
+MainWindow.WatchZoom();
+
+window.addEventListener("resize", MainWindow.OnResize);
