@@ -1,4 +1,5 @@
-
+// TOP DO: Look at https://observablehq.com/@d3/d3-packenclose ; https://d3js.org/d3-hierarchy/pack#packEnclose
+// maybe an enclosing circle will be more natural than enclosing rect?
 
 class Frame extends Node {
 

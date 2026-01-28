@@ -46,6 +46,26 @@ class Node {
     }
 
     //-------------------------------------------------------------------------------
+    
+static Right(d) {
+    return (Node.Centre(d).x + Node.HalfWidth(d));
+}
+
+static Left(d) {
+    return (Node.Centre(d).x - Node.HalfWidth(d));
+}
+
+static Bottom(d) {
+    return (Node.Centre(d).y + Node.HalfHeight(d));
+}
+
+static Top(d) {
+    return (Node.Centre(d).y - Node.HalfHeight(d));
+}
+
+    //-------------------------------------------------------------------------------
+
+    //-------------------------------------------------------------------------------
     // prevent the shape from crossing the perimeter of the SVG viewport
     static BoundedX(d) {
         // bounded node centre needs to consider node's radius as well as the static viewport width, adjusted for corner radius of rounded frame
@@ -148,7 +168,7 @@ class Node {
 
        ticked();
 
-        console.log('exit Node.OnClick')
+        console.log('exit Node.OnClick');
 
 
     }
@@ -156,9 +176,9 @@ class Node {
    //-------------------------------------------------------------------------------
 
 static OnMouseDown(e,d) {
-   console.log('Enter Node.OnMouseDown')
+   console.log('Enter Node.OnMouseDown');
    Node.BringToFront(e.subject);
-      console.log('Exit Node.OnMouseDown')
+      console.log('Exit Node.OnMouseDown');
 }
 
    //-------------------------------------------------------------------------------
@@ -395,31 +415,6 @@ static OnDragEnd(e,d) {
 
 
 
-//-------------------------------------------------------------------------------
-
-// after each tick we have to expressly assign new values to SVG attributes, otherwise nothing changes
-// we can adjust the data here as well eg set velocity to zero
-// to do: if the node is a container, we should allow for extra border
-// to do: needs to allow for extra border around any nested container
-
-
-function RightBoundary(d) {
-    return (Node.Centre(d).x + Node.HalfWidth(d));
-}
-
-function LeftBoundary(d) {
-    return (Node.Centre(d).x - Node.HalfWidth(d));
-}
-
-function BottomBoundary(d) {
-    return (Node.Centre(d).y + Node.HalfHeight(d));
-}
-
-function TopBoundary(d) {
-    return (Node.Centre(d).y - Node.HalfHeight(d));
-}
-
-
  //-------------------------------------------------------------------------------
 
 // which nodes do we care about? include active & passive nodes
@@ -557,7 +552,7 @@ function handleKeyDown(d) {
 
 //-------------------------------------------------------------------------------
 // drag & drop are synthetic events managed by d3. ".on()" only listens for 'raw' DOM events
-// d3's drag listener is applied to circle elements via d3 selection ".call(drag)" method.
+// d3's drag listener is applied to circle elements via d3 selection ".call(drag)" method, inside AppendShapes()
 
 let drag = d3.drag()
     .on('start', Node.OnDragStart)
