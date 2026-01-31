@@ -57,9 +57,6 @@ async function LoadData() {
     links = linklist;
     links.forEach(Link.AppendDatum);
 
-
-    // async means even LoadData() runs in a new thread. Control immediately returns
-    // only within this function can we reliably delay AfterLoad() until 
     AfterLoad();
 }
 

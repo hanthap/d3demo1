@@ -52,7 +52,9 @@ static PolyLinePointString( d ) {
 static StrokeColour(d) { 
     let c = sourcePalette( d.COLOUR_CDE );
     if ( d == mouseover_object ) { return 'black' }
-    return 'rgba(' + c + ( d.selected ? ',1)' : ',0.2)' );
+ //   cleaner looking arrow+line if opacity stays at 1
+   return d.selected ? 'rgba(' + c + ',1)' : 'lightgray' ;
+
 }
 
 //-------------------------------------------------------------------------------
@@ -129,7 +131,7 @@ static ShowAsLine(d) {
 
 //-------------------------------------------------------------------------------
 // generalised formula: aX + bY + c = 0 (immune to divide-by=zero)
-
+// NOT USED - instead use theta 
 static LineGeneralForm(d) {
     const 
         cDest = Node.Centre(d.target),
@@ -244,9 +246,9 @@ static StrokeWidth(d) { // width of extended click zone
 //-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
-    console.log( Link.Theta(d) );
-    console.log( Link.ContactPoints(d) );
-    console.log( Link.PolyLinePointTuple(d) );
+ //   console.log( Link.Theta(d) );
+ //   console.log( Link.ContactPoints(d) );
+ //   console.log( Link.PolyLinePointTuple(d) );
 
     d.selected ^= 1;
     d.source.selected = d.selected;

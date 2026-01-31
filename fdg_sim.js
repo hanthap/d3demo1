@@ -10,9 +10,16 @@ function RefreshSimData() {
 //-------------------------------------------------------------------------------
 
 function UnfreezeSim() {
-    simulation.restart(); 
-    simulationExclusion.restart(); 
+    if ( simulation) simulation.restart(); 
+    if ( simulationExclusion ) simulationExclusion.restart();
 } 
+
+//-------------------------------------------------------------------------------
+
+function StopSim() {
+    if ( simulation) { simulation.stop(); }
+    if ( simulationExclusion ) { simulationExclusion.stop(); }
+}
 
 //-------------------------------------------------------------------------------
 
@@ -21,8 +28,7 @@ function RunSim() {
     // just for the currently-active subset of nodes controlling the animation
 
     // first kill any previous sims
-    if ( simulation) { simulation.stop(); }
-    if ( simulationExclusion ) { simulationExclusion.stop(); }
+    StopSim() ;
 
     simulation = d3.forceSimulation(nodes.filter(Node.IsActive))
 
@@ -54,18 +60,18 @@ function RunSim() {
         .on('tick',ticked)
         ;
     ticked();
-
+            if ( false ) {
         // adding this extra collide sim helps reduce overlap and jitter?
           simulationExclusion = d3.forceSimulation() 
           .force("active_exclusion", active_exclusion) 
           .alphaTarget(0.6) // freeze if/when alpha drops below this threshold
           .alphaDecay(0.8)
          ;
+            }
 
     // the simulation starts running by default - we don't always want it to
     if (frozen) 
-        simulation.stop();
-        simulationExclusion.stop();
+            StopSim() ;
 
 }
 
@@ -99,21 +105,16 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
     
 // TO DO : If a 'container' node is empty it should be rendered as a circle(?), not hidden
 
-
    gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); 
    gLink.selectAll('polyline').each( Link.SetAttributes ); 
-
 
     gNode.selectAll('circle')
          .attr('cx', Node.BoundedX ) 
          .attr('cy', Node.BoundedY )
-
         // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on
         .classed('selected', d => d.selected)
         .attr('visibility', Node.Visibility )
         ;
-
-// to do: what about group frames with no visible child node - these should probably be shown as circles?
 
     gGroup.selectAll('rect')
         .attr('x', Frame.Left ) 
@@ -184,6 +185,9 @@ function active_exclusion(alpha) {
 // what's the 'shortest way out'?
 // TO DO: make sure the frame rect is stationary while the node is nudged outwards
 // this was originally written for scenario where both nodes could move
+
+// TO DO : replace this logic with Math.atan2() - see Link.Theta()
+// maybe also adapt Node.ContactPoint() 
 
 function escape_vector( m, n ) {
   

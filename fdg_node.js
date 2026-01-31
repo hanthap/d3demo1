@@ -191,7 +191,11 @@ static ToFrame(d) {
             d.IS_GROUP = true;
 
             // should this be all descendants?
-            ChildrenOf(d).forEach( c => { c.has_shape = 1 } );
+            ChildrenOf(d).forEach( c => { 
+                    c.has_shape = 1 
+                    // TO DO: remove xhover class?
+                
+                } );
             AppendShapes(); 
             AppendFrameShapes();
             AppendLines();
@@ -214,7 +218,7 @@ static AppendDatum(d,i) {
     d.cogX = 0;
     d.cogY = 0;
     d.weight = 0.1;
-    d.r = d.NODE_MASS * radius / 35; // size proportional to weight
+    d.r = Math.sqrt(d.NODE_MASS) * radius / 10; // size proportional to weight
     d.height = 2 * d.r;
     d.width = 2 * d.r;
     d.selected = 0;
@@ -368,8 +372,7 @@ static OnDragStart(e,d) {
     Node.DragStartPos = [e.x, e.y];
     e.sourceEvent.target.classList.toggle("dragging",true); 
  //   console.log(e.sourceEvent.target);
-    simulation.stop(); // prevents crazy flicker while dragging
-    simulationExclusion.stop(); 
+    StopSim();
    Node.BringToFront(e.subject);
     console.log('Exit Node.OnDragStart');
 }
@@ -389,7 +392,7 @@ static OnDragEnd(e,d) {
  const p = Node.DragStartPos;
  Node.DragStartPos = null; 
  console.debug('Node.OnDragEnd');
- e.sourceEvent.target.classList.toggle("dragging", false); 
+ e.sourceEvent.target.classList.toggle("dragging", false);  // remove special CSS styling
 //    console.log(e.sourceEvent.target);
   const dx = e.x - p[0];
   const dy = e.y - p[1];
@@ -397,9 +400,11 @@ static OnDragEnd(e,d) {
   const CLICK_THRESHOLD = 3; // pixels
 
   if (dist < CLICK_THRESHOLD) {
-        console.debug('Manually calling Node.OnClick.');
+        console.debug('Manually calling Node.OnClick');
         Node.OnClick(e,d);
-       // e.sourceEvent.cancelBubble = true;
+        // TO DO : if the target circle is in foreground it now receives the original click event. We need to prevent that somehow.
+        e.sourceEvent.stopImmediatePropagation(); // seems to have no effect
+
     }
 
  else if ( !frozen ) {
@@ -464,6 +469,7 @@ function AppendShapes() {
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
                 .classed('has_members',Node.HasMembers)
+                .classed('xhover',false) // remove dashed outline CSS for mewly-restored circles
                 .on('mouseover',Node.OnMouseOver) // called at each transition, including nested elements, unlike mouseenter
                 .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
                 .on('mousedown',Node.OnMouseDown) 
