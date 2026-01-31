@@ -55,6 +55,13 @@ circle.has_members {
     50% { opacity: 0 ;}
 }
 
+rect.drag_selector {
+    stroke:red;
+    stroke-dasharray:  3,3;
+    stroke-opacity: 1;
+    fill-opacity: 0.1;
+}
+
 rect.frame {
     stroke:black;
     stroke-width: 1;

@@ -45,17 +45,17 @@ static WatchZoom() {
 
 static OnDragStart(e,d) {
    // console.info("MainWindow.OnDragStart");
-
-        MainWindow.DragStartPos = { x: e.x, y: e.y };
+    const [x,y] = p = d3.pointer(e,svg.node());
+        MainWindow.DragStartPos = p;
         console.info(MainWindow.DragStartPos);
-        MainWindow.SelectRect = gLabel.append('rect');
-        MainWindow.SelectRect
-            //.attr('x', e.x)
-          //  .attr('y', e.y)
-            .attr('width','30')
-            .attr('height','30')
-            .style('fill-opacity','1')
-            ;
+        MainWindow.SelectRect = gLabel
+            .append('rect')
+                .attr('x', x)
+                .attr('y', y)
+                .attr('width','30')
+                .attr('height','30')
+                .classed('drag_selector',true)
+                ;
 
 
 
@@ -63,10 +63,11 @@ static OnDragStart(e,d) {
 
 static OnDrag(e,d) {
  //   console.info("MainWindow.OnDrag");
- //           console.info([e.x, e.y]);
+    const [x1,y1] = d3.pointer(e,svg.node());
+    const [x0,y0] = MainWindow.DragStartPos;
         MainWindow.SelectRect
-            .attr('width', e.x - MainWindow.DragStartPos.x)
-            .attr('height', e.y - MainWindow.DragStartPos.y)
+            .attr('width', x1 - x0)
+            .attr('height', y1 - y0)
             ;
 
 
@@ -74,7 +75,8 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
  //   console.info("MainWindow.OnDragEnd");
-        console.info( { x: e.x, y: e.y } );
+        console.info(d3.pointer(e,svg.node()));
+        MainWindow.SelectRect.remove();
 }
 
 //-------------------------------------------------------------------------------
