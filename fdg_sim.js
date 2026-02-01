@@ -35,18 +35,12 @@ function RunSim() {
         .force('collide', d3.forceCollide().radius(Node.CollideRadius))
     
         // electrostatic forces attract/repel based on charge 
-        .force('elecrtrostatic', d3.forceManyBody().strength(Node.Charge))
-
-        // default centre is (0,0) within the viewBox coords
-        // d3.forceCenter() tries to keep the overall centre of mass in a fixed location
-        .force('centre', d3.forceCenter().strength(1))
-        
-        // push out any non-member circle nodes
-//        .force("active_exclusion", active_exclusion) 
+        .force('electrostatic', d3.forceManyBody().strength(Node.Charge))
 
         // in case we want to add a per-node centroid, eg as an 'attractor' for specific node clusters
-//        .force( 'cogX', d3.forceX( Node.COGX ).strength( Node.ForceX ) )
-//        .force( 'cogY', d3.forceY( Node.COGY ).strength( Node.ForceY ) )
+        // for now, they just help keep nodes near the centre of the window
+        .force( 'cogX', d3.forceX( Node.COGX ).strength( Node.ForceX ) )
+        .force( 'cogY', d3.forceY( Node.COGY ).strength( Node.ForceY ) )
 
         // each edge typically acts as a spring between 2 specific nodes (like a covalent bond)
         .force('link', d3.forceLink()
@@ -59,16 +53,14 @@ function RunSim() {
         .alphaDecay(0.2)  // zero => never freeze, keep responding to drag events
         .on('tick',ticked)
         ;
-    ticked();
-            // if ( false ) 
-              {
-        // adding this extra collide sim helps reduce overlap and jitter?
-          simulationExclusion = d3.forceSimulation() 
+        // separate simulation to handle frame/circle exclusion forces
+        simulationExclusion = d3.forceSimulation() 
           .force("active_exclusion", active_exclusion) 
           .alphaTarget(0.6) // freeze if/when alpha drops below this threshold
           .alphaDecay(0.8)
          ;
-            }
+
+    ticked();
 
     // the simulation starts running by default - we don't always want it to
     if (frozen) 
@@ -129,141 +121,41 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
      ;
 };
 
-
-
-//-------------------------------------------------------------------------------
-
-// Custom force to push out non-member circle nodes - needs work!
-function active_exclusion_OK(alpha) {
-
-  const padding = 2; // extra gap between rect and circle
-  var nudge_factor;                   
-  // full cartesian join, filtered for efficiency
-  // for each visible container frame rect with active exclusion enabled
-
-  // return active_exclusion; // disabled for now, need to define active_frames and active_circles arrays first
-
-  active_frames.forEach( n => { // outer loop
-  var // TO DO : use getBBox() instead. The d3 datum values do not allow for the outer margin for rounded corners
-    nx1 = Frame.Left(n), 
-    nx2 = Frame.Right(n),
-    ny1 = Frame.Top(n), 
-    ny2 = Frame.Bottom(n);
-
-  // for visible circle nodes with active exclusion enabled
-  
-  active_circles.forEach( m => { // inner loop
-    if ( !(n.descendants.includes(m)) ) // circle m is NOT a descendant of frame n 
-      { 
-        // do the rect and circle overlap?
-        // if the 
-
-        try {
-          var
-              x_int = segInt( m.x, m.x+m.width, nx1, nx2), // horizontal intersection
-              y_int = segInt( m.y, m.y+m.height, ny1, ny2), // vertical intersection
-              [x,y] = [x_int[2], y_int[2]],
-              overlap_area = x * y ; 
-
-        } catch (e) { 
-            console.log(e);
-            overlap_area = 0 ;
-            }
-
-      if (overlap_area) { // the 2 rects actually do overlap
-
-          nudge_factor = 2 * alpha; // for smooth animation
-          [x,y] = escape_vector( m, n ); // "shortest way out" 
-          m.x -= padding + x * nudge_factor; // nudge m away from n 
-          m.y -= padding + y * nudge_factor; // nudge m away from n 
-        }
-      }
-    });
-  });
-  ticked();
-
-  return active_exclusion_OK; // return self, enabling a chain of forces if needed
-
-}
 //----------------------------------------------------------------
 
-// Custom force to push out non-member circle nodes - needs work!
+// Custom force to push out non-member circle nodes
 function active_exclusion(alpha) {
 
-
 active_frames.forEach( n => { // outer loop 
-const c0 = Frame.Centre(n); 
-        
-
-    active_circles.forEach( m => { // inner loop
-    if ( !(n.descendants.includes(m)) ) // circle m is NOT a descendant of frame n 
-      { 
-        const 
-          c1 = Node.Centre(m),
-          dx = c1.x - c0.x,
-          dy = c1.y - c0.y,
-          theta_out = Math.atan2( dy,  dx),
-          theta_in =  Math.atan2(-dy, -dx),
-          p0 = Frame.ContactPoint(n,theta_out),
-          p1 = Node.ContactPoint(m,theta_in);  
-          
-        // do the rect and circle overlap?
-        
-        // what's the difference between the 2 vectors? 
-        // if c0 - p0 is more than c0 - p1
-        const
+  const c0 = Frame.Centre(n); 
+  active_circles.forEach( m => { // inner loop
+  if ( !(n.descendants.includes(m)) ) { // circle m is NOT a descendant of frame n 
+      const 
+        c1 = Node.Centre(m),
+        dx = c1.x - c0.x,
+        dy = c1.y - c0.y,
+        theta_out = Math.atan2( dy,  dx),
+        theta_in =  Math.atan2(-dy, -dx),
+        p0 = Frame.ContactPoint(n,theta_out),
+        p1 = Node.ContactPoint(m,theta_in),  
         h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ), // frame centre to frame edge
-        h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ); // frame centre to circle edge
-        if ( h0 > h1 ) { // overlap exists
-          // scale 0.2 makes a big difference
-          const nudge_factor = 0.2 * (h0 - h1) * alpha; // for smooth animation
-          m.x += Math.cos( theta_out ) * nudge_factor;
-          m.y += Math.sin( theta_out ) * nudge_factor;
+        h1 = 2 + Math.hypot( p1.x - c0.x, p1.y - c0.y ); // frame centre to circle edge
+
+        if ( h0 > h1 ) { // overlapping shapes
+          // hardcoded 2 and 0.5 by experimentation
+          const 
+            nudge_factor = 0.5 * (h0 - h1) * alpha; // for smooth animation
+            m.x += Math.cos( theta_out ) * nudge_factor;
+            m.y += Math.sin( theta_out ) * nudge_factor;
+          };
         };
-      };
-    }
-  );
-}
+      }
+    );
+  }
 );
   ticked();
 
   return active_exclusion; // return self, enabling a chain of forces if needed
 
 }
-
-//----------------------------------------------------------------
-
-// what's the 'shortest way out'?
-// TO DO: make sure the frame rect is stationary while the node is nudged outwards
-// this was originally written for scenario where both nodes could move
-
-// TO DO : replace this logic with Math.atan2() - see Link.Theta()
-// maybe also adapt Node.ContactPoint() 
-
-function escape_vector( m, n ) {
-  
-  // Which list item has the smallest absolute value?
-  x = [n.x-(m.x+m.width), (n.x+n.width)-m.x ] ;
-  x = x.reduce((min, num) => Math.abs(num) < Math.abs(min) ? num : min );
-
-  y = [n.y-(m.y+m.height), (n.y+n.height)-m.y ] ;
-  y = y.reduce((min, num) => Math.abs(num) < Math.abs(min) ? num : min );
-
-  return Math.abs(x) < Math.abs(y) ? [-x,0] : [0,-y]
-
-}
-
-//--------------------------------------------------------------------
-
-// does the line segment a1-a2 intersect with b1-b2 ?
-
-function segInt(a1, a2, b1, b2) {
-    // Ensure a1 <= a2 and b1 <= b2
-    var leftBound = Math.max(a1, b1),
-      rightBound = Math.min(a2, b2);
-    // Check if there's an actual intersection
-    return (leftBound <= rightBound) ? [leftBound, rightBound, (rightBound-leftBound) ] : [null,null,0];
-}
-
-//-------------------------------------------------------------------------------
 

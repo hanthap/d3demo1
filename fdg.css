@@ -20,12 +20,6 @@ circle {
     stroke-width: 1;
 }
 
-circle.xhover, circle:hover {
-    stroke-dasharray: 3,3;
-    stroke-opacity: 1;
-    /* mix-blend-mode: difference;  */
-}
-
 /* will use these for foreignObject child div styling */
 div.circleinfo {
     font-size: 8px;
@@ -57,7 +51,7 @@ circle.has_members {
 
 rect.drag_selector {
     stroke:red;
-    stroke-dasharray:  3,3;
+    stroke-dasharray:  2,2;
     stroke-opacity: 1;
     fill-opacity: 0.1;
 }
@@ -76,13 +70,13 @@ rect.frame.selected {
 
 rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover { 
     stroke:black;
-    stroke-dasharray: 3,3;
+    stroke-dasharray:2,2;
     stroke-opacity: 1;
 }
 
 circle.drag_selected {
     stroke: purple;
-    stroke-dasharray: 3,3;
+    stroke-dasharray: 2,2;
     stroke-opacity: 1;
 }
 
@@ -120,5 +114,5 @@ polyline.selected {
 }
 
 polyline.xhover { 
-    stroke-dasharray: 3,3;
+    stroke-dasharray: 2,2;
 }

@@ -200,6 +200,8 @@ static ToFrame(d) {
             AppendFrameShapes();
             AppendLines();
             RefreshSimData();
+            UnfreezeSim();
+
         }
 
 }
@@ -264,10 +266,6 @@ static CollideRadius(d) { // called by d3.forceCollide().radius(...)
 static Charge(d) { // called by d3.forceManyBody().strength(...)
     return d.charge;
 }
-
-/*-------------------------------------------------------------------------------
-
-// NOTE: d3.forceX(), d3.forceY() are not needed
 
 //-------------------------------------------------------------------------------
 
@@ -470,6 +468,7 @@ function AppendShapes() {
                 .attr('fill',Node.FillColour)
                 .classed('has_members',Node.HasMembers)
                 .classed('xhover',false) // remove dashed outline CSS for mewly-restored circles
+                .classed( 'drag_selected', MainWindow.DragRectIncludes )                
                 .on('mouseover',Node.OnMouseOver) // called at each transition, including nested elements, unlike mouseenter
                 .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
                 .on('mousedown',Node.OnMouseDown) 

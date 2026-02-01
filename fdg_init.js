@@ -90,7 +90,6 @@ static OnDrag(e,d) {
         .attr('height', height)
         ;
 
-
 }
 
 //-------------------------------------------------------------------------------
@@ -172,15 +171,12 @@ let mw_drag = d3.drag()
                     .attr("class","arrowhead")
                     .attr("points","0 0, 6 2, 0 4");
 
-// create an SVGPoint for future math - but do we even need it?
-// const pt = svg.node().createSVGPoint(); 
-// get point in global SVG space
+//-------------------------------------------------------------------------------
 
 const supabaseClient = supabase.createClient(
     APP_CONFIG.supabaseUrl,
     APP_CONFIG.supabaseAnonKey
 );
-
 
 //-------------------------------------------------------------------------------
 
@@ -191,13 +187,6 @@ function bounded(x,a,b) {
     return x;
 }
 //-------------------------------------------------------------------------------
-
-
-// function cursorPoint_deprecated(evt) {
-//     pt.x = evt.clientX; pt.y = evt.clientY;
-//     return pt.matrixTransform(svg.getScreenCTM().inverse());
-//     }
-
 
 MainWindow.OnResize();
 MainWindow.WatchZoom();
