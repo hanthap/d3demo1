@@ -113,6 +113,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
          .attr('cy', Node.BoundedY )
         // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on
         .classed('selected', d => d.selected)
+        .classed( 'drag_selected', MainWindow.DragRectIncludes )
         .attr('visibility', Node.Visibility )
         ;
 

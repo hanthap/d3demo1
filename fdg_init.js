@@ -42,47 +42,79 @@ static WatchZoom() {
   requestAnimationFrame(MainWindow.WatchZoom);
 }
 
+//-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
-   // console.info("MainWindow.OnDragStart");
     const [x,y] = p = d3.pointer(e,svg.node());
-        MainWindow.DragStartPos = p;
-        console.info(MainWindow.DragStartPos);
-        MainWindow.SelectRect = gLabel
-            .append('rect')
-                .attr('x', x)
-                .attr('y', y)
-                .attr('width','30')
-                .attr('height','30')
-                .classed('drag_selector',true)
-                ;
-
-
-
-}
-
-static OnDrag(e,d) {
- //   console.info("MainWindow.OnDrag");
-    const [x1,y1] = d3.pointer(e,svg.node());
-    const [x0,y0] = MainWindow.DragStartPos;
-        MainWindow.SelectRect
-            .attr('width', x1 - x0)
-            .attr('height', y1 - y0)
+    MainWindow.DragStartPos = p;
+    MainWindow.SelectRect = gLabel
+        .append('rect')
+            .attr('x', x)
+            .attr('y', y)
+            .classed('drag_selector',true)
             ;
 
+}
+
+//-------------------------------------------------------------------------------
+
+static DragRectIncludes(d) {
+    // helper function to test if circle centre x,y is within drag rectangle
+    const r = MainWindow.DragRectDims;
+    if (r == null) return false;
+  return (
+    d.x >= r.x &&
+    d.x <= r.x + r.width &&
+    d.y >= r.y &&
+    d.y <= r.y + r.height
+  );
+}
+
+//-------------------------------------------------------------------------------
+
+static OnDrag(e,d) {
+
+    const [x1,y1] = d3.pointer(e,svg.node());
+    const [x0,y0] = MainWindow.DragStartPos;
+    const x = x0 < x1 ? x0 : x1;
+    const y = y0 < y1 ? y0 : y1;
+    const width = Math.abs(x1 - x0);
+    const height = Math.abs(y1 - y0);
+    // store for use in DragRectIncludes()
+    MainWindow.DragRectDims = {x, y, width, height};
+
+    MainWindow.SelectRect
+        .attr('x',x)
+        .attr('y',y)
+        .attr('width', width)
+        .attr('height', height)
+        ;
+
 
 }
 
+//-------------------------------------------------------------------------------
+
+
 static OnDragEnd(e,d) {
- //   console.info("MainWindow.OnDragEnd");
-        console.info(d3.pointer(e,svg.node()));
-        MainWindow.SelectRect.remove();
+
+    MainWindow.SelectRect.remove();
+    MainWindow.SelectRect = null;
+    MainWindow.DragRectDims = null;
+
+    gNode.selectAll('circle')
+        .classed( 'drag_selected', false )
+        ;
+
 }
 
 //-------------------------------------------------------------------------------
 
 
 }
+
+
+
 
 
 let mw_drag = d3.drag()

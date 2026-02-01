@@ -80,6 +80,13 @@ rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover {
     stroke-opacity: 1;
 }
 
+circle.drag_selected {
+    stroke: purple;
+    stroke-dasharray: 3,3;
+    stroke-opacity: 1;
+}
+
+
 circle.dragging {
     stroke:red;
     stroke-dasharray: none;
