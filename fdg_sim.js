@@ -60,7 +60,8 @@ function RunSim() {
         .on('tick',ticked)
         ;
     ticked();
-            if ( false ) {
+            // if ( false ) 
+              {
         // adding this extra collide sim helps reduce overlap and jitter?
           simulationExclusion = d3.forceSimulation() 
           .force("active_exclusion", active_exclusion) 
@@ -128,10 +129,12 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
      ;
 };
 
+
+
 //-------------------------------------------------------------------------------
 
 // Custom force to push out non-member circle nodes - needs work!
-function active_exclusion(alpha) {
+function active_exclusion_OK(alpha) {
 
   const padding = 2; // extra gap between rect and circle
   var nudge_factor;                   
@@ -153,6 +156,8 @@ function active_exclusion(alpha) {
     if ( !(n.descendants.includes(m)) ) // circle m is NOT a descendant of frame n 
       { 
         // do the rect and circle overlap?
+        // if the 
+
         try {
           var
               x_int = segInt( m.x, m.x+m.width, nx1, nx2), // horizontal intersection
@@ -175,6 +180,51 @@ function active_exclusion(alpha) {
       }
     });
   });
+  ticked();
+
+  return active_exclusion_OK; // return self, enabling a chain of forces if needed
+
+}
+//----------------------------------------------------------------
+
+// Custom force to push out non-member circle nodes - needs work!
+function active_exclusion(alpha) {
+
+
+active_frames.forEach( n => { // outer loop 
+const c0 = Frame.Centre(n); 
+        
+
+    active_circles.forEach( m => { // inner loop
+    if ( !(n.descendants.includes(m)) ) // circle m is NOT a descendant of frame n 
+      { 
+        const 
+          c1 = Node.Centre(m),
+          dx = c1.x - c0.x,
+          dy = c1.y - c0.y,
+          theta_out = Math.atan2( dy,  dx),
+          theta_in =  Math.atan2(-dy, -dx),
+          p0 = Frame.ContactPoint(n,theta_out),
+          p1 = Node.ContactPoint(m,theta_in);  
+          
+        // do the rect and circle overlap?
+        
+        // what's the difference between the 2 vectors? 
+        // if c0 - p0 is more than c0 - p1
+        const
+        h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ), // frame centre to frame edge
+        h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ); // frame centre to circle edge
+        if ( h0 > h1 ) { // overlap exists
+          // scale 0.2 makes a big difference
+          const nudge_factor = 0.2 * (h0 - h1) * alpha; // for smooth animation
+          m.x += Math.cos( theta_out ) * nudge_factor;
+          m.y += Math.sin( theta_out ) * nudge_factor;
+        };
+      };
+    }
+  );
+}
+);
   ticked();
 
   return active_exclusion; // return self, enabling a chain of forces if needed
