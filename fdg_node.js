@@ -368,7 +368,9 @@ static OnDragStart(e,d) {
     console.log('Enter Node.OnDragStart');
     // TO DO: add more info about the drag?
     Node.DragStartPos = [e.x, e.y];
-    e.sourceEvent.target.classList.toggle("dragging",true); 
+    Node.DraggedElement = d3.select(e.sourceEvent.target);
+    Node.DraggedElement.classed("dragging", true); // add special CSS styling
+//  e.sourceEvent.target.classList.toggle("dragging",true); 
  //   console.log(e.sourceEvent.target);
     StopSim();
    Node.BringToFront(e.subject);
@@ -390,7 +392,10 @@ static OnDragEnd(e,d) {
  const p = Node.DragStartPos;
  Node.DragStartPos = null; 
  console.debug('Node.OnDragEnd');
- e.sourceEvent.target.classList.toggle("dragging", false);  // remove special CSS styling
+
+ // the target isn't necessarily the circle being dragged. C
+//.sourceEvent.target.classList.toggle("dragging", false);  // remove special CSS styling
+     Node.DraggedElement.classed("dragging", false); 
 //    console.log(e.sourceEvent.target);
   const dx = e.x - p[0];
   const dy = e.y - p[1];
