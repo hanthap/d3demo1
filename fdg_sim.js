@@ -100,6 +100,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 
    gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); 
    gLink.selectAll('polyline').each( Link.SetAttributes ); 
+   gLabel.selectAll('g').each( Label.SetAttributes ); 
 
     gNode.selectAll('circle')
          .attr('cx', Node.BoundedX ) 

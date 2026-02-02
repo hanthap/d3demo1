@@ -86,6 +86,8 @@ static ToCircle(d, bCollapsed, cXcY) {
         AppendShapes(); 
         AppendFrameShapes();
         AppendLines();
+        AppendLabels();
+
         RefreshSimData(); 
 
 }

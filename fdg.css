@@ -22,7 +22,11 @@ circle {
     stroke-width: 1;
 }
 
-/* will use these for foreignObject child div styling */
+.circleinfo {
+    pointer-events: none; /* let mouse events pass through to circle */
+}
+
+/*  foreignObject child div styling */
 div.circleinfo {
     font-size: 8px;
     justify-content: center;
@@ -31,10 +35,13 @@ div.circleinfo {
     width: 100%;
     align-items: center;
     font-family: Helvetica;
+    mix-blend-mode: difference; /* why does this not work? */
+
+
 }
 
 circle.selected {
-    fill-opacity:1;
+    fill-opacity: 1;
     stroke: none;
     stroke-opacity: 1;
 }

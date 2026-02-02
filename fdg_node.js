@@ -165,7 +165,7 @@ static Top(d) {
             d.inLinks.forEach ( f => { f.source.selected = d.selected } );
             d.outLinks.forEach ( f => { f.target.selected = d.selected } );
         }
-
+        UnfreezeSim();
        ticked();
 
         console.log('exit Node.OnClick');
@@ -199,6 +199,7 @@ static ToFrame(d) {
             AppendShapes(); 
             AppendFrameShapes();
             AppendLines();
+            AppendLabels();
             RefreshSimData();
             UnfreezeSim();
 
@@ -224,6 +225,7 @@ static AppendDatum(d,i) {
     d.height = 2 * d.r;
     d.width = 2 * d.r;
     d.selected = 0;
+    d.show_label = 1; // default to showing labels
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
     // TO DO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
     return d;
@@ -287,7 +289,7 @@ static ForceX(d) { // passed to d3.forceX().strength()
 
 //-------------------------------------------------------------------------------
 
-static ForceY(d) { // passed to d3.forceX().strength()
+static ForceY(d) { // passed to d3.forceY().strength()
     return (width/height) * d.weight;
 }
 
@@ -388,15 +390,10 @@ static OnDrag(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnDragEnd(e,d) {
-   // console.log(e,d);
  const p = Node.DragStartPos;
  Node.DragStartPos = null; 
  console.debug('Node.OnDragEnd');
-
- // the target isn't necessarily the circle being dragged. C
-//.sourceEvent.target.classList.toggle("dragging", false);  // remove special CSS styling
-     Node.DraggedElement.classed("dragging", false); 
-//    console.log(e.sourceEvent.target);
+ Node.DraggedElement.classed("dragging", false); 
   const dx = e.x - p[0];
   const dy = e.y - p[1];
   const dist = Math.hypot(dx, dy);
@@ -432,18 +429,6 @@ function NodeScope(d) {
 
 //-------------------------------------------------------------------------------
 
-function IsRectShape(d) {
-    return d.NODE_TYPE == 'AR';
-}
-
-//-------------------------------------------------------------------------------
-
-function IsRoundedShape(d) {
-    return d.NODE_TYPE == 'ID';
-}
-
-//-------------------------------------------------------------------------------
-
 function HasVisibleChild(d) {
     return ( VisibleChildrenOf(d).length > 0 );
 }
@@ -458,11 +443,7 @@ function IsVisibleNode(d) {
 
 
 //-------------------------------------------------------------------------------
-// AppendShapes is not just for initial setup. Called after user interaction, also handles update & delete.
-// might be easier up front to create a circle for every node in scope and decide whether to show or hide using CSS attributes
 function AppendShapes() {
- 
-// TO DO: create a mini 'g' group for each node, then append circle & foreignObject as siblings inside that group
 
     // create & bind the SVG visual elements
     circles = gNode.selectAll('circle') // in case we've already got some
@@ -472,10 +453,10 @@ function AppendShapes() {
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
                 .classed('has_members',Node.HasMembers)
-                .classed('xhover',false) // remove dashed outline CSS for mewly-restored circles
-                .classed( 'drag_selected', MainWindow.DragRectIncludes )                
-                .on('mouseover',Node.OnMouseOver) // called at each transition, including nested elements, unlike mouseenter
-                .on('mouseout',Node.OnMouseOut) // ditto, unlike mouseexit
+                .classed('xhover',false) // remove dashed outline CSS for newly-restored circles
+                .classed('drag_selected', MainWindow.DragRectIncludes )                
+                .on('mouseover',Node.OnMouseOver) 
+                .on('mouseout',Node.OnMouseOut) 
                 .on('mousedown',Node.OnMouseDown) 
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
@@ -490,18 +471,10 @@ function AppendShapes() {
                    .text(Node.TitleText)
                 ;
 
-    // TO DO: these should NOT be nested inside circle elements. Circles and ForeignObjkect need to be SIBLINGS inside a mini SVG node 'g' group
-        circles
-            .append("foreignObject") // add a second child element per node-group. 
-                .attr("x", d => -d.r) // relative to parent 'g' element
-                .attr("y", d => -d.r)
-                .attr("width", Node.Width)
-                .attr("height", Node.Height)
-                .append("xhtml:div") // add a grandchild DIV element inside the foreignObject - we need the strictness of XHTML when inside an SVG 
-                    .classed("circleinfo", true)   // for CSS styling  
-                    .html(Node.TitleText);
-
 }
+
+
+
 
 //-------------------------------------------------------------------------------
 
