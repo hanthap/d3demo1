@@ -101,9 +101,10 @@ static OnDragEnd(e,d) {
     MainWindow.SelectRect = null;
     MainWindow.DragRectDims = null;
 
-    gNode.selectAll('circle')
+    gNode.selectAll('circle.drag_selected')
         .classed( 'drag_selected', false )
-        ;
+        .each( d => { d.selected ^= 1 } ) // toggle selected flag
+          ;
 
 }
 
