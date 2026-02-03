@@ -22,13 +22,10 @@ circle {
     stroke-width: 1;
 }
 
-.circleinfo {
-    pointer-events: none; /* let mouse events pass through to circle */
-}
-
-/*  foreignObject child div styling */
+/*  foreignObject child <div> styling */
 div.circleinfo {
     font-size: 8px;
+    color: blue;
     justify-content: center;
     display: flex;
     height: 100%;
@@ -37,8 +34,21 @@ div.circleinfo {
     font-family: Helvetica;
     mix-blend-mode: difference; /* why does this not work? */
 
+}
+div.frameinfo {
+    font-size: 14px;
+    color: grey;
+    justify-content: center;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    font-family: Helvetica;
+    opacity: 0.5;
 
 }
+
+
 
 circle.selected {
     fill-opacity: 1;
@@ -60,7 +70,7 @@ circle.has_members {
 
 rect.drag_selector {
     stroke:red;
-    stroke-dasharray:  2,2;
+    stroke-dasharray: 2,2;
     stroke-opacity: 1;
     fill-opacity: 0.1;
 }
@@ -79,7 +89,7 @@ rect.frame.selected {
 
 rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover { 
     stroke:black;
-    stroke-dasharray:2,2;
+    stroke-dasharray: 2,2;
     stroke-opacity: 1;
 }
 
@@ -107,7 +117,7 @@ g.linkzone {
 
 
 polyline.arrow { /* directed line, with arrow */
-    stroke-width: 1.5;
+    stroke-width: 1.4;
     marker-mid: url(#arrow);
 }
 

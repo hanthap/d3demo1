@@ -148,7 +148,7 @@ static ToCircle(d, bCollapsed, cXcY) {
 
     static HalfHeight(d) { return d.height/2 + Frame.Margin(d) };
 
-    static CornerRadius(d) { return 2*radius };
+    static CornerRadius(d) { return 1.5 * radius ;};
 
     static Margin(d) { return radius };
 
