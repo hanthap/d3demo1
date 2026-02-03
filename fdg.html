@@ -71,13 +71,12 @@ function AfterLoad() {
         d.inLinks  = links.filter( x => ( x.TO_NODE_ID   == d.NODE_ID ) ); 
         d.outLinks = links.filter( x => ( x.FROM_NODE_ID == d.NODE_ID ) );
     } );
- 
-    nodes.filter(Node.ShowAsFrame).forEach( gn => {
-        ChildrenOf(gn).forEach( lnk => {
-            lnk.target = gn.inLinks[0].source;
-            lnk.strength = 100;
-            })
-        });
+
+// store true source/target references in each link
+links.forEach( d => {
+    d.true_source = d.source;
+    d.true_target = d.target;
+} );
 
     // precompute & store lists
     Graph.CacheAllDescendants();    // descendants, per node

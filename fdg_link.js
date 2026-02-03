@@ -1,6 +1,11 @@
 var links = [];
 class Link {
 
+
+    static UniqueId(d) {
+        return d.id;
+    }
+
 //-------------------------------------------------------------------------------
 
 static AppendDatum(d,i) {
@@ -11,6 +16,7 @@ try {
     d.target = Node.GetFromID( d.TO_NODE_ID );
     d.distance = 20;
     d.strength = 0.1;
+    d.id = 'L' + i; // unique identifier
    // console.log(d);
     return d; // only if we didn't throw an error eg 'no such node'
 } catch ( e ) {
@@ -120,15 +126,16 @@ static IsHier(d) {
 
 }
 
- //-------------------------------------------------------------------------------
-
+//-------------------------------------------------------------------------------
+// Excludes "circle-within-frame" links
 static ShowAsLine(d) {
-// a link is in scope if both vertices are in scope
-    // return ( NodeScope(d.source) && NodeScope(d.target) );
-    return ( Node.HasShape(d.source) && Node.HasShape(d.target) );
+    return ( Node.HasShape(d.source) && Node.HasShape(d.target) && !Node.ShowAsFrame(d.target) );
 }
-
-
+//-------------------------------------------------------------------------------
+// Exclude self-self links (eg a collapsed frame linking to itself)
+static VisibleLine(d) {
+    return ( Link.ShowAsLine(d) && ( d.target != d.source ));
+}
 //-------------------------------------------------------------------------------
 // generalised formula: aX + bY + c = 0 (immune to divide-by=zero)
 // NOT USED - instead use theta 
@@ -192,8 +199,9 @@ function IsActiveLink(d) {
 function AppendLines() {
 
     gLinkZone.selectAll('line')
-        .data(links.filter(Link.ShowAsLine))
+        .data(links.filter(Link.VisibleLine),Link.UniqueId)
         .join('line')
+        .attr('id', Link.UniqueId) // for efficient upsert & delete of DOM bindings
         .on('click',LinkZone.OnClick)
         .on('mouseover',LinkZone.OnMouseOver)
         .on('mouseout',LinkZone.OnMouseOut)
@@ -203,7 +211,8 @@ function AppendLines() {
         ;
 
     gLink.selectAll('polyline') // this layer ignores mouse events, so they pass through to LinkZone
-        .data(links.filter(Link.ShowAsLine))
+        .data(links.filter(Link.VisibleLine),Link.UniqueId)
+        .attr('id', Link.UniqueId) // for efficient upsert & delete of DOM bindings
         .join('polyline') 
         .style('stroke',Link.StrokeColour)
         .attr('stroke-width',Link.StrokeWidth)

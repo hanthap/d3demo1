@@ -152,6 +152,7 @@ static Top(d) {
 
         if ( k.ctrlKey && Node.HasMembers(d) ) {      
             clicked_element.attr('visibility', Node.Visibility);
+            // TO DO remove the associated label for each child
             Node.ToFrame(d);
         } else { // toggle foreground/selected status
             d.selected ^= 1;
@@ -185,17 +186,18 @@ static OnMouseDown(e,d) {
 
 // expand a collapsed node so it appears as a frame with visible child nodes
 static ToFrame(d) {
-
     if ( Node.HasMembers(d) ) {
-
-            d.IS_GROUP = true;
-
-            // should this be all descendants?
-            ChildrenOf(d).forEach( c => { 
-                    c.has_shape = 1 
-                    // TO DO: remove xhover class?
-                
-                } );
+          d.IS_GROUP = true;
+          d.has_shape = 1;  // do we need this?
+          // are there some descendants we still need to hide?
+          d.descendants.filter(c => c != d).forEach( c => { 
+                    console.log(c);
+                    c.has_shape = 1; 
+                    // for in and out lines, restore the true endpoints
+                    // importantly, we already have true_source and true_target stored in each link
+                    c.inLinks.forEach( lnk => { lnk.target = lnk.true_target; } );
+                    c.outLinks.forEach( lnk => {lnk.source = lnk.true_source; } );
+            });
             AppendShapes(); 
             AppendFrameShapes();
             AppendLines();
@@ -337,6 +339,10 @@ static ParentsOf(d) {
         // TO DO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFrame(d) == False
         return d.has_shape;
     }
+
+static IsVisible(d) {
+    return ( Node.HasShape(d)  );
+}
 
 //-------------------------------------------------------------------------------
 

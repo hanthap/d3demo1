@@ -1,7 +1,7 @@
 class Label extends Node {
   
     static UniqueId(d) { return Node.UniqueId(d); }
-    static IsVisible(d) { return d.show_label; }
+    static IsVisible(d) { return d.show_label && d.has_shape; }
     static FontColour(d) { return Node.ShowAsFrame(d) ? Node.FillColour(d) : "blue"; }
     static FontSize(d) { return Node.ShowAsFrame(d) ? 12 : 8; }
     static Width(d) { return Node.ShowAsFrame(d) ? Frame.Width(d) : Node.Width(d); } 

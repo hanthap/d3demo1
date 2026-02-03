@@ -75,13 +75,28 @@ static ToCircle(d, bCollapsed, cXcY) {
 
         d.IS_GROUP = false;
 
-        if ( bCollapsed ) {  // hide its contents
-            // should be all descendants
-            ChildrenOf(d).forEach( c => { c.has_shape = 0 } );
+        if ( bCollapsed ) {  // hide its contents & transplant links so they point to this container node
+            // should be all descendants other than self
+            d.descendants.filter(c => c != d).forEach( c => { 
+                    // for in and out lines, set this node d as the effective end point in place of any descendants of d
+                    // importantly, we already have true_source and true_target stored in each link
+                    c.inLinks.filter(Link.ShowAsLine).forEach( lnk => { 
+                        lnk.target = d;
+                        console.log(lnk);
+                    
+                    } );
+                    c.outLinks.filter(Link.ShowAsLine).forEach( lnk => { lnk.source = d } );
+                    c.has_shape = 0; // don't do this too soon as it influences Link.ShowAsLine()
+
+                    console.log(c);
+                } );
             // TO DO: recalculate and cache the 'effective' node-pair for links that reference a leaf node that is now hidden (as a descendant node)
-            // scan the list of edges and set this node d as the effective end point in place of any descendants of d
             // if both ends now point to d then the link will not be in 
             // likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
+
+
+
+
             }
         AppendShapes(); 
         AppendFrameShapes();

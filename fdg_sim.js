@@ -129,7 +129,7 @@ function active_exclusion(alpha) {
 
 active_frames.forEach( n => { // outer loop 
   const c0 = Frame.Centre(n); 
-  active_circles.forEach( m => { // inner loop
+  active_circles.filter(Node.IsVisible).forEach( m => { // inner loop
   if ( !(n.descendants.includes(m)) ) { // circle m is NOT a descendant of frame n 
       const 
         c1 = Node.Centre(m),
@@ -149,6 +149,9 @@ active_frames.forEach( n => { // outer loop
             m.x += Math.cos( theta_out ) * nudge_factor;
             m.y += Math.sin( theta_out ) * nudge_factor;
           };
+
+
+
         };
       }
     );
