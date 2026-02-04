@@ -185,7 +185,7 @@ function BoxesOverlap( boxA, boxB ) {
 //-------------------------------------------------------------------------------
 
 // Depth-first search to return a list of all descendants of a given start node
-// called by Graph.CacheAllDescendants()
+// called by Cache.RefreshAllDescendants()
 // TO DO: look at making this a static function of class Node (or Graph ?)
 
 

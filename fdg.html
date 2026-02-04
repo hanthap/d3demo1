@@ -13,12 +13,11 @@
     </head>
     <body onkeydown="handleKeyDown();">
         <script src="fdg_init.js"></script>
-        <script src="fdg_graph.js"></script>
+        <script src="fdg_cache.js"></script>
         <script src="fdg_node.js"></script>
         <script src="fdg_frame.js"></script>
         <script src="fdg_link.js"></script>
         <script src="fdg_label.js"></script>
-        <script src="fdg_events.js"></script>
         <script src="fdg_sim.js"></script>
 
         <script>
@@ -79,9 +78,9 @@ links.forEach( d => {
 } );
 
     // precompute & store lists
-    Graph.CacheAllDescendants();    // descendants, per node
-  //  Graph.CacheAllExclusiveNodes(); // circles and frames in scope of active_exclusion force
-    Graph.CacheSortedNodes();       // z-order of nested frames
+    Cache.RefreshAllDescendants();    // descendants, per node
+  //  Cache.RefreshAllExclusiveNodes(); // circles and frames in scope of active_exclusion force
+    Cache.RefreshSortedNodes();       // z-order of nested frames
 
     AppendShapes(); 
     AppendFrameShapes(); 
