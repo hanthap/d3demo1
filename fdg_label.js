@@ -29,7 +29,6 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
 
         labels 
             .append("foreignObject") // add a child element per node-group. 
-              //  .classed("circleinfo", true)   // for CSS styling  
                 .attr("x", Label.OffsetX) // relative to parent 'g' element, centred on node (x,y)
                 .attr("y", Label.OffsetY)
                 .attr("width", Label.Width)

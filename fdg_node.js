@@ -265,7 +265,7 @@ static Centre(d) {
 
 static CollideRadius(d) { // called by d3.forceCollide().radius(...)
     //return d.r + 20; // +3 = extra to allow for stroke-width of circle element 
-    return d.r  + 10;
+    return d.r  + 30;
 }
 
 //-------------------------------------------------------------------------------

@@ -126,7 +126,9 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 
 // Custom force to push out non-member circle nodes
 function active_exclusion(alpha) {
+// return active_exclusion;
 
+// [...sorted_nodes].reverse()
 sorted_nodes.filter(Frame.IsExclusive).forEach( n => { // outer loop 
   const c0 = Frame.Centre(n); 
   sorted_nodes.filter(Node.IsExclusive).forEach( m => { // inner loop
