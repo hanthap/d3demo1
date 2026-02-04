@@ -11,14 +11,14 @@
 //-------------------------------------------------------------------------------
 
 
-class MainWindow{
+class ViewBox{
 
 static logicalSize = 500; // width and height in logical units
 static lastDPR = window.devicePixelRatio;
 static DragStartPos;
 
 static OnResize() {
-const sz = MainWindow.logicalSize;
+const sz = ViewBox.logicalSize;
   const W = parseFloat(svg.style("width"));
   const H = parseFloat(svg.style("height"));
 
@@ -35,19 +35,19 @@ const sz = MainWindow.logicalSize;
 
 static WatchZoom() {
   const currentDPR = window.devicePixelRatio;
-  if (currentDPR !== MainWindow.lastDPR) {
-     MainWindow.lastDPR = currentDPR;
-    MainWindow.OnResize();
+  if (currentDPR !== ViewBox.lastDPR) {
+     ViewBox.lastDPR = currentDPR;
+    ViewBox.OnResize();
   }
-  requestAnimationFrame(MainWindow.WatchZoom);
+  requestAnimationFrame(ViewBox.WatchZoom);
 }
 
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
     const [x,y] = p = d3.pointer(e,svg.node());
-    MainWindow.DragStartPos = p;
-    MainWindow.SelectRect = gLabel
+    ViewBox.DragStartPos = p;
+    ViewBox.SelectRect = gLabel
         .append('rect')
             .attr('x', x)
             .attr('y', y)
@@ -60,7 +60,7 @@ static OnDragStart(e,d) {
 
 static DragRectIncludes(d) {
     // helper function to test if circle centre x,y is within drag rectangle
-    const r = MainWindow.DragRectDims;
+    const r = ViewBox.DragRectDims;
     if (r == null) return false;
   return (
     d.x >= r.x &&
@@ -75,15 +75,15 @@ static DragRectIncludes(d) {
 static OnDrag(e,d) {
 
     const [x1,y1] = d3.pointer(e,svg.node());
-    const [x0,y0] = MainWindow.DragStartPos;
+    const [x0,y0] = ViewBox.DragStartPos;
     const x = x0 < x1 ? x0 : x1;
     const y = y0 < y1 ? y0 : y1;
     const width = Math.abs(x1 - x0);
     const height = Math.abs(y1 - y0);
     // store for use in DragRectIncludes()
-    MainWindow.DragRectDims = {x, y, width, height};
+    ViewBox.DragRectDims = {x, y, width, height};
 
-    MainWindow.SelectRect
+    ViewBox.SelectRect
         .attr('x',x)
         .attr('y',y)
         .attr('width', width)
@@ -97,9 +97,9 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
 
-    MainWindow.SelectRect.remove();
-    MainWindow.SelectRect = null;
-    MainWindow.DragRectDims = null;
+    ViewBox.SelectRect.remove();
+    ViewBox.SelectRect = null;
+    ViewBox.DragRectDims = null;
 
     gNode.selectAll('circle.drag_selected')
         .classed( 'drag_selected', false )
@@ -118,9 +118,9 @@ static OnDragEnd(e,d) {
 
 
 let mw_drag = d3.drag()
-    .on('start', MainWindow.OnDragStart)
-    .on('drag', MainWindow.OnDrag)
-    .on('end', MainWindow.OnDragEnd)  
+    .on('start', ViewBox.OnDragStart)
+    .on('drag', ViewBox.OnDrag)
+    .on('end', ViewBox.OnDragEnd)  
     ;
 
 
@@ -189,8 +189,8 @@ function bounded(x,a,b) {
 }
 //-------------------------------------------------------------------------------
 
-MainWindow.OnResize();
-MainWindow.WatchZoom();
+ViewBox.OnResize();
+ViewBox.WatchZoom();
 
-window.addEventListener("resize", MainWindow.OnResize);
+window.addEventListener("resize", ViewBox.OnResize);
 

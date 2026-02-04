@@ -463,7 +463,7 @@ function AppendShapes() {
                 .attr('fill',Node.FillColour)
                 .classed('has_members',Node.HasMembers)
                 .classed('xhover',false) // remove dashed outline CSS for newly-restored circles
-                .classed('drag_selected', MainWindow.DragRectIncludes )                
+                .classed('drag_selected', ViewBox.DragRectIncludes )                
                 .on('mouseover',Node.OnMouseOver) 
                 .on('mouseout',Node.OnMouseOut) 
                 .on('mousedown',Node.OnMouseDown) 
