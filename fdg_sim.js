@@ -57,7 +57,7 @@ function RunSim() {
         simulationExclusion = d3.forceSimulation() 
           .force("active_exclusion", active_exclusion) 
           .alphaTarget(0.6) // freeze if/when alpha drops below this threshold
-          .alphaDecay(0.8)
+          .alphaDecay(0.6)
          ;
 
     ticked();
@@ -127,9 +127,9 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 // Custom force to push out non-member circle nodes
 function active_exclusion(alpha) {
 
-active_frames.forEach( n => { // outer loop 
+sorted_nodes.filter(Frame.IsExclusive).forEach( n => { // outer loop 
   const c0 = Frame.Centre(n); 
-  active_circles.filter(Node.IsVisible).forEach( m => { // inner loop
+  sorted_nodes.filter(Node.IsExclusive).forEach( m => { // inner loop
   if ( !(n.descendants.includes(m)) ) { // circle m is NOT a descendant of frame n 
       const 
         c1 = Node.Centre(m),
@@ -139,11 +139,11 @@ active_frames.forEach( n => { // outer loop
         theta_in =  Math.atan2(-dy, -dx),
         p0 = Frame.ContactPoint(n,theta_out),
         p1 = Node.ContactPoint(m,theta_in),  
-        h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ), // frame centre to frame edge
-        h1 = 2 + Math.hypot( p1.x - c0.x, p1.y - c0.y ); // frame centre to circle edge
+        h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ) + Node.CollideRadius(n), // frame centre to frame edge
+        h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) - Node.CollideRadius(m); // frame centre to circle edge
 
         if ( h0 > h1 ) { // overlapping shapes
-          // hardcoded 2 and 0.5 by experimentation
+          // hardcoded 0.5 by experimentation
           const 
             nudge_factor = 0.5 * (h0 - h1) * alpha; // for smooth animation
             m.x += Math.cos( theta_out ) * nudge_factor;

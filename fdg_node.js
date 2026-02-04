@@ -139,7 +139,8 @@ static Top(d) {
     static OnClick( k, d ) {
        // mouseover_object = d; // redundant
         // toggle 'selected' status of the clicked node
-        console.log('enter Node.OnClick')
+        console.log('enter Node.OnClick');
+        console.log(d);
         
         let clicked_element = gNode   
             .selectAll('circle')
@@ -219,11 +220,12 @@ static OnDblClick(e,d) {
 //-------------------------------------------------------------------------------
 
 static AppendDatum(d,i) {
-    d.charge = -40;
+    d.charge = -10 * Math.random(); // repulsive force
     d.cogX = 0;
     d.cogY = 0;
-    d.weight = 0.1;
-    d.r = Math.sqrt(d.NODE_MASS) * radius / 10; // size proportional to weight
+    d.weight = 0.2;
+ //   d.r = Math.sqrt(d.NODE_MASS) * radius / 10; // size proportional to weight
+    d.r = 10 + 20 * Math.random(); // random radius between 10 and 30
     d.height = 2 * d.r;
     d.width = 2 * d.r;
     d.selected = 0;
@@ -262,7 +264,8 @@ static Centre(d) {
 //-------------------------------------------------------------------------------
 
 static CollideRadius(d) { // called by d3.forceCollide().radius(...)
-    return d.r + 20; // +3 = extra to allow for stroke-width of circle element 
+    //return d.r + 20; // +3 = extra to allow for stroke-width of circle element 
+    return d.r  + 10;
 }
 
 //-------------------------------------------------------------------------------
@@ -310,10 +313,10 @@ static OnMouseOut(e,d) {
     }
 
 //-------------------------------------------------------------------------------
-
+    
 static IsExclusive(d) {
     // to decide whether this node's circle is in scope of active_exclusion force
-    return ( !HasVisibleChild(d) ); // for now, all leaf nodes may be excluded
+    return ( d.has_shape && !HasVisibleChild(d) ); // for now, all leaf nodes may be excluded
     }
 
 //-------------------------------------------------------------------------------

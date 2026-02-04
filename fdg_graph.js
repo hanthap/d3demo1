@@ -22,7 +22,7 @@ static CacheAllDescendants() {
 }
 
     //-------------------------------------------------------------------------------
-
+/*
 static CacheAllExclusiveNodes() {
     // called from fdg_init.js after all nodes and links have been loaded
     // upddate the global active_frames[] and active_circles[] arrays
@@ -30,7 +30,7 @@ static CacheAllExclusiveNodes() {
     active_circles = nodes.filter( Node.IsExclusive );    
 
  }
-
+*/
   //-------------------------------------------------------------------------------
 
 

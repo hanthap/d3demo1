@@ -14,8 +14,8 @@ try {
     // bind Link to its live vertex objects
     d.source = Node.GetFromID( d.FROM_NODE_ID );
     d.target = Node.GetFromID( d.TO_NODE_ID );
-    d.distance = 20;
-    d.strength = 0.1;
+    d.distance = 20 * Math.random();
+    d.strength = 0.4 * Math.random();
     d.id = 'L' + i; // unique identifier
    // console.log(d);
     return d; // only if we didn't throw an error eg 'no such node'
@@ -85,15 +85,15 @@ static TitleText(d) {
 }
 
 //-------------------------------------------------------------------------------
-
+// how strongly the distance is enforced
 static Strength(d) {  // callback for d3.forceLink()
-    return 0.08;
+    return 0.05 ; // Math.random();
 }
 
 //-------------------------------------------------------------------------------
 
 static Distance(d) { // callback for d3.forceLink()
-    return Link.IsHier(d) ? 0 : d.distance ;
+    return d.distance;
 }
 
 //-------------------------------------------------------------------------------
@@ -255,9 +255,7 @@ static StrokeWidth(d) { // width of extended click zone
 //-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
- //   console.log( Link.Theta(d) );
- //   console.log( Link.ContactPoints(d) );
- //   console.log( Link.PolyLinePointTuple(d) );
+    console.log(d);
 
     d.selected ^= 1;
     d.source.selected = d.selected;
