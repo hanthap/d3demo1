@@ -8,7 +8,10 @@ class Label extends Node {
     static Height(d) { return 2 * d.r; }  
     static OffsetX(d) { return -Label.Width(d) / 2; }
     static OffsetY(d) { return -d.r; }
-    static Classes(d) { return Node.ShowAsFrame(d) ? ["frameinfo"] : ["circleinfo"]; }
+    static Classes(d) { 
+        if ( Node.ShowAsFrame(d) ) return ["frameinfo"] ;
+        return ( Node.HasMembers(d) ? [ "has_members"] : ["circleinfo"] );
+    }
     static HtmlText(d) { return Node.UniqueId(d); }
     static SetAttributes(d) { // called via foreach
         d3.select(this).attr('transform', d => `translate(${Node.Centre(d).x},${Node.Centre(d).y})`);   

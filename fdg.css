@@ -35,6 +35,20 @@ div.circleinfo {
     mix-blend-mode: difference; /* why does this not work? */
 
 }
+
+div.has_members {
+    font-size: 9px;
+    color: black;
+    font-weight: bold;
+    text-decoration: underline;
+    justify-content: center;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    font-family: Helvetica;
+}
+
 div.frameinfo {
     font-size: 14px;
     color: grey;

@@ -157,6 +157,7 @@ static AddFrameNode() {
  
     nodes.filter(n => n.selected )
     // TO DO    .filter( n is not an ancestor of d ) // prevent circular nesting
+    // TO DO    .filter( n is a visible circle ) // prevent extra links to nested children
         .forEach( n => Node.AddLinkToParent(n,d) ); // add new frame as parent of all currently selected nodes
 
     Cache.RefreshAllDescendants();    // descendants, per node

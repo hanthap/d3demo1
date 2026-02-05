@@ -73,7 +73,7 @@ static ToCircle(d, bCollapsed, cXcY) {
         [d.x, d.y] = cXcY;
         d.width = d.height = 2*d.r; // referred to by Node.ContactPoints()
 
-        d.is_group = false;
+        d.is_group = false; // OTOH, what do we really mean? It's still a group in the sense of being a container for other nodes, but it is no longer rendered as a frame. 
 
         if ( bCollapsed ) {  // hide its contents & transplant links so they point to this container node
             // should be all descendants other than self
@@ -109,9 +109,10 @@ static ToCircle(d, bCollapsed, cXcY) {
 
    //-------------------------------------------------------------------------------
 
-
    static OnClick(e,d) {
 
+    console.log(d);
+    
     if ( ! e.ctrlKey ) {
         // simple click => toggle selected status
         d.selected ^= 1;
@@ -172,18 +173,6 @@ static ToCircle(d, bCollapsed, cXcY) {
 
 //-------------------------------------------------------------------------------
 
-function BoxesOverlap( boxA, boxB ) {
-        // boxA and boxB are DOM elements with getBBox() method
-        a = boxA.getBBox();
-        b = boxB.getBBox();
-        return !( a.x + a.width < b.x || 
-                  a.x > b.x + b.width || 
-                  a.y + a.height < b.y ||
-                  a.y > b.y + b.height );
-    }
-
-//-------------------------------------------------------------------------------
-
 // Depth-first search to return a list of all descendants of a given start node
 // called by Cache.RefreshAllDescendants()
 // TO DO: look at making this a static function of class Node (or Graph ?)
@@ -223,8 +212,6 @@ function AppendFrameShapes() {
         .append('title')
             .text(Node.TitleText)
         ;
-
-
 
 
 }
