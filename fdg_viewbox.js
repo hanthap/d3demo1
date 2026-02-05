@@ -113,71 +113,55 @@ static OnDragEnd(e,d) {
 
 }
 
+const svg = d3.select('body').append('svg')
+    .attr('width',window.innerWidth)
+    .attr('height', window.innerHeight)
+    // set origin to centre of svg
+    .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
+    .call(d3.drag()
+            .on('start', ViewBox.OnDragStart)
+            .on('drag', ViewBox.OnDrag)
+            .on('end', ViewBox.OnDragEnd)  
+        );
 
-
-
-
-let mw_drag = d3.drag()
-    .on('start', ViewBox.OnDragStart)
-    .on('drag', ViewBox.OnDrag)
-    .on('end', ViewBox.OnDragEnd)  
+// group frames are passive shapes in the background
+const gGroup = svg.append('g')
+    .classed( 'group', true )
     ;
 
+const gNode = svg.append("g"); // circles
 
+// links are rendered in front of circles. 
 
-            var svg = d3.select('body').append('svg')
-                .attr('width',window.innerWidth)
-                .attr('height', window.innerHeight)
-                // set origin to centre of svg
-                .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
-                .call(mw_drag);
+// first the extended click zones, for better visual feedback & easier clicking
+const gLinkZone = svg.append('g')
+    .classed( 'linkzone', true )
+    ;
+// then the polyline edge arrows themselves (with events passing through)
+const gLink = svg.append('g')
+    .classed( 'edge', true )
+    ;
+// a foreground layer eg for drag-select rect, pop-up annotations
+const gLabel = svg.append('g')
+    .classed( 'label', true )
+    ;
 
-            // group frames are passive shapes in the background
-            const gGroup = svg.append('g')
-                .classed( 'group', true )
-                ;
+const defs = svg.append("defs");
 
-            const gNode = svg.append("g"); // circles
+const arrow = defs
+    .append("marker")
+    .attr("id","arrow") //  to invoke this polyline marker and apply it to multiple instances
+    // these attributes cannot be set using CSS
+    .attr("markerWidth",6)
+    .attr("markerHeight",6)
+    .attr("refX",3) // anchor at 3 = 6/2 so the centre of the arrow is at the exact centre of the polyline
+    .attr("refY",2)
+    .attr("orient","auto")
+    .attr("markerUnits","strokeWidth") // should inherit
+        .append("polygon")
+        .attr("class","arrowhead")
+        .attr("points","0 0, 6 2, 0 4");
 
-            // links are rendered in front of circles. 
-            
-            // first the extended click zones, for better visual feedback & easier clicking
-            const gLinkZone = svg.append('g')
-                .classed( 'linkzone', true )
-                ;
-            // then the polyline edge arrows themselves (with events passing through)
-            const gLink = svg.append('g')
-                .classed( 'edge', true )
-                ;
-            // a foreground layer eg for drag-select rect, pop-up annotations
-            const gLabel = svg.append('g')
-                .classed( 'label', true )
-                ;
-
-
-
-            const defs = svg.append("defs");
-
-            const arrow = defs
-                .append("marker")
-                .attr("id","arrow") //  to invoke this polyline marker and apply it to multiple instances
-                // these attributes cannot be set using CSS
-                .attr("markerWidth",6)
-                .attr("markerHeight",6)
-                .attr("refX",3) // anchor at 3 = 6/2 so the centre of the arrow is at the exact centre of the polyline
-                .attr("refY",2)
-                .attr("orient","auto")
-                .attr("markerUnits","strokeWidth") // should inherit
-                    .append("polygon")
-                    .attr("class","arrowhead")
-                    .attr("points","0 0, 6 2, 0 4");
-
-//-------------------------------------------------------------------------------
-
-const supabaseClient = supabase.createClient(
-    APP_CONFIG.supabaseUrl,
-    APP_CONFIG.supabaseAnonKey
-);
 
 //-------------------------------------------------------------------------------
 
@@ -194,3 +178,29 @@ ViewBox.WatchZoom();
 
 window.addEventListener("resize", ViewBox.OnResize);
 
+
+//-------------------------------------------------------------------------------
+
+function handleKeyDown(d) {
+    // console.log(event)
+    switch (event.key) {
+    case 'Escape' : 
+        // clear all highlights by removing the 'selected' class
+        nodes.forEach( d => d.selected = 0 );
+        break;
+    case 'End':
+    case 'Pause' :
+        // toggle frozen
+        if ( frozen ^= 1 )
+            simulation.stop();
+        else
+            simulation.restart();
+        break;
+    case 'Home' :
+        simulation.stop();
+        frozen = false;
+        RunSim(); // re-initialise
+        break;
+    }
+    ticked();
+}

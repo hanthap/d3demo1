@@ -456,7 +456,7 @@ function AppendShapes() {
 
     // create & bind the SVG visual elements
     circles = gNode.selectAll('circle') // in case we've already got some
-        .data(nodes.filter(Node.ShowAsCircle), Node.UniqueId) // optional 2nd arg = stable key 
+        .data(nodes.filter(Node.ShowAsCircle), Node.UniqueId) 
             .join('circle')  // append a new circle shape bound to that datum
                 .attr('id', Node.UniqueId) // for efficient upsert & delete of DOM bindings
                 .attr('r',Node.Radius)
@@ -469,7 +469,11 @@ function AppendShapes() {
                 .on('mousedown',Node.OnMouseDown) 
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
-                .call(drag) // attach d3's special listener object
+                .call(d3.drag()
+                    .on('start', Node.OnDragStart)
+                    .on('drag', Node.OnDrag)
+                    .on('end', Node.OnDragEnd)  
+                    ) 
                 ;
 
 
@@ -515,39 +519,3 @@ function ParentOf(d) {
     } else return d;
 }
 
-
-//-------------------------------------------------------------------------------
-
-function handleKeyDown(d) {
-    // console.log(event)
-    switch (event.key) {
-    case 'Escape' : 
-        // clear all highlights by removing the 'selected' class
-        nodes.forEach( d => d.selected = 0 );
-        break;
-    case 'End':
-    case 'Pause' :
-        // toggle frozen
-        if ( frozen ^= 1 )
-            simulation.stop();
-        else
-            simulation.restart();
-        break;
-    case 'Home' :
-        simulation.stop();
-        frozen = false;
-        RunSim(); // re-initialise
-        break;
-    }
-    ticked();
-}
-
-//-------------------------------------------------------------------------------
-// drag & drop are synthetic events managed by d3. ".on()" only listens for 'raw' DOM events
-// d3's drag listener is applied to circle elements via d3 selection ".call(drag)" method, inside AppendShapes()
-
-let drag = d3.drag()
-    .on('start', Node.OnDragStart)
-    .on('drag', Node.OnDrag)
-    .on('end', Node.OnDragEnd)  
-    ;

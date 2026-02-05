@@ -1,9 +1,16 @@
-// fdg_graph.js
-// A simple force directed graph implementation
+// fdg_cache.js
 // Nodes and edges are stored in maps for efficient access
 // Each node has a unique id and can store arbitrary data
 // Each edge connects two nodes and can also store arbitrary data
-// Methods are for operations that depend on both nodes and edges
+
+
+//-------------------------------------------------------------------------------
+
+const supabaseClient = supabase.createClient(
+    APP_CONFIG.supabaseUrl,
+    APP_CONFIG.supabaseAnonKey
+);
+
 
 class Cache {
 
