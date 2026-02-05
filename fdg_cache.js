@@ -82,7 +82,7 @@ static async LoadData() {
        nodes = nodelist;
 
     // before calling Link.AppendDatum() we need to enable Node.GetFromID()
-       mapNodes = new Map ( nodes.map( x => ( [x.NODE_ID, x ]) ) );
+       mapNodes = new Map ( nodes.map( x => ( [x.node_id, x ]) ) );
 
 
     const linkPromise = supabaseClient
@@ -108,8 +108,8 @@ static AfterLoad() {
     
     // collect all immediate links into/out of each node regardless of type
     nodes.forEach( d => { 
-        d.inLinks  = links.filter( x => ( x.TO_NODE_ID   == d.NODE_ID ) ); 
-        d.outLinks = links.filter( x => ( x.FROM_NODE_ID == d.NODE_ID ) );
+        d.inLinks  = links.filter( x => ( x.to_node_id   == d.node_id ) ); 
+        d.outLinks = links.filter( x => ( x.from_node_id == d.node_id ) );
     } );
 
 // store true source/target references in each link
@@ -136,4 +136,37 @@ links.forEach( d => {
 
 } // end AfterLoad()
 
+static AddFrameNode() {
+    // add a new frame node to the cache
+    const nodeId = prompt("Enter a unique ID for the new frame node:", nodes.length+1 );
+    if (nodeId === null || nodeId.trim() === "") {
+        alert("Node ID cannot be empty.");
+        return;
+    }   
+    var d = {
+        node_id: nodeId,
+        x: 0,
+        y: 0,
+        r: 50,
+        descriptor: nodeId,
+        IS_GROUP: true
+    };
+    Node.AppendDatum(d);
+    nodes.push(d);
+    mapNodes.set(d.node_id, d);
+ 
+    nodes.filter(n => n.selected )
+    // TO DO    .filter( n is not an ancestor of d ) // prevent circular nesting
+        .forEach( n => Node.AddLinkToParent(n,d) ); // add new frame as parent of all currently selected nodes
+
+    Cache.RefreshAllDescendants();    // descendants, per node
+    Cache.RefreshSortedNodes(); 
+    Cache.ApplyFrameOrder();
+
+    AppendShapes(); 
+    // AppendFrameShapes(); 
+    AppendLines();
+    AppendLabels();
+    RefreshSimData();
+}
 }

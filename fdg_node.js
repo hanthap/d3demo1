@@ -26,7 +26,7 @@ class Node {
     //-------------------------------------------------------------------------------
 
     static UniqueId(d) {
-        return d.NODE_ID;
+        return d.node_id;
     }
 
     //-------------------------------------------------------------------------------
@@ -123,14 +123,14 @@ static Top(d) {
     //-------------------------------------------------------------------------------
 
     static FillColour(d) {
-            return 'rgb(' + sourcePalette(d.SRCE_CDE) + ')';
+            return 'rgb(' + sourcePalette(d.hue_id) + ')';
     }
 
     //-------------------------------------------------------------------------------
 
     static TitleText(d) {
-        if ( d.NODE_TXT ) {
-            return d.NODE_TXT.replace(/\|/g,'\n');
+        if ( d.descriptor ) {
+            return d.descriptor.replace(/\|/g,'\n');
         }
     }
 
@@ -188,7 +188,7 @@ static OnMouseDown(e,d) {
 // expand a collapsed node so it appears as a frame with visible child nodes
 static ToFrame(d) {
     if ( Node.HasMembers(d) ) {
-          d.IS_GROUP = true;
+          d.is_group = true;
           d.has_shape = 1;  // do we need this?
           // are there some descendants we still need to hide?
           d.descendants.filter(c => c != d).forEach( c => { 
@@ -224,21 +224,23 @@ static AppendDatum(d,i) {
     d.cogX = 0;
     d.cogY = 0;
     d.weight = 0.2;
- //   d.r = Math.sqrt(d.NODE_MASS) * radius / 10; // size proportional to weight
+ //   d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
     d.r = 10 + 20 * Math.random(); // random radius between 10 and 30
     d.height = 2 * d.r;
     d.width = 2 * d.r;
     d.selected = 0;
     d.show_label = 1; // default to showing labels
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
+    d.outLinks = [];
+    d.inLinks = [];
     // TO DO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
     return d;
 }
 
 //-------------------------------------------------------------------------------
 // called from AppendLinkDatum() in fdg_link.js
-static GetFromID( NODE_ID ) {
-    return ( mapNodes.get(NODE_ID) );
+static GetFromID( node_id ) {
+    return ( mapNodes.get(node_id) );
     }
 
 //-------------------------------------------------------------------------------
@@ -322,7 +324,7 @@ static IsExclusive(d) {
 //-------------------------------------------------------------------------------
 
 static ParentsOf(d) {
-    return d.outLinks.filter(n => n.EDGE_CDE == 'H' ).map(e => e.target);
+    return d.outLinks.filter(n => n.type_cde == 'H' ).map(e => e.target);
 }
 
 //-------------------------------------------------------------------------------
@@ -350,7 +352,7 @@ static IsVisible(d) {
 //-------------------------------------------------------------------------------
 
     static ShowAsFrame(d) {
-        return d.IS_GROUP && Node.HasShape(d) && HasVisibleChild(d);
+        return d.is_group && Node.HasShape(d) && HasVisibleChild(d);
     }
 
 //-------------------------------------------------------------------------------
@@ -424,10 +426,31 @@ static OnDragEnd(e,d) {
 
 }
 
+//-------------------------------------------------------------------------------
+
+static AddLinkToParent(child, parent) {
+    // create a new hierarchical link from child to parent
+    // TO DO:  skip if child is already a member of parent, or if parent is already an ancestor of child (to prevent circular nesting)
+    const newLink = {
+        source: child,
+        target: parent, 
+        true_source: child, // store the true source and target for when we need to restore them after a collapse/expand operation
+        true_target: parent,
+        to_node_id: parent.node_id,
+        from_node_id: child.node_id,
+        type_cde: "H",
+        distance: 20 * Math.random(),
+        strength: 0.4 * Math.random(),
+        id: 'L' + links.length + 1, // unique identifier
+        descriptor: `${child.node_id} ∈ ${parent.node_id}`
+    };
+    links.push(newLink);
+    child.outLinks.push(newLink);
+    parent.inLinks.push(newLink);
+}
+//-------------------------------------------------------------------------------
 
 }
-
-
 
  //-------------------------------------------------------------------------------
 

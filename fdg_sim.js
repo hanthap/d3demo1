@@ -43,10 +43,11 @@ function RunSim() {
         .force( 'cogY', d3.forceY( Node.COGY ).strength( Node.ForceY ) )
 
         // each edge typically acts as a spring between 2 specific nodes (like a covalent bond)
+  
         .force('link', d3.forceLink()
+            .links(links.filter(Link.ShowAsLine)) // d3.forceLink() requires that each link datum has a 'source' and 'target' property, which are references to node objects
             .distance(Link.Distance)
             .strength(Link.Strength)
-            .links(links.filter(Link.ShowAsLine))
             .iterations(2)
             )
         .alphaTarget(0.6) // freeze if/when alpha drops below this threshold

@@ -12,8 +12,8 @@ static AppendDatum(d,i) {
 
 try { 
     // bind Link to its live vertex objects
-    d.source = Node.GetFromID( d.FROM_NODE_ID );
-    d.target = Node.GetFromID( d.TO_NODE_ID );
+    d.source = Node.GetFromID( d.from_node_id );
+    d.target = Node.GetFromID( d.to_node_id );
     d.distance = 20 * Math.random();
     d.strength = 0.4 * Math.random();
     d.id = 'L' + i; // unique identifier
@@ -56,7 +56,7 @@ static PolyLinePointString( d ) {
 //-------------------------------------------------------------------------------
 
 static StrokeColour(d) { 
-    let c = sourcePalette( d.COLOUR_CDE );
+    let c = sourcePalette( d.hue_id );
     if ( d == mouseover_object ) { return 'black' }
  //   cleaner looking arrow+line if opacity stays at 1
    return d.selected ? 'rgba(' + c + ',1)' : 'lightgray' ;
@@ -72,7 +72,7 @@ static FillColour(d) { // drives arrowhead colour
 //-------------------------------------------------------------------------------
 
 static StrokeWidth(d) { // stroke-width of visible polyline
-        return d.EDGE_MASS / 20;
+        return d.link_mass / 20;
 }
 
 //-------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ static StrokeWidth(d) { // stroke-width of visible polyline
 static TitleText(d) {
 // to do: in case either node is stacked look for any links that are obscured by this one and display their info too
     try {
-        return d.EDGE_TXT + '\n\nFrom: ' + Node.TitleText(d.source) + '\n\nTo: ' + Node.TitleText(d.target);
+        return d.descriptor + '\n\nFrom: ' + Node.TitleText(d.source) + '\n\nTo: ' + Node.TitleText(d.target);
     } catch (e) { console.log(e);  };
 }
 
@@ -121,7 +121,7 @@ static SetAttributes(d)   {
     // to do: handle multiple containership hierarchies => need a priority order in case of 
 static IsHier(d) {
     return ( false 
-        || ( 'H').includes( d.EDGE_CDE )
+        || ( 'H').includes( d.type_cde )
     );
 
 }

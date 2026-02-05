@@ -73,7 +73,7 @@ static ToCircle(d, bCollapsed, cXcY) {
         [d.x, d.y] = cXcY;
         d.width = d.height = 2*d.r; // referred to by Node.ContactPoints()
 
-        d.IS_GROUP = false;
+        d.is_group = false;
 
         if ( bCollapsed ) {  // hide its contents & transplant links so they point to this container node
             // should be all descendants other than self

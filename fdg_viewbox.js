@@ -42,6 +42,38 @@ static WatchZoom() {
   requestAnimationFrame(ViewBox.WatchZoom);
 }
 
+
+
+//-------------------------------------------------------------------------------
+
+static OnKeyDown(d) {
+    // console.log(event)
+    switch (event.key) {
+    case 'Escape' : 
+        // clear all highlights by removing the 'selected' class
+        nodes.forEach( d => d.selected = 0 );
+        links.forEach( d => d.selected = 0 );
+        break;
+    case 'End':
+    case 'Pause' :
+        // toggle frozen
+        if ( frozen ^= 1 )
+            StopSim();
+        else
+            UnfreezeSim();
+        break;
+    case 'Home' :
+        frozen = false;
+        RunSim();
+        break;
+    case 'Insert' :
+      //  alert("Insert key pressed");
+        Cache.AddFrameNode();
+            ;
+        break;
+    }
+    ticked();
+}
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
@@ -113,11 +145,16 @@ static OnDragEnd(e,d) {
 
 }
 
+d3.select('body')
+  .on('keyup', ViewBox.OnKeyDown)
+  ;
+
 const svg = d3.select('body').append('svg')
     .attr('width',window.innerWidth)
     .attr('height', window.innerHeight)
     // set origin to centre of svg
     .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
+
     .call(d3.drag()
             .on('start', ViewBox.OnDragStart)
             .on('drag', ViewBox.OnDrag)
@@ -178,29 +215,3 @@ ViewBox.WatchZoom();
 
 window.addEventListener("resize", ViewBox.OnResize);
 
-
-//-------------------------------------------------------------------------------
-
-function handleKeyDown(d) {
-    // console.log(event)
-    switch (event.key) {
-    case 'Escape' : 
-        // clear all highlights by removing the 'selected' class
-        nodes.forEach( d => d.selected = 0 );
-        break;
-    case 'End':
-    case 'Pause' :
-        // toggle frozen
-        if ( frozen ^= 1 )
-            simulation.stop();
-        else
-            simulation.restart();
-        break;
-    case 'Home' :
-        simulation.stop();
-        frozen = false;
-        RunSim(); // re-initialise
-        break;
-    }
-    ticked();
-}
