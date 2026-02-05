@@ -34,7 +34,7 @@ static RefreshAllDescendants() {
 static RefreshSortedNodes() {
 
     let root_nodes = nodes.filter(Node.IsNotNested); 
-    sorted_nodes = FlattenByGeneration(root_nodes); // global, in fdg_nodes.js
+    sorted_nodes = Cache.FlattenByGeneration(root_nodes); // global, in fdg_nodes.js
 }
 
 static ApplyFrameOrder() {
@@ -45,12 +45,10 @@ static ApplyFrameOrder() {
 
 }
 
-}
-
 //-------------------------------------------------------------------------------
 // Called by Cache.RefreshSortedNodes() 
 
-function FlattenByGeneration(roots) {
+static FlattenByGeneration(roots) {
   const result = new Set(); // prevent duplicates, preserves insertion order
   const queue = [...roots];   // start with top-level objects
 
@@ -65,5 +63,77 @@ function FlattenByGeneration(roots) {
  
   return [...result]; // convert set to array 
  }
+ 
+static async LoadData() {
+    // this queues both promises (and their associated "then" statements) via parallel threads
+
+    const nodePromise = supabaseClient
+        .from("nodes")
+        .select("*");
+
+    let { data: nodelist, node_error } = await nodePromise; 
+
+      if (node_error) {
+        console.error(node_error);
+        return;
+      }
+
+       nodelist.forEach(Node.AppendDatum);
+       nodes = nodelist;
+
+    // before calling Link.AppendDatum() we need to enable Node.GetFromID()
+       mapNodes = new Map ( nodes.map( x => ( [x.NODE_ID, x ]) ) );
 
 
+    const linkPromise = supabaseClient
+        .from("edges")
+        .select("*");
+
+    let { data: linklist, error: link_error } = await linkPromise; 
+
+    if (link_error) {
+        console.error(link_error);
+        return;
+      }
+    links = linklist;
+    links.forEach(Link.AppendDatum);
+
+    Cache.AfterLoad();
+}
+
+
+//-------------------------------------------------------------------------------
+// final init steps that have to wait until nodes AND links are both populated 
+static AfterLoad() {
+    
+    // collect all immediate links into/out of each node regardless of type
+    nodes.forEach( d => { 
+        d.inLinks  = links.filter( x => ( x.TO_NODE_ID   == d.NODE_ID ) ); 
+        d.outLinks = links.filter( x => ( x.FROM_NODE_ID == d.NODE_ID ) );
+    } );
+
+// store true source/target references in each link
+links.forEach( d => {
+    d.true_source = d.source;
+    d.true_target = d.target;
+} );
+
+    // precompute & store lists
+    Cache.RefreshAllDescendants();    // descendants, per node
+  //  Cache.RefreshAllExclusiveNodes(); // circles and frames in scope of active_exclusion force
+    Cache.RefreshSortedNodes();       // z-order of nested frames
+
+    AppendShapes(); 
+    AppendFrameShapes(); 
+    AppendLines();
+    AppendLabels();
+
+
+    // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
+    simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
+
+    RunSim(); 
+
+} // end AfterLoad()
+
+}
