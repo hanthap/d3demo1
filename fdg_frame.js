@@ -126,7 +126,7 @@ static ToCircle(d, bCollapsed, cXcY) {
     }
 
     if ( e.ctrlKey ) { 
-        Frame.ToCircle(d, !e.shiftKey, d3.pointer(e)); // ctrl+SHIFT => do NOT hide children
+        Frame.ToCircle(d, false, d3.pointer(e)); // ctrl+click => switch to a circle, with lines from each child circle
         }         
 
     ticked();
@@ -137,7 +137,7 @@ static ToCircle(d, bCollapsed, cXcY) {
 
     // because smartphone doesn't have a shift key
    static OnDblClick(e,d) { //  show as a circle linked to all its children
-            Frame.ToCircle(d, false, d3.pointer(e)); // false => do not collapse
+                Frame.ToCircle(d, true, d3.pointer(e)); // true => collapse
             ticked();
 
    }
@@ -166,7 +166,7 @@ static ToCircle(d, bCollapsed, cXcY) {
 
     static CornerRadius(d) { return 1.5 * radius ;};
 
-    static Margin(d) { return radius };
+    static Margin(d) { return radius + 3*d.descendants.length }; // TO DO: make this a function of the number of descendants, or the size of the largest descendant, or something else that reflects the need for more space around larger frames.
 
  
 }

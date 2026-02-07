@@ -72,7 +72,7 @@ static FillColour(d) { // drives arrowhead colour
 //-------------------------------------------------------------------------------
 
 static StrokeWidth(d) { // stroke-width of visible polyline
-        return d.link_mass / 20;
+      return d.link_mass ? d.link_mass / 20 : 1.5; // to do: need a better formula for link mass => stroke width
 }
 
 //-------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ static StrokeWidth(d) { // stroke-width of visible polyline
 static TitleText(d) {
 // to do: in case either node is stacked look for any links that are obscured by this one and display their info too
     try {
-        return d.descriptor + '\n\nFrom: ' + Node.TitleText(d.source) + '\n\nTo: ' + Node.TitleText(d.target);
+        return d.descriptor + '\n\nFrom: ' + Node.TitleText(d.true_source) + '\n\nTo: ' + Node.TitleText(d.true_target);
     } catch (e) { console.log(e);  };
 }
 
@@ -100,6 +100,8 @@ static Distance(d) { // callback for d3.forceLink()
 // a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
 // Called once for link and again for linkzone
 
+
+// Why do we need this function? We could set the points and styles directly in the d3 join, as we do for the linkzone lines.
 static SetAttributes(d)   {
     // this = the HTML SVG element, d = the d3 datum
     // don't show link from child to its parent container - TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
@@ -202,10 +204,11 @@ function AppendLines() {
         .data(links.filter(Link.VisibleLine),Link.UniqueId)
         .join('line')
         .attr('id', Link.UniqueId) // for efficient upsert & delete of DOM bindings
+        .classed('linkzone',true) // for CSS styling of the extended click zone
         .on('click',LinkZone.OnClick)
         .on('mouseover',LinkZone.OnMouseOver)
         .on('mouseout',LinkZone.OnMouseOut)
-        .attr('stroke-width',LinkZone.StrokeWidth)
+        .style('stroke-width',LinkZone.StrokeWidth)
         .append('title') // simpler tooltip using HTML elements
             .text(Link.TitleText)
         ;
@@ -215,7 +218,7 @@ function AppendLines() {
         .attr('id', Link.UniqueId) // for efficient upsert & delete of DOM bindings
         .join('polyline') 
         .style('stroke',Link.StrokeColour)
-        .attr('stroke-width',Link.StrokeWidth)
+        .style('stroke-width',Link.StrokeWidth)
         ;
 
 }
@@ -231,9 +234,9 @@ static SetAttributes(d)   {
     // don't show link from child to its parent container - 
     // TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
 
-    if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) 
-        this.setAttribute('visibility','hidden');
-    else {
+    // if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) 
+    //     this.setAttribute('visibility','hidden');
+    // else {
         this.setAttribute('visibility','visible');
         let t = Link.PolyLinePointTuple(d);
         this.setAttribute('x1',t.start.x);
@@ -241,15 +244,15 @@ static SetAttributes(d)   {
         this.setAttribute('x2',t.end.x);
         this.setAttribute('y2',t.end.y);
        d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
-    }
+   // }
 }
 
 //-------------------------------------------------------------------------------
 
 static StrokeWidth(d) { // width of extended click zone
-    try {
-        return Link.StrokeWidth(d) + 4;
-    } catch (e) { };
+
+        return Link.StrokeWidth(d) + 20;
+
 }
 
 //-------------------------------------------------------------------------------

@@ -152,7 +152,8 @@ static Top(d) {
             // EndDrag event happens AND the OnClick ) 
 
         if ( k.ctrlKey && Node.HasMembers(d) ) {      
-            clicked_element.attr('visibility', Node.Visibility);
+            //Frame.ToCircle(d, true, d3.pointer(e)); // true => collapse
+            //clicked_element.attr('visibility', Node.Visibility);
             // TO DO remove the associated label for each child
             Node.ToFrame(d);
         } else { // toggle foreground/selected status
@@ -220,7 +221,7 @@ static OnDblClick(e,d) {
 //-------------------------------------------------------------------------------
 
 static AppendDatum(d,i) {
-    d.charge = -10 * Math.random(); // repulsive force
+    d.charge = 5 - ( 10 * Math.random()); // repulsive or attractive force
     d.cogX = 0;
     d.cogY = 0;
     d.weight = 0.2;

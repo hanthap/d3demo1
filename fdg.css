@@ -120,11 +120,12 @@ circle.dragging {
     stroke-opacity: 1;
 }
 
-g.edge {
+g.edge, g.label {
     pointer-events: none; /* let mouse events pass through to LinkZone */
 }
 
-g.linkzone { 
+line.linkzone { 
+    stroke-width:  10;
     stroke: yellow;
     stroke-opacity: 0;
 }
