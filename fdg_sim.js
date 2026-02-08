@@ -11,15 +11,14 @@ function RefreshSimData() {
 
 function UnfreezeSim() {
     if ( simulation) simulation.restart(); 
-    if ( simulationExclusion ) simulationExclusion.restart();
-} 
+}  
 
 //-------------------------------------------------------------------------------
 
 function FreezeSim() {
-    if ( simulation) { simulation.stop(); }
-    if ( simulationExclusion ) { simulationExclusion.stop(); }
-}
+    if ( simulation) simulation.stop(); 
+    }
+
 
 //-------------------------------------------------------------------------------
 
@@ -63,16 +62,13 @@ function RunSim() {
             .strength(0) // Link.Strength) 
             .iterations(1) // per tick. More => stronger effect, more repulsion?
             )
-        .alphaTarget(0.6) // freeze if/when alpha drops below this threshold
-        .alphaDecay(0.4)  // zero => never freeze, keep responding to drag events
+
+        .force("active_exclusion", active_exclusion) 
+
+        .alphaTarget(0.3) // freeze if/when alpha drops below this threshold
+        .alphaDecay(0.1)  // zero => never freeze, keep responding to drag events
         .on('tick',ticked)
         ;
-        // separate simulation to handle frame/circle exclusion forces
-        simulationExclusion = d3.forceSimulation() 
-          .force("active_exclusion", active_exclusion) 
-          .alphaTarget(0.8) // freeze if/when alpha drops below this threshold
-          .alphaDecay(0.6)
-         ;
 
     ticked();
 
@@ -137,20 +133,23 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 };
 
 //----------------------------------------------------------------
-
+// TO DO: maybe nudge circles towards the centre of their parent frames too?
 // Custom force to expel non-member circle nodes
 function active_exclusion(alpha) {
 // return active_exclusion;
-const frame_list = sorted_nodes.filter(Frame.IsExclusive);
-const circle_list = sorted_nodes.filter(Node.IsExclusive);
+//const frame_list = sorted_nodes.filter(Frame.IsExclusive).reverse();
+// const circle_list = sorted_nodes.filter(Node.IsExclusive);
+
+const frame_set = new Set(sorted_nodes.filter(Frame.IsExclusive).reverse());
+const circle_set = new Set(sorted_nodes.filter(Node.IsExclusive));
+
 const nIterations = 3; // per tick
 
 for(i=0; i < nIterations; i++) {
 
-  // [...sorted_nodes].reverse()
-  frame_list.forEach( n => { // outer loop 
+  frame_set.forEach( n => { // outer loop 
     const c0 = Frame.Centre(n); 
-    circle_list.forEach( m => { // inner loop
+    circle_set.forEach( m => { // inner loop
     if ( !(n.descendants.includes(m)) ) { // circle m is NOT a descendant of frame n 
         const 
           c1 = Node.Centre(m),
@@ -162,7 +161,7 @@ for(i=0; i < nIterations; i++) {
           p1 = Node.ContactPoint(m,theta_in),  
           h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ) + Node.CollideRadius(n), // frame centre to frame edge
           h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) - Node.CollideRadius(m); // frame centre to circle edge
-
+        ;
           if ( h0 > h1 ) { // overlapping shapes
             // hardcoded 0.5 by experimentation
             const 
@@ -170,13 +169,13 @@ for(i=0; i < nIterations; i++) {
               m.x += Math.cos( theta_out ) * nudge_factor;
               m.y += Math.sin( theta_out ) * nudge_factor;
             };
+
           };
         }
       );
     }
   );
 };
- // ticked();
 
   return active_exclusion; // return self, enabling a chain of forces if needed
 

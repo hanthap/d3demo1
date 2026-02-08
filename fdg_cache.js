@@ -130,13 +130,11 @@ links.forEach( d => {
     AppendLines();
     AppendLabels();
 
-
-    // 'null' simulation - lazy one-time pragma just to ensure inactive nodes are correctly registered with d3
-    simPassive = d3.forceSimulation(nodes.filter(NodeScope)).stop();
-
     RunSim(); 
 
 } // end AfterLoad()
+
+//-------------------------------------------------------------------------------
 
 static AddFrameNode() {
     // add a new frame node to the cache
@@ -149,9 +147,9 @@ static AddFrameNode() {
         node_id: nodeId,
         x: 0,
         y: 0,
-        r: 50,
+        r: 20,
         descriptor: nodeId,
-        IS_GROUP: true
+        is_group: true
     };
     Node.AppendDatum(d);
     nodes.push(d);
@@ -166,10 +164,12 @@ static AddFrameNode() {
     Cache.RefreshSortedNodes(); 
     Cache.ApplyFrameOrder();
 
-    AppendShapes(); 
-    // AppendFrameShapes(); 
-    AppendLines();
-    AppendLabels();
-    RefreshSimData();
+    Node.ToFrame(d);
+
 }
-}
+
+//-------------------------------------------------------------------------------
+
+} // end of Cache class
+
+//-------------------------------------------------------------------------------

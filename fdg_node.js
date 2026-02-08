@@ -130,7 +130,7 @@ static Top(d) {
 
     static TitleText(d) {
         if ( d.descriptor ) {
-            return d.descriptor.replace(/\|/g,'\n') + ' ' + d.charge;
+            return d.descriptor.replace(/\|/g,'\n');
         }
     }
    //-------------------------------------------------------------------------------
@@ -267,7 +267,7 @@ static Centre(d) {
 
 static CollideRadius(d) { // called by d3.forceCollide().radius(...)
     //return d.r + 20; // +3 = extra to allow for stroke-width of circle element 
-    return d.r  + 0;
+    return d.r  + 1;
 }
 
 //-------------------------------------------------------------------------------
@@ -319,8 +319,8 @@ static OnMouseOut(e,d) {
     
 static IsExclusive(d) {
     // to decide whether this node's circle is in scope of active_exclusion force
- //   if ( Node.DraggedElement && d === Node.DraggedElement.data() ) return false; // the dragged circle is immune
-    return ( d.has_shape && !HasVisibleChild(d)  ); 
+    // return ( d.has_shape && !HasVisibleChild(d)  ); 
+    return Node.ShowAsCircle(d);
     }
 
 //-------------------------------------------------------------------------------
@@ -342,13 +342,13 @@ static ParentsOf(d) {
 //-------------------------------------------------------------------------------
 // Decide whether we want a DOM shape element (visible or not) to be bound to this node 
 
-    static HasShape(d) {
-        // TO DO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFrame(d) == False
-        return d.has_shape;
-    }
+static HasShape(d) {
+    // TO DO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFrame(d) == False
+    return d.has_shape;
+}
 
 static IsVisible(d) {
-    return ( Node.HasShape(d)  );
+    return ( Node.HasShape(d) );
 }
 
 //-------------------------------------------------------------------------------
@@ -381,6 +381,7 @@ static IsVisible(d) {
 
 static OnDragStart(e,d) {
     console.log('Enter Node.OnDragStart');
+    console.log(d);
     d.fx = e.x; // fix the node position
     d.fy = e.y;     
    Node.DraggedElement = d3.select(e.sourceEvent.target);
@@ -529,7 +530,8 @@ function ChildrenOf(d) {
 //-------------------------------------------------------------------------------
 
 function VisibleChildrenOf(d) {
-        return ChildrenOf(d).filter(IsVisibleNode);
+       // return ChildrenOf(d).filter(IsVisibleNode);
+        return ChildrenOf(d).filter(Node.HasShape);
 }
 
 //-------------------------------------------------------------------------------

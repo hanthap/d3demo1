@@ -77,12 +77,14 @@ static OnKeyDown(d) {
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
-    const [x,y] = p = d3.pointer(e,svg.node());
+    console.log('dragstart');
+    console.log(svg); // expecting a d3 selection, but now looks more like a DOM 'svg' element?
+    const p = d3.pointer(e,svg.node());
     ViewBox.DragStartPos = p;
     ViewBox.SelectRect = gLabel
         .append('rect')
-            .attr('x', x)
-            .attr('y', y)
+            .attr('x', p.x)
+            .attr('y', p.y)
             .classed('drag_selector',true)
             ;
 
@@ -154,7 +156,6 @@ const svg = d3.select('body').append('svg')
     .attr('height', window.innerHeight)
     // set origin to centre of svg
     .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
-
     .call(d3.drag()
             .on('start', ViewBox.OnDragStart)
             .on('drag', ViewBox.OnDrag)
