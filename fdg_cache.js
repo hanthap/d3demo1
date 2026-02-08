@@ -87,7 +87,9 @@ static async LoadData() {
 
     const linkPromise = supabaseClient
         .from("edges")
-        .select("*");
+        .select("*")
+      //  .eq("hue_id", "A")
+        ;
 
     let { data: linklist, error: link_error } = await linkPromise; 
 

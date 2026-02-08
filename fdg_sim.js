@@ -2,7 +2,7 @@
 // no need to drop and recreate the simulation. Just feed it latest data
 
 function RefreshSimData() {
-  simulation.nodes(nodes.filter(Node.IsActive));
+  simulation.nodes(nodes.filter(Node.ShowAsCircle));
   simulation.force('link').links(links.filter(Link.ShowAsLine));
 
 }
@@ -16,7 +16,7 @@ function UnfreezeSim() {
 
 //-------------------------------------------------------------------------------
 
-function StopSim() {
+function FreezeSim() {
     if ( simulation) { simulation.stop(); }
     if ( simulationExclusion ) { simulationExclusion.stop(); }
 }
@@ -28,36 +28,49 @@ function RunSim() {
     // just for the currently-active subset of nodes controlling the animation
 
     // first kill any previous sims
-    StopSim() ;
+    FreezeSim();
 
     simulation = d3.forceSimulation(nodes.filter(Node.IsActive))
 
         .force('collide', d3.forceCollide().radius(Node.CollideRadius))
     
         // electrostatic forces attract/repel based on charge 
-        .force('electrostatic', d3.forceManyBody().strength(Node.Charge))
+       .force('electrostatic', d3.forceManyBody()
+          .strength(4) // negative => repulsive
+          .distanceMin(20) // minimum distance at which force applies
+          .distanceMax(50)  // maximum distance at which force applies
+          .theta(0.8) //  lower value => smoother, more accurate (but more costly)
+        )
+
+       .force('center', d3.forceCenter()
+        .strength(0.05) 
+      ) 
+
 
         // in case we want to add a per-node centroid, eg as an 'attractor' for specific node clusters
         // for now, they just help keep nodes near the centre of the window
-        .force( 'cogX', d3.forceX( Node.COGX ).strength( Node.ForceX ) )
-        .force( 'cogY', d3.forceY( Node.COGY ).strength( Node.ForceY ) )
+
+        .force( 'cogX', d3.forceX( Node.COGX )
+            .strength( Node.ForceX ) )
+        .force( 'cogY', d3.forceY( Node.COGY )
+            .strength( Node.ForceY ) )
 
         // each edge typically acts as a spring between 2 specific nodes (like a covalent bond)
   
         .force('link', d3.forceLink()
             .links(links.filter(Link.ShowAsLine)) // d3.forceLink() requires that each link datum has a 'source' and 'target' property, which are references to node objects
-            .distance(Link.Distance)
-            .strength(Link.Strength)
-            .iterations(2)
+            .distance(0) // Link.Distance)
+            .strength(0) // Link.Strength) 
+            .iterations(1) // per tick. More => stronger effect, more repulsion?
             )
         .alphaTarget(0.6) // freeze if/when alpha drops below this threshold
-        .alphaDecay(0.2)  // zero => never freeze, keep responding to drag events
+        .alphaDecay(0.4)  // zero => never freeze, keep responding to drag events
         .on('tick',ticked)
         ;
         // separate simulation to handle frame/circle exclusion forces
         simulationExclusion = d3.forceSimulation() 
           .force("active_exclusion", active_exclusion) 
-          .alphaTarget(0.6) // freeze if/when alpha drops below this threshold
+          .alphaTarget(0.8) // freeze if/when alpha drops below this threshold
           .alphaDecay(0.6)
          ;
 
@@ -65,7 +78,7 @@ function RunSim() {
 
     // the simulation starts running by default - we don't always want it to
     if (frozen) 
-            StopSim() ;
+            FreezeSim();
 
 }
 
@@ -125,42 +138,45 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 
 //----------------------------------------------------------------
 
-// Custom force to push out non-member circle nodes
+// Custom force to expel non-member circle nodes
 function active_exclusion(alpha) {
 // return active_exclusion;
+const frame_list = sorted_nodes.filter(Frame.IsExclusive);
+const circle_list = sorted_nodes.filter(Node.IsExclusive);
+const nIterations = 3; // per tick
 
-// [...sorted_nodes].reverse()
-sorted_nodes.filter(Frame.IsExclusive).forEach( n => { // outer loop 
-  const c0 = Frame.Centre(n); 
-  sorted_nodes.filter(Node.IsExclusive).forEach( m => { // inner loop
-  if ( !(n.descendants.includes(m)) ) { // circle m is NOT a descendant of frame n 
-      const 
-        c1 = Node.Centre(m),
-        dx = c1.x - c0.x,
-        dy = c1.y - c0.y,
-        theta_out = Math.atan2( dy,  dx),
-        theta_in =  Math.atan2(-dy, -dx),
-        p0 = Frame.ContactPoint(n,theta_out),
-        p1 = Node.ContactPoint(m,theta_in),  
-        h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ) + Node.CollideRadius(n), // frame centre to frame edge
-        h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) - Node.CollideRadius(m); // frame centre to circle edge
+for(i=0; i < nIterations; i++) {
 
-        if ( h0 > h1 ) { // overlapping shapes
-          // hardcoded 0.5 by experimentation
-          const 
-            nudge_factor = 0.5 * (h0 - h1) * alpha; // for smooth animation
-            m.x += Math.cos( theta_out ) * nudge_factor;
-            m.y += Math.sin( theta_out ) * nudge_factor;
+  // [...sorted_nodes].reverse()
+  frame_list.forEach( n => { // outer loop 
+    const c0 = Frame.Centre(n); 
+    circle_list.forEach( m => { // inner loop
+    if ( !(n.descendants.includes(m)) ) { // circle m is NOT a descendant of frame n 
+        const 
+          c1 = Node.Centre(m),
+          dx = c1.x - c0.x,
+          dy = c1.y - c0.y,
+          theta_out = Math.atan2( dy,  dx),
+          theta_in =  Math.atan2(-dy, -dx),
+          p0 = Frame.ContactPoint(n,theta_out),
+          p1 = Node.ContactPoint(m,theta_in),  
+          h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ) + Node.CollideRadius(n), // frame centre to frame edge
+          h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) - Node.CollideRadius(m); // frame centre to circle edge
+
+          if ( h0 > h1 ) { // overlapping shapes
+            // hardcoded 0.5 by experimentation
+            const 
+              nudge_factor = 0.5 * (h0 - h1) * alpha; // for smooth animation
+              m.x += Math.cos( theta_out ) * nudge_factor;
+              m.y += Math.sin( theta_out ) * nudge_factor;
+            };
           };
-
-
-
-        };
-      }
-    );
-  }
-);
-  ticked();
+        }
+      );
+    }
+  );
+};
+ // ticked();
 
   return active_exclusion; // return self, enabling a chain of forces if needed
 

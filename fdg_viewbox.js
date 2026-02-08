@@ -58,7 +58,7 @@ static OnKeyDown(d) {
     case 'Pause' :
         // toggle frozen
         if ( frozen ^= 1 )
-            StopSim();
+            FreezeSim();
         else
             UnfreezeSim();
         break;

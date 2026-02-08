@@ -130,10 +130,9 @@ static Top(d) {
 
     static TitleText(d) {
         if ( d.descriptor ) {
-            return d.descriptor.replace(/\|/g,'\n');
+            return d.descriptor.replace(/\|/g,'\n') + ' ' + d.charge;
         }
     }
-
    //-------------------------------------------------------------------------------
 
     static OnClick( k, d ) {
@@ -224,7 +223,7 @@ static AppendDatum(d,i) {
     d.charge = 5 - ( 10 * Math.random()); // repulsive or attractive force
     d.cogX = 0;
     d.cogY = 0;
-    d.weight = 0.2;
+    d.weight = 0.1;
  //   d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
     d.r = 10 + 20 * Math.random(); // random radius between 10 and 30
     d.height = 2 * d.r;
@@ -268,12 +267,13 @@ static Centre(d) {
 
 static CollideRadius(d) { // called by d3.forceCollide().radius(...)
     //return d.r + 20; // +3 = extra to allow for stroke-width of circle element 
-    return d.r  + 30;
+    return d.r  + 0;
 }
 
 //-------------------------------------------------------------------------------
 
 static Charge(d) { // called by d3.forceManyBody().strength(...)
+    return 0;
     return d.charge;
 }
 
@@ -319,7 +319,8 @@ static OnMouseOut(e,d) {
     
 static IsExclusive(d) {
     // to decide whether this node's circle is in scope of active_exclusion force
-    return ( d.has_shape && !HasVisibleChild(d) ); // for now, all leaf nodes may be excluded
+ //   if ( Node.DraggedElement && d === Node.DraggedElement.data() ) return false; // the dragged circle is immune
+    return ( d.has_shape && !HasVisibleChild(d)  ); 
     }
 
 //-------------------------------------------------------------------------------
@@ -380,32 +381,35 @@ static IsVisible(d) {
 
 static OnDragStart(e,d) {
     console.log('Enter Node.OnDragStart');
-    // TO DO: add more info about the drag?
-    Node.DragStartPos = [e.x, e.y];
-    Node.DraggedElement = d3.select(e.sourceEvent.target);
-    Node.DraggedElement.classed("dragging", true); // add special CSS styling
-//  e.sourceEvent.target.classList.toggle("dragging",true); 
- //   console.log(e.sourceEvent.target);
-    StopSim();
+    d.fx = e.x; // fix the node position
+    d.fy = e.y;     
+   Node.DraggedElement = d3.select(e.sourceEvent.target);
+   Node.DraggedElement.classed("dragging", true); // add special CSS styling
    Node.BringToFront(e.subject);
-    console.log('Exit Node.OnDragStart');
+   console.log('Exit Node.OnDragStart');
+
 }
 //-------------------------------------------------------------------------------
 
 static OnDrag(e,d) {
     // TO DO : ignore MouseOver with Links = so the dashed outline always stays with the circle being dragged (or perhaps with the circle it's dragged over)
-    d.x = e.x;
-    d.y = e.y;
+    d.fx = e.x;
+    d.fy = e.y;
     ticked();
 }
 
 //-------------------------------------------------------------------------------
 
 static OnDragEnd(e,d) {
+d.fx = null; // release the fixed position
+d.fy = null;    
+ Node.DraggedElement.classed("dragging", false); 
+
+ /*
  const p = Node.DragStartPos;
  Node.DragStartPos = null; 
  console.debug('Node.OnDragEnd');
- Node.DraggedElement.classed("dragging", false); 
+
   const dx = e.x - p[0];
   const dy = e.y - p[1];
   const dist = Math.hypot(dx, dy);
@@ -424,7 +428,7 @@ static OnDragEnd(e,d) {
     }
 
   console.debug('Exit Node.OnDragEnd');
-
+*/
 }
 
 //-------------------------------------------------------------------------------
