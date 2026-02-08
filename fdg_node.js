@@ -393,8 +393,8 @@ static OnDragStart(e,d) {
 
 static OnDrag(e,d) {
     // TO DO : ignore MouseOver with Links = so the dashed outline always stays with the circle being dragged (or perhaps with the circle it's dragged over)
-    d.fx = e.x;
-    d.fy = e.y;
+    d.x = d.fx = e.x; // update the x, y as well, so the circle moves even if the simulation is frozen
+    d.y = d.fy = e.y;
     ticked();
 }
 
