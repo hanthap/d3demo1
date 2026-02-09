@@ -381,12 +381,17 @@ static IsVisible(d) {
 
 static OnDragStart(e,d) {
     console.log('Enter Node.OnDragStart');
-    console.log(d);
+    console.log(e);
     d.fx = e.x; // fix the node position
     d.fy = e.y;     
    Node.DraggedElement = d3.select(e.sourceEvent.target);
-   Node.DraggedElement.classed("dragging", true); // add special CSS styling
-   Node.BringToFront(e.subject);
+   if ( e.sourceEvent.shiftKey) {
+        console.log(`Shift+DragStart => start creating a new link from node ${d.id}`);
+   }
+   else {
+    Node.DraggedElement.classed("dragging", true); // add special CSS styling
+    Node.BringToFront(e.subject);
+    }
    console.log('Exit Node.OnDragStart');
 
 }
@@ -394,17 +399,30 @@ static OnDragStart(e,d) {
 
 static OnDrag(e,d) {
     // TO DO : ignore MouseOver with Links = so the dashed outline always stays with the circle being dragged (or perhaps with the circle it's dragged over)
+       if ( e.sourceEvent.shiftKey) {
+        console.log('creating link');
+   }
+   else {
     d.x = d.fx = e.x; // update the x, y as well, so the circle moves even if the simulation is frozen
     d.y = d.fy = e.y;
+   }
     ticked();
 }
 
 //-------------------------------------------------------------------------------
 
 static OnDragEnd(e,d) {
-d.fx = null; // release the fixed position
-d.fy = null;    
- Node.DraggedElement.classed("dragging", false); 
+
+    if ( e.sourceEvent.shiftKey) {
+        console.log('finish creating link');
+        console.log(e.sourceEvent.target.__data__);
+   }
+   else 
+{
+    d.fx = null; // release the fixed position
+    d.fy = null;    
+     Node.DraggedElement.classed("dragging", false); 
+}
 
  /*
  const p = Node.DragStartPos;

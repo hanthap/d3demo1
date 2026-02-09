@@ -78,7 +78,6 @@ static OnKeyDown(d) {
 
 static OnDragStart(e,d) {
     console.log('dragstart');
-    console.log(svg); // expecting a d3 selection, but now looks more like a DOM 'svg' element?
     const p = d3.pointer(e,svg.node());
     ViewBox.DragStartPos = p;
     ViewBox.SelectRect = gLabel
