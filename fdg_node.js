@@ -320,7 +320,7 @@ static OnMouseOut(e,d) {
 static IsExclusive(d) {
     // to decide whether this node's circle is in scope of active_exclusion force
     // return ( d.has_shape && !HasVisibleChild(d)  ); 
-    return Node.ShowAsCircle(d);
+    return d.has_shape && Node.ShowAsCircle(d);
     }
 
 //-------------------------------------------------------------------------------
