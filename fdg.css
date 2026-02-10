@@ -133,7 +133,7 @@ g.edge, g.label {
 }
 
 line.linkzone { 
-    stroke-width:  16;
+    stroke-width:  10;
     stroke: yellow;
     stroke-opacity: 0;
 }

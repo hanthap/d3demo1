@@ -172,15 +172,16 @@ const gNode = svg.append("g"); // circles
 
 // links are rendered in front of circles. 
 
-// first the extended click zones, for better visual feedback & easier clicking
-const gLinkZone = svg.append('g')
-    .classed( 'linkzone', true )
     ;
-// then the polyline edge arrows themselves (with events passing through)
+// next the polyline edge arrows 
 const gLink = svg.append('g')
     .classed( 'edge', true )
     ;
-// a foreground layer eg for drag-select rect, pop-up annotations
+// overlay the invisible click zones
+const gLinkZone = svg.append('g')
+    .classed( 'linkzone', true )
+
+    // a foreground layer eg for drag-select rect, pop-up annotations
 const gLabel = svg.append('g')
     .classed( 'label', true )
     ;

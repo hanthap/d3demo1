@@ -449,11 +449,17 @@ console.log(e);
     if ( e.sourceEvent.shiftKey) {
         console.log('finish creating link');
         const lnk = {
-            from_datum: e.subject,
-            to_datum: e.sourceEvent.target.__data__,
-            from_shape: Node.DraggedElement,
-            to_shape: e.sourceEvent.target
-        }
+            true_source: e.subject,
+            true_target: e.sourceEvent.target.__data__,
+            source: e.subject,
+            target: e.sourceEvent.target.__data__,
+            id:  'L' + 1000 + Math.round( 1000 * Math.random() ), // unique identifier
+            descriptor: null
+        };
+        lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}.`
+        links.push(lnk);
+        AppendLines();
+
    }
    else  if ( ! e.sourceEvent.ctrlKey ) {
         d.fx = d.fy = null; // Crtl key => node 'stays put'
@@ -462,6 +468,7 @@ console.log(e);
 if ( ViewBox.DraftLine ) {  
     ViewBox.DraftLine.remove();
     ViewBox.DraftLine = null;
+
 }
 if ( Node.DraftLineFromElement ) {
     Node.DraftLineFromElement.classed("drafting", false);
