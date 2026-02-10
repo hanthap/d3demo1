@@ -54,7 +54,9 @@ static OnKeyDown(d) {
         nodes.forEach( d => d.selected = 0 );
         links.forEach( d => d.selected = 0 );
         break;
-    case 'End':
+    case 'End': // release any 'pegged' circles
+        nodes.forEach( d => { d.fx = d.fy = null }  );
+        break;
     case 'Pause' :
         // toggle frozen
         if ( frozen ^= 1 )

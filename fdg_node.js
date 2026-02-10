@@ -455,11 +455,9 @@ console.log(e);
             to_shape: e.sourceEvent.target
         }
    }
-   else 
-{
-    d.fx = null; // release the fixed x,y position
-    d.fy = null;    
-}
+   else  if ( ! e.sourceEvent.ctrlKey ) {
+        d.fx = d.fy = null; // Crtl key => node 'stays put'
+    }
 
 if ( ViewBox.DraftLine ) {  
     ViewBox.DraftLine.remove();
@@ -474,6 +472,7 @@ if ( Node.DraggedElement ) {
     Node.DraggedElement.classed("dragging", false);
     Node.DraggedElement = null;
 }
+ticked();
 
 
  /*

@@ -126,19 +126,6 @@ circle.drafting {
     stroke-opacity: 1;
 }
 
-circle.valid_target {
-    stroke: green;
-    stroke-dasharray: none;
-    stroke-opacity: 1;
-}
-
-rect.valid_target {
-    stroke: green;
-    stroke-dasharray: none;
-    stroke-opacity: 1;
-
-}
-
 
 
 g.edge, g.label {
@@ -146,7 +133,7 @@ g.edge, g.label {
 }
 
 line.linkzone { 
-    stroke-width:  10;
+    stroke-width:  16;
     stroke: yellow;
     stroke-opacity: 0;
 }
@@ -175,4 +162,20 @@ polyline.xhover {
 line.drafting {
     stroke-dasharray: 2,2;
         stroke:purple;
+}
+
+
+circle.valid_target {
+    stroke: green;
+    stroke-dasharray: none;
+    stroke-opacity: 1;
+    stroke-width:  4;
+}
+
+rect.valid_target {
+    stroke: green;
+    stroke-dasharray: none;
+    stroke-opacity: 1;
+    stroke-width:  4;
+
 }

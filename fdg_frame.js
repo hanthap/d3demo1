@@ -47,26 +47,29 @@ return point;
 
    static Hover( d, bHovering ) {
 
-    d3.selectAll('circle, rect') 
+    const s = d3.selectAll('circle, rect') 
         .filter( e => d.descendants.includes(e) ) 
         .classed( 'xhover', bHovering ) ;
-    } 
 
+    if ( Node.DraftLineFromElement ) {
+        s.classed("drafting", true);
+        } 
+   }
    //-------------------------------------------------------------------------------
 
    static OnMouseOver(e, d) {
     // MouseOver also fires when entering any child element
-        Frame.Hover( d, true );
         mouseover_object = Node.GetSelection(d);
+        Frame.Hover( d, true );
    }
 
    //-------------------------------------------------------------------------------
 
    static OnMouseOut(e, d) {
     if (e.button) return; //  ignore if still dragging 
-        Frame.Hover( d, false );
         mouseover_object.classed("valid_target",false);
         mouseover_object = null;
+        Frame.Hover( d, false );
    }
 
    //-------------------------------------------------------------------------------
