@@ -57,6 +57,7 @@ return point;
    static OnMouseOver(e, d) {
     // MouseOver also fires when entering any child element
         Frame.Hover( d, true );
+        mouseover_object = Node.GetSelection(d);
    }
 
    //-------------------------------------------------------------------------------
@@ -64,6 +65,8 @@ return point;
    static OnMouseOut(e, d) {
     if (e.button) return; //  ignore if still dragging 
         Frame.Hover( d, false );
+        mouseover_object.classed("valid_target",false);
+        mouseover_object = null;
    }
 
    //-------------------------------------------------------------------------------

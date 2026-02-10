@@ -108,7 +108,7 @@ rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover {
 }
 
 circle.drag_selected {
-    stroke: purple;
+    stroke:purple;
     stroke-dasharray: 2,2;
     stroke-opacity: 1;
 }
@@ -119,6 +119,27 @@ circle.dragging {
     stroke-dasharray: none;
     stroke-opacity: 1;
 }
+
+circle.drafting {
+    stroke: green;
+    stroke-dasharray: 2,2;
+    stroke-opacity: 1;
+}
+
+circle.valid_target {
+    stroke: green;
+    stroke-dasharray: none;
+    stroke-opacity: 1;
+}
+
+rect.valid_target {
+    stroke: green;
+    stroke-dasharray: none;
+    stroke-opacity: 1;
+
+}
+
+
 
 g.edge, g.label {
     pointer-events: none; /* let mouse events pass through to LinkZone */
@@ -149,4 +170,9 @@ polyline.selected {
 
 polyline.xhover { 
     stroke-dasharray: 2,2;
+}
+
+line.drafting {
+    stroke-dasharray: 2,2;
+        stroke:purple;
 }

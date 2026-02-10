@@ -136,11 +136,12 @@ static Top(d) {
    //-------------------------------------------------------------------------------
 
     static OnClick( k, d ) {
-       // mouseover_object = d; // redundant
+
         // toggle 'selected' status of the clicked node
         console.log('enter Node.OnClick');
         console.log(d);
-        
+
+        // TO DO: isn't there a simpler way to get this?
         let clicked_element = gNode   
             .selectAll('circle')
             .filter(c => c == d);
@@ -304,15 +305,21 @@ static ForceY(d) { // passed to d3.forceY().strength()
 //-------------------------------------------------------------------------------*/
 
 static OnMouseOver(e,d) {
-        mouseover_object = d;
+        mouseover_object = Node.GetSelection(d);
     }
 
 //-------------------------------------------------------------------------------
 
 static OnMouseOut(e,d) {
     // TO DO: when dragging over LinkZone, we lose :hover style. Need to manage .xhover class explicitly when dragging
-     if ( Node.DragStartPos || e.button ) return; //  ignore if still dragging 
+     if ( Node.DragStartPos || e.button ) {
+            return; //  ignore if still dragging 
+     }
+     if ( mouseover_object ) {
+        //console.log(mouseover_object);
+            mouseover_object.classed("valid_target",false);
             mouseover_object = null;           
+     }
     }
 
 //-------------------------------------------------------------------------------
@@ -382,26 +389,51 @@ static IsVisible(d) {
 static OnDragStart(e,d) {
     console.log('Enter Node.OnDragStart');
     console.log(e);
+    console.log(d);
+
     d.fx = e.x; // fix the node position
     d.fy = e.y;     
-   Node.DraggedElement = d3.select(e.sourceEvent.target);
+
    if ( e.sourceEvent.shiftKey) {
+       Node.DraftLineFromElement = d3.select(e.sourceEvent.target); 
         console.log(`Shift+DragStart => start creating a new link from node ${d.id}`);
+         Node.DraftLineFromElement.classed("drafting", true);
+         const p = Node.Centre(d);
+         ViewBox.DraftLine = gLabel
+        .append('line')
+            .attr('x1', p.x)
+            .attr('y1', p.y)
+            .attr('x2', e.x)
+            .attr('y2', e.y)
+            .classed('drafting',true)
+            ;
    }
    else {
+    Node.DraggedElement = d3.select(e.sourceEvent.target); 
     Node.DraggedElement.classed("dragging", true); // add special CSS styling
-    Node.BringToFront(e.subject);
+    Node.BringToFront(Node.DraggedElement);
     }
    console.log('Exit Node.OnDragStart');
-
+ticked();
 }
 //-------------------------------------------------------------------------------
 
 static OnDrag(e,d) {
+
     // TO DO : ignore MouseOver with Links = so the dashed outline always stays with the circle being dragged (or perhaps with the circle it's dragged over)
-       if ( e.sourceEvent.shiftKey) {
-        console.log('creating link');
-   }
+
+    if ( ViewBox.DraftLine ) {
+            ViewBox.DraftLine
+                .attr('x2', e.x)
+                .attr('y2', e.y)
+        // TO DO : highlight the mouseover_object shape element (but only if it's a valid link target)
+        if ( mouseover_object &&
+            mouseover_object != Node.DraftLineFromElement
+         ) {
+                mouseover_object.classed("valid_target",true);
+         }
+
+    }
    else {
     d.x = d.fx = e.x; // update the x, y as well, so the circle moves even if the simulation is frozen
     d.y = d.fy = e.y;
@@ -412,17 +444,37 @@ static OnDrag(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnDragEnd(e,d) {
+console.log(e);
 
     if ( e.sourceEvent.shiftKey) {
         console.log('finish creating link');
-        console.log(e.sourceEvent.target.__data__);
+        const lnk = {
+            from_datum: e.subject,
+            to_datum: e.sourceEvent.target.__data__,
+            from_shape: Node.DraggedElement,
+            to_shape: e.sourceEvent.target
+        }
    }
    else 
 {
-    d.fx = null; // release the fixed position
+    d.fx = null; // release the fixed x,y position
     d.fy = null;    
-     Node.DraggedElement.classed("dragging", false); 
 }
+
+if ( ViewBox.DraftLine ) {  
+    ViewBox.DraftLine.remove();
+    ViewBox.DraftLine = null;
+}
+if ( Node.DraftLineFromElement ) {
+    Node.DraftLineFromElement.classed("drafting", false);
+    Node.DraftLineFromElement = null;
+}
+
+if ( Node.DraggedElement ) {  
+    Node.DraggedElement.classed("dragging", false);
+    Node.DraggedElement = null;
+}
+
 
  /*
  const p = Node.DragStartPos;

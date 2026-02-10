@@ -42,8 +42,8 @@ static PolyLinePointTuple( d ) {
     var yMid = ( cp.p0.y + cp.p1.y ) / 2;
 
     return { 'start': { 'x': cp.p0.x , 'y': cp.p0.y },
-             'mid' :  { 'x': xMid,   'y': yMid },
-             'end':   {  'x': cp.p1.x , 'y': cp.p1.y  }
+             'mid' :  { 'x': xMid,     'y': yMid },
+             'end':   { 'x': cp.p1.x , 'y': cp.p1.y  }
             };
 }
 //-------------------------------------------------------------------------------
@@ -251,7 +251,7 @@ static SetAttributes(d)   {
 
 static StrokeWidth(d) { // width of extended click zone
 
-        return Link.StrokeWidth(d) + 20;
+        return Link.StrokeWidth(d) + 8;
 
 }
 
@@ -268,6 +268,9 @@ static OnClick(e,d) {
 
 //-------------------------------------------------------------------------------
 
+
+//-------------------------------------------------------------------------------
+
 static Hover( d, bHovering ) {
 
     if ( Node.DragStartPos ) return; // don't react if user is dragging a circle
@@ -277,6 +280,9 @@ static Hover( d, bHovering ) {
         .classed( 'xhover', bHovering ) // for CSS dash-array
         .each(d => { mouseover_object = bHovering ? d : null })
         ;
+
+    // mouseover_object = bHovering ? Node.GetSelection(d,"polyline") : null;
+
 
     gNode.selectAll("circle")
         .filter( c => c == d.source || c == d.target )
