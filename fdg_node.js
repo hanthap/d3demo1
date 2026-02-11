@@ -453,13 +453,14 @@ console.log(e);
             true_target: e.sourceEvent.target.__data__,
             source: e.subject,
             target: e.sourceEvent.target.__data__,
-            id:  'L' + 1000 + Math.round( 1000 * Math.random() ), // unique identifier
+            id:  'L' + 10000 + Math.round( 10000 * Math.random() ), // unique identifier
             descriptor: null,
             hue_id: 'B',
             type_cde: 1,
             mass: 100,
             strength: 0,
-            selected: 1
+            selected: 1,
+            opacity: 1
         };
         lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}`
         console.log(lnk);

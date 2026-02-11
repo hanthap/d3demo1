@@ -16,6 +16,7 @@ try {
     d.target = Node.GetFromID( d.to_node_id );
     d.distance = 20 * Math.random();
     d.strength = 0.4 * Math.random();
+    d.opacity = Math.random();
     d.id = 'L' + i; // unique identifier
    // console.log(d);
     return d; // only if we didn't throw an error eg 'no such node'
@@ -56,10 +57,14 @@ static PolyLinePointString( d ) {
 //-------------------------------------------------------------------------------
 
 static StrokeColour(d) { 
-    let c = sourcePalette( d.hue_id );
-    if ( d == mouseover_object ) { return 'black' }
- //   cleaner looking arrow+line if opacity stays at 1
-   return d.selected ? 'rgba(' + c + ',1)' : 'lightgray' ;
+
+   let rgb = ( d.selected ) ? sourcePalette( d.hue_id ) :
+        d == mouseover_object ? '0,0,0' : '192,192,192'; // black or grey if not selected
+
+   let a = ( d == mouseover_object ) ? 1 : d.opacity;
+
+   //   But, cleaner looking arrow+line if opacity stays at 1
+   return `rgba(${rgb},${a})`;
 
 }
 
@@ -70,9 +75,16 @@ static FillColour(d) { // drives arrowhead colour
 }
 
 //-------------------------------------------------------------------------------
+// eg to distinguish 'certain/evidence-based' vs 'tentative/subjective' connections
+
+static Opacity(d) {
+    return d.opacity;
+}
+
+//-------------------------------------------------------------------------------
 
 static StrokeWidth(d) { // stroke-width of visible polyline
-      return d.link_mass ? d.link_mass / 20 : 1.5; // to do: need a better formula for link mass => stroke width
+      return d.link_mass ? d.link_mass / 20 : 1.2; // to do: need a better formula for link mass => stroke width
 }
 
 //-------------------------------------------------------------------------------

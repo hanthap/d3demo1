@@ -156,6 +156,11 @@ static OnDragEnd(e,d) {
 
 d3.select('body')
   .on('keyup', ViewBox.OnKeyDown)
+  .call(d3.drag()
+            .on('start', Pointer.OnDragStart)
+            .on('drag', Pointer.OnDrag)
+            .on('end', Pointer.OnDragEnd)  
+        );
   ;
 
 const svg = d3.select('body').append('svg')

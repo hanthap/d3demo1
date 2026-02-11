@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -11,22 +12,22 @@
     </head>
     <!-- <body onkeydown="handleKeyDown();"> -->
     <body>
-        <!-- <script src="fdg_viewbox.js"></script> -->
-        <script src="fdg_pointer.js"></script>        
+        <script src="fdg_pointer.js"></script>         
+        <script src="fdg_viewbox.js"></script>
         <script src="fdg_cache.js"></script>
         <script src="fdg_node.js"></script>
         <script src="fdg_frame.js"></script>
         <script src="fdg_link.js"></script>
         <script src="fdg_label.js"></script>
         <script src="fdg_sim.js"></script>
-        <form>
+        <!-- <form> -->
         <input title="upload" type="file" multiple id="fileInput" accept=".csv">
-        </form>
+        <!-- </form> -->
 
 <script>
-          //  Cache.LoadData(); 
-          Cache.ReadLocalCsv();
-        </script>
+    Cache.LoadData(); 
+    Cache.ReadLocalCsv(); // currerntly this just sets up a listener for upload input field
+</script>
  
 
 </body>
