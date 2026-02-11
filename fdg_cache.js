@@ -144,12 +144,14 @@ static AddFrameNode() {
         return;
     }   
     var d = {
-        node_id: nodeId,
+        node_id: nodeId.trim(),
         x: 0,
         y: 0,
-        r: 20,
-        descriptor: nodeId,
-        is_group: true
+        r: 10,
+        descriptor: `New node: ${nodeId}`,
+        is_group: true,
+        hue_id: 'M',
+        node_mass: 20
     };
     Node.AppendDatum(d);
     nodes.push(d);
@@ -179,9 +181,15 @@ static ToCSV(data, columns) {
   return [header, ...rows].join("\n");
 }
 
+//-------------------------------------------------------------------------------
 
-static DownloadCSV(csvText, filename = "nodes.csv") {
-  const blob = new Blob([csvText], { type: "text/csv" });
+static DownloadCSV(object_list, filename = "nodes.csv") {
+   // list column names based on attributes in the trimmed extract
+const columns = [...new Set(object_list.flatMap(obj => Object.keys(obj)))];
+
+const csv = Cache.ToCSV(object_list, columns);
+
+  const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
@@ -191,7 +199,6 @@ static DownloadCSV(csvText, filename = "nodes.csv") {
 
   URL.revokeObjectURL(url);
 }
-
 
 //-------------------------------------------------------------------------------
 
@@ -211,7 +218,7 @@ static DownloadJSON(data, filename = "nodes.json") {
 
 static Download() {
     // only keep the persistent attributes
-    const trimmed = nodes.map(d => (
+    const trimmed_nodes = nodes.map(d => (
     {
     node_id: d.node_id,
     descriptor: d.descriptor,
@@ -225,17 +232,54 @@ static Download() {
     fy: d.fy
     }
     ));
-    Cache.DownloadJSON(trimmed);
+   // Cache.DownloadJSON(trimmed_nodes,"nodes.json");
+    Cache.DownloadCSV(trimmed_nodes,"nodes.csv");
 
-    // list column names based on attributes in the trimmed extract
-const columns = [...new Set(trimmed.flatMap(obj => Object.keys(obj)))];
-
-const csv = Cache.ToCSV(trimmed, columns);
-
-Cache.DownloadCSV(csv);
-
+    const trimmed_links = links.map(d => (
+        {
+            id: d.id,   
+            descriptor: d.descriptor,
+            // DEBUG: are these sometimes incorrect for newly-created links?
+            from_node_id: d.true_source.node_id,
+            to_node_id: d.true_target.node_id,
+            hue_id: d.hue_id,
+            type_cde: d.type_cde,
+            mass: d.mass,
+            strength: Math.round(d.strength*1000)/1000,
+            selected: d.selected
+        } ) );
+   // Cache.DownloadJSON(trimmed_links,"links.json");
+    Cache.DownloadCSV(trimmed_links,"links.csv");
 
 }
+//-------------------------------------------------------------------------------
+
+static ReadLocalCsv() {
+document.getElementById("fileInput").addEventListener("change", function() {
+  const file = this.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const data = d3.csvParse(text);
+    // explicitly convert strings 
+    const casted = data.map(d => ({
+    ...d,
+        selected: +d.selected,
+        mass: +d.mass,
+        strength: +d.strength
+        }));
+
+    console.log("Parsed CSV:", casted);
+    };
+
+  reader.readAsText(file);
+}
+)}
+;
+
+
+
 
 //-------------------------------------------------------------------------------
 

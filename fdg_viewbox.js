@@ -1,7 +1,7 @@
             var width = window.innerWidth, height = window.innerHeight;
             var simulation;
-            var simPassive;
-            var simulationExclusion;
+     //       var simPassive;
+    //        var simulationExclusion;
             var frozen = false;
 
 
@@ -64,7 +64,7 @@ static OnKeyDown(e) {
         else
             UnfreezeSim();
         break;
-    case 's' : // Alt+s => save data as JSON
+    case 's' : // Alt+s => export data as JSON & CSV
         if ( e.altKey ) {
             console.log(e);
             Cache.Download();

@@ -454,15 +454,21 @@ console.log(e);
             source: e.subject,
             target: e.sourceEvent.target.__data__,
             id:  'L' + 1000 + Math.round( 1000 * Math.random() ), // unique identifier
-            descriptor: null
+            descriptor: null,
+            hue_id: 'B',
+            type_cde: 1,
+            mass: 100,
+            strength: 0,
+            selected: 1
         };
-        lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}.`
+        lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}`
+        console.log(lnk);
         links.push(lnk);
         AppendLines();
         // DEBUG: If the target is a frame, the line doesn't show until the frame is collapsed to circle
 
    }
-   else  if ( ! e.sourceEvent.ctrlKey ) {
+   if ( ! e.sourceEvent.ctrlKey ) {
         d.fx = d.fy = null; // Crtl key => node 'stays put'
     }
 

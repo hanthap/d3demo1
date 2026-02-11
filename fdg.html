@@ -11,7 +11,7 @@
     </head>
     <!-- <body onkeydown="handleKeyDown();"> -->
     <body>
-        <script src="fdg_viewbox.js"></script>
+        <!-- <script src="fdg_viewbox.js"></script> -->
         <script src="fdg_pointer.js"></script>        
         <script src="fdg_cache.js"></script>
         <script src="fdg_node.js"></script>
@@ -19,10 +19,15 @@
         <script src="fdg_link.js"></script>
         <script src="fdg_label.js"></script>
         <script src="fdg_sim.js"></script>
-        <script>
-            Cache.LoadData(); 
+        <form>
+        <input title="upload" type="file" multiple id="fileInput" accept=".csv">
+        </form>
 
-
+<script>
+          //  Cache.LoadData(); 
+          Cache.ReadLocalCsv();
         </script>
+ 
+
 </body>
 </html>
