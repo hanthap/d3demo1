@@ -435,8 +435,8 @@ static OnDrag(e,d) {
 
     }
    else {
-    d.x = d.fx = e.x; // update the x, y as well, so the circle moves even if the simulation is frozen
-    d.y = d.fy = e.y;
+    d.x = d.fx = Math.round(e.x*1000)/1000; // update the x, y as well, so the circle moves even if the simulation is frozen
+    d.y = d.fy = Math.round(e.y*1000)/1000;
    }
     ticked();
 }
@@ -459,6 +459,7 @@ console.log(e);
         lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}.`
         links.push(lnk);
         AppendLines();
+        // DEBUG: If the target is a frame, the line doesn't show until the frame is collapsed to circle
 
    }
    else  if ( ! e.sourceEvent.ctrlKey ) {

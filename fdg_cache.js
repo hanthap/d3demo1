@@ -170,6 +170,75 @@ static AddFrameNode() {
 
 //-------------------------------------------------------------------------------
 
+
+static ToCSV(data, columns) {
+  const header = columns.join(",");
+  const rows = data.map(d =>
+    columns.map(col => JSON.stringify(d[col] ?? "")).join(",")
+  );
+  return [header, ...rows].join("\n");
+}
+
+
+static DownloadCSV(csvText, filename = "nodes.csv") {
+  const blob = new Blob([csvText], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+
+//-------------------------------------------------------------------------------
+
+static DownloadJSON(data, filename = "nodes.json") {
+  const json = JSON.stringify(data, null, 2);  
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+//-------------------------------------------------------------------------------
+
+static Download() {
+    // only keep the persistent attributes
+    const trimmed = nodes.map(d => (
+    {
+    node_id: d.node_id,
+    descriptor: d.descriptor,
+    selected: d.selected,
+    show_label: d.show_label,
+    has_shape: d.has_shape,
+    hue_id: d.hue_id,
+    node_mass: d.node_mass,
+    show_label: d.show_label,
+    fx: d.fx,
+    fy: d.fy
+    }
+    ));
+    Cache.DownloadJSON(trimmed);
+
+    // list column names based on attributes in the trimmed extract
+const columns = [...new Set(trimmed.flatMap(obj => Object.keys(obj)))];
+
+const csv = Cache.ToCSV(trimmed, columns);
+
+Cache.DownloadCSV(csv);
+
+
+}
+
+//-------------------------------------------------------------------------------
+
 } // end of Cache class
 
 //-------------------------------------------------------------------------------

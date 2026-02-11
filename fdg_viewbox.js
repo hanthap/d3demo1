@@ -46,7 +46,7 @@ static WatchZoom() {
 
 //-------------------------------------------------------------------------------
 
-static OnKeyDown(d) {
+static OnKeyDown(e) {
     // console.log(event)
     switch (event.key) {
     case 'Escape' : 
@@ -63,6 +63,12 @@ static OnKeyDown(d) {
             FreezeSim();
         else
             UnfreezeSim();
+        break;
+    case 's' : // Alt+s => save data as JSON
+        if ( e.altKey ) {
+            console.log(e);
+            Cache.Download();
+        }
         break;
     case 'Home' :
         frozen = false;
