@@ -34,6 +34,28 @@ class Node {
     static Radius(d) {
         return d.r;
     }
+
+    //-------------------------------------------------------------------------------
+
+static Coordinates(d) {
+    const s = Node.GetSelection(d);
+    if (s) {
+    const b = s.node().getBBox();
+    return { 
+            xmin: b.x,
+            ymin: b.y,
+            xmax : b.x + b.width,
+            ymax : b.y + b.height,
+            xmid : b.x + b.width/2,
+            ymid : b.y + b.height/2,
+            width : b.width,
+            height : b.height,
+            node_id: d.node_id
+            };
+        }
+
+}
+
     //-------------------------------------------------------------------------------
 
     static Width(d) {
@@ -532,7 +554,8 @@ static AddLinkToParent(child, parent) {
         distance: 20 * Math.random(),
         strength: 0.4 * Math.random(),
         id: 'L' + links.length + 1, // unique identifier
-        descriptor: `${child.node_id} ∈ ${parent.node_id}`
+        descriptor: `New link: ${child.node_id} ∈ ${parent.node_id}`,
+        opacity: 1
     };
     links.push(newLink);
     child.outLinks.push(newLink);
@@ -568,15 +591,13 @@ function IsVisibleNode(d) {
 function AppendShapes() {
 
     // create & bind the SVG visual elements
-    circles = gNode.selectAll('circle') // in case we've already got some
+    circles = gNode.selectAll('circle')
         .data(nodes.filter(Node.ShowAsCircle), Node.UniqueId) 
-            .join('circle')  // append a new circle shape bound to that datum
-                .attr('id', Node.UniqueId) // for efficient upsert & delete of DOM bindings
+            .join('circle') 
+                .attr('id', Node.UniqueId) 
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
                 .classed('has_members',Node.HasMembers)
-                .classed('xhover',false) // remove dashed outline CSS for newly-restored circles
-                .classed('drag_selected', ViewBox.DragRectIncludes )                
                 .on('mouseover',Node.OnMouseOver) 
                 .on('mouseout',Node.OnMouseOut) 
                 .on('mousedown',Node.OnMouseDown) 
@@ -589,11 +610,8 @@ function AppendShapes() {
                     ) 
                 ;
 
-
-// works ok - title can be nested inside circle element
        circles
                 .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
-                // can we append a custom element that supports CSS eg (stackoverflow)
                    .text(Node.TitleText)
                 ;
 

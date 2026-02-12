@@ -246,7 +246,8 @@ static Download() {
             type_cde: d.type_cde,
             mass: d.mass,
             strength: Math.round(d.strength*1000)/1000,
-            selected: d.selected
+            selected: d.selected,
+            opacity: Math.round(d.opacity*100)/100
         } ) );
    // Cache.DownloadJSON(trimmed_links,"links.json");
     Cache.DownloadCSV(trimmed_links,"links.csv");

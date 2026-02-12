@@ -40,6 +40,13 @@ const
   // TO DO : what if the point falls at a rounded corner (within Frame.CornerRadius of that corner)
 
 return point;
+
+}
+
+//-------------------------------------------------------------------------------
+// 
+static ExclusionBuffer(d) {
+    return 25;
 }
 
    //-------------------------------------------------------------------------------
@@ -118,6 +125,8 @@ static ToCircle(d, bCollapsed, cXcY) {
    static OnClick(e,d) {
 
     console.log(d);
+
+    console.log(Frame.Coordinates(d));
     
     if ( ! e.ctrlKey ) {
         // simple click => toggle selected status
@@ -151,6 +160,11 @@ static ToCircle(d, bCollapsed, cXcY) {
    //-------------------------------------------------------------------------------
 
    // currently assumes that x, y, height & width are determined by visible child circles
+
+   
+
+   //-------------------------------------------------------------------------------
+
 
     static Centre(d) { return { x: d.x + d.width/2, y: d.y + d.height/2 }    }
 
