@@ -58,6 +58,7 @@ static ExclusionBuffer(d) {
         .filter( e => d.descendants.includes(e) ) 
         .classed( 'xhover', bHovering ) ;
 
+//console.log(bHovering,s);
 
     if ( Node.DraftLineFromElement ) {
         s.classed("drafting", bHovering);
@@ -67,17 +68,28 @@ static ExclusionBuffer(d) {
 
    static OnMouseOver(e, d) {
     // MouseOver also fires when entering any child element
+
+  //  console.log('Frame.OnMouseOver',e,d,this);
+
         mouseover_d3selection = Node.GetD3Selection(d);
+        mouseover_datum = d;
+        mouseover_dom_element = this;
         Frame.Hover( d, true );
    }
 
    //-------------------------------------------------------------------------------
 
    static OnMouseOut(e, d) {
+
+//    console.log('Frame.OnMouseOut',e,d,this);
+
+
     if (e.button) return; //  ignore if still dragging 
         mouseover_d3selection.classed("valid_target",false);
-        mouseover_d3selection = null;
         Frame.Hover( d, false );
+        mouseover_d3selection = null;
+        mouseover_datum = null;
+        mouseover_dom_element = null;
    }
 
    //-------------------------------------------------------------------------------
@@ -125,7 +137,7 @@ static ToCircle(d, bCollapsed, cXcY) {
 
    static OnClick(e,d) {
 
-    console.log(d);
+   console.log('Frame.OnClick',e,d,this);
 
     console.log(Frame.Coordinates(d));
     
@@ -230,6 +242,8 @@ function AppendFrameShapes() {
         .on('dblclick', Frame.OnDblClick)
         .on('mouseover', Frame.OnMouseOver) 
         .on('mouseout', Frame.OnMouseOut)
+//        .on('mouseenter', Frame.OnMouseOver) 
+//        .on('mouseleave', Frame.OnMouseOut)
         .append('title')
             .text(Node.TitleText)
         ;

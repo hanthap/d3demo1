@@ -4,13 +4,13 @@ class Pointer {
 //---------------------------------------------------------------------------
 
 static OnMouseOver(e,d) {
-
+    console.log('Pointer.OnMouseOver',d,e);
 }
 
 //---------------------------------------------------------------------------
 
 static OnMouseExit(e,d) {
-    console.log(e);
+    console.log('Pointer.OnMouseExit',d,e);
 }
 //---------------------------------------------------------------------------
 static OnDragStart(e,d) {

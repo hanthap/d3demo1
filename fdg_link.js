@@ -109,20 +109,24 @@ static Distance(d) { // callback for d3.forceLink()
 }
 
 //-------------------------------------------------------------------------------
-// a function we can invoke with gLinkZone.selectAll('line'). Called twice per link, per animation
-// Called once for link and again for linkzone
+// d3selection.each(f) invokes f(d) for each DOM element (accessed via 'this') with d = its bound datum
 
+static OnTick() {
+   gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); 
+   gLink.selectAll('polyline').each( Link.SetAttributes ); 
+}
 
-// Why do we need this function? We could set the points and styles directly in the d3 join, as we do for the linkzone lines.
+//-------------------------------------------------------------------------------
+// Called per link, per tick, via selectAll('polyline').each( Link.SetAttributes ) 
 static SetAttributes(d)   {
-    // this = the HTML SVG element, d = the d3 datum
-    // don't show link from child to its parent container - TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
+    // selection.each(d) => this: the DOM element, d: the d3 datum
+    // don't show link from child to its parent container frame
     if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) 
-        this.setAttribute('visibility','hidden');
+        this.setAttribute('visibility','hidden'); // hidden element still generates mouseexit !
     else {
         this.setAttribute('visibility','visible');
         this.setAttribute('points', Link.PolyLinePointString(d) ); 
-        d3.select(this)
+        d3.select(this) // convert DOM element to d3 selection
             .classed('selected',d.selected)
             .classed('arrow',true)
             .style('stroke', Link.StrokeColour ) 
@@ -141,14 +145,18 @@ static IsHier(d) {
 }
 
 //-------------------------------------------------------------------------------
-// Excludes "circle-within-frame" links
+// TO DO: are there any non-hierarchical "circle-within-frame" links that should be hidden?
 static ShowAsLine(d) {
-    return ( Node.HasShape(d.source) && Node.HasShape(d.target) && !Node.ShowAsFrame(d.target) );
+    return ( Node.HasShape(d.source) && Node.HasShape(d.target) );
 }
 //-------------------------------------------------------------------------------
 // Exclude self-self links (eg a collapsed frame linking to itself)
 static VisibleLine(d) {
+    if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) return false;
     return ( Link.ShowAsLine(d) && ( d.target != d.source ));
+
+
+    Link.IsHier(d) && Node.ShowAsFrame(d.target) 
 }
 //-------------------------------------------------------------------------------
 // generalised formula: aX + bY + c = 0 (immune to divide-by=zero)
@@ -255,7 +263,7 @@ static SetAttributes(d)   {
         this.setAttribute('y1',t.start.y);
         this.setAttribute('x2',t.end.x);
         this.setAttribute('y2',t.end.y);
-       d3.select(this).classed('selected',d.selected); // classed() is a d3 extension; only needed once per user click
+       d3.select(this).classed('selected',d.selected);
    // }
 }
 

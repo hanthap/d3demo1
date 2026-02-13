@@ -128,7 +128,7 @@ circle.drafting {
 
 
 
-g.edge, g.label {
+g.edge, g.label, div.label, foreignObject, xhtml:div {
     pointer-events: none; /* let mouse events pass through to LinkZone */
 }
 

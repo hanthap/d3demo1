@@ -4,21 +4,19 @@
 function RefreshSimData() {
   simulation.nodes(nodes.filter(Node.ShowAsCircle));
   simulation.force('link').links(links.filter(Link.ShowAsLine));
-
 }
 
 //-------------------------------------------------------------------------------
 
 function UnfreezeSim() {
-    if ( simulation) simulation.restart(); 
+    if (simulation) simulation.restart(); 
 }  
 
 //-------------------------------------------------------------------------------
 
 function FreezeSim() {
-    if ( simulation) simulation.stop(); 
+    if (simulation) simulation.stop(); 
     }
-
 
 //-------------------------------------------------------------------------------
 
@@ -106,18 +104,15 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         d.height =yMax - yMin ;
     } } );
     
-// TO DO : If a 'container' node is empty it should be rendered as a circle(?), not hidden
-
-   gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); 
-   gLink.selectAll('polyline').each( Link.SetAttributes ); 
-   gLabel.selectAll('g').each( Label.SetAttributes ); 
+   Link.OnTick(); // update coordinates etc for each DOM element
+   Label.OnTick();
 
     gNode.selectAll('circle')
          .attr('cx', Node.BoundedX ) 
          .attr('cy', Node.BoundedY )
         // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on
         .classed('selected', d => d.selected)
-        .classed( 'drag_selected', ViewBox.DragRectIncludes )
+        .classed('drag_selected', ViewBox.DragRectIncludes )
         .attr('visibility', Node.Visibility )
         ;
 

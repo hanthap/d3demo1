@@ -8,6 +8,7 @@
             var x; // last clicked node
             var mouseover_d3selection = null;
             var mouseover_datum = null;
+            var mouseover_dom_element = null;
 
 //-------------------------------------------------------------------------------
 
@@ -86,7 +87,7 @@ static OnKeyDown(e) {
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
-    console.log('dragstart');
+    console.log('viewbox dragstart');
     const p = d3.pointer(e,svg.node());
     ViewBox.DragStartPos = p;
     ViewBox.SelectRect = gLabel

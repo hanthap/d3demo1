@@ -13,9 +13,10 @@ class Label extends Node {
         return ( Node.HasMembers(d) ? [ "has_members"] : ["circleinfo"] );
     }
     static HtmlText(d) { return Node.UniqueId(d); }
-    static SetAttributes(d) { // called via foreach
-        d3.select(this).attr('transform', d => `translate(${Node.Centre(d).x},${Node.Centre(d).y})`);   
+    static SetAttributes(d) { 
+       this.setAttribute('transform',`translate(${Node.Centre(d).x},${Node.Centre(d).y})`);
        }
+    static OnTick() { gLabel.selectAll('g').each(Label.SetAttributes);  }
 
 }
 

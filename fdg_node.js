@@ -159,11 +159,10 @@ static Top(d) {
 
     static OnClick( k, d ) {
 
-        // toggle 'selected' status of the clicked node
-        console.log('enter Node.OnClick');
-        console.log(d);
+    console.log('Node.OnClick',k,d,this);
 
-        // TO DO: isn't there a simpler way to get this?
+        // toggle 'selected' status of the clicked node
+        // TO DO: isn't there a simpler way to get this? eg d3.select(this) ?
         let clicked_element = gNode   
             .selectAll('circle')
             .filter(c => c == d);
@@ -275,7 +274,7 @@ static GetD3Selection( d, types="circle, rect" ) {
 //-------------------------------------------------------------------------------
 
 static BringToFront( d ) {
-    console.debug('Node.BringToFront');
+  //  console.debug('Node.BringToFront');
      Node.GetD3Selection( d ).raise(); 
     }
 
@@ -327,12 +326,22 @@ static ForceY(d) { // passed to d3.forceY().strength()
 //-------------------------------------------------------------------------------*/
 
 static OnMouseOver(e,d) {
+        mouseover_dom_element = this;
+        mouseover_datum = d;
         mouseover_d3selection = Node.GetD3Selection(d);
+        mouseover_d3selection.raise();
+
+  //      console.log('Node.OnMouseOver',d,e,mouseover_d3selection);
+
+
     }
 
 //-------------------------------------------------------------------------------
 
 static OnMouseOut(e,d) {
+
+//        console.log('Node.OnMouseOut',d,e,mouseover_d3selection);
+
     // TO DO: when dragging over LinkZone, we lose :hover style. Need to manage .xhover class explicitly when dragging
      if ( Node.DragStartPos || e.button ) {
             return; //  ignore if still dragging 
@@ -340,8 +349,13 @@ static OnMouseOut(e,d) {
      if ( mouseover_d3selection ) {
         //console.log(mouseover_d3selection);
             mouseover_d3selection.classed("valid_target",false);
-            mouseover_d3selection = null;           
      }
+
+    mouseover_dom_element = null;
+    mouseover_datum = null;
+    mouseover_d3selection = null;           
+
+
     }
 
 //-------------------------------------------------------------------------------
@@ -409,9 +423,7 @@ static IsVisible(d) {
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
-    console.log('Enter Node.OnDragStart');
-    console.log(e);
-    console.log(d);
+    console.log('Node.OnDragStart',e,d,this);
 
     d.fx = e.x; // fix the node position
     d.fy = e.y;     
@@ -452,7 +464,7 @@ static OnDrag(e,d) {
         if ( mouseover_d3selection && // we're hovering somewhere
             mouseover_d3selection != Node.DraftLineFromElement // exclude starting circle
          ) {
-                console.log(mouseover_d3selection);
+              //  console.log(mouseover_d3selection);
                 mouseover_d3selection.classed("valid_target",true);
          }
 
@@ -467,7 +479,7 @@ static OnDrag(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnDragEnd(e,d) {
-console.log(e);
+    console.log('Node.OnDragEnd',e,d,this);
 
     if ( e.sourceEvent.shiftKey) {
         console.log('finish creating link');
