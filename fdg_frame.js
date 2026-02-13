@@ -58,15 +58,16 @@ static ExclusionBuffer(d) {
         .filter( e => d.descendants.includes(e) ) 
         .classed( 'xhover', bHovering ) ;
 
+
     if ( Node.DraftLineFromElement ) {
-        s.classed("drafting", true);
+        s.classed("drafting", bHovering);
         } 
    }
    //-------------------------------------------------------------------------------
 
    static OnMouseOver(e, d) {
     // MouseOver also fires when entering any child element
-        mouseover_object = Node.GetSelection(d);
+        mouseover_d3selection = Node.GetD3Selection(d);
         Frame.Hover( d, true );
    }
 
@@ -74,8 +75,8 @@ static ExclusionBuffer(d) {
 
    static OnMouseOut(e, d) {
     if (e.button) return; //  ignore if still dragging 
-        mouseover_object.classed("valid_target",false);
-        mouseover_object = null;
+        mouseover_d3selection.classed("valid_target",false);
+        mouseover_d3selection = null;
         Frame.Hover( d, false );
    }
 

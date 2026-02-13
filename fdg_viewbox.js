@@ -6,7 +6,8 @@
 
 
             var x; // last clicked node
-            var mouseover_object = null;
+            var mouseover_d3selection = null;
+            var mouseover_datum = null;
 
 //-------------------------------------------------------------------------------
 

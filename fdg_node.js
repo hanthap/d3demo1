@@ -38,7 +38,7 @@ class Node {
     //-------------------------------------------------------------------------------
 
 static Coordinates(d) {
-    const s = Node.GetSelection(d);
+    const s = Node.GetD3Selection(d);
     if (s) {
     const b = s.node().getBBox();
     return { 
@@ -268,7 +268,7 @@ static GetFromID( node_id ) {
 
 //-------------------------------------------------------------------------------
 // return a d3 selection of all {circles & rects} bound to node datum d
-static GetSelection( d, types="circle, rect" ) {
+static GetD3Selection( d, types="circle, rect" ) {
     return d3.selectAll(types).filter(e => e === d ); // .filter() handles whatever you throw at it.
     }
 
@@ -276,7 +276,7 @@ static GetSelection( d, types="circle, rect" ) {
 
 static BringToFront( d ) {
     console.debug('Node.BringToFront');
-     Node.GetSelection( d ).raise(); 
+     Node.GetD3Selection( d ).raise(); 
     }
 
 //-------------------------------------------------------------------------------
@@ -327,7 +327,7 @@ static ForceY(d) { // passed to d3.forceY().strength()
 //-------------------------------------------------------------------------------*/
 
 static OnMouseOver(e,d) {
-        mouseover_object = Node.GetSelection(d);
+        mouseover_d3selection = Node.GetD3Selection(d);
     }
 
 //-------------------------------------------------------------------------------
@@ -337,10 +337,10 @@ static OnMouseOut(e,d) {
      if ( Node.DragStartPos || e.button ) {
             return; //  ignore if still dragging 
      }
-     if ( mouseover_object ) {
-        //console.log(mouseover_object);
-            mouseover_object.classed("valid_target",false);
-            mouseover_object = null;           
+     if ( mouseover_d3selection ) {
+        //console.log(mouseover_d3selection);
+            mouseover_d3selection.classed("valid_target",false);
+            mouseover_d3selection = null;           
      }
     }
 
@@ -448,11 +448,12 @@ static OnDrag(e,d) {
             ViewBox.DraftLine
                 .attr('x2', e.x)
                 .attr('y2', e.y)
-        // TO DO : highlight the mouseover_object shape element (but only if it's a valid link target)
-        if ( mouseover_object &&
-            mouseover_object != Node.DraftLineFromElement
+        // TO DO : highlight the mouseover_d3selection shape element (but only if it's a valid link target)
+        if ( mouseover_d3selection && // we're hovering somewhere
+            mouseover_d3selection != Node.DraftLineFromElement // exclude starting circle
          ) {
-                mouseover_object.classed("valid_target",true);
+                console.log(mouseover_d3selection);
+                mouseover_d3selection.classed("valid_target",true);
          }
 
     }

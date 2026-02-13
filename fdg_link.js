@@ -59,12 +59,12 @@ static PolyLinePointString( d ) {
 static StrokeColour(d) { 
 
    let rgb = ( d.selected ) ? sourcePalette( d.hue_id ) :
-        d == mouseover_object ? '0,0,0' : '192,192,192'; // black or grey if not selected
+        d == mouseover_datum ? '0,0,0' : '192,192,192'; // black or grey if not selected
 
-   let a = ( d == mouseover_object ) ? 1 : d.opacity;
+   let alpha = ( d == mouseover_datum ) ? 1 : d.opacity;
 
    //   But, cleaner looking arrow+line if opacity stays at 1
-   return `rgba(${rgb},${a})`;
+   return `rgba(${rgb},${alpha})`;
 
 }
 
@@ -290,10 +290,8 @@ static Hover( d, bHovering ) {
     gLink.selectAll('polyline')
         .filter( p => p == d ) // bound to the same datum 
         .classed( 'xhover', bHovering ) // for CSS dash-array
-        .each(d => { mouseover_object = bHovering ? d : null })
+        .each(d => { mouseover_datum = bHovering ? d : null })
         ;
-
-    // mouseover_object = bHovering ? Node.GetSelection(d,"polyline") : null;
 
 
     gNode.selectAll("circle")
