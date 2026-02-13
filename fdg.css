@@ -87,6 +87,7 @@ rect.drag_selector {
     stroke-dasharray: 2,2;
     stroke-opacity: 1;
     fill-opacity: 0.1;
+    cursor: crosshair;
 }
 
 rect.frame {
@@ -118,12 +119,15 @@ circle.dragging {
     stroke:red;
     stroke-dasharray: none;
     stroke-opacity: 1;
+    /* cursor: grabbing; ,* closed hand */
+    cursor: move; /* up-down & left-right arrows */
 }
 
 circle.drafting {
     stroke: green;
     stroke-dasharray: 2,2;
     stroke-opacity: 1;
+    cursor: no-drop;
 }
 
 
@@ -169,13 +173,15 @@ circle.valid_target {
     stroke: green;
     stroke-dasharray: none;
     stroke-opacity: 1;
-    stroke-width:  4;
+    stroke-width:  2;
+    cursor: crosshair;
 }
 
 rect.valid_target {
     stroke: green;
     stroke-dasharray: none;
     stroke-opacity: 1;
-    stroke-width:  4;
+    stroke-width:  2;
+    cursor: crosshair;
 
 }
