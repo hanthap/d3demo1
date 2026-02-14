@@ -278,7 +278,7 @@ static StrokeWidth(d) { // width of extended click zone
 //-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
-    console.log(d);
+    console.log('Link.OnClick',e,d,this);
 
     d.selected ^= 1;
     d.source.selected = d.selected;

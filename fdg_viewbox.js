@@ -47,10 +47,11 @@ static WatchZoom() {
 
 
 //-------------------------------------------------------------------------------
-
+// invoked from document regardless of selected element
 static OnKeyDown(e) {
-    // console.log(event)
-    switch (event.key) {
+   console.log('ViewBox.OnKeyDown',e);
+ 
+   switch (e.key) {
     case 'Escape' : 
         // clear all highlights by removing the 'selected' class
         nodes.forEach( d => d.selected = 0 );
@@ -58,6 +59,12 @@ static OnKeyDown(e) {
         break;
     case 'End': // release any 'pegged' circles
         nodes.forEach( d => { d.fx = d.fy = null }  );
+        break;
+    case 'Shift':
+        svg.classed("shift-down",true);
+        break;
+    case 'Control':
+        svg.classed("ctrl-down",true);
         break;
     case 'Pause' :
         // toggle frozen
@@ -79,15 +86,27 @@ static OnKeyDown(e) {
     case 'Insert' :
       //  alert("Insert key pressed");
         Cache.AddFrameNode();
-            ;
         break;
     }
     ticked();
 }
 //-------------------------------------------------------------------------------
 
+static OnKeyUp(e) {
+//  console.log('ViewBox.OnKeyUp',e);
+    switch (e.key) {
+    case 'Shift':
+        svg.classed("shift-down",false);
+        break;
+    case 'Control':
+        svg.classed("ctrl-down",false);
+        break;
+    }
+}
+//-------------------------------------------------------------------------------
+
 static OnDragStart(e,d) {
-    console.log('viewbox dragstart');
+    console.log('ViewBox.OnDragStart',e,d,this);
     const p = d3.pointer(e,svg.node());
     ViewBox.DragStartPos = p;
     ViewBox.SelectRect = gLabel
@@ -157,7 +176,7 @@ static OnDragEnd(e,d) {
 }
 
 d3.select('body')
-  .on('keyup', ViewBox.OnKeyDown)
+//  .on('keydown', ViewBox.OnKeyDown)
   .call(d3.drag()
             .on('start', Pointer.OnDragStart)
             .on('drag', Pointer.OnDrag)
@@ -170,6 +189,7 @@ const svg = d3.select('body').append('svg')
     .attr('height', window.innerHeight)
     // set origin to centre of svg
     .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
+    .on('contextmenu',e => e.preventDefault() ) // applies to all elements! => use Ctrl+Shift+I to open Console inspect
     .call(d3.drag()
             .on('start', ViewBox.OnDragStart)
             .on('drag', ViewBox.OnDrag)
@@ -231,3 +251,6 @@ ViewBox.WatchZoom();
 
 window.addEventListener("resize", ViewBox.OnResize);
 
+// centralise all keypresses regardless of which element is selected
+document.addEventListener("keydown", ViewBox.OnKeyDown);
+document.addEventListener("keyup", ViewBox.OnKeyUp);

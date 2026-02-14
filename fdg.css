@@ -20,7 +20,13 @@ circle {
     stroke:black;
     stroke-opacity: 0.1;
     stroke-width: 1;
+    cursor: grab;
 }
+
+.shift-down circle {
+    cursor: crosshair;
+}
+
 
 /*  foreignObject child <div> styling */
 div.circleinfo {
@@ -38,20 +44,22 @@ div.circleinfo {
 
 div.has_members {
     font-size: 9px;
-    color: black;
+    /* color: black; */
     font-weight: bold;
-    text-decoration: underline;
+    /* text-decoration: underline; */
     justify-content: center;
     display: flex;
     height: 100%;
     width: 100%;
     align-items: center;
     font-family: Helvetica;
+    text-shadow:
+        /* 1px 1px 0 #fff, */
+        2px 2px 4px rgba(0,0,0,0.4);
 }
 
 div.frameinfo {
-    font-size: 14px;
-    color: grey;
+    font-size: 12px;
     justify-content: center;
     display: flex;
     height: 100%;
@@ -62,7 +70,14 @@ div.frameinfo {
 
 }
 
-
+div.frameinfo.xhover {
+    transition: 0.2s ease;
+    /* font-size: 16px; */
+    opacity: 1;
+    text-shadow:
+        /* 1px 1px 0 #fff, */
+        2px 2px 2px rgba(0,0,0,0.7);
+}
 
 circle.selected {
     fill-opacity: 1;
@@ -71,7 +86,12 @@ circle.selected {
 }
 
 circle.has_members {
-    stroke: black;
+        stroke: black;
+}
+
+/* .class name first => we only need to set class on the 'g' container. (CSS selectors cascade to all descendants) */
+.shift-down circle.has_members {
+    cursor: zoom-in;
 }
 
 .blink_me {
@@ -95,7 +115,13 @@ rect.frame {
     stroke-width: 1;
     stroke-opacity: 0.1;
     fill-opacity: 0.1;
+
     }
+
+.shift-down rect.frame {
+    cursor: zoom-out;
+}
+
 
 rect.frame.selected {
     stroke-opacity: 1;
@@ -119,8 +145,8 @@ circle.dragging {
     stroke:red;
     stroke-dasharray: none;
     stroke-opacity: 1;
-    /* cursor: grabbing; ,* closed hand */
-    cursor: move; /* up-down & left-right arrows */
+    cursor: grabbing; 
+    /* cursor: move; /* up-down & left-right arrows */
 }
 
 circle.drafting {
@@ -133,7 +159,7 @@ circle.drafting {
 
 
 g.edge, g.label, div.label, foreignObject, xhtml:div {
-    pointer-events: none; /* let mouse events pass through to LinkZone */
+    pointer-events: none; /* let mouse events pass through  */
 }
 
 line.linkzone { 

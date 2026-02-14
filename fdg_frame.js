@@ -58,6 +58,10 @@ static ExclusionBuffer(d) {
         .filter( e => d.descendants.includes(e) ) 
         .classed( 'xhover', bHovering ) ;
 
+d3.selectAll('.frameinfo') 
+        .filter( e => d == e ) // not subsets
+        .classed( 'xhover', bHovering ) ;
+
 //console.log(bHovering,s);
 
     if ( Node.DraftLineFromElement ) {
@@ -71,7 +75,8 @@ static ExclusionBuffer(d) {
 
   //  console.log('Frame.OnMouseOver',e,d,this);
 
-        mouseover_d3selection = Node.GetD3Selection(d);
+        //mouseover_d3selection = Node.GetD3Selection(d);
+        mouseover_d3selection = d3.select(this);
         mouseover_datum = d;
         mouseover_dom_element = this;
         Frame.Hover( d, true );
@@ -81,8 +86,8 @@ static ExclusionBuffer(d) {
 
    static OnMouseOut(e, d) {
 
-//    console.log('Frame.OnMouseOut',e,d,this);
-
+  //  console.log('Frame.OnMouseOut',e,d,this);
+    if (e.toElement && e.toElement.localName == 'line') return; // better UX if we igore frame mouseout passing over link line
 
     if (e.button) return; //  ignore if still dragging 
         mouseover_d3selection.classed("valid_target",false);
