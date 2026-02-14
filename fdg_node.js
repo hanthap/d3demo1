@@ -155,6 +155,34 @@ static Top(d) {
             return d.descriptor.replace(/\|/g,'\n');
         }
     }
+
+
+//-------------------------------------------------------------------------------
+
+static OnMenuItemClick(e,d) {
+    console.log('Node.OnMenuItemClick',e,e.target);
+}
+
+//-------------------------------------------------------------------------------
+
+static OnContextMenu(e,d) {
+
+    e.preventDefault();
+
+    menu
+      .style("display", "block")
+      .style("left", e.pageX + "px")
+      .style("top", e.pageY + "px")
+      .html(`
+        <div class="item"><b>Node: ${d.node_id}</b></div>
+        <div class="item">${d.descriptor}</div>
+      `)
+      .on('click',Node.OnMenuItemClick)
+      ;
+
+}
+
+
    //-------------------------------------------------------------------------------
 
     static OnClick( k, d ) {
@@ -447,7 +475,7 @@ static OnDragStart(e,d) {
     Node.DraggedElement.classed("dragging", true); // add special CSS styling
     Node.BringToFront(Node.DraggedElement);
     }
-   console.log('Exit Node.OnDragStart');
+
 ticked();
 }
 //-------------------------------------------------------------------------------
@@ -613,9 +641,10 @@ function AppendShapes() {
                 .classed('has_members',Node.HasMembers)
                 .on('mouseover',Node.OnMouseOver) 
                 .on('mouseout',Node.OnMouseOut) 
-                .on('mousedown',Node.OnMouseDown) 
+         //       .on('mousedown',Node.OnMouseDown) 
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
+                .on('contextmenu',Node.OnContextMenu)
                 .call(d3.drag()
                     .on('start', Node.OnDragStart)
                     .on('drag', Node.OnDrag)

@@ -6,6 +6,11 @@ html, body {
     overflow: hidden; /* prevents scrollbars */
 }
 
+* {
+    font-size: 15px;
+    font-family: Helvetica;
+}
+
 svg {
     display: block; /* removes inline-gap issues */
     box-sizing: border-box;
@@ -37,7 +42,7 @@ div.circleinfo {
     height: 100%;
     width: 100%;
     align-items: center;
-    font-family: Helvetica;
+    /* font-family: Helvetica; */
     mix-blend-mode: difference; /* why does this not work? */
 
 }
@@ -46,13 +51,11 @@ div.has_members {
     font-size: 9px;
     /* color: black; */
     font-weight: bold;
-    /* text-decoration: underline; */
     justify-content: center;
     display: flex;
     height: 100%;
     width: 100%;
-    align-items: center;
-    font-family: Helvetica;
+    align-items: center; /* vertical */
     text-shadow:
         /* 1px 1px 0 #fff, */
         2px 2px 4px rgba(0,0,0,0.4);
@@ -65,14 +68,12 @@ div.frameinfo {
     height: 100%;
     width: 100%;
     align-items: center;
-    font-family: Helvetica;
     opacity: 0.5;
 
 }
 
 div.frameinfo.xhover {
     transition: 0.2s ease;
-    /* font-size: 16px; */
     opacity: 1;
     text-shadow:
         /* 1px 1px 0 #fff, */
@@ -210,4 +211,23 @@ rect.valid_target {
     stroke-width:  2;
     cursor: crosshair;
 
+}
+
+#context-menu {
+  position: absolute;
+  display: none;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+#context-menu .item {
+  font-size: 6;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+#context-menu .item:hover {
+  background: #eee;
 }

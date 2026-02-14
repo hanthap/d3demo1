@@ -49,6 +49,31 @@ static ExclusionBuffer(d) {
     return 25;
 }
 
+//-------------------------------------------------------------------------------
+
+static OnMenuItemClick(e,d) {
+    console.log('Frame.OnMenuItemClick',e,e.target);
+}
+
+//-------------------------------------------------------------------------------
+
+static OnContextMenu(e,d) {
+
+    e.preventDefault();
+
+    menu
+      .style("display", "block") 
+      .style("left", e.pageX + "px")
+      .style("top", e.pageY + "px")
+      .html(`
+        <div class="item"><b>Set: ${d.node_id}</b></div>
+        <div class="item">${d.descriptor}</div>
+      `)
+      .on('click',Frame.OnMenuItemClick)
+      ;
+
+}
+
    //-------------------------------------------------------------------------------
     // set or unset the 'xhover' class for node d plus all its descendants
 
@@ -247,8 +272,7 @@ function AppendFrameShapes() {
         .on('dblclick', Frame.OnDblClick)
         .on('mouseover', Frame.OnMouseOver) 
         .on('mouseout', Frame.OnMouseOut)
-//        .on('mouseenter', Frame.OnMouseOver) 
-//        .on('mouseleave', Frame.OnMouseOut)
+        .on("contextmenu", Frame.OnContextMenu)
         .append('title')
             .text(Node.TitleText)
         ;

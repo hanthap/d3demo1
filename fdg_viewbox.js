@@ -49,7 +49,7 @@ static WatchZoom() {
 //-------------------------------------------------------------------------------
 // invoked from document regardless of selected element
 static OnKeyDown(e) {
-   console.log('ViewBox.OnKeyDown',e);
+//   console.log('ViewBox.OnKeyDown',e);
  
    switch (e.key) {
     case 'Escape' : 
@@ -235,6 +235,11 @@ const arrow = defs
         .attr("class","arrowhead")
         .attr("points","0 0, 6 2, 0 4");
 
+const context_menu = d3.select('body').append('div')
+    .attr("id","context-menu") ; // let CSS do the rest
+
+
+
 
 //-------------------------------------------------------------------------------
 
@@ -254,3 +259,16 @@ window.addEventListener("resize", ViewBox.OnResize);
 // centralise all keypresses regardless of which element is selected
 document.addEventListener("keydown", ViewBox.OnKeyDown);
 document.addEventListener("keyup", ViewBox.OnKeyUp);
+
+const menu = d3.select("#context-menu");
+
+
+menu.on("click", function(event) {
+  const action = event.target;
+  console.log("Menu item Clicked:", action);
+});
+
+// hide the context menu when anything else is clicked
+d3.select("body").on("click", () => {
+  menu.style("display", "none");
+});

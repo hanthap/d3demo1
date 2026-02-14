@@ -228,6 +228,7 @@ function AppendLines() {
         .on('click',LinkZone.OnClick)
         .on('mouseover',LinkZone.OnMouseOver)
         .on('mouseout',LinkZone.OnMouseOut)
+        .on('contextmenu',LinkZone.OnContextMenu)
         .style('stroke-width',LinkZone.StrokeWidth)
         .append('title') // simpler tooltip using HTML elements
             .text(Link.TitleText)
@@ -287,6 +288,30 @@ static OnClick(e,d) {
 }
 
 //-------------------------------------------------------------------------------
+
+static OnMenuItemClick(e,d) {
+    console.log('LinkZone.OnMenuItemClick',e,e.target);
+}
+
+//-------------------------------------------------------------------------------
+
+static OnContextMenu(e,d) {
+
+    e.preventDefault();
+
+    menu
+      .style("display", "block")
+      .style("left", e.pageX + "px")
+      .style("top", e.pageY + "px")
+      .html(`
+        <div class="item"><b>Link: ${d.from_node_id} -> ${d.to_node_id}</b></div>
+        <div class="item">${d.descriptor}</div>
+      `)
+      .on('click',LinkZone.OnMenuItemClick)
+      ;
+
+}
+
 
 
 //-------------------------------------------------------------------------------
