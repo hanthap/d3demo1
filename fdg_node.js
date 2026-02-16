@@ -164,7 +164,9 @@ static OnMenuItemClick(e,d) {
 }
 //-------------------------------------------------------------------------------
 
-static ImageSource(d) { return 'tara.jpg'  };
+static ImageSource(d) { 
+    return d.img_src;
+};
 
 //-------------------------------------------------------------------------------
 
@@ -187,10 +189,10 @@ static OnContextMenu(e,d) {
       `)
         .append('div').classed('item',true)
         .append("img")
-            .attr("src", Node.ImageSource)
-            .attr("alt", Node.ImageAlt) // mandatory
-            .attr("width", '40px')
-            .attr("height", '50px')
+            .attr("src", Node.ImageSource(d))
+            .attr("alt", Node.ImageAlt(d)) // mandatory
+       //     .attr("width", '40px') automatic, if we specify height
+            .attr("height", '80px')
   
       .on('click',Node.OnMenuItemClick)
       ;

@@ -228,6 +228,7 @@ static Download() {
     hue_id: d.hue_id,
     node_mass: d.node_mass,
     show_label: d.show_label,
+    img_src: d.img_src,
     fx: d.fx,
     fy: d.fy
     }
