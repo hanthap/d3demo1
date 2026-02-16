@@ -196,8 +196,20 @@ static ContactPoints(d) {
     return { p0, p1 };
     }
 
+//-------------------------------------------------------------------------------
+
+
+static Matches(d) {
+return links.filter( e => ( e.source == d.source && e.target == d.target ) || 
+( e.source == d.target && e.target == d.source)
+ )
+
+
 }
 
+
+
+}
 //-------------------------------------------------------------------------------
 
 function IsActiveLink(d) {
@@ -259,7 +271,7 @@ static StrokeWidth(d) { // width of extended click zone
 //-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
-    console.log('Link.OnClick',e,d,this);
+    console.log('LinkZone.OnClick',e,d,this,Link.Matches(d));
 
     d.selected ^= 1;
     d.source.selected = d.selected;
@@ -279,14 +291,17 @@ static OnContextMenu(e,d) {
 
     e.preventDefault();
 
+    const a = Link.Matches(d);
+
+    const sub = a.map( e => `<div class="item">${e.true_source.node_id} → ${e.true_target.node_id}</div>`).join("\n");
+
+
     menu
       .style("display", "block")
       .style("left", e.pageX + "px")
       .style("top", e.pageY + "px")
       .html(`
-        <div class="item"><b>Link: ${d.true_source.node_id} → ${d.true_target.node_id}</b></div>
-        <div class="item">${d.descriptor}</div>
-      `)
+        <div class="item"><b>Link: ${d.source.node_id} ↔ ${d.target.node_id}</b> (${a.length})</div>${sub}`)
       .on('click',LinkZone.OnMenuItemClick)
       ;
 
@@ -326,5 +341,10 @@ static OnMouseOver(e,d) {
 static OnMouseOut(e,d) {
     LinkZone.Hover( d, false );
 }
+
+//-------------------------------------------------------------------------------
+
+
+
 
 }

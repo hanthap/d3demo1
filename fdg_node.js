@@ -162,6 +162,14 @@ static Top(d) {
 static OnMenuItemClick(e,d) {
     console.log('Node.OnMenuItemClick',e,e.target);
 }
+//-------------------------------------------------------------------------------
+
+static ImageSource(d) { return 'tara.jpg'  };
+
+//-------------------------------------------------------------------------------
+
+static ImageAlt(d) { return 'Tara JPEG' };
+
 
 //-------------------------------------------------------------------------------
 
@@ -177,6 +185,13 @@ static OnContextMenu(e,d) {
         <div class="item"><b>Node: ${d.node_id}</b></div>
         <div class="item">${d.descriptor}</div>
       `)
+        .append('div').classed('item',true)
+        .append("img")
+            .attr("src", Node.ImageSource)
+            .attr("alt", Node.ImageAlt) // mandatory
+            .attr("width", '40px')
+            .attr("height", '50px')
+  
       .on('click',Node.OnMenuItemClick)
       ;
 
@@ -228,9 +243,9 @@ static OnContextMenu(e,d) {
    //-------------------------------------------------------------------------------
 
 static OnMouseDown(e,d) {
-   console.log('Enter Node.OnMouseDown');
-   Node.BringToFront(e.subject);
-      console.log('Exit Node.OnMouseDown');
+//   console.log('Enter Node.OnMouseDown');
+//   Node.BringToFront(e.subject);
+//      console.log('Exit Node.OnMouseDown');
 }
 
    //-------------------------------------------------------------------------------
@@ -638,6 +653,8 @@ function AppendShapes() {
                 .attr('id', Node.UniqueId) 
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
+                .attr('data-myid', Node.TitleText) // "data-" attributes are HTML's way to tag an element with arbitrary key-value pairs, without side effects
+
                 .classed('has_members',Node.HasMembers)
                 .on('mouseover',Node.OnMouseOver) 
                 .on('mouseout',Node.OnMouseOut) 
@@ -652,10 +669,6 @@ function AppendShapes() {
                     ) 
                 ;
 
-       circles
-                .append('title') // auto tooltip lacks the option to set format with CSS - not even font size
-                   .text(Node.TitleText)
-                ;
 
 }
 

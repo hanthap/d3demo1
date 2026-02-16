@@ -52,6 +52,12 @@ static OnKeyDown(e) {
 //   console.log('ViewBox.OnKeyDown',e);
  
    switch (e.key) {
+    case 'A' :
+        if ( e.ctrlKey) { // Ctrl+A => Select All
+        nodes.filter(Node.ShowAsCircle).forEach( d => d.selected = 1 );
+        links.forEach( d => d.selected = 1 );
+        }
+        break;
     case 'Escape' : 
         // clear all highlights by removing the 'selected' class
         nodes.forEach( d => d.selected = 0 );

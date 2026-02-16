@@ -263,7 +263,7 @@ document.getElementById("fileInput").addEventListener("change", function() {
   reader.onload = function(e) {
     const text = e.target.result;
     const data = d3.csvParse(text);
-    // explicitly convert strings 
+    // explicitly convert strings to numbers
     const casted = data.map(d => ({
     ...d,
         selected: +d.selected,

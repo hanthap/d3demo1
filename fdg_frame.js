@@ -165,11 +165,19 @@ static ToCircle(d, bCollapsed, cXcY) {
 
    //-------------------------------------------------------------------------------
 
+static DescendantShapesSVG(d) {
+   return d3.selectAll('circle,rect').filter(e => d.descendants.slice(1).includes(e));
+   // don't include non-SVG elements. getBBox() only works for SVG.
+    }
+
+   //-------------------------------------------------------------------------------
+
    static OnClick(e,d) {
 
-   console.log('Frame.OnClick',e,d,this);
-
-    console.log(Frame.Coordinates(d));
+   console.log('Frame.OnClick',e,d,this,Frame.DescendantShapesSVG(d));
+   const bb = GetCombinedBBox(Frame.DescendantShapesSVG(d));
+   console.log('GetCombinedBBox()',bb);
+   console.log(Frame.Coordinates(d));
     
     if ( ! e.ctrlKey ) {
         // simple click => toggle selected status
@@ -279,4 +287,17 @@ function AppendFrameShapes() {
 
 
 }
+//---------------------------------------------------------------------------------
+function GetCombinedBBox( sel ) {
+    const boundingBoxes = sel.nodes().map(shape => shape.getBBox());
 
+    const combinedBBox = boundingBoxes.reduce((acc, bbox) => ({
+        x: Math.min(acc.x, bbox.x),
+        y: Math.min(acc.y, bbox.y),
+        width: Math.max(acc.x + acc.width, bbox.x + bbox.width) - Math.min(acc.x, bbox.x),
+        height: Math.max(acc.y + acc.height, bbox.y + bbox.height) - Math.min(acc.y, bbox.y)
+    }));
+
+    return combinedBBox;
+
+}
