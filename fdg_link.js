@@ -117,22 +117,12 @@ static OnTick() {
 }
 
 //-------------------------------------------------------------------------------
-// Called per link, per tick, via selectAll('polyline').each( Link.SetAttributes ) 
+// Repeated per link, per tick, via selectAll('polyline').each(Link.SetAttributes) 
 static SetAttributes(d)   {
     // selection.each(d) => this: the DOM element, d: the d3 datum
-    // don't show link from child to its parent container frame
-    if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) 
-        this.setAttribute('visibility','hidden'); // hidden element still generates mouseexit !
-    else {
-        this.setAttribute('visibility','visible');
-        this.setAttribute('points', Link.PolyLinePointString(d) ); 
-        d3.select(this) // convert DOM element to d3 selection
-            .classed('selected',d.selected)
-            .classed('arrow',true)
-            .style('stroke', Link.StrokeColour ) 
-            .style('fill', Link.FillColour );  // for arrowhead
+    this.setAttribute('points', Link.PolyLinePointString(d) ); 
 
-    }
+
 }
 
  //-------------------------------------------------------------------------------
@@ -155,8 +145,6 @@ static VisibleLine(d) {
     if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) return false;
     return ( Link.ShowAsLine(d) && ( d.target != d.source ));
 
-
-    Link.IsHier(d) && Node.ShowAsFrame(d.target) 
 }
 //-------------------------------------------------------------------------------
 // generalised formula: aX + bY + c = 0 (immune to divide-by=zero)
@@ -220,26 +208,27 @@ function IsActiveLink(d) {
 
 function AppendLines() {
 
-    gLinkZone.selectAll('line')
+    gLinkZone.selectAll('line') 
         .data(links.filter(Link.VisibleLine),Link.UniqueId)
         .join('line')
-        .attr('id', Link.UniqueId) // for efficient upsert & delete of DOM bindings
-        .classed('linkzone',true) // for CSS styling of the extended click zone
+        .attr('id', Link.UniqueId)
+        .classed('linkzone',true)
         .on('click',LinkZone.OnClick)
         .on('mouseover',LinkZone.OnMouseOver)
         .on('mouseout',LinkZone.OnMouseOut)
         .on('contextmenu',LinkZone.OnContextMenu)
         .style('stroke-width',LinkZone.StrokeWidth)
-        .append('title') // simpler tooltip using HTML elements
-            .text(Link.TitleText)
+        // .append('title').text(Link.TitleText)
         ;
 
-    gLink.selectAll('polyline') // this layer ignores mouse events, so they pass through to LinkZone
+    gLink.selectAll('polyline') 
         .data(links.filter(Link.VisibleLine),Link.UniqueId)
-        .attr('id', Link.UniqueId) // for efficient upsert & delete of DOM bindings
+        .attr('id', Link.UniqueId)
         .join('polyline') 
+        .classed('arrow',true)
         .style('stroke',Link.StrokeColour)
         .style('stroke-width',Link.StrokeWidth)
+        .style('fill', Link.FillColour ); // for the arrowhead
         ;
 
 }
@@ -250,22 +239,13 @@ function AppendLines() {
 class LinkZone extends Link {
 
 static SetAttributes(d)   {
+    
+    let t = Link.PolyLinePointTuple(d);
+    this.setAttribute('x1',t.start.x);
+    this.setAttribute('y1',t.start.y);
+    this.setAttribute('x2',t.end.x);
+    this.setAttribute('y2',t.end.y);
 
-    // this = the HTML SVG element, d = the d3 datum
-    // don't show link from child to its parent container - 
-    // TO DO: should we also hide a direct shortcut link from grandchild to grandparent container?
-
-    // if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) 
-    //     this.setAttribute('visibility','hidden');
-    // else {
-        this.setAttribute('visibility','visible');
-        let t = Link.PolyLinePointTuple(d);
-        this.setAttribute('x1',t.start.x);
-        this.setAttribute('y1',t.start.y);
-        this.setAttribute('x2',t.end.x);
-        this.setAttribute('y2',t.end.y);
-       d3.select(this).classed('selected',d.selected);
-   // }
 }
 
 //-------------------------------------------------------------------------------
@@ -304,15 +284,13 @@ static OnContextMenu(e,d) {
       .style("left", e.pageX + "px")
       .style("top", e.pageY + "px")
       .html(`
-        <div class="item"><b>Link: ${d.from_node_id} -> ${d.to_node_id}</b></div>
+        <div class="item"><b>Link: ${d.true_source.node_id} → ${d.true_target.node_id}</b></div>
         <div class="item">${d.descriptor}</div>
       `)
       .on('click',LinkZone.OnMenuItemClick)
       ;
 
 }
-
-
 
 //-------------------------------------------------------------------------------
 
@@ -324,15 +302,15 @@ static Hover( d, bHovering ) {
         .filter( p => p == d ) // bound to the same datum 
         .classed( 'xhover', bHovering ) // for CSS dash-array
         .each(d => { mouseover_datum = bHovering ? d : null })
-        ;
-
+        .style('stroke', Link.StrokeColour )  
+        .style('fill', Link.FillColour );  // for arrowhead
 
     gNode.selectAll("circle")
         .filter( c => c == d.source || c == d.target )
         .classed( 'xhover', bHovering );
 
     gGroup.selectAll("rect") // frame
-        .filter( c => c == d.source || c == d.target )
+        .filter( r => r == d.source || r == d.target )
         .classed( 'xhover', bHovering );
         // TO DO : apply to all nested frames and circles
 }
