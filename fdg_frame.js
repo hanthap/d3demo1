@@ -98,12 +98,10 @@ d3.selectAll('.frameinfo')
    static OnMouseOver(e, d) {
     // MouseOver also fires when entering any child element
 
-  //  console.log('Frame.OnMouseOver',e,d,this);
-
-        //mouseover_d3selection = Node.GetD3Selection(d);
         mouseover_d3selection = d3.select(this);
         mouseover_datum = d;
         mouseover_dom_element = this;
+        //mouseover_d3selection.raise(); // frames must stay in nesting heirarchy
         Frame.Hover( d, true );
    }
 
@@ -112,9 +110,9 @@ d3.selectAll('.frameinfo')
    static OnMouseOut(e, d) {
 
   //  console.log('Frame.OnMouseOut',e,d,this);
-    if (e.toElement && e.toElement.localName == 'line') return; // better UX if we igore frame mouseout passing over link line
+    if (e.toElement && e.toElement.localName == 'line') return; // better UX if we ignore frame mouseout passing over link line
 
-    if (e.button) return; //  ignore if still dragging 
+    //if (e.button) return; //  ignore if still dragging 
         mouseover_d3selection.classed("valid_target",false);
         Frame.Hover( d, false );
         mouseover_d3selection = null;
@@ -124,14 +122,14 @@ d3.selectAll('.frameinfo')
 
    //-------------------------------------------------------------------------------
 
-static ToCircle(d, bCollapsed, cXcY) {
+static ToCircle(d, bExploded, cXcY) {
         // replace the frame with a circle at cXcY, refresh attributes
         [d.x, d.y] = cXcY;
         d.width = d.height = 2*d.r; // referred to by Node.ContactPoints()
 
         d.is_group = false; // OTOH, what do we really mean? It's still a group in the sense of being a container for other nodes, but it is no longer rendered as a frame. 
 
-        if ( bCollapsed ) {  // hide its contents & transplant links so they point to this container node
+        if ( ! bExploded ) {  // default: 'implode' = hide its contents & transplant links so they point to this container node
             // should be all descendants other than self
             d.descendants.filter(c => c != d).forEach( c => { 
                     // for in and out lines, set this node d as the effective end point in place of any descendants of d
@@ -178,22 +176,26 @@ static DescendantShapesSVG(d) {
    const bb = GetCombinedBBox(Frame.DescendantShapesSVG(d));
    console.log('GetCombinedBBox()',bb);
    console.log(Frame.Coordinates(d));
-    
-    if ( ! e.ctrlKey ) {
-        // simple click => toggle selected status
-        d.selected ^= 1;
 
-        ChildrenOf(d).forEach( c => {
-            c.selected = d.selected;
-            // TO DO: this only goes down to grandchildren. Should use d.descendants
-            ChildrenOf(c).forEach( gc => { gc.selected = d.selected } );
-            } ) ; // set all children on or off
+   const cursor = window.getComputedStyle(this).cursor;
 
+    switch ( cursor ) {
+        case 'zoom-out' : // switch to a circle either collapsed, or (if ctrl key) 'exploded';
+            Frame.ToCircle(d, e.ctrlKey, d3.pointer(e)); 
+            break;
+        default: // toggle selected status
+            d.selected ^= 1;
+
+            ChildrenOf(d).forEach( c => {
+                c.selected = d.selected;
+                // TO DO: this only goes down to grandchildren. Should use d.descendants
+                ChildrenOf(c).forEach( gc => { 
+                        gc.selected = d.selected;
+                    //    d3.select('rect').filter( o => o == gc).classed('selected',d.selected) ;
+                    } );
+                } ) ; // set all children on or off
+            break;
     }
-
-    if ( e.ctrlKey ) { 
-        Frame.ToCircle(d, false, d3.pointer(e)); // ctrl+click => switch to a circle, with lines from each child circle
-        }         
 
     ticked();
 
@@ -202,8 +204,8 @@ static DescendantShapesSVG(d) {
     //-------------------------------------------------------------------------------
 
     // because smartphone doesn't have a shift key
-   static OnDblClick(e,d) { //  show as a circle linked to all its children
-                Frame.ToCircle(d, true, d3.pointer(e)); // true => collapse
+   static OnDblClick(e,d) { //  show as a circle , hiding children
+                Frame.ToCircle(d, false, d3.pointer(e)); // true => implode
             ticked();
 
    }
@@ -273,16 +275,14 @@ function AppendFrameShapes() {
         .attr('id', Node.UniqueId) //primary key
         .attr('rx', Frame.CornerRadius)
         .attr('ry', Frame.CornerRadius)
-        .attr('fill',Node.FillColour) // same as if it was a collapsed circle
+        .attr('fill',Node.FillColour) 
         // gradients are static defs, so we can't set them per-node here
-        .classed('frame',true) // CSS selectors can use ".frame" 
+        .classed('frame',true)
         .on('click', Frame.OnClick)
         .on('dblclick', Frame.OnDblClick)
         .on('mouseover', Frame.OnMouseOver) 
         .on('mouseout', Frame.OnMouseOut)
         .on("contextmenu", Frame.OnContextMenu)
-        .append('title')
-            .text(Node.TitleText)
         ;
 
 

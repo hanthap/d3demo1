@@ -49,7 +49,7 @@ static WatchZoom() {
 //-------------------------------------------------------------------------------
 // invoked from document regardless of selected element
 static OnKeyDown(e) {
-//   console.log('ViewBox.OnKeyDown',e);
+ //  console.log('ViewBox.OnKeyDown',e);
  
    switch (e.key) {
     case 'A' :
@@ -66,6 +66,10 @@ static OnKeyDown(e) {
     case 'End': // release any 'pegged' circles
         nodes.forEach( d => { d.fx = d.fy = null }  );
         break;
+    // case 'Meta' :
+    //      e.preventDefault(); // this does nothing... ?
+    //     svg.classed("meta-down",true)
+    //     break;
     case 'Shift':
         svg.classed("shift-down",true);
         break;
@@ -101,6 +105,9 @@ static OnKeyDown(e) {
 static OnKeyUp(e) {
 //  console.log('ViewBox.OnKeyUp',e);
     switch (e.key) {
+    // case 'Meta':
+    //     svg.classed("meta-down",false);
+    //     break;
     case 'Shift':
         svg.classed("shift-down",false);
         break;
@@ -109,9 +116,28 @@ static OnKeyUp(e) {
         break;
     }
 }
+
+//-------------------------------------------------------------------------------
+
+static OnMouseDown(e,d) {
+  console.log('ViewBox.OnMouseDown',e,d,this);
+ // svg.classed('left-mouse-down',true);
+
+}
+
+
+//-------------------------------------------------------------------------------
+
+static OnMouseUp(e,d) {
+  console.log('ViewBox.OnMouseUp',e,d,this);
+  svg.classed('left-mouse-down',false);
+
+}
+
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
+
     console.log('ViewBox.OnDragStart',e,d,this);
     const p = d3.pointer(e,svg.node());
     ViewBox.DragStartPos = p;
@@ -173,7 +199,7 @@ static OnDragEnd(e,d) {
         .classed( 'drag_selected', false )
         .each( d => { d.selected ^= 1 } ) // toggle selected flag
           ;
-
+    ticked();
 }
 
 //-------------------------------------------------------------------------------
@@ -182,7 +208,9 @@ static OnDragEnd(e,d) {
 }
 
 d3.select('body')
-//  .on('keydown', ViewBox.OnKeyDown)
+ .on('mousedown', ViewBox.OnMouseDown)
+.on('mouseup', ViewBox.OnMouseUp)
+
   .call(d3.drag()
             .on('start', Pointer.OnDragStart)
             .on('drag', Pointer.OnDrag)
@@ -196,11 +224,15 @@ const svg = d3.select('body').append('svg')
     // set origin to centre of svg
     .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
     .on('contextmenu',e => e.preventDefault() ) // applies to all elements! => use Ctrl+Shift+I to open Console inspect
-    .call(d3.drag()
-            .on('start', ViewBox.OnDragStart)
-            .on('drag', ViewBox.OnDrag)
-            .on('end', ViewBox.OnDragEnd)  
-        );
+ //   .on('mousedown',ViewBox.OnMouseDown)
+ //   .on('mouseup',ViewBox.OnMouseUp)
+
+    // .call(d3.drag()
+    //         .on('start', ViewBox.OnDragStart)
+    //         .on('drag', ViewBox.OnDrag)
+    //         .on('end', ViewBox.OnDragEnd)  
+    //     )
+        ;
 
 // group frames are passive shapes in the background
 const gGroup = svg.append('g')
@@ -211,7 +243,6 @@ const gNode = svg.append("g"); // circles
 
 // links are rendered in front of circles. 
 
-    ;
 // next the polyline edge arrows 
 const gLink = svg.append('g')
     .classed( 'edge', true )
@@ -265,7 +296,8 @@ window.addEventListener("resize", ViewBox.OnResize);
 // centralise all keypresses regardless of which element is selected
 document.addEventListener("keydown", ViewBox.OnKeyDown);
 document.addEventListener("keyup", ViewBox.OnKeyUp);
-
+document.addEventListener("mousedown", ViewBox.OnMouseDown);
+document.addEventListener("mouseup", ViewBox.OnMouseUp);
 const menu = d3.select("#context-menu");
 
 

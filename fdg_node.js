@@ -230,7 +230,7 @@ static OnContextMenu(e,d) {
 
         // optionally, propagate the selected status to all directly-linked neighbours
         if ( k.shiftKey ) {
-            clicked_element.classed('blink_me',true); // test
+          //  clicked_element.classed('blink_me',true); // test
             d.inLinks.forEach ( f => { f.source.selected = d.selected } );
             d.outLinks.forEach ( f => { f.target.selected = d.selected } );
         }
@@ -373,8 +373,8 @@ static ForceY(d) { // passed to d3.forceY().strength()
 static OnMouseOver(e,d) {
         mouseover_dom_element = this;
         mouseover_datum = d;
-        mouseover_d3selection = Node.GetD3Selection(d);
-        mouseover_d3selection.raise();
+        mouseover_d3selection = d3.select(this);
+        mouseover_d3selection.raise(); 
 
   //      console.log('Node.OnMouseOver',d,e,mouseover_d3selection);
 

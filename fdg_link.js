@@ -28,9 +28,8 @@ try {
 
 //-------------------------------------------------------------------------------
 
-// Given 2 circle nodes with different radii, calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
-// this ensures the line's terminal arrowhead will just touch the outer perimeter of the destination node.
-// TO DO: adjust for non-circular nodes. If the circle is inside the rect, the line goes to the nearest outer edge of the rect, not the centre
+// Given 2 nodes (circle or frame) calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
+// this ensures the line's endpoints will just touch the outer perimeter of each shape.
 // TO DO: handle scenario where source node overlaps the destination (or vice versa)
 
 
@@ -75,7 +74,7 @@ static FillColour(d) { // drives arrowhead colour
 }
 
 //-------------------------------------------------------------------------------
-// eg to distinguish 'certain/evidence-based' vs 'tentative/subjective' connections
+// eg to distinguish 'corroborated' vs 'tentative' connections
 
 static Opacity(d) {
     return d.opacity;
@@ -97,15 +96,15 @@ static TitleText(d) {
 }
 
 //-------------------------------------------------------------------------------
-// how strongly the distance is enforced
+// how rigidly the distance is enforced
 static Strength(d) {  // callback for d3.forceLink()
-    return 0.05 ; // Math.random();
+    return 0 ; // no effect, by default
 }
 
 //-------------------------------------------------------------------------------
 
 static Distance(d) { // callback for d3.forceLink()
-    return d.distance;
+    return 0; //d.distance;
 }
 
 //-------------------------------------------------------------------------------
@@ -119,10 +118,7 @@ static OnTick() {
 //-------------------------------------------------------------------------------
 // Repeated per link, per tick, via selectAll('polyline').each(Link.SetAttributes) 
 static SetAttributes(d)   {
-    // selection.each(d) => this: the DOM element, d: the d3 datum
     this.setAttribute('points', Link.PolyLinePointString(d) ); 
-
-
 }
 
  //-------------------------------------------------------------------------------
@@ -228,8 +224,18 @@ function AppendLines() {
         .on('click',LinkZone.OnClick)
         .on('mouseover',LinkZone.OnMouseOver)
         .on('mouseout',LinkZone.OnMouseOut)
+
+        .on('mousedown',ViewBox.OnMouseDown)
+        .on('mouseup',ViewBox.OnMouseUp)
+
+
         .on('contextmenu',LinkZone.OnContextMenu)
         .style('stroke-width',LinkZone.StrokeWidth)
+        .call(d3.drag()
+            .on('start',LinkZone.OnDragStart)
+            .on('drag',LinkZone.OnDrag)
+            .on('end',LinkZone.OnDragEnd)  
+            ) 
         // .append('title').text(Link.TitleText)
         ;
 
@@ -293,7 +299,7 @@ static OnContextMenu(e,d) {
 
     const a = Link.Matches(d);
 
-    const sub = a.map( e => `<div class="item">${e.true_source.node_id} → ${e.true_target.node_id}</div>`).join("\n");
+    const sub = a.map( e => `<div class="item">${e.true_source.node_id} → ${e.true_target.node_id}: ${e.descriptor}</div>`).join("\n");
 
 
     menu
@@ -341,6 +347,29 @@ static OnMouseOver(e,d) {
 static OnMouseOut(e,d) {
     LinkZone.Hover( d, false );
 }
+
+//---------------------------------------------------------------------------
+
+static OnDragStart(e,d) { 
+    Pointer.dragging_DOM_element = this;
+    Pointer.dragging_datum = d;
+    Pointer.dragging_d3_selection = d3.selectAll('line,polyline')
+        .filter(o => o === d)
+       .classed('dragging',true);
+    console.log('LinkZone.OnDragStart',e,d,this,Pointer.dragging_d3_selection,Pointer.dragging_datum);
+    ticked();
+}
+//---------------------------------------------------------------------------
+static OnDrag(e,d) {}
+//---------------------------------------------------------------------------
+static OnDragEnd(e,d) {
+
+    Pointer.dragging_d3_selection.classed('dragging',false);
+    console.log('LinkZone.OnDragEnd',e,d,this,Pointer.dragging_d3_selection,Pointer.dragging_datum);
+    ticked();
+
+}
+
 
 //-------------------------------------------------------------------------------
 

@@ -56,8 +56,8 @@ function RunSim() {
   
         .force('link', d3.forceLink()
             .links(links.filter(Link.ShowAsLine)) // d3.forceLink() requires that each link datum has a 'source' and 'target' property, which are references to node objects
-            .distance(0) // Link.Distance)
-            .strength(0) // Link.Strength) 
+            .distance(Link.Distance)
+            .strength(Link.Strength) 
             .iterations(1) // per tick. More => stronger effect, more repulsion?
             )
 
@@ -110,10 +110,9 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
     gNode.selectAll('circle')
          .attr('cx', Node.BoundedX ) 
          .attr('cy', Node.BoundedY )
-        // NOTE the following adjustments are only required if/when static data is modified, typically after a user click, not on
-        .classed('selected', d => d.selected)
         .classed('drag_selected', ViewBox.DragRectIncludes )
-        .attr('visibility', Node.Visibility )
+        // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
+        .classed('selected', d => d.selected)  
         ;
 
     gGroup.selectAll('rect')
@@ -121,9 +120,8 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         .attr('y', Frame.Top )
         .attr('height', Frame.Height )
         .attr('width', Frame.Width )
-        // The following adjustments are only required when static data is modified, typically after a user click
-        .classed('selected', d => d.selected)  
-        .attr('visibility', Frame.Visibility )
+        // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
+      .classed('selected', d => d.selected)  
      ;
 };
 

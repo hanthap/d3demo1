@@ -61,6 +61,11 @@ div.has_members {
         2px 2px 4px rgba(0,0,0,0.4);
 }
 
+foreignObject {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 div.frameinfo {
     font-size: 12px;
     justify-content: center;
@@ -123,6 +128,12 @@ rect.frame {
     cursor: zoom-out;
 }
 
+.ctrl-down.shift-down g {
+       fill-opacity: 1;
+    cursor: crosshair;
+}
+
+
 
 rect.frame.selected {
     stroke-opacity: 1;
@@ -149,6 +160,23 @@ circle.dragging {
     cursor: grabbing; 
     /* cursor: move; /* up-down & left-right arrows */
 }
+
+.shift-down line.linkzone  { 
+     cursor: grab;  
+ }
+
+.ctrl-down line.linkzone  { 
+     cursor: grab;  
+ }
+
+.ctrl-down.shift-down line.linkzone  { 
+     cursor: grabbing;  
+ }
+
+.shift-down.left-mouse-down line.linkzone  { 
+     cursor: grabbing;  
+ }
+
 
 circle.drafting {
     stroke: green;
@@ -189,6 +217,14 @@ polyline.selected {
 polyline.xhover { 
     stroke-dasharray: 2,2;
 }
+
+.dragging line { 
+    stroke-dasharray: 2,2;
+    stroke:red; 
+    stroke-opacity: 1;
+
+}
+
 
 line.drafting {
     stroke-dasharray: 2,2;
