@@ -29,7 +29,7 @@ try {
 //-------------------------------------------------------------------------------
 
 // Given 2 nodes (circle or frame) calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
-// this ensures the line's endpoints will just touch the outer perimeter of each shape.
+// this ensures the line's endpoints will coincide with the outer perimeter of each shape.
 // TO DO: handle scenario where source node overlaps the destination (or vice versa)
 
 
@@ -159,20 +159,18 @@ static LineGeneralForm(d) {
 //-------------------------------------------------------------------------------
 
 // geometry we can pre-compute once per link, before nodes find the intersection with their own boundary
-// NOTE we stick with screen coordinates througout, so 'top' y is less than 'bottom' y (and amgle is flipped accordingly)
+// NOTE we stick with screen coordinates througout, so 'top' y is less than 'bottom' y (and angle is flipped accordingly)
 
-static Theta(d) {
+static Theta(c0,c1) {
 
 const
-        c0 = Node.Centre(d.source), // careful with rect
-        c1 = Node.Centre(d.target),
-        dx = c1.x - c0.x,
-        dy = c1.y - c0.y,
-        theta_out = Math.atan2( dy,  dx),
-        theta_in =  Math.atan2(-dy, -dx),
-        deg_out = theta_out * (180 / Math.PI), // range [-180,+180] 
-        deg_in = theta_in * (180 / Math.PI) // range [-180,+180] 
-        ; 
+    dx = c1.x - c0.x,
+    dy = c1.y - c0.y,
+    theta_out = Math.atan2( dy,  dx),
+    theta_in =  Math.atan2(-dy, -dx),
+    deg_out = theta_out * (180 / Math.PI), // range [-180,+180] 
+    deg_in = theta_in * (180 / Math.PI) // range [-180,+180] 
+    ; 
         
 const info = 
 {
@@ -186,7 +184,10 @@ return info;
 //-------------------------------------------------------------------------------
 static ContactPoints(d) {
 
-    const t = Link.Theta(d),
+    const 
+    c0 = Node.Centre(d.source), // careful with rect
+    c1 = Node.Centre(d.target),
+    t =  Link.Theta(c0,c1),
     p0 = Node.ContactPoint(d.source,t.theta_out),
     p1 = Node.ContactPoint(d.target,t.theta_in); 
     return { p0, p1 };

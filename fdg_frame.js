@@ -89,7 +89,7 @@ d3.selectAll('.frameinfo')
 
 //console.log(bHovering,s);
 
-    if ( Node.DraftLineFromElement ) {
+    if ( Node.DraftLineFromD3Selection ) {
         s.classed("drafting", bHovering);
         } 
    }

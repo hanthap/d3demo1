@@ -17,6 +17,8 @@ var sourcePalette = d3.scaleOrdinal()
 class Node {
 
     static DragStartPos;
+    static DraftLineFromD3Selection;
+    static DraftLineFromDatum;
 
     constructor( d ) {
         this.d = d;
@@ -470,13 +472,15 @@ static OnDragStart(e,d) {
     d.fx = e.x; // fix the node position
     d.fy = e.y;     
 
-   if ( e.sourceEvent.shiftKey) {
-       Node.DraftLineFromElement = d3.select(e.sourceEvent.target); 
+   if ( e.sourceEvent.shiftKey && d ) {
+    //   Node.DraftLineFromD3Selection = d3.select(e.sourceEvent.target); 
+       Node.DraftLineFromD3Selection = d3.select(this); 
+       Node.DraftLineFromDatum = d;
         console.log(`Shift+DragStart => start creating a new link from node ${d.id}`);
-         Node.DraftLineFromElement.classed("drafting", true);
+         Node.DraftLineFromD3Selection.classed("drafting", true);
          const p = Node.Centre(d);
          ViewBox.DraftLine = gLabel
-        .append('line')
+            .append('line')
             .attr('x1', p.x)
             .attr('y1', p.y)
             .attr('x2', e.x)
@@ -499,15 +503,29 @@ static OnDrag(e,d) {
     // TO DO : ignore MouseOver with Links = so the dashed outline always stays with the circle being dragged (or perhaps with the circle it's dragged over)
 
     if ( ViewBox.DraftLine ) {
-            ViewBox.DraftLine
-                .attr('x2', e.x)
-                .attr('y2', e.y)
         // TO DO : highlight the mouseover_d3selection shape element (but only if it's a valid link target)
         if ( mouseover_d3selection && // we're hovering somewhere
-            mouseover_d3selection != Node.DraftLineFromElement // exclude starting circle
+            ( mouseover_datum.node_id != null ) &&  // it's a node, not a line
+            mouseover_d3selection != Node.DraftLineFromD3Selection // exclude starting circle
+
          ) {
-              //  console.log(mouseover_d3selection);
+            // "snap to" draw the draft line between contact points
+              const draft_link = { source: Node.DraftLineFromDatum, target: mouseover_datum };
+              const cp = Link.ContactPoints(draft_link);
+
+            ViewBox.DraftLine
+                .attr('x1', cp.p0.x)
+                .attr('y1', cp.p0.y)
+                .attr('x2', cp.p1.x)
+                .attr('y2', cp.p1.y);
+
                 mouseover_d3selection.classed("valid_target",true);
+         }
+         else { // not hovering over a valid target
+            // find contact point on source node, for a ray with no target node
+            ViewBox.DraftLine
+                .attr('x2', e.x)
+                .attr('y2', e.y);
          }
 
     }
@@ -555,9 +573,9 @@ if ( ViewBox.DraftLine ) {
     ViewBox.DraftLine = null;
 
 }
-if ( Node.DraftLineFromElement ) {
-    Node.DraftLineFromElement.classed("drafting", false);
-    Node.DraftLineFromElement = null;
+if ( Node.DraftLineFromD3Selection ) {
+    Node.DraftLineFromD3Selection.classed("drafting", false);
+    Node.DraftLineFromD3Selection = null;
 }
 
 if ( Node.DraggedElement ) {  
