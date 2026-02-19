@@ -172,10 +172,10 @@ static DescendantShapesSVG(d) {
 
    static OnClick(e,d) {
 
-   console.log('Frame.OnClick',e,d,this,Frame.DescendantShapesSVG(d));
-   const bb = GetCombinedBBox(Frame.DescendantShapesSVG(d));
-   console.log('GetCombinedBBox()',bb);
-   console.log(Frame.Coordinates(d));
+//    console.log('Frame.OnClick',e,d,this,Frame.DescendantShapesSVG(d));
+//    const bb = GetCombinedBBox(Frame.DescendantShapesSVG(d));
+//    console.log('GetCombinedBBox()',bb);
+//    console.log(Frame.Coordinates(d));
 
    const cursor = window.getComputedStyle(this).cursor;
 
@@ -205,8 +205,8 @@ static DescendantShapesSVG(d) {
 
     // because smartphone doesn't have a shift key
    static OnDblClick(e,d) { //  show as a circle , hiding children
-                Frame.ToCircle(d, false, d3.pointer(e)); // true => implode
-            ticked();
+        Frame.ToCircle(d, false, d3.pointer(e)); // true => implode
+        ticked();
 
    }
 

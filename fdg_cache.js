@@ -130,7 +130,8 @@ links.forEach( d => {
     AppendLines();
     AppendLabels();
 
-    RunSim(); 
+   RunSim(); 
+ //  FreezeSim();
 
 } // end AfterLoad()
 

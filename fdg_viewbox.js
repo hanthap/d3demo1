@@ -49,8 +49,8 @@ static WatchZoom() {
 //-------------------------------------------------------------------------------
 // invoked from document regardless of selected element
 static OnKeyDown(e) {
- //  console.log('ViewBox.OnKeyDown',e);
- 
+  // console.log('ViewBox.OnKeyDown',e);
+ const capslock = e.getModifierState("CapsLock");
    switch (e.key) {
     case 'A' :
         if ( e.ctrlKey) { // Ctrl+A => Select All
@@ -71,17 +71,25 @@ static OnKeyDown(e) {
     //     svg.classed("meta-down",true)
     //     break;
     case 'Shift':
+        FreezeSim();
         svg.classed("shift-down",true);
         break;
     case 'Control':
         svg.classed("ctrl-down",true);
         break;
+    case 'CapsLock' :
+        frozen = ! capslock; // will be toggled in next line
+    case 'ScrollLock' :    
     case 'Pause' :
         // toggle frozen
-        if ( frozen ^= 1 )
+        if ( frozen ^= 1 ) {
             FreezeSim();
-        else
+            svg.classed("shift-down",true);
+        }
+        else {
             UnfreezeSim();
+            svg.classed("shift-down",false);
+        }
         break;
     case 's' : // Alt+s => export data as JSON & CSV
         if ( e.altKey ) {
@@ -104,12 +112,20 @@ static OnKeyDown(e) {
 
 static OnKeyUp(e) {
 //  console.log('ViewBox.OnKeyUp',e);
-    switch (e.key) {
+
+ const capslock = e.getModifierState("CapsLock");
+
+switch (e.key) {
     // case 'Meta':
     //     svg.classed("meta-down",false);
     //     break;
+
     case 'Shift':
-        svg.classed("shift-down",false);
+        if (!capslock) {
+            svg.classed("shift-down",false);
+            if (!frozen) UnfreezeSim();
+        }
+
         break;
     case 'Control':
         svg.classed("ctrl-down",false);
@@ -258,19 +274,7 @@ const gLabel = svg.append('g')
 
 const defs = svg.append("defs");
 
-const arrow = defs
-    .append("marker")
-    .attr("id","arrow") //  to invoke this polyline marker and apply it to multiple instances
-    // these attributes cannot be set using CSS
-    .attr("markerWidth",6)
-    .attr("markerHeight",6)
-    .attr("refX",3) // anchor at 3 = 6/2 so the centre of the arrow is at the exact centre of the polyline
-    .attr("refY",2)
-    .attr("orient","auto")
-    .attr("markerUnits","strokeWidth") // should inherit
-        .append("polygon")
-        .attr("class","arrowhead")
-        .attr("points","0 0, 6 2, 0 4");
+
 
 const context_menu = d3.select('body').append('div')
     .attr("id","context-menu") ; // let CSS do the rest

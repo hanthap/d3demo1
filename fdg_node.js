@@ -204,41 +204,38 @@ static OnContextMenu(e,d) {
 
     static OnClick( k, d ) {
 
-    console.log('Node.OnClick',k,d,this);
+    //    console.log('Node.OnClick',k,d,this);
 
         // toggle 'selected' status of the clicked node
-        // TO DO: isn't there a simpler way to get this? eg d3.select(this) ?
-        let clicked_element = gNode   
-            .selectAll('circle')
-            .filter(c => c == d);
-        
-            console.log(clicked_element);
+        // let clicked_element = gNode   
+        //     .selectAll('circle')
+        //     .filter(c => c == d);
+        let clicked_element = d3.select(this);  
             // DEBUG: if the element is already in foreground , the whole event happens twice 
             // appearance is the toggle doesn't happen 
             // EndDrag event happens AND the OnClick ) 
 
-        if ( k.ctrlKey && Node.HasMembers(d) ) {      
-            //Frame.ToCircle(d, true, d3.pointer(e)); // true => collapse
-            //clicked_element.attr('visibility', Node.Visibility);
-            // TO DO remove the associated label for each child
-            Node.ToFrame(d);
-        } else { // toggle foreground/selected status
-            d.selected ^= 1;
-            clicked_element.classed('selected', d => d.selected)
-        }
+        const cursor = window.getComputedStyle(this).cursor;
 
+        switch ( cursor ) {
 
+            case 'zoom-in' : // assume this only applies when there are child nodes i.e. Node.HasMembers(d)
+                Node.ToFrame(d);
+                break;
+
+            default: // toggle foreground/selected status
+                d.selected ^= 1;
+                clicked_element.classed('selected', d => d.selected)
+                break;
+            }
+     
         // optionally, propagate the selected status to all directly-linked neighbours
         if ( k.shiftKey ) {
-          //  clicked_element.classed('blink_me',true); // test
             d.inLinks.forEach ( f => { f.source.selected = d.selected } );
             d.outLinks.forEach ( f => { f.target.selected = d.selected } );
         }
-        UnfreezeSim();
+       if (!frozen) UnfreezeSim();
        ticked();
-
-        console.log('exit Node.OnClick');
-
 
     }
 
@@ -271,7 +268,7 @@ static ToFrame(d) {
             AppendLines();
             AppendLabels();
             RefreshSimData();
-            UnfreezeSim();
+            if (!frozen) UnfreezeSim();
 
         }
 

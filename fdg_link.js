@@ -230,7 +230,7 @@ function AppendLines() {
 
 
         .on('contextmenu',LinkZone.OnContextMenu)
-        .style('stroke-width',LinkZone.StrokeWidth)
+    //    .style('stroke-width',LinkZone.StrokeWidth) // TBC - maybe leave it to CSS
         .call(d3.drag()
             .on('start',LinkZone.OnDragStart)
             .on('drag',LinkZone.OnDrag)
@@ -275,13 +275,64 @@ static StrokeWidth(d) { // width of extended click zone
 }
 
 //-------------------------------------------------------------------------------
+// Given an arbitrary clickpoint p=(x,y), decide which of the link's pair of connection points is nearer (free to move) vs farther (fixed)
+// useful for copy+paste or cut+paste while preserving all relevant attributes except for the disconnected node
+
+static ChooseEnds(d,[x,y]) {
+
+    const 
+    
+    cp = Link.ContactPoints(d),  // p0, p1 
+
+    h0 = Math.hypot(cp.p0.x - x, cp.p0.y - y),
+    h1 = Math.hypot(cp.p1.x - x, cp.p1.y - y),
+    
+    s = { 
+        node: d.source,
+        point: cp.p0,
+        class: 'fixed-source',
+        end: 'source' },
+    t = {
+        node: d.target,
+        point: cp.p1,
+        class: 'fixed-target',
+        end: 'target' }
+        ;
+console.log([x,y],cp,h0,h1);
+    return ( h0 > h1 ) ? { far: s, near: t } : { far: t, near: s };
+
+}
+
+
+//-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
+    
+   const style = window.getComputedStyle(this);
+   const p = d3.pointer(e,svg.node());
+   const sel = d3.select(this);
+
+    switch ( style.cursor ) {
+        case 'grab' : 
+            const ends = LinkZone.ChooseEnds(d,p);
+            console.log('LinkZone.OnClick(grab)',d,this,p,ends,sel);
+            sel
+                .classed(ends.far.class,true)
+                .classed(ends.near.class,false);
+
+            // which connection point is closer to the click? That's the one we are about to detach and drag
+            break;
+        default : 
+            d.selected ^= 1;
+            d.source.selected = d.selected;
+            d.target.selected = d.selected;
+            break;
+
+    }
+    
     console.log('LinkZone.OnClick',e,d,this,Link.Matches(d));
 
-    d.selected ^= 1;
-    d.source.selected = d.selected;
-    d.target.selected = d.selected;
+
     ticked();
 }
 
@@ -377,3 +428,35 @@ static OnDragEnd(e,d) {
 
 
 }
+
+
+const arrow = defs
+    .append("marker")
+    .attr("id","arrow") //  to invoke this polyline marker and apply it to multiple instances
+    // these attributes cannot be set using CSS
+    .attr("markerWidth",6)
+    .attr("markerHeight",6)
+    .attr("refX",3) // anchor at 3 = 6/2 so the centre of the arrow is at the exact centre of the polyline
+    .attr("refY",2)
+    .attr("orient","auto")
+    .attr("markerUnits","strokeWidth") // should inherit
+        .append("polygon")
+        .attr("class","arrowhead")
+        .attr("points","0 0, 6 2, 0 4");
+
+
+const bullet = defs
+    .append("marker")
+    .attr("id","bullet") //  to invoke this circle marker and apply it to multiple instances
+    // these attributes cannot be set using CSS
+    .attr("markerWidth",6)
+    .attr("markerHeight",6)
+    .attr("refX",3) // anchor at 3 = 6/2 so the centre of the bullet is at the exact centre of the line
+    .attr("refY",3)
+ //   .attr("orient","auto")
+    .attr("markerUnits","strokeWidth") // should inherit
+        .append("circle")
+        .attr("class","bullet")
+        .attr("cx","3")
+        .attr("cy","3")
+        ;

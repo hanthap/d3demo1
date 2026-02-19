@@ -193,21 +193,47 @@ g.edge, g.label, div.label, foreignObject, xhtml:div {
 
 line.linkzone { 
     stroke-width:  10;
-    stroke: yellow;
+    stroke: yellow; /* one way to make it clickable */
     stroke-opacity: 0;
 }
 
+line.bullet {
+    fill: context-fill; 
+    stroke: none; 
+}
+
+line.linkzone.fixed-source { 
+    stroke-width:  1.4;
+    stroke: green; 
+    stroke-opacity: 1;
+    marker-start: url(#bullet);
+}
+
+line.linkzone.fixed-target { 
+    stroke-width:  1.4;
+    stroke: blue;
+    stroke-opacity: 1;
+    marker-end: url(#bullet);
+
+}
 
 polyline.arrow { /* directed line, with arrow */
     stroke-width: 1.4;
     marker-mid: url(#arrow);
+    /* marker-mid: url(#bullet); */
 }
+
+
 
 polygon.arrowhead {
     fill: context-fill; /* inherit polyline's RGBA fill colour INCLUDING opacity (alpha) */
     stroke: none; 
+}
 
-
+circle.bullet {
+    fill-opacity: 1;
+    fill: context-fill; /* inherit line's RGBA fill colour INCLUDING opacity (alpha) */
+    stroke: none; 
 }
 
 polyline.selected {
