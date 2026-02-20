@@ -208,10 +208,6 @@ static OnContextMenu(e,d) {
 
     //    console.log('Node.OnClick',k,d,this);
 
-        // toggle 'selected' status of the clicked node
-        // let clicked_element = gNode   
-        //     .selectAll('circle')
-        //     .filter(c => c == d);
         let clicked_element = d3.select(this);  
             // DEBUG: if the element is already in foreground , the whole event happens twice 
             // appearance is the toggle doesn't happen 
@@ -221,7 +217,7 @@ static OnContextMenu(e,d) {
 
         switch ( cursor ) {
 
-            case 'zoom-in' : // assume this only applies when there are child nodes i.e. Node.HasMembers(d)
+            case 'zoom-in' : // implies we know there are child nodes i.e. Node.HasMembers(d)
                 Node.ToFrame(d);
                 break;
 
@@ -231,7 +227,7 @@ static OnContextMenu(e,d) {
                 break;
             }
      
-        // optionally, propagate the selected status to all directly-linked neighbours
+        // optionally, cascade the selected status to all directly-linked neighbours
         if ( k.shiftKey ) {
             d.inLinks.forEach ( f => { f.source.selected = d.selected } );
             d.outLinks.forEach ( f => { f.target.selected = d.selected } );
@@ -469,11 +465,10 @@ static IsVisible(d) {
 static OnDragStart(e,d) {
     console.log('Node.OnDragStart',e,d,this);
 
-    d.fx = e.x; // fix the node position
+    d.fx = e.x; // fix the node position.. 
     d.fy = e.y;     
 
    if ( e.sourceEvent.shiftKey && d ) {
-    //   Node.DraftLineFromD3Selection = d3.select(e.sourceEvent.target); 
        Node.DraftLineFromD3Selection = d3.select(this); 
        Node.DraftLineFromDatum = d;
         console.log(`Shift+DragStart => start creating a new link from node ${d.id}`);
@@ -489,7 +484,7 @@ static OnDragStart(e,d) {
             ;
    }
    else {
-    Node.DraggedElement = d3.select(e.sourceEvent.target); 
+    Node.DraggedElement = d3.select(this); 
     Node.DraggedElement.classed("dragging", true); // add special CSS styling
     Node.BringToFront(Node.DraggedElement);
     }
@@ -500,36 +495,32 @@ ticked();
 
 static OnDrag(e,d) {
 
-    // TO DO : ignore MouseOver with Links = so the dashed outline always stays with the circle being dragged (or perhaps with the circle it's dragged over)
+   const [x,y] = d3.pointer(e,svg.node()),
+    p = {x,y};
 
     if ( ViewBox.DraftLine ) {
-        // TO DO : highlight the mouseover_d3selection shape element (but only if it's a valid link target)
-        if ( mouseover_d3selection && // we're hovering somewhere
-            ( mouseover_datum.node_id != null ) &&  // it's a node, not a line
+        if ( // mouseover_d3selection && // we're hovering somewhere IS THIS NECESSARY
             mouseover_d3selection != Node.DraftLineFromD3Selection // exclude starting circle
-
-         ) {
-            // "snap to" draw the draft line between contact points
+        ) 
+          if ( mouseover_datum && "node_id" in mouseover_datum )
+            {
+            // "snap to" draw draft line between contact points
+              mouseover_d3selection.classed("valid_target",true);
               const draft_link = { source: Node.DraftLineFromDatum, target: mouseover_datum };
-              const cp = Link.ContactPoints(draft_link);
+              var cp = Link.ContactPoints(draft_link) ;
+          } 
+         else 
+            { //not hovering over a node => draft line ends at pointer 
+                          var cp = Link.DraftEndPoints(Node.DraftLineFromDatum,p); 
+            }
 
             ViewBox.DraftLine
-                .attr('x1', cp.p0.x)
-                .attr('y1', cp.p0.y)
-                .attr('x2', cp.p1.x)
-                .attr('y2', cp.p1.y);
-
-                mouseover_d3selection.classed("valid_target",true);
-         }
-         else { // not hovering over a valid target
-            // find contact point on source node, for a ray with no target node
-            ViewBox.DraftLine
-                .attr('x2', e.x)
-                .attr('y2', e.y);
-         }
-
+            .attr('x1', cp.p0.x)
+            .attr('y1', cp.p0.y)
+            .attr('x2', cp.p1.x)
+            .attr('y2', cp.p1.y);
     }
-   else {
+   else { // ViewBox.DraftLine == false
     d.x = d.fx = Math.round(e.x*1000)/1000; // update the x, y as well, so the circle moves even if the simulation is frozen
     d.y = d.fy = Math.round(e.y*1000)/1000;
    }
@@ -541,13 +532,34 @@ static OnDrag(e,d) {
 static OnDragEnd(e,d) {
     console.log('Node.OnDragEnd',e,d,this);
 
-    if ( e.sourceEvent.shiftKey) {
+
+if ( ViewBox.DraftLine ) {  
+    ViewBox.DraftLine.remove();
+    ViewBox.DraftLine = null;
+
+}
+if ( Node.DraftLineFromD3Selection ) {
+    Node.DraftLineFromD3Selection.classed("drafting", false);
+    Node.DraftLineFromD3Selection = null;
+}
+
+if ( Node.DraggedElement ) {  
+    Node.DraggedElement.classed("dragging", false);
+    Node.DraggedElement = null;
+}
+
+const target_datum = e.sourceEvent.target.__data__;
+
+    if ( e.sourceEvent.shiftKey && target_datum ) {
         console.log('finish creating link');
+
+
+
         const lnk = {
             true_source: e.subject,
-            true_target: e.sourceEvent.target.__data__,
+            true_target: target_datum,
             source: e.subject,
-            target: e.sourceEvent.target.__data__,
+            target: target_datum,
             id:  'L' + 10000 + Math.round( 10000 * Math.random() ), // unique identifier
             descriptor: null,
             hue_id: 'B',
@@ -568,20 +580,6 @@ static OnDragEnd(e,d) {
         d.fx = d.fy = null; // Crtl key => node 'stays put'
     }
 
-if ( ViewBox.DraftLine ) {  
-    ViewBox.DraftLine.remove();
-    ViewBox.DraftLine = null;
-
-}
-if ( Node.DraftLineFromD3Selection ) {
-    Node.DraftLineFromD3Selection.classed("drafting", false);
-    Node.DraftLineFromD3Selection = null;
-}
-
-if ( Node.DraggedElement ) {  
-    Node.DraggedElement.classed("dragging", false);
-    Node.DraggedElement = null;
-}
 ticked();
 
 

@@ -194,6 +194,17 @@ static ContactPoints(d) {
     }
 
 //-------------------------------------------------------------------------------
+// when drafting a semi-detached line, from a node to the pointer's current (x,y) coords
+static DraftEndPoints(from_node,to_point) {
+
+    const 
+    c = Node.Centre(from_node), // careful with rect
+    t = Link.Theta(c,to_point),
+    from_cp = Node.ContactPoint(from_node,t.theta_out)
+    return { p0: from_cp, p1: to_point };
+    }
+
+//-------------------------------------------------------------------------------
 
 
 static Matches(d) {
