@@ -153,7 +153,7 @@ static OnMouseUp(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
-
+    body.classed('crosshair',true);
     console.log('ViewBox.OnDragStart',e,d,this);
     const p = d3.pointer(e,svg.node());
     ViewBox.DragStartPos = p;
@@ -207,6 +207,8 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
 
+    body.classed('crosshair',false);
+
     ViewBox.SelectRect.remove();
     ViewBox.SelectRect = null;
     ViewBox.DragRectDims = null;
@@ -223,18 +225,21 @@ static OnDragEnd(e,d) {
 
 }
 
-d3.select('body')
- .on('mousedown', ViewBox.OnMouseDown)
-.on('mouseup', ViewBox.OnMouseUp)
 
-  .call(d3.drag()
-            .on('start', Pointer.OnDragStart)
-            .on('drag', Pointer.OnDrag)
-            .on('end', Pointer.OnDragEnd)  
-        );
+body = d3.select('body')
+.on('mousedown', ViewBox.OnMouseDown)
+.on('mouseup', ViewBox.OnMouseUp)
+;
+
+
+//   .call(d3.drag()
+//             .on('start', Pointer.OnDragStart)
+//             .on('drag', Pointer.OnDrag)
+//             .on('end', Pointer.OnDragEnd)  
+//         );
   ;
 
-const svg = d3.select('body').append('svg')
+const svg = body.append('svg')
     .attr('width',window.innerWidth)
     .attr('height', window.innerHeight)
     // set origin to centre of svg
@@ -243,11 +248,11 @@ const svg = d3.select('body').append('svg')
  //   .on('mousedown',ViewBox.OnMouseDown)
  //   .on('mouseup',ViewBox.OnMouseUp)
 
-    // .call(d3.drag()
-    //         .on('start', ViewBox.OnDragStart)
-    //         .on('drag', ViewBox.OnDrag)
-    //         .on('end', ViewBox.OnDragEnd)  
-    //     )
+    .call(d3.drag()
+            .on('start', ViewBox.OnDragStart)
+            .on('drag', ViewBox.OnDrag)
+            .on('end', ViewBox.OnDragEnd)  
+        )
         ;
 
 // group frames are passive shapes in the background

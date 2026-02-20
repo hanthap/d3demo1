@@ -293,3 +293,7 @@ rect.valid_target {
 #context-menu .item:hover {
   background: #eee;
 }
+
+.crosshair {
+    cursor: crosshair
+}
