@@ -193,16 +193,6 @@ static ContactPoints(d) {
     return { p0, p1 };
     }
 
-//-------------------------------------------------------------------------------
-// when drafting a semi-detached line, from a node to the pointer's current (x,y) coords
-static DraftEndPoints(from_node,to_point) {
-
-    const 
-    c = Node.Centre(from_node), // careful with rect
-    t = Link.Theta(c,to_point),
-    from_cp = Node.ContactPoint(from_node,t.theta_out)
-    return { p0: from_cp, p1: to_point };
-    }
 
 //-------------------------------------------------------------------------------
 
@@ -440,6 +430,115 @@ static OnDragEnd(e,d) {
 
 
 }
+
+class DraftLink extends Link {
+
+static FromD3Selection;
+static FromDatum;
+static LineElement;
+
+
+//-------------------------------------------------------------------------------
+// Use this eg when drafting a semi-detached line, from a node to the pointer's current (x,y) coords
+static EndPoints(from_node,to_point) {
+
+    const 
+    c = Node.Centre(from_node), 
+    t = Link.Theta(c,to_point),
+    from_cp = Node.ContactPoint(from_node,t.theta_out)
+    return { p0: from_cp, p1: to_point };
+    }
+
+//-------------------------------------------------------------------------------
+
+static OnDragStart(e,d,d3selection) {
+    // TO DO: set CSS classes (and cursor shapes) for all layers, according to whether drop is allowable
+    console.log('DraftLink.OnDragStart',e,d,d3selection);
+    DraftLink.FromD3Selection = d3selection.classed("drafting", true); 
+    DraftLink.FromDatum = d;
+    const p = Node.Centre(d);
+    DraftLink.LineElement = gLabel
+        .append('line')
+        .attr('x1', p.x)
+        .attr('y1', p.y)
+        .attr('x2', p.x) // zero length from centre of start node
+        .attr('y2', p.y)
+        .classed('drafting',true)
+    ;
+
+}
+
+//-------------------------------------------------------------------------------
+
+static OnDrag(e) {
+        
+    if ( mouseover_d3selection == DraftLink.FromD3Selection ) return; // exclude starting circle
+
+    if ( mouseover_datum && "node_id" in mouseover_datum )  {
+        // "snap to" draw draft line between contact points
+            mouseover_d3selection.classed("valid_target",true); // this can be done in advance, in OnDragStart()
+            const draft_link = { source: DraftLink.FromDatum, target: mouseover_datum };
+            var cp = Link.ContactPoints(draft_link) ;
+        } 
+    else { //not hovering over a node => redraw line to end at pointer position
+            const [x,y] = d3.pointer(e,svg.node()),
+            p = {x,y};
+            var cp = DraftLink.EndPoints(DraftLink.FromDatum,p); 
+        }
+
+    DraftLink.LineElement
+        .attr('x1', cp.p0.x)
+        .attr('y1', cp.p0.y)
+        .attr('x2', cp.p1.x)
+        .attr('y2', cp.p1.y);
+
+}
+
+//-------------------------------------------------------------------------------
+
+static OnDragEnd() {
+
+    // TO DO: use cursor shape to decide whether to drop or ignore
+    // then clear all temp classes
+
+    // only create a link to a valid node
+    if ( mouseover_datum && "node_id" in mouseover_datum ) {
+
+        const lnk = {
+            true_source: DraftLink.FromDatum,
+            true_target: mouseover_datum,
+            source: DraftLink.FromDatum,
+            target: mouseover_datum,
+            id:  'L' + 10000 + Math.round( 10000 * Math.random() ), // unique identifier
+            descriptor: null,
+            hue_id: 'B',
+            type_cde: 1,
+            mass: 100,
+            strength: 0,
+            selected: 1,
+            opacity: 1
+        };
+        lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}`
+        console.log(lnk);
+        links.push(lnk);
+        AppendLines();
+
+    }
+
+    DraftLink.LineElement.remove();
+    DraftLink.FromD3Selection.classed("drafting", false);
+    DraftLink.FromD3Selection = null;
+    DraftLink.FromDatum = null;
+    DraftLink.LineElement= null;
+
+
+}
+//-------------------------------------------------------------------------------
+
+}
+
+//-------------------------------------------------------------------------------
+
 
 
 const arrow = defs

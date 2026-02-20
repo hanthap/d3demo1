@@ -17,8 +17,8 @@ var sourcePalette = d3.scaleOrdinal()
 class Node {
 
     static DragStartPos;
-    static DraftLineFromD3Selection;
-    static DraftLineFromDatum;
+    static DraggedD3Selection;
+
 
     constructor( d ) {
         this.d = d;
@@ -460,6 +460,8 @@ static IsVisible(d) {
         return ChildrenOf(d).length == 0 ;
     }
 
+
+
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
@@ -467,63 +469,30 @@ static OnDragStart(e,d) {
 
     d.fx = e.x; // fix the node position.. 
     d.fy = e.y;     
+    const d3selection = d3.select(this);
+    console.log('Node.OnDragStartXXX',e.sourceEvent.shiftKey);
 
-   if ( e.sourceEvent.shiftKey && d ) {
-       Node.DraftLineFromD3Selection = d3.select(this); 
-       Node.DraftLineFromDatum = d;
-        console.log(`Shift+DragStart => start creating a new link from node ${d.id}`);
-         Node.DraftLineFromD3Selection.classed("drafting", true);
-         const p = Node.Centre(d);
-         ViewBox.DraftLine = gLabel
-            .append('line')
-            .attr('x1', p.x)
-            .attr('y1', p.y)
-            .attr('x2', e.x)
-            .attr('y2', e.y)
-            .classed('drafting',true)
-            ;
-   }
+   if ( e.sourceEvent.shiftKey ) {
+      //  console.log('Node.OnDragStartYYY',e.sourceEvent.shiftKey);
+        DraftLink.OnDragStart(e,d,d3selection);
+        }
+
    else {
-    Node.DraggedElement = d3.select(this); 
-    Node.DraggedElement.classed("dragging", true); // add special CSS styling
-    Node.BringToFront(Node.DraggedElement);
-    }
+        Node.DraggedD3Selection = d3selection.classed("dragging", true); // add special CSS styling
+        Node.BringToFront(Node.DraggedD3Selection);
+        }
 
-ticked();
+    ticked();
 }
 //-------------------------------------------------------------------------------
 
 static OnDrag(e,d) {
 
-   const [x,y] = d3.pointer(e,svg.node()),
-    p = {x,y};
-
-    if ( ViewBox.DraftLine ) {
-        if ( // mouseover_d3selection && // we're hovering somewhere IS THIS NECESSARY
-            mouseover_d3selection != Node.DraftLineFromD3Selection // exclude starting circle
-        ) 
-          if ( mouseover_datum && "node_id" in mouseover_datum )
-            {
-            // "snap to" draw draft line between contact points
-              mouseover_d3selection.classed("valid_target",true);
-              const draft_link = { source: Node.DraftLineFromDatum, target: mouseover_datum };
-              var cp = Link.ContactPoints(draft_link) ;
-          } 
-         else 
-            { //not hovering over a node => draft line ends at pointer 
-                          var cp = Link.DraftEndPoints(Node.DraftLineFromDatum,p); 
-            }
-
-            ViewBox.DraftLine
-            .attr('x1', cp.p0.x)
-            .attr('y1', cp.p0.y)
-            .attr('x2', cp.p1.x)
-            .attr('y2', cp.p1.y);
+    if ( DraftLink.LineElement ) DraftLink.OnDrag(e);
+    else { 
+        d.x = d.fx = Math.round(e.x*1000)/1000; // update the x, y as well, so the circle moves even if the simulation is frozen
+        d.y = d.fy = Math.round(e.y*1000)/1000;
     }
-   else { // ViewBox.DraftLine == false
-    d.x = d.fx = Math.round(e.x*1000)/1000; // update the x, y as well, so the circle moves even if the simulation is frozen
-    d.y = d.fy = Math.round(e.y*1000)/1000;
-   }
     ticked();
 }
 
@@ -531,56 +500,20 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
     console.log('Node.OnDragEnd',e,d,this);
+//    const d3selection = d3.select(this);
 
-
-if ( ViewBox.DraftLine ) {  
-    ViewBox.DraftLine.remove();
-    ViewBox.DraftLine = null;
-
-}
-if ( Node.DraftLineFromD3Selection ) {
-    Node.DraftLineFromD3Selection.classed("drafting", false);
-    Node.DraftLineFromD3Selection = null;
-}
-
-if ( Node.DraggedElement ) {  
-    Node.DraggedElement.classed("dragging", false);
-    Node.DraggedElement = null;
-}
-
-const target_datum = e.sourceEvent.target.__data__;
-
-    if ( e.sourceEvent.shiftKey && target_datum ) {
-        console.log('finish creating link');
-
-
-
-        const lnk = {
-            true_source: e.subject,
-            true_target: target_datum,
-            source: e.subject,
-            target: target_datum,
-            id:  'L' + 10000 + Math.round( 10000 * Math.random() ), // unique identifier
-            descriptor: null,
-            hue_id: 'B',
-            type_cde: 1,
-            mass: 100,
-            strength: 0,
-            selected: 1,
-            opacity: 1
-        };
-        lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}`
-        console.log(lnk);
-        links.push(lnk);
-        AppendLines();
-        // DEBUG: If the target is a frame, the line doesn't show until the frame is collapsed to circle
-
-   }
-   if ( ! e.sourceEvent.ctrlKey ) {
-        d.fx = d.fy = null; // Crtl key => node 'stays put'
+    if ( Node.DraggedD3Selection ) {  
+        Node.DraggedD3Selection.classed("dragging", false);
+        Node.DraggedD3Selection = null;
     }
 
-ticked();
+    if ( DraftLink.LineElement ) DraftLink.OnDragEnd();
+
+    if ( ! e.sourceEvent.ctrlKey ) {
+            d.fx = d.fy = null; // Crtl key => node 'stays put'
+        }
+
+    ticked();
 
 
  /*
