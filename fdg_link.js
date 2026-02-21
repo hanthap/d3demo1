@@ -205,6 +205,16 @@ return links.filter( e => ( e.source == d.source && e.target == d.target ) ||
 
 }
 
+//-------------------------------------------------------------------------------
+
+static SwapEnds(d) {
+    const tt = d.true_target, t = d.target;
+    d.true_target = d.true_source;
+    d.target = d.source;
+    d.true_source = tt;
+    d.source = t;
+    d.descriptor = 'R:' + d.descriptor;
+}
 
 
 }
@@ -542,14 +552,19 @@ static OnDragEnd(e) {
         }
 
         if ( DraftLink.OrigLinkDatum ) { // we started by dragging an existing link 
-            DraftLink.OrigLinkDatum.true_target = DraftLink.OrigLinkDatum.target = lnk.target;
-            // TO DO: swap source/target depending on which end was unhitched
+            const reverse = DraftLink.OrigLinkDatum.true_target == DraftLink.FromDatum ;
+            if ( reverse ) {
+                DraftLink.OrigLinkDatum.true_source = DraftLink.OrigLinkDatum.source = lnk.target;    
+            }
+            else
+                DraftLink.OrigLinkDatum.true_target = DraftLink.OrigLinkDatum.target = lnk.target;    
+
         }
         else { // save the new link and refresh cache
             links.push(lnk);
-            AppendLines();
-        }
 
+        }
+        AppendLines();
         RefreshSimData();
 
         console.log(lnk);

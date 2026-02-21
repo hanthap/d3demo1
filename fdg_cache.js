@@ -37,6 +37,9 @@ static RefreshSortedNodes() {
     sorted_nodes = Cache.FlattenByGeneration(root_nodes); // global, in fdg_nodes.js
 }
 
+//-------------------------------------------------------------------------------
+
+
 static ApplyFrameOrder() {
     // ensure that existing frame shapes are rendered with superset containers behind their nested subsets.
     gGroup.selectAll('.frame') 
@@ -129,14 +132,14 @@ links.forEach( d => {
     AppendFrameShapes(); 
     AppendLines();
     AppendLabels();
-body.classed('wait',false);
+    body.classed('wait',false);
    RunSim(); 
  //  FreezeSim();
 
 } // end AfterLoad()
 
 //-------------------------------------------------------------------------------
-
+// called by DraftLink.OnDragEnd() 
 static CreateNode( [x,y] = [0,0], id=null,label=null) {
 const 
   nodeId = id ? id : 'N' + Math.round( Math.random() * 1000000 ),
@@ -147,16 +150,18 @@ const
         r: 10,
         descriptor: label ? label : `New node: ${nodeId}`,
         is_group: false,
+        has_shape: true,
         hue_id: 'M',
         node_mass: 20
     };
+    d.descendants = [d]; 
     Node.AppendDatum(d);
     nodes.push(d);
     mapNodes.set(d.node_id, d);
     AppendShapes();
     AppendLabels();
- //   Cache.RefreshAllDescendants();    // descendants, per node
-//    Cache.RefreshSortedNodes(); 
+   Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
+//   Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
 //    Cache.ApplyFrameOrder();
 
     return d;
