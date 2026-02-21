@@ -220,7 +220,7 @@ line.linkzone.fixed-target {
 polyline.arrow { /* directed line, with arrow */
     stroke-width: 1.4;
     marker-mid: url(#arrow);
-    /* marker-mid: url(#bullet); */
+
 }
 
 
@@ -302,19 +302,19 @@ rect.valid_target {
     cursor:help; /* pointer with question mark */
     cursor:alias; /* pointer with arrow up to right */
     cursor:all-scroll; /* 4-way arrows, thin - same as move */
-    cursor:context-menu;  /* normal ponter */
+    cursor:context-menu;  /* normal pointer */
     cursor:copy;  /* pointer with '+' at top right */
     cursor:move; /* 4-way arrows, thin - same as all-scroll */
     cursor:no-drop;
     cursor:not-allowed; /* same as no-drop */
     cursor:progress;  /* arrow with spinning circle at top right */
-    cursor:wait; /* spinning circle, no arrow */
-    /* cursor:-moz-grab;/*  not supported */
+
+
     /* cursor:calc() */
 
 
 }
 
 .wait {
-    cursor:wait; 
+    cursor:wait; /* spinning circle, no arrow */
 }

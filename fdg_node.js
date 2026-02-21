@@ -469,16 +469,15 @@ static OnDragStart(e,d) {
 
     d.fx = e.x; // fix the node position.. 
     d.fy = e.y;     
-    const d3selection = d3.select(this);
-    console.log('Node.OnDragStartXXX',e.sourceEvent.shiftKey);
+    const selThisNode = d3.select(this);
+ 
 
    if ( e.sourceEvent.shiftKey ) {
-      //  console.log('Node.OnDragStartYYY',e.sourceEvent.shiftKey);
-        DraftLink.OnDragStart(e,d,d3selection);
+        DraftLink.OnDragStart(e,d,selThisNode);
         }
 
    else {
-        Node.DraggedD3Selection = d3selection.classed("dragging", true); // add special CSS styling
+        Node.DraggedD3Selection = selThisNode.classed("dragging", true); // add special CSS styling
         Node.BringToFront(Node.DraggedD3Selection);
         }
 

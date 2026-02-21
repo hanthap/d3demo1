@@ -404,21 +404,32 @@ static OnMouseOut(e,d) {
 //---------------------------------------------------------------------------
 
 static OnDragStart(e,d) { 
-    Pointer.dragging_DOM_element = this;
-    Pointer.dragging_datum = d;
-    Pointer.dragging_d3_selection = d3.selectAll('line,polyline')
-        .filter(o => o === d)
-       .classed('dragging',true);
-    console.log('LinkZone.OnDragStart',e,d,this,Pointer.dragging_d3_selection,Pointer.dragging_datum);
+
+  const style = window.getComputedStyle(this);
+  const p = d3.pointer(e,svg.node());
+
+    switch ( style.cursor ) {
+
+        case 'grab' : 
+            // un-hitch whichever end is nearer the mouseclick
+            const ends = LinkZone.ChooseEnds(d,p);
+            const selFixedNode = d3.select('circle,rect').filter(n => n == ends.far.node );
+            DraftLink.OnDragStart(e, ends.far.node, selFixedNode );
+            // TO DO temporarily hide the current link and its linkzone
+            break;
+
+    }
     ticked();
 }
 //---------------------------------------------------------------------------
-static OnDrag(e,d) {}
+static OnDrag(e,d) {
+    DraftLink.OnDrag(e);
+}
 //---------------------------------------------------------------------------
 static OnDragEnd(e,d) {
-
-    Pointer.dragging_d3_selection.classed('dragging',false);
-    console.log('LinkZone.OnDragEnd',e,d,this,Pointer.dragging_d3_selection,Pointer.dragging_datum);
+    DraftLink.OnDragEnd(e);
+    // finally change the variable end node (source or target) of the original link datum
+    // remove the draft line and delete its objects
     ticked();
 
 }
@@ -431,11 +442,12 @@ static OnDragEnd(e,d) {
 
 }
 
-class DraftLink extends Link {
+class DraftLink {
 
 static FromD3Selection;
 static FromDatum;
 static LineElement;
+static OrigLinkDatum; // the link we will be updating at the end, if all goes well
 
 
 //-------------------------------------------------------------------------------
@@ -451,12 +463,13 @@ static EndPoints(from_node,to_point) {
 
 //-------------------------------------------------------------------------------
 
-static OnDragStart(e,d,d3selection) {
+static OnDragStart(e,dFromNode,selFromNode) {
+
     // TO DO: set CSS classes (and cursor shapes) for all layers, according to whether drop is allowable
-    console.log('DraftLink.OnDragStart',e,d,d3selection);
-    DraftLink.FromD3Selection = d3selection.classed("drafting", true); 
-    DraftLink.FromDatum = d;
-    const p = Node.Centre(d);
+    console.log('DraftLink.OnDragStart',e,dFromNode,selFromNode);
+    DraftLink.FromD3Selection = selFromNode.classed("drafting", true); 
+    DraftLink.FromDatum = dFromNode;
+    const p = Node.Centre(dFromNode);
     DraftLink.LineElement = gLabel
         .append('line')
         .attr('x1', p.x)
@@ -475,12 +488,12 @@ static OnDrag(e) {
     if ( mouseover_d3selection == DraftLink.FromD3Selection ) return; // exclude starting circle
 
     if ( mouseover_datum && "node_id" in mouseover_datum )  {
-        // "snap to" draw draft line between contact points
-            mouseover_d3selection.classed("valid_target",true); // this can be done in advance, in OnDragStart()
+        // "snap to" draw draft line between pair of contact points
+            mouseover_d3selection.classed("valid_target",true); // this could be done in advance, in OnDragStart()
             const draft_link = { source: DraftLink.FromDatum, target: mouseover_datum };
             var cp = Link.ContactPoints(draft_link) ;
         } 
-    else { //not hovering over a node => redraw line to end at pointer position
+    else { // not hovering over a node => redraw semi-detached line to end at pointer position
             const [x,y] = d3.pointer(e,svg.node()),
             p = {x,y};
             var cp = DraftLink.EndPoints(DraftLink.FromDatum,p); 
