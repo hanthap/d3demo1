@@ -506,7 +506,7 @@ static OnDragEnd(e,d) {
         Node.DraggedD3Selection = null;
     }
 
-    if ( DraftLink.LineElement ) DraftLink.OnDragEnd();
+    if ( DraftLink.LineElement ) DraftLink.OnDragEnd(e);
 
     if ( ! e.sourceEvent.ctrlKey ) {
             d.fx = d.fy = null; // Crtl key => node 'stays put'

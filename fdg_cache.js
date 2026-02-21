@@ -137,8 +137,36 @@ body.classed('wait',false);
 
 //-------------------------------------------------------------------------------
 
+static CreateNode( [x,y] = [0,0], id=null,label=null) {
+const 
+  nodeId = id ? id : 'N' + Math.round( Math.random() * 1000000 ),
+  d = {
+        node_id: nodeId,
+        x,
+        y,
+        r: 10,
+        descriptor: label ? label : `New node: ${nodeId}`,
+        is_group: false,
+        hue_id: 'M',
+        node_mass: 20
+    };
+    Node.AppendDatum(d);
+    nodes.push(d);
+    mapNodes.set(d.node_id, d);
+    AppendShapes();
+    AppendLabels();
+ //   Cache.RefreshAllDescendants();    // descendants, per node
+//    Cache.RefreshSortedNodes(); 
+//    Cache.ApplyFrameOrder();
+
+    return d;
+}
+
+
+//-------------------------------------------------------------------------------
+
 static AddFrameNode() {
-    // add a new frame node to the cache
+    // add a new frame node to the cache to contain all currently selected nodes
     const nodeId = prompt("Enter a unique ID for the new frame node:", nodes.length+1 );
     if (nodeId === null || nodeId.trim() === "") {
         alert("Node ID cannot be empty.");

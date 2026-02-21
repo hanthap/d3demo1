@@ -414,7 +414,7 @@ static OnDragStart(e,d) {
             // un-hitch whichever end is nearer the mouseclick
             const ends = LinkZone.ChooseEnds(d,p);
             const selFixedNode = d3.select('circle,rect').filter(n => n == ends.far.node );
-            DraftLink.OnDragStart(e, ends.far.node, selFixedNode );
+            DraftLink.OnDragStart(e, ends.far.node, selFixedNode, d );
             // TO DO temporarily hide the current link and its linkzone
             break;
 
@@ -463,12 +463,13 @@ static EndPoints(from_node,to_point) {
 
 //-------------------------------------------------------------------------------
 
-static OnDragStart(e,dFromNode,selFromNode) {
+static OnDragStart(e,dFromNode,selFromNode,dOrigLink=null) {
 
     // TO DO: set CSS classes (and cursor shapes) for all layers, according to whether drop is allowable
     console.log('DraftLink.OnDragStart',e,dFromNode,selFromNode);
     DraftLink.FromD3Selection = selFromNode.classed("drafting", true); 
     DraftLink.FromDatum = dFromNode;
+    DraftLink.OrigLinkDatum = dOrigLink;
     const p = Node.Centre(dFromNode);
     DraftLink.LineElement = gLabel
         .append('line')
@@ -509,19 +510,18 @@ static OnDrag(e) {
 
 //-------------------------------------------------------------------------------
 
-static OnDragEnd() {
+static OnDragEnd(e) {
 
     // TO DO: use cursor shape to decide whether to drop or ignore
     // then clear all temp classes
+    console.log('DraftLink.OnDragEnd(e)',e);
+    if ( e.sourceEvent.shiftKey ) { // go ahead and create a link
 
-    // only create a link to a valid node
-    if ( mouseover_datum && "node_id" in mouseover_datum ) {
+    // TO DO: swap source & target depending on which end was unhitched
 
         const lnk = {
             true_source: DraftLink.FromDatum,
-            true_target: mouseover_datum,
             source: DraftLink.FromDatum,
-            target: mouseover_datum,
             id:  'L' + 10000 + Math.round( 10000 * Math.random() ), // unique identifier
             descriptor: null,
             hue_id: 'B',
@@ -530,20 +530,37 @@ static OnDragEnd() {
             strength: 0,
             selected: 1,
             opacity: 1
-        };
-        lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}`
-        console.log(lnk);
-        links.push(lnk);
-        AppendLines();
+            }
 
-    }
+        if ( mouseover_datum && "node_id" in mouseover_datum ) { // over valid node => update original link
+            lnk.target = lnk.true_target = mouseover_datum;
+            }
+
+        else if ( mouseover_datum == null ) { // over empty space => create a new node & link to it
+            lnk.target = lnk.true_target = Cache.CreateNode( d3.pointer(e,svg.node()));
+            lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}`
+        }
+
+        if ( DraftLink.OrigLinkDatum ) { // we started by dragging an existing link 
+            DraftLink.OrigLinkDatum.true_target = DraftLink.OrigLinkDatum.target = lnk.target;
+            // TO DO: swap source/target depending on which end was unhitched
+        }
+        else { // save the new link and refresh cache
+            links.push(lnk);
+            AppendLines();
+        }
+
+        RefreshSimData();
+
+        console.log(lnk);
+        }
 
     DraftLink.LineElement.remove();
     DraftLink.FromD3Selection.classed("drafting", false);
     DraftLink.FromD3Selection = null;
     DraftLink.FromDatum = null;
     DraftLink.LineElement= null;
-
+    DraftLink.OrigLinkDatum =null;
 
 }
 //-------------------------------------------------------------------------------

@@ -181,7 +181,7 @@ static DescendantShapesSVG(d) {
 
     switch ( cursor ) {
         case 'zoom-out' : // switch to a circle either collapsed, or (if ctrl key) 'exploded';
-            Frame.ToCircle(d, e.ctrlKey, d3.pointer(e)); 
+            Frame.ToCircle(d, e.ctrlKey, d3.pointer(e,svg.node())); 
             break;
         default: // toggle selected status
             d.selected ^= 1;
@@ -205,7 +205,7 @@ static DescendantShapesSVG(d) {
 
     // because smartphone doesn't have a shift key
    static OnDblClick(e,d) { //  show as a circle , hiding children
-        Frame.ToCircle(d, false, d3.pointer(e)); // true => implode
+        Frame.ToCircle(d, false, d3.pointer(e,svg.node())); // true => implode
         ticked();
 
    }
