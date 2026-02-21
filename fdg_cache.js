@@ -129,7 +129,7 @@ links.forEach( d => {
     AppendFrameShapes(); 
     AppendLines();
     AppendLabels();
-
+body.classed('wait',false);
    RunSim(); 
  //  FreezeSim();
 

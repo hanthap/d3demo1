@@ -295,5 +295,26 @@ rect.valid_target {
 }
 
 .crosshair {
-    cursor: crosshair
+    cursor: crosshair;
+}
+
+.test {
+    cursor:help; /* pointer with question mark */
+    cursor:alias; /* pointer with arrow up to right */
+    cursor:all-scroll; /* 4-way arrows, thin - same as move */
+    cursor:context-menu;  /* normal ponter */
+    cursor:copy;  /* pointer with '+' at top right */
+    cursor:move; /* 4-way arrows, thin - same as all-scroll */
+    cursor:no-drop;
+    cursor:not-allowed; /* same as no-drop */
+    cursor:progress;  /* arrow with spinning circle at top right */
+    cursor:wait; /* spinning circle, no arrow */
+    /* cursor:-moz-grab;/*  not supported */
+    /* cursor:calc() */
+
+
+}
+
+.wait {
+    cursor:wait; 
 }

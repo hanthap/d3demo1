@@ -49,8 +49,11 @@ static WatchZoom() {
 //-------------------------------------------------------------------------------
 // invoked from document regardless of selected element
 static OnKeyDown(e) {
-  // console.log('ViewBox.OnKeyDown',e);
- const capslock = e.getModifierState("CapsLock");
+ const 
+    capslock = e.getModifierState("CapsLock")
+ 
+ ;
+ 
    switch (e.key) {
     case 'A' :
         if ( e.ctrlKey) { // Ctrl+A => Select All
@@ -104,6 +107,9 @@ static OnKeyDown(e) {
     case 'Insert' :
       //  alert("Insert key pressed");
         Cache.AddFrameNode();
+        break;
+    default:
+        console.log('ViewBox.OnKeyDown',e);
         break;
     }
     ticked();
@@ -229,6 +235,7 @@ static OnDragEnd(e,d) {
 body = d3.select('body')
 .on('mousedown', ViewBox.OnMouseDown)
 .on('mouseup', ViewBox.OnMouseUp)
+.classed('wait',true)
 ;
 
 
