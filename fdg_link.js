@@ -124,6 +124,7 @@ static SetAttributes(d)   {
  //-------------------------------------------------------------------------------
     // to do: handle multiple containership hierarchies => need a priority order in case of 
 static IsHier(d) {
+    console.assert(d.type_cde);
     return ( false 
         || ( 'H').includes( d.type_cde )
     );
@@ -539,7 +540,8 @@ static OnDragEnd(e) {
             mass: 100,
             strength: 0,
             selected: 1,
-            opacity: 1
+            opacity: 1,
+            type_cde: '1' // not 'H' 
             }
 
         if ( mouseover_datum && "node_id" in mouseover_datum ) { // over valid node => update original link
@@ -564,7 +566,14 @@ static OnDragEnd(e) {
             links.push(lnk);
 
         }
+// SIDE EFFECT: after adding/editing links the donor and recipient nodes also need to have their inLinks and outLinks u
+// otherwise the graph traversal can get really screwy
+        Cache.RefreshNodeInOutLinks();
+
         AppendLines();
+
+
+
         RefreshSimData();
 
         console.log(lnk);

@@ -50,22 +50,28 @@ static ApplyFrameOrder() {
 
 //-------------------------------------------------------------------------------
 // Called by Cache.RefreshSortedNodes() 
+// precondition: inLinks and outLinks are updated to reflect latest edits
 
 static FlattenByGeneration(roots) {
   const result = new Set(); // prevent duplicates, preserves insertion order
   const queue = [...roots];   // start with top-level objects
-
-  while (queue.length > 0) {
-    const node = queue.shift();
-    result.add(node);
-    let clist = ChildrenOf(node);
+// console.log('Cache.FlattenByGeneration() queue = [...roots]',queue);
+  while (queue.length > 0  && queue.length < 30 ) { // DEBUG
+    const node = queue.shift(); // get next in queue
+//   console.log('Cache.FlattenByGeneration() node = queue.shift()',node,queue);
+    result.add(node); // without duplication
+//    let clist = ChildrenOf(node); // infinite loop if we don't ignore hidden chidren
+    let clist = VisibleChildrenOf(node); 
+//        console.log('Cache.FlattenByGeneration()  clist = ChildrenOf(node)',clist.length,clist,node);
     if ( clist && clist.length > 0 ) {
-      queue.push(...clist);
+        queue.push(...clist);
      }
     }
  
   return [...result]; // convert set to array 
  }
+
+ //-------------------------------------------------------------------------------
  
 static async LoadData() {
     // this queues both promises (and their associated "then" statements) via parallel threads
@@ -106,6 +112,19 @@ static async LoadData() {
     Cache.AfterLoad();
 }
 
+//-------------------------------------------------------------------------------
+// rely on the src & dest object references as currently bound to each link datum
+// NOT the initial node_id string lookup values as loaded from external data source 
+
+static RefreshNodeInOutLinks() {
+
+    nodes.forEach( d => { 
+        d.inLinks  = links.filter( x => ( x.true_target == d ) ); 
+        d.outLinks = links.filter( x => ( x.true_source == d ) );
+    } );
+
+}
+
 
 //-------------------------------------------------------------------------------
 // final init steps that have to wait until nodes AND links are both populated 
@@ -117,7 +136,7 @@ static AfterLoad() {
         d.outLinks = links.filter( x => ( x.from_node_id == d.node_id ) );
     } );
 
-// store true source/target references in each link
+// initialise true source/target references in each link
 links.forEach( d => {
     d.true_source = d.source;
     d.true_target = d.target;
@@ -160,8 +179,10 @@ const
     mapNodes.set(d.node_id, d);
     AppendShapes();
     AppendLabels();
+
+    // no need to recalc link data as it has none, yet
    Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
-//   Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
+   Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
 //    Cache.ApplyFrameOrder();
 
     return d;
