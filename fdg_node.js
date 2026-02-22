@@ -626,7 +626,8 @@ function AppendShapes() {
 
 function ChildrenOf(d) {
     if ( d.inLinks ) {
-            return ( d.inLinks.filter( Link.IsHier ).map( e => e.source ) )
+            //return ( d.inLinks.filter( Link.IsHier ).map( e => e.source ) )
+            return ( d.inLinks.filter( Link.IsHier ).map( e => e.true_source ) )
     } else return [];
 
 }
