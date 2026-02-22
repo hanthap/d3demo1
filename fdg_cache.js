@@ -56,7 +56,11 @@ static FlattenByGeneration(roots) {
   const result = new Set(); // prevent duplicates, preserves insertion order
   const queue = [...roots];   // start with top-level objects
 // console.log('Cache.FlattenByGeneration() queue = [...roots]',queue);
-  while (queue.length > 0  && queue.length < 30 ) { // DEBUG
+  while (queue.length > 0 ) { 
+    // DEBUG: if  user drags a line into empty space AND ANY group is collapsed
+    // Expecting a new node, but instead clist keeps adding to the queue, never ending
+    // DraftLink.OnDragEnd -> Cache.CreateNode()
+    if ( queue.length > 50 ) debugger; 
     const node = queue.shift(); // get next in queue
 //   console.log('Cache.FlattenByGeneration() node = queue.shift()',node,queue);
     result.add(node); // without duplication
