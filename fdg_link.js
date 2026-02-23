@@ -217,6 +217,26 @@ static SwapEnds(d) {
     d.descriptor = 'R:' + d.descriptor;
 }
 
+//-------------------------------------------------------------------------------
+
+
+static InsertNode(lnk,node) {
+    console.log('Link.InsertNode(lnk,node)',lnk,node);
+    
+    console.log('Copy link as new_link');
+    const new_lnk = { ...lnk };
+    new_lnk.id =  'L' + 100000 + Math.round( 100000 * Math.random() ); // unique identifier
+
+    console.log('Bind new_link.source & true_source to node');
+    new_lnk.source = new_lnk.true_source = node;
+
+    console.log('Bind (old) link.target & true_target to node');
+    lnk.target = lnk.true_target = node;
+
+    links.push(new_lnk);
+
+}
+
 
 }
 //-------------------------------------------------------------------------------
@@ -532,14 +552,12 @@ static OnDragEnd(e) {
     // TO DO: use cursor shape to decide whether to drop or ignore
     // then clear all temp classes
     console.log('DraftLink.OnDragEnd(e)',e);
-    if ( e.sourceEvent.shiftKey ) { // go ahead and create a link
-
-    // TO DO: swap source & target depending on which end was unhitched
+    if ( e.sourceEvent.shiftKey ) { // bypass confirmation prompt, go ahead with edit
 
         const lnk = {
             true_source: DraftLink.FromDatum,
             source: DraftLink.FromDatum,
-            id:  'L' + 10000 + Math.round( 10000 * Math.random() ), // unique identifier
+            id:  'L' + 100000 + Math.round( 100000 * Math.random() ), // unique identifier
             descriptor: null,
             hue_id: 'B',
             type_cde: 1,
@@ -553,6 +571,15 @@ static OnDragEnd(e) {
         if ( mouseover_datum && "node_id" in mouseover_datum ) { // over valid node => update original link
             lnk.target = lnk.true_target = mouseover_datum;
             }
+
+        if ( mouseover_datum && "from_node_id" in mouseover_datum ) { // over valid link => split that link and insert a new node
+            // create a new node
+            lnk.target = lnk.true_target = Cache.CreateNode( d3.pointer(e,svg.node()));
+            lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}`
+            // also, splice the new node into the existing (mouseover) link
+            Link.InsertNode(mouseover_datum,lnk.target);
+            }
+
 
         else if ( mouseover_datum == null ) { // over empty space => create a new node & link to it
             lnk.target = lnk.true_target = Cache.CreateNode( d3.pointer(e,svg.node()));
