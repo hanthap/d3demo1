@@ -142,24 +142,24 @@ switch (e.key) {
 //-------------------------------------------------------------------------------
 
 static OnMouseDown(e,d) {
-  console.log('ViewBox.OnMouseDown',e,d,this);
- // svg.classed('left-mouse-down',true);
+    console.log('ViewBox.OnMouseDown',e,d,this);
+    svg.classed('left-mouse-down',true);
 
 }
 
 
 //-------------------------------------------------------------------------------
-
+// seems that d3 drag OnDragEnd event prevents mouseup?
 static OnMouseUp(e,d) {
-  console.log('ViewBox.OnMouseUp',e,d,this);
-  svg.classed('left-mouse-down',false);
-
+    console.log('ViewBox.OnMouseUp',e,d,this);
+    svg.classed('left-mouse-down',false);
 }
 
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
     body.classed('crosshair',true);
+    svg.classed('left-mouse-down', true);
     console.log('ViewBox.OnDragStart',e,d,this);
     const p = d3.pointer(e,svg.node());
     ViewBox.DragStartPos = p;
@@ -214,6 +214,7 @@ static OnDrag(e,d) {
 static OnDragEnd(e,d) {
 
     body.classed('crosshair',false);
+    svg.classed('left-mouse-down', false);
 
     ViewBox.SelectRect.remove();
     ViewBox.SelectRect = null;
@@ -233,8 +234,8 @@ static OnDragEnd(e,d) {
 
 
 body = d3.select('body')
-.on('mousedown', ViewBox.OnMouseDown)
-.on('mouseup', ViewBox.OnMouseUp)
+//.on('mousedown', ViewBox.OnMouseDown)
+//.on('mouseup', ViewBox.OnMouseUp)
 .classed('wait',true)
 ;
 
@@ -252,8 +253,8 @@ const svg = body.append('svg')
     // set origin to centre of svg
     .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
     .on('contextmenu',e => e.preventDefault() ) // applies to all elements! => use Ctrl+Shift+I to open Console inspect
- //   .on('mousedown',ViewBox.OnMouseDown)
- //   .on('mouseup',ViewBox.OnMouseUp)
+    .on('mousedown',ViewBox.OnMouseDown)
+    .on('mouseup',ViewBox.OnMouseUp)
 
     .call(d3.drag()
             .on('start', ViewBox.OnDragStart)

@@ -500,6 +500,9 @@ static OnDrag(e,d) {
 static OnDragEnd(e,d) {
     console.log('Node.OnDragEnd',e,d,this);
 //    const d3selection = d3.select(this);
+    svg.classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
+// TO DO : drag & drop an existing node onto a linkzone => injects node into link
+
 
     if ( Node.DraggedD3Selection ) {  
         Node.DraggedD3Selection.classed("dragging", false);

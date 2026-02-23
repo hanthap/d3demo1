@@ -335,6 +335,12 @@ static OnClick(e,d) {
 
             // which connection point is closer to the click? That's the one we are about to detach and drag
             break;
+
+        case 'copy' : 
+            console.log('LinkZone.OnClick(copy) => insert new node at midpoint',d,this,p,sel);
+            break;
+        // TO DO : drag & drop an existing node onto a link to achieve similar result
+
         default : 
             d.selected ^= 1;
             d.source.selected = d.selected;
@@ -421,7 +427,7 @@ static OnDragStart(e,d) {
 
     switch ( style.cursor ) {
 
-        case 'grab' : 
+        case 'grabbing' : 
             // un-hitch whichever end is nearer the mouseclick
             const ends = LinkZone.ChooseEnds(d,p);
             const selFixedNode = d3.select('circle,rect').filter(n => n == ends.far.node );
@@ -581,6 +587,7 @@ static OnDragEnd(e) {
 
     DraftLink.LineElement.remove();
     DraftLink.FromD3Selection.classed("drafting", false);
+    svg.classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
     DraftLink.FromD3Selection = null;
     DraftLink.FromDatum = null;
     DraftLink.LineElement= null;

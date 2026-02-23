@@ -166,12 +166,9 @@ circle.dragging {
  }
 
 .ctrl-down line.linkzone  { 
-     cursor: grab;  
+     cursor: copy;  
  }
 
-.ctrl-down.shift-down line.linkzone  { 
-     cursor: grabbing;  
- }
 
 .shift-down.left-mouse-down line.linkzone  { 
      cursor: grabbing;  
@@ -314,6 +311,7 @@ rect.valid_target {
 
 
 }
+
 
 .wait {
     cursor:wait; /* spinning circle, no arrow */
