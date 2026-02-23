@@ -227,10 +227,12 @@ static OnContextMenu(e,d) {
                 break;
             }
      
-        // optionally, cascade the selected status to all directly-linked neighbours
+        // optionally, cascade the selected status to all direct links and their bound nodes
+        // DEBUG why are the resulting selections inverted for nodes vs links?
         if ( k.shiftKey ) {
-            d.inLinks.forEach ( f => { f.source.selected = d.selected } );
-            d.outLinks.forEach ( f => { f.target.selected = d.selected } );
+            d.inLinks.forEach ( f => { f.selected = f.source.selected = d.selected } );
+            d.outLinks.forEach ( f => { f.selected = f.target.selected = d.selected } );
+
         }
        if (!frozen) UnfreezeSim();
        ticked();
@@ -397,6 +399,19 @@ static OnMouseOut(e,d) {
 
 
     }
+
+//-------------------------------------------------------------------------------
+// grow or shrink circle
+
+static OnWheel(e,d) {
+    console.log('Node.OnWheel(e,d)',e,d);
+    d.r *= ( 1 + e.wheelDelta / 1200 );
+    this.setAttribute("r",d.r);
+    // update collision force directly. This actually works!
+    simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));
+
+}
+
 
 //-------------------------------------------------------------------------------
     
@@ -608,7 +623,7 @@ function AppendShapes() {
                 .classed('has_members',Node.HasMembers)
                 .on('mouseover',Node.OnMouseOver) 
                 .on('mouseout',Node.OnMouseOut) 
-         //       .on('mousedown',Node.OnMouseDown) 
+                .on('wheel',Node.OnWheel) 
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
                 .on('contextmenu',Node.OnContextMenu)
@@ -629,7 +644,6 @@ function AppendShapes() {
 
 function ChildrenOf(d) {
     if ( d.inLinks ) {
-            //return ( d.inLinks.filter( Link.IsHier ).map( e => e.source ) )
             return ( d.inLinks.filter( Link.IsHier ).map( e => e.true_source ) )
     } else return [];
 
