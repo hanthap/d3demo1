@@ -188,6 +188,11 @@ g.edge, g.label, div.label, foreignObject, xhtml:div {
     pointer-events: none; /* let mouse events pass through  */
 }
 
+
+g.label * {
+    pointer-events: none; /* let mouse events pass through  */
+}
+
 line.linkzone { 
     stroke-width:  10;
     stroke: yellow; /* one way to make it clickable */

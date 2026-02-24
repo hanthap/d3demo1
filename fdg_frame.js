@@ -161,6 +161,42 @@ static ToCircle(d, bExploded, cXcY) {
 
 }
 
+//-------------------------------------------------------------------------------
+// was Cache.AddFrameNode
+static Create() {
+    // add a new frame node to the cache to contain all currently selected nodes
+    const nodeId = prompt("Enter a unique ID for the new frame node:", nodes.length+1 );
+    if (nodeId === null || nodeId.trim() === "") {
+        alert("Node ID cannot be empty.");
+        return;
+    }   
+    var d = {
+        node_id: nodeId.trim(),
+        x: 0,
+        y: 0,
+        r: 10,
+        descriptor: `New node: ${nodeId}`,
+        is_group: true,
+        hue_id: 'M',
+        node_mass: 20
+    };
+    Node.AppendDatum(d);
+    nodes.push(d);
+    mapNodes.set(d.node_id, d);
+ 
+    nodes.filter(n => n.selected )
+    // TO DO    .filter( n is not an ancestor of d ) // prevent circular nesting
+    // TO DO    .filter( n is a visible circle ) // prevent extra links to nested children
+        .forEach( n => Node.AddLinkToParent(n,d) ); // add new frame as parent of all currently selected nodes
+
+    Cache.RefreshAllDescendants();    // descendants, per node
+    Cache.RefreshSortedNodes(); 
+    Cache.ApplyFrameOrder();
+
+    Node.ToFrame(d);
+
+}
+
    //-------------------------------------------------------------------------------
 
 static DescendantShapesSVG(d) {

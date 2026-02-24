@@ -104,9 +104,13 @@ static OnKeyDown(e) {
         frozen = false;
         RunSim();
         break;
-    case 'Insert' :
-      //  alert("Insert key pressed");
-        Cache.AddFrameNode();
+    case 'Insert' : 
+        // sticky insert/overtype mode?
+        // if hovering over space => create node
+        // if hovering inside a frame => create child node
+        // if hovering over a line => splice a new node
+        // else if 2 or more nodes are selected, encapsulate them in a new frame
+        Frame.Create();
         break;
     default:
         console.log('ViewBox.OnKeyDown',e);

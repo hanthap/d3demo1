@@ -28,6 +28,9 @@ function RunSim() {
     FreezeSim();
 
     simulation = d3.forceSimulation(nodes.filter(Node.IsActive))
+        
+      // putting this first =>  better exclusion but less likely to settle
+        .force("active_exclusion", active_exclusion) 
 
         .force('collide', d3.forceCollide().radius(Node.CollideRadius))
     
@@ -61,7 +64,6 @@ function RunSim() {
             .iterations(1) // per tick. More => stronger effect, more repulsion?
             )
 
-        .force("active_exclusion", active_exclusion) 
 
         .alphaTarget(0.3) // freeze if/when alpha drops below this threshold
         .alphaDecay(0.1)  // zero => never freeze, keep responding to drag events

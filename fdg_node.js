@@ -30,6 +30,10 @@ class Node {
     static UniqueId(d) {
         return d.node_id;
     }
+static Tag(d) {
+    return d.tag > "" ? d.tag : d.node_id;
+}
+
 
     //-------------------------------------------------------------------------------
 
@@ -172,7 +176,7 @@ static ImageSource(d) {
 
 //-------------------------------------------------------------------------------
 
-static ImageAlt(d) { return 'Tara JPEG' };
+static ImageAlt(d) { return d.tag };
 
 
 //-------------------------------------------------------------------------------
@@ -288,7 +292,7 @@ static AppendDatum(d,i) {
     d.cogX = 0;
     d.cogY = 0;
     d.weight = 0.1;
- //   d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
+  //  d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
     d.r = 10 + 20 * Math.random(); // random radius between 10 and 30
     d.height = 2 * d.r;
     d.width = 2 * d.r;
@@ -298,6 +302,37 @@ static AppendDatum(d,i) {
     d.outLinks = [];
     d.inLinks = [];
     // TO DO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
+    return d;
+}
+
+//-------------------------------------------------------------------------------
+// called by DraftLink.OnDragEnd() 
+static Create( [x,y] = [0,0], id=null,label=null) {
+const 
+  nodeId = id ? id : 'N' + Math.round( Math.random() * 1000000 ),
+  d = {
+        node_id: nodeId,
+        x,
+        y,
+        r: 10,
+        descriptor: label ? label : `New node: ${nodeId}`,
+        is_group: false,
+        has_shape: 1,
+        hue_id: 'M',
+        node_mass: 20
+    };
+    d.descendants = [d]; 
+    Node.AppendDatum(d);
+    nodes.push(d);
+    mapNodes.set(d.node_id, d);
+    AppendShapes();
+    AppendLabels();
+
+    // no need to recalc link data as it has none, yet
+   Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
+   Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
+//    Cache.ApplyFrameOrder();
+
     return d;
 }
 
@@ -331,7 +366,7 @@ static Centre(d) {
 
 static CollideRadius(d) { // called by d3.forceCollide().radius(...)
     //return d.r + 20; // +3 = extra to allow for stroke-width of circle element 
-    return d.r  + 1;
+    return d.r  + 5;
 }
 
 //-------------------------------------------------------------------------------
@@ -404,7 +439,7 @@ static OnMouseOut(e,d) {
 // grow or shrink circle
 
 static OnWheel(e,d) {
-    console.log('Node.OnWheel(e,d)',e,d);
+   // console.log('Node.OnWheel(e,d)',e,d);
     d.r *= ( 1 + e.wheelDelta / 1200 );
     this.setAttribute("r",d.r);
     // update collision force directly. This actually works!

@@ -12,7 +12,7 @@ class Label extends Node {
         if ( Node.ShowAsFrame(d) ) return ["frameinfo"] ;
         return ( Node.HasMembers(d) ? [ "has_members"] : ["circleinfo"] );
     }
-    static HtmlText(d) { return Node.UniqueId(d); }
+    static HtmlText(d) { return Node.Tag(d); }
     static SetAttributes(d) { 
        this.setAttribute('transform',`translate(${Node.Centre(d).x},${Node.Centre(d).y})`);
        }
@@ -23,12 +23,12 @@ class Label extends Node {
 function AppendLabels() {
 
 gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
+// which seems odd, i thought join('g') would handle all that
     
     const labels = gLabel.selectAll('g') 
         .data(nodes.filter(Label.IsVisible), Label.UniqueId)  
-            .join('g')  // append a new group element bound to that datum
-                .attr('id', Label.UniqueId) // for efficient upsert & delete of DOM bindings
-                .style('pointer-events', 'none') // let mouse events pass through to circle
+            .join('g')  
+                .attr('id', Label.UniqueId)
                 ;
 
         labels 

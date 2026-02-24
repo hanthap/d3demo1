@@ -565,7 +565,8 @@ static OnDragEnd(e) {
             strength: 0,
             selected: 1,
             opacity: 1,
-            type_cde: '1' // not 'H' 
+            type_cde: '1', // not 'H' 
+            tag: '?'
             }
 
         if ( mouseover_datum && "node_id" in mouseover_datum ) { // over valid node => update original link
@@ -574,16 +575,16 @@ static OnDragEnd(e) {
 
         if ( mouseover_datum && "from_node_id" in mouseover_datum ) { // over valid link => split that link and insert a new node
             // create a new node
-            lnk.target = lnk.true_target = Cache.CreateNode( d3.pointer(e,svg.node()));
-            lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}`
+            lnk.target = lnk.true_target = Node.Create( d3.pointer(e,svg.node()));
+            lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
             // also, splice the new node into the existing (mouseover) link
             Link.InsertNode(mouseover_datum,lnk.target);
             }
 
 
         else if ( mouseover_datum == null ) { // over empty space => create a new node & link to it
-            lnk.target = lnk.true_target = Cache.CreateNode( d3.pointer(e,svg.node()));
-            lnk.descriptor = `New link from ${lnk.true_source.node_id} to ${lnk.true_target.node_id}`
+            lnk.target = lnk.true_target = Node.Create( d3.pointer(e,svg.node()));
+            lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
         }
 
         if ( DraftLink.OrigLinkDatum ) { // we started by dragging an existing link 
