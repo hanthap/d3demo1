@@ -127,7 +127,7 @@ static Top(d) {
    //-------------------------------------------------------------------------------
 
     static ContactPoint(d,theta) {  
-        if ( Node.ShowAsFrame(d) ) { //  DIY polymorphism 
+        if ( Node.ShowAsFloatingFrame(d) ) { //  DIY polymorphism 
             return Frame.ContactPoint(d,theta);
         }
         if ( Node.ShowAsCircle(d) ) {
@@ -253,12 +253,17 @@ static OnMouseDown(e,d) {
 
    //-------------------------------------------------------------------------------
 
-// expand a collapsed node so it appears as a frame with visible child nodes
+// zoom in (expand) a collapsed node so it appears as a frame with visible child nodes
+
+// DEBUG: any nested frame should reappear just as it was when frame d was collapsed to a circle.
+// Instead, it is displayed in "exploded" configuration, as a circle linked to its children.
+
+
 static ToFrame(d) {
     if ( Node.HasMembers(d) ) {
           d.is_group = true;
           d.has_shape = 1;  // do we need this?
-          // are there some descendants we still need to hide?
+          // are there some descendants we still need to hide? YES - see comment above
           d.descendants.filter(c => c != d).forEach( c => { 
                     console.log(c);
                     c.has_shape = 1; 
@@ -359,7 +364,7 @@ static BringToFront( d ) {
 //-------------------------------------------------------------------------------
 
 static Centre(d) {
-    if ( Node.ShowAsFrame(d) ) return Frame.Centre(d); // DIY polymorphism
+    if ( Node.ShowAsFloatingFrame(d) ) return Frame.Centre(d); // DIY polymorphism
     else return { 'x': d.x, 'y': d.y };  
 }
 
@@ -467,7 +472,7 @@ static ParentsOf(d) {
 // Y/N is this a 'top-level' ('root') node, within the graph context? 
     static IsNotNested(d) {
         return ( Node.ParentsOf(d)
-            .filter(Node.ShowAsFrame)
+            .filter(Node.ShowAsFloatingFrame)
             .length == 0
         );
 
@@ -477,7 +482,7 @@ static ParentsOf(d) {
 // Decide whether we want a DOM shape element (visible or not) to be bound to this node 
 
 static HasShape(d) {
-    // TO DO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFrame(d) == False
+    // TO DO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFloatingFrame(d) == False
     try {
     return d.has_shape;
     } catch { debugger }
@@ -489,14 +494,14 @@ static IsVisible(d) {
 
 //-------------------------------------------------------------------------------
 
-    static ShowAsFrame(d) {
+    static ShowAsFloatingFrame(d) {
         return d.is_group && Node.HasShape(d) && HasVisibleChild(d);
     }
 
 //-------------------------------------------------------------------------------
 
     static ShowAsCircle(d) {
-        return Node.HasShape(d) && !Node.ShowAsFrame(d);
+        return Node.HasShape(d) && !Node.ShowAsFloatingFrame(d);
     }
 
 //-------------------------------------------------------------------------------

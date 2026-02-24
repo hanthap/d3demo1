@@ -83,7 +83,7 @@ function RunSim() {
 function ticked() { // invoked just before each 'repaint' so we can decide exactly how to render
 
 // only now can we decide where to position the frames, working from leaf (innermost) to root (outermost)
-[...sorted_nodes].reverse().filter( Node.ShowAsFrame ) // filter because sorted_nodes actually includes non-frame nodes... 
+[...sorted_nodes].reverse().filter( Node.ShowAsFloatingFrame ) // filter because sorted_nodes actually includes non-frame nodes... 
 .forEach( d => {
     // TO DO: assuming nodes are correctly pre-sorted, I thought we should only need to look at visible children, not all descendants
     // BUT NO!!! Switching to Children only causes strange side-effect, where other frames expand in the same dimension, by 50%.
@@ -129,6 +129,13 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 
 //----------------------------------------------------------------
 // TO DO: maybe nudge circles towards the centre of their parent frames too?
+
+// TO DO: do NOT exclude a collapsed circle IF it has any "descendants in common" with thie frame
+// instead, try to position it so it straddles the boundary, suggesting a non-empty intersection. 
+// This bit could be tricky!
+// likewise, can we adjust the collision force for when multiple ancestors are collapsed circles
+// Maybe set collision radius to zero, just for collapsed sets that are known to have 'hybrid' descendants
+// and then handle it with this custom force...?
 
 // Custom force to expel non-member circle nodes
 function active_exclusion(alpha) {

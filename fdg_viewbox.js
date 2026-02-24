@@ -220,7 +220,9 @@ static OnDragEnd(e,d) {
     if ( svg.classed("ctrl-down") ) {
         // create a new StaticFrame using ViewBox.SelectRect
         const 
-            selNodes = gNode.selectAll('*').filter(ViewBox.DragRectIncludes);
+            selNodes = gNode.selectAll('*')
+                .filter(ViewBox.DragRectIncludes)
+                .filter(Node.HasShape);
         StaticFrame.Create(ViewBox.DragRectDims,selNodes);
     }
 

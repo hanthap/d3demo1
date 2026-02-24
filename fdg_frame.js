@@ -197,6 +197,7 @@ static Create(selContents=null) {
     Cache.ApplyFrameOrder();
 
     Node.ToFrame(d);
+    return d;
 
 }
 
@@ -309,7 +310,7 @@ function AllDescendantsOf(start, visited = new Set(), result = []) {
     // this has to wait until we've finished loading graph data, & cached derived variables
 function AppendFrameShapes() {
     gGroup.selectAll('rect') // in case we've already got some
-      .data(sorted_nodes.filter(Node.ShowAsFrame), Node.UniqueId) 
+      .data(sorted_nodes.filter(Node.ShowAsFloatingFrame), Node.UniqueId) 
         .join('rect') // one-step upsert|delete based on matching UniqueId
         .attr('id', Node.UniqueId) //primary key
         .attr('rx', Frame.CornerRadius)
@@ -346,6 +347,16 @@ function GetCombinedBBox( sel ) {
 // (Unlike a Frame, which passively moves to enclose all its descendants wherever they may wander
 // So, potential use as swim lanes for process diagram. or sections of a Kanban board
 
+// 25/2/26 Still TBD whether it's better to make static boundaries a property of Frame, rather than a whole subclass.
+// Simulation and ticked() would still need to filter accordingly. 
+// I'd like to generalise the concept of a fixed boundary that can be nested to arbitrary depth
+// AND COLLAPSED to a small rect. as with circles except they don't float
+// When expanded, any floating children are constrained BUT still LINK to other visible shapes.
+// The whole bounding rect can be moved and resized by dragging. All contents move together as one.
+// THIS seems like a good use case for nesting of g elements. 
+// BUT then how to calibrate, translate & align exact x,y, coordinates in a shared simulation? 
+// Given their 'native' coordinates will be relative to the innermost container?
+
 class StaticFrame extends Frame {
 
 // toggle between static and floating
@@ -355,9 +366,36 @@ class StaticFrame extends Frame {
 static Create(rectDims,selContents=null) {
     console.log('StaticFrame.Create(rectDims,selContents)',rectDims,selContents);
     // create a new node for the static frame, and return its datum?
-    // const f = Frame.Create(selContents); // f is added to nodes list
+    const f = Frame.Create(selContents); // f is added to nodes list
     // now tweak datum so it's treated correctly by simulation etc....
     // eg f.rect = selRect.node fx, fy, width, height, no rounding at corner
+    console.log('StaticFrame.Create(rectDims,selContents) returns f=',f);
+    f.fx = rectDims.x;
+    f.fy = rectDims.y;
+    f.width = rectDims.width;
+    f.height = rectDims.height;
+    f.static = 1;
+
+    }
+
 }
+
+//-------------------------------------------------------------------------------
+
+
+function AppendStaticFrameShapes() {
+    gStatic.selectAll('rect') 
+      .data(sorted_nodes.filter(Node.ShowAsStaticFrame), Node.UniqueId) 
+        .join('rect') 
+        .attr('id', Node.UniqueId)
+        .attr('fill',Node.FillColour) 
+        .classed('staticframe',true)
+        .on('click', StaticFrame.OnClick)
+        .on('dblclick', StaticFrame.OnDblClick)
+        .on('mouseover', StaticFrame.OnMouseOver) 
+        .on('mouseout', StaticFrame.OnMouseOut)
+        .on("contextmenu", StaticFrame.OnContextMenu)
+        ;
+
 
 }

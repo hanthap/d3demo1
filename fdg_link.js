@@ -139,7 +139,7 @@ static ShowAsLine(d) {
 //-------------------------------------------------------------------------------
 // Exclude self-self links (eg a collapsed frame linking to itself)
 static VisibleLine(d) {
-    if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) return false;
+    if ( Link.IsHier(d) && Node.ShowAsFloatingFrame(d.target) ) return false;
     return ( Link.ShowAsLine(d) && ( d.target != d.source ));
 
 }
@@ -589,23 +589,15 @@ static OnDragEnd(e) {
         }
         else { // save the new link and refresh cache
             links.push(lnk);
-
         }
-// SIDE EFFECT: after adding/editing links the donor and recipient nodes also need to have their inLinks and outLinks u
-// otherwise the graph traversal can get really screwy
         Cache.RefreshNodeInOutLinks();
-
         AppendLines();
-
-
-
         RefreshSimData();
-
         console.log(lnk);
         }
 
-    try { DraftLink.LineElement.remove(); } catch { debugger };
-    DraftLink.FromD3Selection.classed("drafting", false);
+    if (DraftLink.LineElement) DraftLink.LineElement.remove();
+    if (DraftLink.FromD3Selection) DraftLink.FromD3Selection.classed("drafting", false);
     svg.classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
     DraftLink.FromD3Selection = null;
     DraftLink.FromDatum = null;
