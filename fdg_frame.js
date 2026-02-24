@@ -162,31 +162,34 @@ static ToCircle(d, bExploded, cXcY) {
 }
 
 //-------------------------------------------------------------------------------
-// was Cache.AddFrameNode
-static Create() {
-    // add a new frame node to the cache to contain all currently selected nodes
-    const nodeId = prompt("Enter a unique ID for the new frame node:", nodes.length+1 );
-    if (nodeId === null || nodeId.trim() === "") {
-        alert("Node ID cannot be empty.");
-        return;
-    }   
-    var d = {
-        node_id: nodeId.trim(),
+
+static Create(selContents=null) {
+    // add a new frame node to the cache to contain all currently-selected nodes (by default)
+    // or selContents, if that's provided
+ const 
+    nodeId ='N' + Math.round( Math.random() * 1000000 ), 
+    d = {
+        node_id: nodeId,
         x: 0,
         y: 0,
         r: 10,
         descriptor: `New node: ${nodeId}`,
         is_group: true,
+        has_shape: 1,
         hue_id: 'M',
-        node_mass: 20
+        node_mass: 20,
+        tag: '?'
     };
     Node.AppendDatum(d);
     nodes.push(d);
     mapNodes.set(d.node_id, d);
- 
-    nodes.filter(n => n.selected )
+    
+    const nodes_to_add = selContents ? selContents.data() : nodes.filter(n => n.selected );
+    
     // TO DO    .filter( n is not an ancestor of d ) // prevent circular nesting
     // TO DO    .filter( n is a visible circle ) // prevent extra links to nested children
+
+    nodes_to_add
         .forEach( n => Node.AddLinkToParent(n,d) ); // add new frame as parent of all currently selected nodes
 
     Cache.RefreshAllDescendants();    // descendants, per node
@@ -335,5 +338,26 @@ function GetCombinedBBox( sel ) {
     }));
 
     return combinedBBox;
+
+}
+
+//------------------------------------------------------------------------------
+// a StaticFrame isolates its descendants from all other floating nodes by enforcing a hard boundary 
+// (Unlike a Frame, which passively moves to enclose all its descendants wherever they may wander
+// So, potential use as swim lanes for process diagram. or sections of a Kanban board
+
+class StaticFrame extends Frame {
+
+// toggle between static and floating
+// if static, fixed position and size are controlled by mouse drag
+// could leverage the dragrect 
+
+static Create(rectDims,selContents=null) {
+    console.log('StaticFrame.Create(rectDims,selContents)',rectDims,selContents);
+    // create a new node for the static frame, and return its datum?
+    // const f = Frame.Create(selContents); // f is added to nodes list
+    // now tweak datum so it's treated correctly by simulation etc....
+    // eg f.rect = selRect.node fx, fy, width, height, no rounding at corner
+}
 
 }

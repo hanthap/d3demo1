@@ -347,19 +347,10 @@ static OnClick(e,d) {
 
     switch ( style.cursor ) {
         case 'grab' : 
-            const ends = LinkZone.ChooseEnds(d,p);
-            console.log('LinkZone.OnClick(grab)',d,this,p,ends,sel);
-            sel
-                .classed(ends.far.class,true)
-                .classed(ends.near.class,false);
-
-            // which connection point is closer to the click? That's the one we are about to detach and drag
             break;
 
         case 'copy' : 
-            console.log('LinkZone.OnClick(copy) => insert new node at midpoint',d,this,p,sel);
             break;
-        // TO DO : drag & drop an existing node onto a link to achieve similar result
 
         default : 
             d.selected ^= 1;
@@ -370,7 +361,6 @@ static OnClick(e,d) {
     }
     
     console.log('LinkZone.OnClick',e,d,this,Link.Matches(d));
-
 
     ticked();
 }
@@ -566,14 +556,15 @@ static OnDragEnd(e) {
             selected: 1,
             opacity: 1,
             type_cde: '1', // not 'H' 
-            tag: '?'
+            tag: '?',
+            has_shape: 1
             }
 
         if ( mouseover_datum && "node_id" in mouseover_datum ) { // over valid node => update original link
             lnk.target = lnk.true_target = mouseover_datum;
             }
-
-        if ( mouseover_datum && "from_node_id" in mouseover_datum ) { // over valid link => split that link and insert a new node
+        // DEBUG: "from_node_id" does not exist in newly added link objects
+        if ( mouseover_datum && "source" in mouseover_datum ) { // over valid link => split that link and insert a new node
             // create a new node
             lnk.target = lnk.true_target = Node.Create( d3.pointer(e,svg.node()));
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
@@ -613,7 +604,7 @@ static OnDragEnd(e) {
         console.log(lnk);
         }
 
-    DraftLink.LineElement.remove();
+    try { DraftLink.LineElement.remove(); } catch { debugger };
     DraftLink.FromD3Selection.classed("drafting", false);
     svg.classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
     DraftLink.FromD3Selection = null;

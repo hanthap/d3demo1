@@ -14,7 +14,6 @@ html, body {
 svg {
     display: block; /* removes inline-gap issues */
     box-sizing: border-box;
-    border: 1px solid red; 
     width: 100vw; height: 100vh;
     touch-action: none; /* disable default touch actions e.g. scrolling when touching svg */
 }
@@ -129,7 +128,7 @@ rect.frame {
 }
 
 .ctrl-down.shift-down g {
-       fill-opacity: 1;
+    fill-opacity: 1;
     cursor: crosshair;
 }
 
@@ -158,7 +157,6 @@ circle.dragging {
     stroke-dasharray: none;
     stroke-opacity: 1;
     cursor: grabbing; 
-    /* cursor: move; /* up-down & left-right arrows */
 }
 
 .shift-down line.linkzone  { 
@@ -166,7 +164,7 @@ circle.dragging {
  }
 
 .ctrl-down line.linkzone  { 
-     cursor: copy;  
+     cursor: copy;  /* arrow with plus superscript "click to insert here" */
  }
 
 
@@ -182,8 +180,6 @@ circle.drafting {
     cursor: no-drop;
 }
 
-
-
 g.edge, g.label, div.label, foreignObject, xhtml:div {
     pointer-events: none; /* let mouse events pass through  */
 }
@@ -195,7 +191,7 @@ g.label * {
 
 line.linkzone { 
     stroke-width:  10;
-    stroke: yellow; /* one way to make it clickable */
+    stroke: yellow; /* otherwise not clickable */
     stroke-opacity: 0;
 }
 

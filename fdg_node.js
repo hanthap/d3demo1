@@ -319,7 +319,8 @@ const
         is_group: false,
         has_shape: 1,
         hue_id: 'M',
-        node_mass: 20
+        node_mass: 20,
+        tag: '?'
     };
     d.descendants = [d]; 
     Node.AppendDatum(d);
@@ -332,7 +333,7 @@ const
    Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
    Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
 //    Cache.ApplyFrameOrder();
-
+    console.log('Node.Create() return d=',d);
     return d;
 }
 
@@ -477,7 +478,9 @@ static ParentsOf(d) {
 
 static HasShape(d) {
     // TO DO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFrame(d) == False
+    try {
     return d.has_shape;
+    } catch { debugger }
 }
 
 static IsVisible(d) {

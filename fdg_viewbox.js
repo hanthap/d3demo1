@@ -217,17 +217,28 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
 
-    body.classed('crosshair',false);
-    svg.classed('left-mouse-down', false);
+    if ( svg.classed("ctrl-down") ) {
+        // create a new StaticFrame using ViewBox.SelectRect
+        const 
+            selNodes = gNode.selectAll('*').filter(ViewBox.DragRectIncludes);
+        StaticFrame.Create(ViewBox.DragRectDims,selNodes);
+    }
 
-    ViewBox.SelectRect.remove();
-    ViewBox.SelectRect = null;
-    ViewBox.DragRectDims = null;
 
     gNode.selectAll('circle.drag_selected')
         .classed( 'drag_selected', false )
         .each( d => { d.selected ^= 1 } ) // toggle selected flag
           ;
+
+
+
+
+    body.classed('crosshair',false);
+    svg.classed('left-mouse-down', false);
+    ViewBox.SelectRect.remove();
+    ViewBox.SelectRect = null;
+    ViewBox.DragRectDims = null;
+
     ticked();
 }
 
@@ -267,12 +278,19 @@ const svg = body.append('svg')
         )
         ;
 
+
+
+// static frames (eg swimlanes) stay in place, enforce strict boundary for floating nodes
+const gStatic = svg.append('g')
+    .classed( 'static', true );
+
+
 // group frames are passive shapes in the background
 const gGroup = svg.append('g')
     .classed( 'group', true )
     ;
 
-const gNode = svg.append("g"); // circles
+const gNode = svg.append("g"); // circles = floating nodes
 
 // links are rendered in front of circles. 
 
