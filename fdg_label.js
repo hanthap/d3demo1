@@ -16,7 +16,7 @@ class Label extends Node {
     static SetAttributes(d) { 
        this.setAttribute('transform',`translate(${Node.Centre(d).x},${Node.Centre(d).y})`);
        }
-    static OnTick() { gLabel.selectAll('g').each(Label.SetAttributes);  }
+    static OnTick() { gLabel.selectAll('.labelmain').each(Label.SetAttributes);  }
 
 }
 
@@ -29,6 +29,7 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
         .data(nodes.filter(Label.IsVisible), Label.UniqueId)  
             .join('g')  
                 .attr('id', Label.UniqueId)
+                .classed('labelmain',true)
                 ;
 
         labels 
@@ -44,4 +45,28 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
                     .html(Label.HtmlText) 
                     ;
 
+        labels 
+            .append('g')
+                // transform="translate(0, 0) scale(1.2)" opacity="0.5"
+                .attr('transform',"translate(-50, -50) scale(0.25)")
+
+                // .attr('opacity',0.5) // adds a lot of CPU work
+                .attr('clip-path','url(#cropCircle)')
+                .append('image')
+                    .attr('href',"tara.jpg")
+                    .attr('width',300)
+                    .attr('height',300)
+             //       .attr('transform',"translate(0, 0) scale(1)")
+                    ;
+
 }
+
+// circular clip path for photo inside node
+const cropCircle = defs
+    .append("clipPath")
+        .attr("id","cropCircle") 
+        .append("circle")
+            .attr("cx","150")
+            .attr("cy","150")
+            .attr("r","100")
+;
