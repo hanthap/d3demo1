@@ -29,6 +29,7 @@ try {
 //-------------------------------------------------------------------------------
 
     static Create(child, parent) {
+        console.log('Link.Create(child, parent)',child,parent)
     // create a new hierarchical link from child to parent
     // TO DO:  skip if child is already a member of parent, or if parent is already an ancestor of child (to prevent circular nesting)
     const newLink = {

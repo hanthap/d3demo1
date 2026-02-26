@@ -546,6 +546,20 @@ static OnDragStart(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnDrag(e,d) {
+// TO DO: uppdate mouseover ref using document.elementsFromPoint(x, y) - see below
+
+//     const [x, y] = d3.pointer(e); // must use screen space, not SVG space
+
+//     const hits = document.elementsFromPoint(x, y)
+//         .filter(el => el instanceof SVGElement);
+
+//     const svgElement = hits;
+// //    console.log('svgElement',hits, svgElement);
+
+//     const selHits = d3.selectAll(svgElement);
+//     console.log('d3.select(selHits)',selHits);
+
+
 
     if ( DraftLink.LineElement ) DraftLink.OnDrag(e);
     else { 
@@ -561,11 +575,32 @@ static OnDragEnd(e,d) {
     console.log('Node.OnDragEnd',e,d,this);
 //    const d3selection = d3.select(this);
     svg.classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
-// TO DO : drag & drop an existing node onto a linkzone => injects node into link
+
+// 
+    const [x, y] = d3.pointer(e); // must use screen space, not SVG space
+
+    const hits = document.elementsFromPoint(x, y)
+    .filter(el => el instanceof SVGElement)
+    ; // exclude non-SVG?
+
+    const svgElement = hits;
+    console.log('svgElement',hits, svgElement);
+
+    const selHits = d3.selectAll(svgElement),
+        f = selHits.data().at(1);
+    console.log('d3.select(selHits), f,d',selHits,f,d);
 
 
     if ( Node.DraggedD3Selection ) {  
         Node.DraggedD3Selection.classed("dragging", false);
+        if ( d.outLinks.length == 0 && Node.ShowAsFloatingFrame(f)) {
+  
+            Link.Create(d,f);
+            // TO DO: make this more efficient
+            Cache.RefreshAllDescendants();    // descendants, per node
+            Cache.RefreshSortedNodes(); 
+            Cache.ApplyFrameOrder();
+            }
         Node.DraggedD3Selection = null;
     }
 
