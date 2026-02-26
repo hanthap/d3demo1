@@ -167,7 +167,7 @@ static OnDragStart(e,d) {
     console.log('ViewBox.OnDragStart',e,d,this);
     const p = d3.pointer(e,svg.node());
     ViewBox.DragStartPos = p;
-    ViewBox.SelectRect = gLabel
+    ViewBox.SelectRect = gForeground
         .append('rect')
             .attr('x', p.x)
             .attr('y', p.y)
@@ -294,6 +294,11 @@ const gGroup = svg.append('g')
 
 const gNode = svg.append("g"); // circles = floating nodes
 
+    // images and captions (lines pass in front of these)
+const gLabel = svg.append('g')
+    .classed( 'label', true )
+    ;
+
 // links are rendered in front of circles. 
 
 // next the polyline edge arrows 
@@ -304,10 +309,13 @@ const gLink = svg.append('g')
 const gLinkZone = svg.append('g')
     .classed( 'linkzone', true )
 
+
     // a foreground layer eg for drag-select rect, pop-up annotations
-const gLabel = svg.append('g')
-    .classed( 'label', true )
+const gForeground = svg.append('g')
+    .classed( 'foreground', true )
     ;
+
+
 
 const defs = svg.append("defs");
 

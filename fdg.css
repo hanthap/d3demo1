@@ -160,7 +160,7 @@ circle.dragging {
 }
 
 .shift-down.ctrl-down circle {
-    cursor:cell; /* drop here (inside this node) */
+    cursor:cell; /* drop here (inside a frame) */
 }
 
 .shift-down line.linkzone  { 
@@ -190,6 +190,10 @@ g.edge, g.label, div.label, foreignObject, xhtml:div {
 
 
 g.label * {
+    pointer-events: none; /* let mouse events pass through  */
+}
+
+g.foreground * {
     pointer-events: none; /* let mouse events pass through  */
 }
 
