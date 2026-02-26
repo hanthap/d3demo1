@@ -28,6 +28,30 @@ try {
 
 //-------------------------------------------------------------------------------
 
+    static Create(child, parent) {
+    // create a new hierarchical link from child to parent
+    // TO DO:  skip if child is already a member of parent, or if parent is already an ancestor of child (to prevent circular nesting)
+    const newLink = {
+        source: child,
+        target: parent, 
+        true_source: child, // store the true source and target for when we need to restore them after a collapse/expand operation
+        true_target: parent,
+        to_node_id: parent.node_id,
+        from_node_id: child.node_id,
+        type_cde: "H",
+        distance: 20 * Math.random(),
+        strength: 0.4 * Math.random(),
+        id: 'L' + links.length + 1, // unique identifier
+        descriptor: `New link: ${child.node_id} ∈ ${parent.node_id}`,
+        opacity: 1
+    };
+    links.push(newLink);
+    child.outLinks.push(newLink);
+    parent.inLinks.push(newLink);
+}
+
+//-------------------------------------------------------------------------------
+
 // Given 2 nodes (circle or frame) calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
 // this ensures the line's endpoints will coincide with the outer perimeter of each shape.
 // TO DO: handle scenario where source node overlaps the destination (or vice versa)

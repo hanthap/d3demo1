@@ -190,7 +190,7 @@ static Create(selContents=null) {
     // TO DO    .filter( n is a visible circle ) // prevent extra links to nested children
 
     nodes_to_add
-        .forEach( n => Node.AddLinkToParent(n,d) ); // add new frame as parent of all currently selected nodes
+        .forEach( n => Link.Create(n,d) ); // add new frame as parent of all currently selected nodes
 
     Cache.RefreshAllDescendants();    // descendants, per node
     Cache.RefreshSortedNodes(); 

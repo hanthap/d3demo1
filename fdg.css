@@ -159,6 +159,10 @@ circle.dragging {
     cursor: grabbing; 
 }
 
+.shift-down.ctrl-down circle {
+    cursor:cell; /* drop here (inside this node) */
+}
+
 .shift-down line.linkzone  { 
      cursor: grab;  
  }
