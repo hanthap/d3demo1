@@ -31,6 +31,26 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
                 .attr('id', Label.UniqueId)
                 .classed('labelmain',true)
                 ;
+    const scale = 0.2,
+        width = 2*cropCircle.node().getAttribute("cx"),
+        height = width,
+        xoffset = -width * scale / 2,
+        yoffset = xoffset,
+        transform = `translate(${xoffset}, ${yoffset}) scale(${scale})`;
+
+        labels
+            .filter(d => d.img_src > "" )
+            .append('g')
+                .attr('transform',transform)
+            //    .attr('opacity',0.5) // adds a lot of CPU work when debugging
+                .attr('clip-path','url(#cropCircle)')
+                .append('image')
+                    .attr('href',d => d.img_src)
+                    .attr('width',width)
+                    .attr('height',height)
+             //       .attr('transform',"translate(0, 0) scale(1)")
+                    ;
+
 
         labels 
             .append("foreignObject") // add a child element per node-group. 
@@ -45,28 +65,17 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
                     .html(Label.HtmlText) 
                     ;
 
-        labels 
-            .append('g')
-                // transform="translate(0, 0) scale(1.2)" opacity="0.5"
-                .attr('transform',"translate(-50, -50) scale(0.25)")
-
-                // .attr('opacity',0.5) // adds a lot of CPU work
-                .attr('clip-path','url(#cropCircle)')
-                .append('image')
-                    .attr('href',"tara.jpg")
-                    .attr('width',300)
-                    .attr('height',300)
-             //       .attr('transform',"translate(0, 0) scale(1)")
-                    ;
 
 }
 
 // circular clip path for photo inside node
+// 
 const cropCircle = defs
     .append("clipPath")
         .attr("id","cropCircle") 
         .append("circle")
-            .attr("cx","150")
-            .attr("cy","150")
-            .attr("r","100")
+            // these attributes work for LinkedIn mugshots, but not for arbitrary photos
+            .attr("cx",150) 
+            .attr("cy",150)
+            .attr("r",100)
 ;
