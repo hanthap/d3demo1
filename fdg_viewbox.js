@@ -52,6 +52,8 @@ static OnWheel(e,d) {
     .filter(d => d.selected )
     .each( d => d.r *= ( 1 + e.wheelDelta / 1200 ) )
     .attr( 'r', d => d.r )
+    .filter( d => d.img_src > '' )
+    .each( Label.OnWheel )
     ;
     // update collision force directly. This actually works!
     simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));
@@ -112,7 +114,7 @@ static OnKeyDown(e) {
     case 's' : // Alt+s => export data as JSON & CSV
         if ( e.altKey ) {
             console.log(e);
-            // TO DO: keyboard modifiers decide whether to download just the current selection
+            // TODO: keyboard modifiers decide whether TODOwnload just the current selection
             Cache.Download();
         }
         break;
@@ -252,7 +254,7 @@ static OnDragEnd(e,d) {
         StaticFrame.Create(ViewBox.DragRectDims,selNodes);
     }
 
-
+    // TODO These selections are not visible until simulation unfreezes
     gNode.selectAll('circle.drag_selected')
         .classed( 'drag_selected', false )
         .each( d => { d.selected ^= 1 } ) // toggle selected flag

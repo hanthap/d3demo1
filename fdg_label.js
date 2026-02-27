@@ -18,6 +18,11 @@ class Label extends Node {
        }
     static OnTick() { gLabel.selectAll('.labelmain').each(Label.SetAttributes);  }
 
+    static OnWheel(d) { 
+        // TODO use d.r to update scale of image
+    }
+
+
 }
 
 function AppendLabels() {
@@ -31,6 +36,10 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
                 .attr('id', Label.UniqueId)
                 .classed('labelmain',true)
                 ;
+
+// TODO: special WYSIWYG interactive zoom & pan of each individual image so it's always centred in crop circle
+// eg using 'right-ctrl-down' or 'function-down' 
+// as initial default can we obtain original height & width from the image file itself? 
     const scale = 0.2,
         width = 2*cropCircle.node().getAttribute("cx"),
         height = width,
@@ -70,12 +79,13 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
 
 // circular clip path for photo inside node
 // 
-const cropCircle = defs
+const CROP_CIRCLE_CX = 150, CROP_CIRCLE_R = 100
+cropCircle = defs
     .append("clipPath")
         .attr("id","cropCircle") 
         .append("circle")
             // these attributes work for LinkedIn mugshots, but not for arbitrary photos
-            .attr("cx",150) 
-            .attr("cy",150)
-            .attr("r",100)
+            .attr("cx",CROP_CIRCLE_CX) 
+            .attr("cy",CROP_CIRCLE_CX)
+            .attr("r",CROP_CIRCLE_R)
 ;

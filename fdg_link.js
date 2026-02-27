@@ -31,7 +31,7 @@ try {
     static Create(child, parent) {
         console.log('Link.Create(child, parent)',child,parent)
     // create a new hierarchical link from child to parent
-    // TO DO:  skip if child is already a member of parent, or if parent is already an ancestor of child (to prevent circular nesting)
+    // TODO:  skip if child is already a member of parent, or if parent is already an ancestor of child (to prevent circular nesting)
     const newLink = {
         source: child,
         target: parent, 
@@ -55,7 +55,7 @@ try {
 
 // Given 2 nodes (circle or frame) calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
 // this ensures the line's endpoints will coincide with the outer perimeter of each shape.
-// TO DO: handle scenario where source node overlaps the destination (or vice versa)
+// TODO: handle scenario where source node overlaps the destination (or vice versa)
 
 
 static PolyLinePointTuple( d ) {
@@ -108,13 +108,13 @@ static Opacity(d) {
 //-------------------------------------------------------------------------------
 
 static StrokeWidth(d) { // stroke-width of visible polyline
-      return d.link_mass ? d.link_mass / 20 : 1.2; // to do: need a better formula for link mass => stroke width
+      return d.link_mass ? d.link_mass / 20 : 1.2; // TODO: need a better formula for link mass => stroke width
 }
 
 //-------------------------------------------------------------------------------
 
 static TitleText(d) {
-// to do: in case either node is stacked look for any links that are obscured by this one and display their info too
+// TODO: in case either node is stacked look for any links that are obscured by this one and display their info too
     try {
         return d.descriptor + '\n\nFrom: ' + Node.TitleText(d.true_source) + '\n\nTo: ' + Node.TitleText(d.true_target);
     } catch (e) { console.log(e);  };
@@ -147,7 +147,7 @@ static SetAttributes(d)   {
 }
 
  //-------------------------------------------------------------------------------
-    // to do: handle multiple containership hierarchies => need a priority order in case of 
+    // TODO: handle multiple containership hierarchies => need a priority order in case of 
 static IsHier(d) {
     console.assert(d.type_cde);
     return ( false 
@@ -157,7 +157,7 @@ static IsHier(d) {
 }
 
 //-------------------------------------------------------------------------------
-// TO DO: are there any non-hierarchical "circle-within-frame" links that should be hidden?
+// TODO: are there any non-hierarchical "circle-within-frame" links that should be hidden?
 static ShowAsLine(d) {
     return ( Node.HasShape(d.source) && Node.HasShape(d.target) );
 }
@@ -438,7 +438,7 @@ static Hover( d, bHovering ) {
     gGroup.selectAll("rect") // frame
         .filter( r => r == d.source || r == d.target )
         .classed( 'xhover', bHovering );
-        // TO DO : apply to all nested frames and circles
+        // TODO : apply to all nested frames and circles
 }
 
 //-------------------------------------------------------------------------------
@@ -467,7 +467,7 @@ static OnDragStart(e,d) {
             const ends = LinkZone.ChooseEnds(d,p);
             const selFixedNode = d3.select('circle,rect').filter(n => n == ends.far.node );
             DraftLink.OnDragStart(e, ends.far.node, selFixedNode, d );
-            // TO DO temporarily hide the current link and its linkzone
+            // TODO temporarily hide the current link and its linkzone
             break;
 
     }
@@ -517,7 +517,7 @@ static EndPoints(from_node,to_point) {
 
 static OnDragStart(e,dFromNode,selFromNode,dOrigLink=null) {
 
-    // TO DO: set CSS classes (and cursor shapes) for all layers, according to whether drop is allowable
+    // TODO: set CSS classes (and cursor shapes) for all layers, according to whether drop is allowable
     console.log('DraftLink.OnDragStart',e,dFromNode,selFromNode);
     DraftLink.FromD3Selection = selFromNode.classed("drafting", true); 
     DraftLink.FromDatum = dFromNode;
@@ -564,7 +564,7 @@ static OnDrag(e) {
 
 static OnDragEnd(e) {
 
-    // TO DO: use cursor shape to decide whether to drop or ignore
+    // TODO: use cursor shape to decide whether to drop or ignore
     // then clear all temp classes
     console.log('DraftLink.OnDragEnd(e)',e);
     if ( e.sourceEvent.shiftKey ) { // bypass confirmation prompt, go ahead with edit

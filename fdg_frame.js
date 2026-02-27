@@ -5,7 +5,7 @@ class Frame extends Node {
 
     static IsExclusive(d) {  
         // to decide whether non-members will be pushed out by active_exclusion force
-        // TO DO: a frame is exclusive iff it is in the foreground ??
+        // TODO: a frame is exclusive iff it is in the foreground ??
         return ( HasVisibleChild(d) ); // for now, all frame rects are exclusive    
     }
 
@@ -37,7 +37,7 @@ const
         point = v.dim == 'x' ? { x: v.k, y: Frame.Centre(d).y + ( Frame.HalfWidth(d)  * Math.tan(v.a) ) } :
                                { y: v.k, x: Frame.Centre(d).x + ( Frame.HalfHeight(d) * Math.tan(v.a) ) } ;
 
-  // TO DO : what if the point falls at a rounded corner (within Frame.CornerRadius of that corner)
+  // TODO : what if the point falls at a rounded corner (within Frame.CornerRadius of that corner)
 
 return point;
 
@@ -144,7 +144,7 @@ static ToCircle(d, bExploded, cXcY) {
 
                     console.log(c);
                 } );
-            // TO DO: recalculate and cache the 'effective' node-pair for links that reference a leaf node that is now hidden (as a descendant node)
+            // TODO: recalculate and cache the 'effective' node-pair for links that reference a leaf node that is now hidden (as a descendant node)
             // if both ends now point to d then the link will not be in 
             // likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
 
@@ -186,8 +186,8 @@ static Create(selContents=null) {
     
     const nodes_to_add = selContents ? selContents.data() : nodes.filter(n => n.selected );
     
-    // TO DO    .filter( n is not an ancestor of d ) // prevent circular nesting
-    // TO DO    .filter( n is a visible circle ) // prevent extra links to nested children
+    // TODO    .filter( n is not an ancestor of d ) // prevent circular nesting
+    // TODO    .filter( n is a visible circle ) // prevent extra links to nested children
 
     nodes_to_add
         .forEach( n => Link.Create(n,d) ); // add new frame as parent of all currently selected nodes
@@ -228,7 +228,7 @@ static DescendantShapesSVG(d) {
 
             ChildrenOf(d).forEach( c => {
                 c.selected = d.selected;
-                // TO DO: this only goes down to grandchildren. Should use d.descendants
+                // TODO: this only goes down to grandchildren. Should use d.descendants
                 ChildrenOf(c).forEach( gc => { 
                         gc.selected = d.selected;
                     //    d3.select('rect').filter( o => o == gc).classed('selected',d.selected) ;
@@ -279,7 +279,7 @@ static DescendantShapesSVG(d) {
 
     static CornerRadius(d) { return 1.5 * radius ;};
 
-    static Margin(d) { return radius + 3*d.descendants.length }; // TO DO: make this a function of the number of descendants, or the size of the largest descendant, or something else that reflects the need for more space around larger frames.
+    static Margin(d) { return radius + 3*d.descendants.length }; // TODO: make this a function of the number of descendants, or the size of the largest descendant, or something else that reflects the need for more space around larger frames.
 
 
  
@@ -289,7 +289,7 @@ static DescendantShapesSVG(d) {
 
 // Depth-first search to return a list of all descendants of a given start node
 // called by Cache.RefreshAllDescendants()
-// TO DO: look at making this a static function of class Node (or Graph ?)
+// TODO: look at making this a static function of class Node (or Graph ?)
 
 
 function AllDescendantsOf(start, visited = new Set(), result = []) {

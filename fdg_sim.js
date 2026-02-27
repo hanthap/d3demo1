@@ -21,7 +21,7 @@ function FreezeSim() {
 //-------------------------------------------------------------------------------
 
 function RunSim() {
-    // to do: override default settings that influence movement for the first few seconds
+    // TODO: override default settings that influence movement for the first few seconds
     // just for the currently-active subset of nodes controlling the animation
 
     // first kill any previous sims
@@ -85,7 +85,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 // only now can we decide where to position the frames, working from leaf (innermost) to root (outermost)
 [...sorted_nodes].reverse().filter( Node.ShowAsFloatingFrame ) // filter because sorted_nodes actually includes non-frame nodes... 
 .forEach( d => {
-    // TO DO: assuming nodes are correctly pre-sorted, I thought we should only need to look at visible children, not all descendants
+    // TODO: assuming nodes are correctly pre-sorted, I thought we should only need to look at visible children, not all descendants
     // BUT NO!!! Switching to Children only causes strange side-effect, where other frames expand in the same dimension, by 50%.
     // Including descendants prevents this problem, not sure exactly why. 
     // It's NOT because of zombie simulations still running.
@@ -99,7 +99,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         yMax = Math.max( ...visible_children.map( Node.Bottom ) );
         yMin = Math.min( ...visible_children.map( Node.Top ) );
 
-        // TO DO add buffer margin around nested subsets
+        // TODO add buffer margin around nested subsets
         d.x = xMin; 
         d.y = yMin;
         d.width = xMax - xMin;
@@ -128,9 +128,9 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 };
 
 //----------------------------------------------------------------
-// TO DO: maybe nudge circles towards the centre of their parent frames too?
+// TODO: maybe nudge circles towards the centre of their parent frames too?
 
-// TO DO: do NOT exclude a collapsed circle IF it has any "descendants in common" with thie frame
+// TODO: do NOT exclude a collapsed circle IF it has any "descendants in common" with thie frame
 // instead, try to position it so it straddles the boundary, suggesting a non-empty intersection. 
 // This bit could be tricky!
 // likewise, can we adjust the collision force for when multiple ancestors are collapsed circles
@@ -229,7 +229,7 @@ for(i=0; i < nIterations; i++) {
 //----------------------------------------------------------------------------------------
 function expel_vector(frame,circle) {
 
-  // zero overlap => nothing to do
+  // zero overlap => nothing TODO
   if ( circle.ymin > frame.ymax + 5|| 
       circle.ymax < frame.ymin - 5 ||
       circle.xmin > frame.xmax + 5|| 

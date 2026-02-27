@@ -133,7 +133,7 @@ static Top(d) {
         if ( Node.ShowAsCircle(d) ) {
             // where does the ray intersect the circle?
             return {
-                // TO DO: adjust for stroke width
+                // TODO: adjust for stroke width
                     x: d.x + d.r * Math.cos(theta),
                     y: d.y + d.r * Math.sin(theta)
             };
@@ -306,7 +306,7 @@ static AppendDatum(d,i) {
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
     d.outLinks = [];
     d.inLinks = [];
-    // TO DO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
+    // TODO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
     return d;
 }
 
@@ -425,7 +425,7 @@ static OnMouseOut(e,d) {
 
 //        console.log('Node.OnMouseOut',d,e,mouseover_d3selection);
 
-    // TO DO: when dragging over LinkZone, we lose :hover style. Need to manage .xhover class explicitly when dragging
+    // TODO: when dragging over LinkZone, we lose :hover style. Need to manage .xhover class explicitly when dragging
      if ( Node.DragStartPos || e.button ) {
             return; //  ignore if still dragging 
      }
@@ -482,7 +482,7 @@ static ParentsOf(d) {
 // Decide whether we want a DOM shape element (visible or not) to be bound to this node 
 
 static HasShape(d) {
-    // TO DO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFloatingFrame(d) == False
+    // TODO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFloatingFrame(d) == False
     try {
     return d.has_shape;
     } catch { debugger }
@@ -522,8 +522,11 @@ static IsVisible(d) {
 
 // pre-drop sanity check. If false then the dragged circle c shouild have "no-drop" cursor
     static WouldAcceptChild(n,c) { 
-        // TO DO : check that n is not a descendant of c (circular)
-        // TO DO : check that c is not a descendant of n (pre-existing)
+        // TODO : check that n is not a descendant of c (circular)
+        // TODO : check that c is not already a child of n (avoid duplicates)
+        // IGNORE if n == c OR n.children contains c
+        // if new parent is a descendant of old parent or vice versa, then REPLACE the target node
+        // else, ADD a new 'H' link
         return true;
     }
 
@@ -551,7 +554,7 @@ static OnDragStart(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnDrag(e,d) {
-// TO DO: uppdate mouseover ref using document.elementsFromPoint(x, y) - see below
+// TODO: uppdate mouseover ref using document.elementsFromPoint(x, y) - see below
 
      const [x, y] = d3.pointer(e); // must use screen space, not SVG space
 
@@ -598,14 +601,14 @@ static OnDragEnd(e,d) {
     const selHits = d3.selectAll(svgElement),
         f = selHits.data().at(1); // 
     console.log('d3.select(selHits), f,d',selHits,f,d);
-    // TO DO: generalise and drop node d into multiple overlapping frames
+    // TODO: generalise and drop node d into multiple overlapping frames
 
     switch ( cursor ) {
 
         case 'cell' : 
             if (  Node.ShowAsFloatingFrame(f) && Node.WouldAcceptChild(f,d) ) {
                 Link.Create(d,f);
-                // TO DO: make this more efficient
+                // TODO: make this more efficient
                 Cache.RefreshAllDescendants();    // descendants, per node
                 Cache.RefreshSortedNodes(); 
                 Cache.ApplyFrameOrder();
@@ -616,7 +619,7 @@ static OnDragEnd(e,d) {
             break;
     }
 
-// TO DO : clean up these lines...
+// TODO : clean up these lines...
     if ( Node.DraggedD3Selection ) {  
         Node.DraggedD3Selection.classed("dragging", false);
         Node.DraggedD3Selection = null;
@@ -644,7 +647,7 @@ static OnDragEnd(e,d) {
   if (dist < CLICK_THRESHOLD) {
         console.debug('Manually calling Node.OnClick');
         Node.OnClick(e,d);
-        // TO DO : if the target circle is in foreground it now receives the original click event. We need to prevent that somehow.
+        // TODO : if the target circle is in foreground it now receives the original click event. We need to prevent that somehow.
         e.sourceEvent.stopImmediatePropagation(); // seems to have no effect
 
     }

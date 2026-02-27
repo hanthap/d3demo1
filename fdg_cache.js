@@ -279,4 +279,8 @@ document.getElementById("fileInput").addEventListener("change", function() {
 
 } // end of Cache class
 
+// TODO Export & import as fixed-format text
+// TODO extract repeating properties of links and nodes as separate dimension tables
+// TODO Deploy single-use customer HTML including data embedded as (encrpyted?) strings of fixed-format data
+// see what others are doing on Observable 
 //-------------------------------------------------------------------------------
