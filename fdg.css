@@ -321,7 +321,11 @@ rect.valid_target {
 
 }
 
+.no-drop {
+        cursor:no-drop;
+}
 
 .wait {
     cursor:wait; /* spinning circle, no arrow */
 }
+

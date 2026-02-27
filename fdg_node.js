@@ -443,8 +443,8 @@ static OnMouseOut(e,d) {
 
 //-------------------------------------------------------------------------------
 // grow or shrink circle
-
-static OnWheel(e,d) {
+// to be generaised as ViewBox.OnWheel() ?
+/* static OnWheel(e,d) {
    // console.log('Node.OnWheel(e,d)',e,d);
     d.r *= ( 1 + e.wheelDelta / 1200 );
     this.setAttribute("r",d.r);
@@ -452,7 +452,7 @@ static OnWheel(e,d) {
     simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));
 
 }
-
+ */
 
 //-------------------------------------------------------------------------------
     
@@ -520,7 +520,12 @@ static IsVisible(d) {
         return ChildrenOf(d).length == 0 ;
     }
 
-
+// pre-drop sanity check. If false then the dragged circle c shouild have "no-drop" cursor
+    static WouldAcceptChild(n,c) { 
+        // TO DO : check that n is not a descendant of c (circular)
+        // TO DO : check that c is not a descendant of n (pre-existing)
+        return true;
+    }
 
 //-------------------------------------------------------------------------------
 
@@ -548,18 +553,20 @@ static OnDragStart(e,d) {
 static OnDrag(e,d) {
 // TO DO: uppdate mouseover ref using document.elementsFromPoint(x, y) - see below
 
-//     const [x, y] = d3.pointer(e); // must use screen space, not SVG space
+     const [x, y] = d3.pointer(e); // must use screen space, not SVG space
 
-//     const hits = document.elementsFromPoint(x, y)
-//         .filter(el => el instanceof SVGElement);
+     const hits = document.elementsFromPoint(x, y)
+         .filter(el => el instanceof SVGElement);
 
-//     const svgElement = hits;
+     const svgElement = hits;
 // //    console.log('svgElement',hits, svgElement);
 
-//     const selHits = d3.selectAll(svgElement);
-//     console.log('d3.select(selHits)',selHits);
+    const selHits = d3.selectAll(svgElement).filter(Node.ShowAsFloatingFrame),
+        f = selHits.data().at(1); 
 
 
+if ( f ) 
+        Node.DraggedD3Selection.classed("no-drop", !Node.WouldAcceptChild(f,d) );
 
     if ( DraftLink.LineElement ) DraftLink.OnDrag(e);
     else { 
@@ -573,8 +580,10 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
     console.log('Node.OnDragEnd',e,d,this);
-//    const d3selection = d3.select(this);
+
     svg.classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
+
+   const cursor = window.getComputedStyle(this).cursor;
 
 // 
     const [x, y] = d3.pointer(e); // must use screen space, not SVG space
@@ -587,22 +596,31 @@ static OnDragEnd(e,d) {
     console.log('svgElement',hits, svgElement);
 
     const selHits = d3.selectAll(svgElement),
-        f = selHits.data().at(1);
+        f = selHits.data().at(1); // 
     console.log('d3.select(selHits), f,d',selHits,f,d);
+    // TO DO: generalise and drop node d into multiple overlapping frames
 
+    switch ( cursor ) {
 
+        case 'cell' : 
+            if (  Node.ShowAsFloatingFrame(f) && Node.WouldAcceptChild(f,d) ) {
+                Link.Create(d,f);
+                // TO DO: make this more efficient
+                Cache.RefreshAllDescendants();    // descendants, per node
+                Cache.RefreshSortedNodes(); 
+                Cache.ApplyFrameOrder();
+                }
+        break;
+
+        default:
+            break;
+    }
+
+// TO DO : clean up these lines...
     if ( Node.DraggedD3Selection ) {  
         Node.DraggedD3Selection.classed("dragging", false);
-        if ( d.outLinks.length == 0 && Node.ShowAsFloatingFrame(f)) {
-  
-            Link.Create(d,f);
-            // TO DO: make this more efficient
-            Cache.RefreshAllDescendants();    // descendants, per node
-            Cache.RefreshSortedNodes(); 
-            Cache.ApplyFrameOrder();
-            }
         Node.DraggedD3Selection = null;
-    }
+        }
 
     if ( DraftLink.LineElement ) DraftLink.OnDragEnd(e);
 
@@ -682,7 +700,7 @@ function AppendShapes() {
                 .classed('has_members',Node.HasMembers)
                 .on('mouseover',Node.OnMouseOver) 
                 .on('mouseout',Node.OnMouseOut) 
-                .on('wheel',Node.OnWheel) 
+           //     .on('wheel',Node.OnWheel)  generalised in ViewBox.OnWheel()
                 .on('click',Node.OnClick)
                 .on('dblclick',Node.OnDblClick)
                 .on('contextmenu',Node.OnContextMenu)

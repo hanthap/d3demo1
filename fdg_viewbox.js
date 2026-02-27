@@ -44,7 +44,19 @@ static WatchZoom() {
   requestAnimationFrame(ViewBox.WatchZoom);
 }
 
+//-------------------------------------------------------------------------------
 
+static OnWheel(e,d) {
+ //   console.log('Node.OnWheel(e,d)',e,d);
+    gNode.selectAll('circle')
+    .filter(d => d.selected )
+    .each( d => d.r *= ( 1 + e.wheelDelta / 1200 ) )
+    .attr( 'r', d => d.r )
+    ;
+    // update collision force directly. This actually works!
+    simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));
+    ticked();
+}
 
 //-------------------------------------------------------------------------------
 // invoked from document regardless of selected element
@@ -55,31 +67,33 @@ static OnKeyDown(e) {
  ;
  
    switch (e.key) {
+
     case 'A' :
         if ( e.ctrlKey) { // Ctrl+A => Select All
         nodes.filter(Node.ShowAsCircle).forEach( d => d.selected = 1 );
         links.forEach( d => d.selected = 1 );
         }
         break;
+
     case 'Escape' : 
         // clear all highlights by removing the 'selected' class
         nodes.forEach( d => d.selected = 0 );
         links.forEach( d => d.selected = 0 );
         break;
+
     case 'End': // release any 'pegged' circles
         nodes.forEach( d => { d.fx = d.fy = null }  );
         break;
-    // case 'Meta' :
-    //      e.preventDefault(); // this does nothing... ?
-    //     svg.classed("meta-down",true)
-    //     break;
+
     case 'Shift':
         FreezeSim();
         svg.classed("shift-down",true);
         break;
+
     case 'Control':
         svg.classed("ctrl-down",true);
         break;
+
     case 'CapsLock' :
         frozen = ! capslock; // will be toggled in next line
     case 'ScrollLock' :    
@@ -94,16 +108,26 @@ static OnKeyDown(e) {
             svg.classed("shift-down",false);
         }
         break;
+
     case 's' : // Alt+s => export data as JSON & CSV
         if ( e.altKey ) {
             console.log(e);
+            // TO DO: keyboard modifiers decide whether to download just the current selection
             Cache.Download();
         }
         break;
+
+    case 'Space' :
+        // toggle visibility of unselected lines & nodes
+        // shift+space add/remove them from the simulation as well
+        break;
+
+
     case 'Home' :
         frozen = false;
         RunSim();
         break;
+
     case 'Insert' : 
         // sticky insert/overtype mode?
         // if hovering over space => create node
@@ -112,9 +136,11 @@ static OnKeyDown(e) {
         // else if 2 or more nodes are selected, encapsulate them in a new frame
         Frame.Create();
         break;
+
     default:
         console.log('ViewBox.OnKeyDown',e);
         break;
+
     }
     ticked();
 }
@@ -272,6 +298,7 @@ const svg = body.append('svg')
     .on('contextmenu',e => e.preventDefault() ) // applies to all elements! => use Ctrl+Shift+I to open Console inspect
     .on('mousedown',ViewBox.OnMouseDown)
     .on('mouseup',ViewBox.OnMouseUp)
+        .on('wheel',ViewBox.OnWheel)
 
     .call(d3.drag()
             .on('start', ViewBox.OnDragStart)
