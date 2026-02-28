@@ -329,3 +329,33 @@ rect.valid_target {
     cursor:wait; /* spinning circle, no arrow */
 }
 
+
+
+
+/* TODO explore uses for these special states & badges, (tweakable via Elements tab in Chromium Developer Tools)
+AUTOMATIC CLASSES (force state)
+:active
+:hover - already using this
+:focus
+:visited
+:focus-within
+:focus-visible
+
+
+
+BADGE SETTINGS
+grid
+subgrid
+flex
+ad
+scroll-snap
+container
+slot
+top-layer
+reveal
+media
+scroll
+starting style
+popover
+grid-lanes
+view-source
