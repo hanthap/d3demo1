@@ -151,7 +151,7 @@ static Top(d) {
     //-------------------------------------------------------------------------------
 
     static FillColour(d) {
-            return 'rgb(' + sourcePalette(d.hue_id) + ')';
+            return d.bg_fill ? d.bg_fill : 'rgb(' + sourcePalette(d.hue_id) + ')';
     }
 
     //-------------------------------------------------------------------------------

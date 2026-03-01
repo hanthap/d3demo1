@@ -223,6 +223,7 @@ static Download() {
     show_label: d.show_label,
     img_src: d.img_src,
     img_transform: d.img_transform,
+    bg_fill: d.bg_fill,
     fx: d.fx,
     fy: d.fy
     }
