@@ -213,6 +213,7 @@ static Download() {
     const trimmed_nodes = nodes.map(d => (
     {
     node_id: d.node_id,
+    tag: d.tag,
     descriptor: d.descriptor,
     selected: d.selected,
     show_label: d.show_label,
@@ -221,6 +222,7 @@ static Download() {
     node_mass: d.node_mass,
     show_label: d.show_label,
     img_src: d.img_src,
+    img_transform: d.img_transform,
     fx: d.fx,
     fy: d.fy
     }
@@ -231,8 +233,8 @@ static Download() {
     const trimmed_links = links.map(d => (
         {
             id: d.id,   
+            tag: d.tag,
             descriptor: d.descriptor,
-            // DEBUG: are these sometimes incorrect for newly-created links?
             from_node_id: d.true_source.node_id,
             to_node_id: d.true_target.node_id,
             hue_id: d.hue_id,

@@ -16,12 +16,18 @@ class Label extends Node {
     static SetAttributes(d) { 
        this.setAttribute('transform',`translate(${Node.Centre(d).x},${Node.Centre(d).y})`);
        }
-    static OnTick() { gLabel.selectAll('.labelmain').each(Label.SetAttributes);  }
-
-    static OnWheel(d) { 
-        // TODO use d.r to update scale of image
-    }
-
+    static OnTick() { 
+            gLabel.selectAll('.labelmain').each(Label.SetAttributes)
+            ;
+            }
+    static TransformImageElement(d) { return d.img_transform; }
+    static TransformGroupElement(d) { // resize with cicle's radius
+        const 
+            scale = d.r / CROP_CIRCLE_R, 
+            xoffset = -CROP_CIRCLE_CX * scale,
+            yoffset = xoffset;
+        return `translate(${xoffset}, ${yoffset}) scale(${scale})`;
+         }
 
 }
 
@@ -39,31 +45,24 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
 
 // TODO: special WYSIWYG interactive zoom & pan of each individual image so it's always centred in crop circle
 // eg using 'right-ctrl-down' or 'function-down' 
-// as initial default can we obtain original height & width from the image file itself? 
-//  Image.naturalWidth  and Image.naturalHeight work for JPG and SVG images
-// having loaded each one, at least it's now in the browser cache. Any benefit in using the blob while it's in Javascript memory? 
-// or should we just discard after calculating offset and scale?
-    const scale = 0.15, // this is the one parameter that we want to adjust with wheel
+
+    const 
         width = 2*CROP_CIRCLE_CX,
-        height = width,
-        xoffset = -CROP_CIRCLE_CX * scale,
-        yoffset = xoffset,
-        svg = "https://cdn.worldvectorlogo.com/logos/warner-music-international.svg",
-        transform = `translate(${xoffset}, ${yoffset}) scale(${scale})`;
+        height = width
+     ;
 
         labels
             .filter(d => d.img_src > "" )
             .append('g')
-                .attr('transform',transform)
+                .classed("image-group",true)
+                .attr('transform',Label.TransformGroupElement)
             //    .attr('opacity',0.5) // adds a lot of CPU work when debugging
                 .attr('clip-path','url(#cropCircle)')
                 .append('image')
                     .attr('href',d => d.img_src)
-                   //  .attr('href',svg)
                     .attr('width',width)
                     .attr('height',height)
-                  //  .attr('transform',"translate(0, 0) scale(1)")
-                    .attr('transform',"scale(1)") // these 3 parameters would be stored in the node record
+                    .attr('transform', Label.TransformImageElement)
                     ;
 
 

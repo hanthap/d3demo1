@@ -51,9 +51,10 @@ static OnWheel(e,d) {
     gNode.selectAll('circle')
     .filter(d => d.selected )
     .each( d => d.r *= ( 1 + e.wheelDelta / 1200 ) )
-    .attr( 'r', d => d.r )
-    .filter( d => d.img_src > '' )
-    .each( Label.OnWheel )
+    .attr( 'r', d => d.r );
+
+    gLabel.selectAll('.image-group') // nested g elements with a non-empty image tag
+        .attr('transform',Label.TransformGroupElement) // the nested g and its image
     ;
     // update collision force directly. This actually works!
     simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));

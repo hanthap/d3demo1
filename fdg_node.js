@@ -210,7 +210,7 @@ static OnContextMenu(e,d) {
 
     static OnClick( k, d ) {
 
-    //    console.log('Node.OnClick',k,d,this);
+        console.log('Node.OnClick',k,d,this);
 
         let clicked_element = d3.select(this);  
             // DEBUG: if the element is already in foreground , the whole event happens twice 
