@@ -121,7 +121,7 @@ static OnKeyDown(e) {
         break;
 
     case 'Space' :
-        // toggle visibility of unselected lines & nodes
+        // TODO: toggle visibility of unselected lines & nodes
         // shift+space add/remove them from the simulation as well
         break;
 
@@ -132,7 +132,7 @@ static OnKeyDown(e) {
         break;
 
     case 'Insert' : 
-        // sticky insert/overtype mode?
+        // TODO: sticky insert/overtype mode?
         // if hovering over space => create node
         // if hovering inside a frame => create child node
         // if hovering over a line => splice a new node

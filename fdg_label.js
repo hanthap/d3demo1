@@ -21,11 +21,16 @@ class Label extends Node {
             ;
             }
     static TransformImageElement(d) { return d.img_transform; }
-    static TransformGroupElement(d) { // resize with cicle's radius
+    static TransformGroupElement(d) { 
+        // TODO: for expanded frames, allow logo to be at top (dedicated header) or centre (background)
+        // 'top header mode' would need special treatment by active-exclusion force
+        // resize with cicle's radius
         const 
-            scale = d.r / CROP_CIRCLE_R, 
+            w = Label.Width(d), h = Label.Height(d), // cater for rectangular frames as well as circular nodes
+            r = h < w ? h/2 : w/2, // scale to fit inside smaller dimension of the label
+            scale = r / CROP_CIRCLE_R, 
             xoffset = -CROP_CIRCLE_CX * scale,
-            yoffset = xoffset;
+            yoffset = xoffset; // for now, keep the image centred on the node, even as the node resizes.
         return `translate(${xoffset}, ${yoffset}) scale(${scale})`;
          }
 
@@ -41,6 +46,7 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
             .join('g')  
                 .attr('id', Label.UniqueId)
                 .classed('labelmain',true)
+              //  .attr("class", Label.Classes) // let CSS handle the rest
                 ;
 
 // TODO: special WYSIWYG interactive zoom & pan of each individual image so it's always centred in crop circle
@@ -73,7 +79,7 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
                 .attr("width", Label.Width)
                 .attr("height", Label.Height)
                 .append("xhtml:div") // add a grandchild DIV element inside the foreignObject - we need the strictness of XHTML when inside an SVG 
-                    .attr("class", Label.Classes) // let CSS handle the rest
+                   .attr("class", Label.Classes) // let CSS handle the rest
                     .style('color',Label.FontColour)
              //       .style('font-size',Label.FontSize)  
                     .html(Label.HtmlText) 
