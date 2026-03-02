@@ -53,7 +53,7 @@ static OnWheel(e,d) {
     .each( d => d.r *= ( 1 + e.wheelDelta / 1200 ) )
     .attr( 'r', d => d.r );
 
-    gLabel.selectAll('.image-group') // nested g elements with a non-empty image tag
+    gNode.selectAll('.image-group') // nested g elements with a non-empty image tag
         .attr('transform',Label.TransformGroupElement) // the nested g and its image
     ;
     // update collision force directly. This actually works!
@@ -325,8 +325,7 @@ const gGroup = svg.append('g')
 const gNode = svg.append("g"); // circles = floating nodes
 
     // images and captions (lines pass in front of these)
-const gLabel = svg.append('g')
-    .classed( 'label', true )
+// const gLabel = svg.append('g').classed( 'label', true )
     ;
 
 // links are rendered in front of circles. 

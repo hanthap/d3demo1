@@ -4,6 +4,7 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden; /* prevents scrollbars */
+
 }
 
 * {
@@ -16,6 +17,7 @@ svg {
     box-sizing: border-box;
     width: 100vw; height: 100vh;
     touch-action: none; /* disable default touch actions e.g. scrolling when touching svg */
+    background-color: lightgray;
 }
 
 
@@ -184,12 +186,12 @@ circle.drafting {
     cursor: no-drop;
 }
 
-g.edge, g.label, div.label, foreignObject, xhtml:div {
+g.edge, div.label, foreignObject, xhtml:div {
     pointer-events: none; /* let mouse events pass through  */
 }
 
 
-g.label * {
+.labelxmain g {
     pointer-events: none; /* let mouse events pass through  */
 }
 
@@ -329,7 +331,11 @@ rect.valid_target {
     cursor:wait; /* spinning circle, no arrow */
 }
 
+.disabled * {
+   filter: grayscale(100%);
+   opacity: 0.5;
 
+}
 
 
 /* TODO explore uses for these special states & badges, (tweakable via Elements tab in Chromium Developer Tools)

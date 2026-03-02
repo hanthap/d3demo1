@@ -157,6 +157,7 @@ static Top(d) {
     //-------------------------------------------------------------------------------
 
     static TitleText(d) {
+        return d.legal_text ? d.legal_text : null;
         if ( d.descriptor ) {
             return d.descriptor.replace(/\|/g,'\n');
         }
@@ -227,7 +228,9 @@ static OnContextMenu(e,d) {
 
             default: // toggle foreground/selected status
                 d.selected ^= 1;
-                clicked_element.classed('selected', d => d.selected)
+                clicked_element
+                    .classed('selected', d => d.selected)
+                    .classed('disabled', d => !d.selected) // for grayscaling unselected nodes
                 break;
             }
      
@@ -325,7 +328,10 @@ const
         has_shape: 1,
         hue_id: 'M',
         node_mass: 20,
-        tag: '?'
+        tag: '?',
+        legal_text: null,
+        img_src: null,
+        bg_fill: null
     };
     d.descendants = [d]; 
     Node.AppendDatum(d);
@@ -407,14 +413,14 @@ static ForceY(d) { // passed to d3.forceY().strength()
 }
 
 //-------------------------------------------------------------------------------*/
-
+// TODO never raise the circle shape to block its label+image group
 static OnMouseOver(e,d) {
-        mouseover_dom_element = this;
+        mouseover_dom_element = this; 
         mouseover_datum = d;
         mouseover_d3selection = d3.select(this);
-        mouseover_d3selection.raise(); 
+   //     mouseover_d3selection.raise(); 
 
-  //      console.log('Node.OnMouseOver',d,e,mouseover_d3selection);
+        console.log('Node.OnMouseOver',d,e,mouseover_d3selection);
 
 
     }
@@ -690,15 +696,15 @@ function IsVisibleNode(d) {
 
 //-------------------------------------------------------------------------------
 function AppendShapes() {
+return;
 
-    // create & bind the SVG visual elements
     circles = gNode.selectAll('circle')
         .data(nodes.filter(Node.ShowAsCircle), Node.UniqueId) 
             .join('circle') 
                 .attr('id', Node.UniqueId) 
                 .attr('r',Node.Radius)
                 .attr('fill',Node.FillColour)
-                .attr('data-myid', Node.TitleText) // "data-" attributes are HTML's way to tag an element with arbitrary key-value pairs, without side effects
+                .attr('text',Node.TitleText) // "data-" attributes are HTML's way to tag an element with arbitrary key-value pairs, without side effects
 
                 .classed('has_members',Node.HasMembers)
                 .on('mouseover',Node.OnMouseOver) 

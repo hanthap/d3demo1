@@ -17,13 +17,14 @@ class Label extends Node {
        this.setAttribute('transform',`translate(${Node.Centre(d).x},${Node.Centre(d).y})`);
        }
     static OnTick() { 
-            gLabel.selectAll('.labelmain').each(Label.SetAttributes)
+            gNode.selectAll('.label').each(Label.SetAttributes)
             ;
             }
     static TransformImageElement(d) { return d.img_transform; }
     static TransformGroupElement(d) { 
         // TODO: for expanded frames, allow logo to be at top (dedicated header) or centre (background)
         // 'top header mode' would need special treatment by active-exclusion force
+        // banner header would exclude child shapes from first x pixels of frame
         // resize with cicle's radius
         const 
             w = Label.Width(d), h = Label.Height(d), // cater for rectangular frames as well as circular nodes
@@ -38,16 +39,42 @@ class Label extends Node {
 
 function AppendLabels() {
 
-gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
+gNode.selectAll('g').remove(); // otherwise we get duplicates on data refresh
 // which seems odd, i thought join('g') would handle all that
     
-    const labels = gLabel.selectAll('g') 
-        .data(nodes.filter(Label.IsVisible), Label.UniqueId)  
+    const labels = gNode.selectAll('g') 
+        .data(nodes
+                .filter(Label.IsVisible)
+                .filter(Node.ShowAsCircle), 
+                Label.UniqueId)  
             .join('g')  
                 .attr('id', Label.UniqueId)
                 .classed('labelmain',true)
-              //  .attr("class", Label.Classes) // let CSS handle the rest
                 ;
+labels
+    .classed('has_members',Node.HasMembers)
+    .on('mouseover',Node.OnMouseOver) 
+    .on('mouseout',Node.OnMouseOut) 
+//     .on('wheel',Node.OnWheel)  generalised in ViewBox.OnWheel()
+    .on('click',Node.OnClick)
+    .on('dblclick',Node.OnDblClick)
+    .on('contextmenu',Node.OnContextMenu)
+    .call(d3.drag()
+        .on('start', Node.OnDragStart)
+        .on('drag', Node.OnDrag)
+        .on('end', Node.OnDragEnd)  
+        ) 
+
+
+labels
+        .append('circle')
+            .attr('id', Node.UniqueId) 
+            .attr('r',Node.Radius)
+            .attr('fill',Node.FillColour)
+
+
+            ;
+
 
 // TODO: special WYSIWYG interactive zoom & pan of each individual image so it's always centred in crop circle
 // eg using 'right-ctrl-down' or 'function-down' 
@@ -59,6 +86,9 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
 
         labels
             .filter(d => d.img_src > "" )
+                        .append('g').classed('label',true)
+              //  .attr("class", Label.Classes) // let CSS handle the rest
+
             .append('g')
                 .classed("image-group",true)
                 .attr('transform',Label.TransformGroupElement)
@@ -82,7 +112,7 @@ gLabel.selectAll('g').remove(); // otherwise we get duplicates on data refresh
                    .attr("class", Label.Classes) // let CSS handle the rest
                     .style('color',Label.FontColour)
              //       .style('font-size',Label.FontSize)  
-                    .html(Label.HtmlText) 
+             //       .html(Label.HtmlText) 
                     ;
 
 
