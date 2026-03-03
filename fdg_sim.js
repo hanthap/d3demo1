@@ -109,12 +109,13 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
    Link.OnTick(); // update coordinates etc for each DOM element
    Label.OnTick();
 
-    gNode.selectAll('circle')
+    gNode.selectAll('circle,g') // TODO this is a bit hacky, but it means we can apply the same classes to both circles and their nested image groups, without having to duplicate the code for each type of element
          .attr('cx', Node.BoundedX ) 
          .attr('cy', Node.BoundedY )
         .classed('drag_selected', ViewBox.DragRectIncludes )
         // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
         .classed('selected', d => d.selected)  
+        .classed('disabled', d => !d.selected)  
         ;
 
     gGroup.selectAll('rect')
@@ -124,6 +125,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         .attr('width', Frame.Width )
         // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
       .classed('selected', d => d.selected)  
+        .classed('disabled', d => !d.selected)        
      ;
 };
 

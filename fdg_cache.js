@@ -151,7 +151,7 @@ links.forEach( d => {
   //  Cache.RefreshAllExclusiveNodes(); // circles and frames in scope of active_exclusion force
     Cache.RefreshSortedNodes();       // z-order of nested frames
 
-    AppendShapes(); 
+  //  AppendShapes(); 
     AppendFrameShapes(); 
     AppendLines();
     AppendLabels();

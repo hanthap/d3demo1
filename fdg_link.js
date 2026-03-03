@@ -523,7 +523,7 @@ static OnDragStart(e,dFromNode,selFromNode,dOrigLink=null) {
     DraftLink.FromDatum = dFromNode;
     DraftLink.OrigLinkDatum = dOrigLink;
     const p = Node.Centre(dFromNode);
-    DraftLink.LineElement = gLabel
+    DraftLink.LineElement = gForeground
         .append('line')
         .attr('x1', p.x)
         .attr('y1', p.y)

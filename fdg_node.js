@@ -30,37 +30,39 @@ class Node {
     static UniqueId(d) {
         return d.node_id;
     }
-static Tag(d) {
-    return d.tag > "" ? d.tag : d.node_id;
-}
 
+    //-------------------------------------------------------------------------------
+
+    static Tag(d) {
+        return d.tag > "" ? d.tag : d.node_id;
+    }
 
     //-------------------------------------------------------------------------------
 
     static Radius(d) {
         return d.r;
-    }
+        }
 
     //-------------------------------------------------------------------------------
 
-static Coordinates(d) {
-    const s = Node.GetD3Selection(d);
-    if (s) {
-    const b = s.node().getBBox();
-    return { 
-            xmin: b.x,
-            ymin: b.y,
-            xmax : b.x + b.width,
-            ymax : b.y + b.height,
-            xmid : b.x + b.width/2,
-            ymid : b.y + b.height/2,
-            width : b.width,
-            height : b.height,
-            node_id: d.node_id
-            };
-        }
+    static Coordinates(d) {
+        const s = Node.GetD3Selection(d);
+        if (s) {
+        const b = s.node().getBBox();
+        return { 
+                xmin: b.x,
+                ymin: b.y,
+                xmax : b.x + b.width,
+                ymax : b.y + b.height,
+                xmid : b.x + b.width/2,
+                ymid : b.y + b.height/2,
+                width : b.width,
+                height : b.height,
+                node_id: d.node_id
+                };
+            }
 
-}
+    }
 
     //-------------------------------------------------------------------------------
 
@@ -90,8 +92,6 @@ static Bottom(d) {
 static Top(d) {
     return (Node.Centre(d).y - Node.HalfHeight(d));
 }
-
-    //-------------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------------
     // prevent the shape from crossing the perimeter of the SVG viewport
@@ -139,7 +139,7 @@ static Top(d) {
             };
 
         }
- }
+    }
 
     //-------------------------------------------------------------------------------
 
@@ -264,26 +264,26 @@ static OnMouseDown(e,d) {
 
 static ToFrame(d) {
     if ( Node.HasMembers(d) ) {
-          d.is_group = true;
-          d.has_shape = 1;  // do we need this?
-          // are there some descendants we still need to hide? YES - see comment above
-          d.descendants.filter(c => c != d).forEach( c => { 
-                    console.log(c);
-                    c.has_shape = 1; 
-                    // for in and out lines, restore the true endpoints
-                    // importantly, we already have true_source and true_target stored in each link
-                    c.inLinks.forEach( lnk => { lnk.target = lnk.true_target; } );
-                    c.outLinks.forEach( lnk => {lnk.source = lnk.true_source; } );
-            });
-            AppendShapes(); 
-            AppendFrameShapes();
-            AppendLines();
-            AppendLabels();
-            RefreshSimData();
-            if (!frozen) UnfreezeSim();
-
-        }
-
+        d.is_group = true;
+        d.has_shape = 1;  // do we need this?
+        // are there some descendants we still need to hide? YES - see comment above
+        d.descendants
+            .filter(c => c != d)
+            .forEach( c => { 
+                console.log(c);
+                c.has_shape = 1; 
+                // for in and out lines, restore the true endpoints
+                // importantly, we already have true_source and true_target stored in each link
+                c.inLinks.forEach( lnk => { lnk.target = lnk.true_target; } );
+                c.outLinks.forEach( lnk => {lnk.source = lnk.true_source; } );
+                });
+        //   AppendShapes(); 
+        AppendFrameShapes();
+        AppendLines();
+        AppendLabels();
+        RefreshSimData();
+        if (!frozen) UnfreezeSim();
+    }
 }
 
    //-------------------------------------------------------------------------------
@@ -291,7 +291,7 @@ static ToFrame(d) {
 static OnDblClick(e,d) {
     Node.ToFrame(d);
     ticked();
-   }
+}
 
 //-------------------------------------------------------------------------------
 
@@ -300,8 +300,8 @@ static AppendDatum(d,i) {
     d.cogX = 0;
     d.cogY = 0;
     d.weight = 0.1;
-  //  d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
-    d.r = 10 + 20 * Math.random(); // random radius between 10 and 30
+    //  d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
+    d.r = 10 + 30 * Math.random(); // random radius between 10 and 40
     d.height = 2 * d.r;
     d.width = 2 * d.r;
     d.selected = 0;
@@ -316,34 +316,35 @@ static AppendDatum(d,i) {
 //-------------------------------------------------------------------------------
 // called by DraftLink.OnDragEnd() 
 static Create( [x,y] = [0,0], id=null,label=null) {
-const 
-  nodeId = id ? id : 'N' + Math.round( Math.random() * 1000000 ),
-  d = {
-        node_id: nodeId,
-        x,
-        y,
-        r: 10,
-        descriptor: label ? label : `New node: ${nodeId}`,
-        is_group: false,
-        has_shape: 1,
-        hue_id: 'M',
-        node_mass: 20,
-        tag: '?',
-        legal_text: null,
-        img_src: null,
-        bg_fill: null
-    };
+
+    const 
+        nodeId = id ? id : 'N' + Math.round( Math.random() * 1000000 ),
+        d = {
+            node_id: nodeId,
+            x,
+            y,
+            r: 10,
+            descriptor: label ? label : `New node: ${nodeId}`,
+            is_group: false,
+            has_shape: 1,
+            hue_id: 'M',
+            node_mass: 20,
+            tag: '?',
+            legal_text: null,
+            img_src: null,
+            bg_fill: null
+            };
     d.descendants = [d]; 
     Node.AppendDatum(d);
     nodes.push(d);
     mapNodes.set(d.node_id, d);
-    AppendShapes();
+    // AppendShapes();
     AppendLabels();
 
     // no need to recalc link data as it has none, yet
-   Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
-   Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
-//    Cache.ApplyFrameOrder();
+    Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
+    Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
+    //    Cache.ApplyFrameOrder();
     console.log('Node.Create() return d=',d);
     return d;
 }
@@ -352,20 +353,20 @@ const
 // called from AppendLinkDatum() in fdg_link.js
 static GetFromID( node_id ) {
     return ( mapNodes.get(node_id) );
-    }
+}
 
 //-------------------------------------------------------------------------------
 // return a d3 selection of all {circles & rects} bound to node datum d
 static GetD3Selection( d, types="circle, rect" ) {
     return d3.selectAll(types).filter(e => e === d ); // .filter() handles whatever you throw at it.
-    }
+}
 
 //-------------------------------------------------------------------------------
 
 static BringToFront( d ) {
   //  console.debug('Node.BringToFront');
      Node.GetD3Selection( d ).raise(); 
-    }
+}
 
 //-------------------------------------------------------------------------------
 
@@ -444,21 +445,7 @@ static OnMouseOut(e,d) {
     mouseover_datum = null;
     mouseover_d3selection = null;           
 
-
     }
-
-//-------------------------------------------------------------------------------
-// grow or shrink circle
-// to be generaised as ViewBox.OnWheel() ?
-/* static OnWheel(e,d) {
-   // console.log('Node.OnWheel(e,d)',e,d);
-    d.r *= ( 1 + e.wheelDelta / 1200 );
-    this.setAttribute("r",d.r);
-    // update collision force directly. This actually works!
-    simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));
-
-}
- */
 
 //-------------------------------------------------------------------------------
     
@@ -475,14 +462,16 @@ static ParentsOf(d) {
 }
 
 //-------------------------------------------------------------------------------
-// Y/N is this a 'top-level' ('root') node, within the graph context? 
-    static IsNotNested(d) {
-        return ( Node.ParentsOf(d)
-            .filter(Node.ShowAsFloatingFrame)
-            .length == 0
-        );
 
-    }
+// Y/N is this a 'top-level' ('root') node, within the graph context? 
+
+static IsNotNested(d) {
+    return ( Node.ParentsOf(d)
+        .filter(Node.ShowAsFloatingFrame)
+        .length == 0
+    );
+
+}
 
 //-------------------------------------------------------------------------------
 // Decide whether we want a DOM shape element (visible or not) to be bound to this node 
@@ -666,11 +655,8 @@ static OnDragEnd(e,d) {
 */
 }
 
-//-------------------------------------------------------------------------------
-
-// static AddLinkToParent(child, parent) { // replaced by Link.Create(child, parent)
-
 }
+
 
 //-------------------------------------------------------------------------------
 
@@ -695,7 +681,7 @@ function IsVisibleNode(d) {
 
 
 //-------------------------------------------------------------------------------
-function AppendShapes() {
+/* function AppendShapes() {
 return;
 
     circles = gNode.selectAll('circle')
@@ -724,7 +710,7 @@ return;
 }
 
 
-
+ */
 
 //-------------------------------------------------------------------------------
 

@@ -1,7 +1,5 @@
             var width = window.innerWidth, height = window.innerHeight;
             var simulation;
-     //       var simPassive;
-    //        var simulationExclusion;
             var frozen = false;
 
 
@@ -20,15 +18,16 @@ static lastDPR = window.devicePixelRatio;
 static DragStartPos;
 
 static OnResize() {
-const sz = ViewBox.logicalSize;
-  const W = parseFloat(svg.style("width"));
-  const H = parseFloat(svg.style("height"));
+const 
+    sz = ViewBox.logicalSize,
+    W = parseFloat(svg.style("width")),
+    H = parseFloat(svg.style("height")),
 
-  const s = Math.min(W, H);
-  const scale = sz / s;
+    s = Math.min(W, H),
+    scale = sz / s,
 
-  const x0 = -sz/2;
-  const y0 = -sz/2;
+    x0 = -sz/2,
+    y0 = -sz/2;
 
   svg.attr("viewBox", `${x0} ${y0} ${sz} ${sz}`);
   }
@@ -322,11 +321,7 @@ const gGroup = svg.append('g')
     .classed( 'group', true )
     ;
 
-const gNode = svg.append("g"); // circles = floating nodes
-
-    // images and captions (lines pass in front of these)
-// const gLabel = svg.append('g').classed( 'label', true )
-    ;
+const gNode = svg.append('g'); // circles = floating nodes
 
 // links are rendered in front of circles. 
 

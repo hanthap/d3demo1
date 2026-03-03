@@ -31,16 +31,9 @@ class Label extends Node {
             r = h < w ? h/2 : w/2, // scale to fit inside smaller dimension of the label
             scale = r / CROP_CIRCLE_RADIUS, 
             offset = -r;
-//            yoffset = offset; // for now, keep the image centred on the node, even as the node resizes.
         return `translate(${offset}, ${offset}) scale(${scale})`;
 
-
-/*             scale = r / CROP_CIRCLE_RADIUS, 
-            offset = -r * scale;
-
-        return `translate(${offset}, ${offset}) scale(${scale})`;
- */        }
-
+}
 }
 
 function AppendLabels() {
@@ -50,17 +43,18 @@ function AppendLabels() {
 gNode.selectAll('g').remove(); // otherwise we get duplicates on data refresh
 // which seems odd, i thought join('g') would handle all that
     
-const labels = gNode.selectAll('g') 
+const gTop = gNode.selectAll('g') 
     .data(nodes
             .filter(Label.IsVisible)
             .filter(Node.ShowAsCircle), 
             Label.UniqueId)  
-        .join('g')  
+        .join('g')  // top-level container for all elements of the label (circle, image, HTML content) 
             .attr('id', Label.UniqueId)
             .classed('labelmain',true)
+            .classed('disabled',true)
             ;
-const circles =
-labels
+
+gTop
     .classed('has_members',Node.HasMembers)
     .on('mouseover',Node.OnMouseOver) 
     .on('mouseout',Node.OnMouseOut) 
@@ -72,21 +66,21 @@ labels
         .on('drag', Node.OnDrag)
         .on('end', Node.OnDragEnd)  
         )
+        ;
     ;
 
-labels
+gTop
     .append('circle')
         .attr('id', Node.UniqueId) 
         .attr('r',Node.Radius)
         .attr('fill',Node.FillColour)
-        ;
 
 
 // TODO: special WYSIWYG interactive zoom & pan of each individual image so it's always centred in crop circle
 // eg using 'right-ctrl-down' or 'function-down' 
 
 
-circles
+gTop
     .filter(d => d.img_src > "" )
     .append('g') 
     // TODO - this extra group is needed to apply the clip-path to both the image and its transform, 
@@ -96,10 +90,10 @@ circles
         .classed('label',true)
     //  .attr("class", Label.Classes) // let CSS handle the rest
         .append('g')
-            .classed("image-group",true)
+            .classed("image-group",true) // or "image-clipped"
             .attr('transform',Label.TransformGroupElement) // changes with every re-size tick (mouse wheel event)
             .attr('clip-path','url(#cropCircle)')
-            .append('image')
+            .append('image') 
                 .attr('href',d => d.img_src)
                 .attr('width',CROP_CIRCLE_DIAMETER)
                 .attr('height',CROP_CIRCLE_DIAMETER)

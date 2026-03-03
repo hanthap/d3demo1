@@ -152,7 +152,7 @@ static ToCircle(d, bExploded, cXcY) {
 
 
             }
-        AppendShapes(); 
+//        AppendShapes(); 
         AppendFrameShapes();
         AppendLines();
         AppendLabels();
