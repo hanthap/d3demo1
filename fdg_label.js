@@ -29,33 +29,41 @@ class Label extends Node {
         const 
             w = Label.Width(d), h = Label.Height(d), // cater for rectangular frames as well as circular nodes
             r = h < w ? h/2 : w/2, // scale to fit inside smaller dimension of the label
-            scale = r / CROP_CIRCLE_R, 
-            xoffset = -CROP_CIRCLE_CX * scale,
-            yoffset = xoffset; // for now, keep the image centred on the node, even as the node resizes.
-        return `translate(${xoffset}, ${yoffset}) scale(${scale})`;
-         }
+            scale = r / CROP_CIRCLE_RADIUS, 
+            offset = -r;
+//            yoffset = offset; // for now, keep the image centred on the node, even as the node resizes.
+        return `translate(${offset}, ${offset}) scale(${scale})`;
+
+
+/*             scale = r / CROP_CIRCLE_RADIUS, 
+            offset = -r * scale;
+
+        return `translate(${offset}, ${offset}) scale(${scale})`;
+ */        }
 
 }
 
 function AppendLabels() {
 
+// This is superseding the AppendNodes function. Will need to change names later to reflect this.
+
 gNode.selectAll('g').remove(); // otherwise we get duplicates on data refresh
 // which seems odd, i thought join('g') would handle all that
     
-    const labels = gNode.selectAll('g') 
-        .data(nodes
-                .filter(Label.IsVisible)
-                .filter(Node.ShowAsCircle), 
-                Label.UniqueId)  
-            .join('g')  
-                .attr('id', Label.UniqueId)
-                .classed('labelmain',true)
-                ;
+const labels = gNode.selectAll('g') 
+    .data(nodes
+            .filter(Label.IsVisible)
+            .filter(Node.ShowAsCircle), 
+            Label.UniqueId)  
+        .join('g')  
+            .attr('id', Label.UniqueId)
+            .classed('labelmain',true)
+            ;
+const circles =
 labels
     .classed('has_members',Node.HasMembers)
     .on('mouseover',Node.OnMouseOver) 
     .on('mouseout',Node.OnMouseOut) 
-//     .on('wheel',Node.OnWheel)  generalised in ViewBox.OnWheel()
     .on('click',Node.OnClick)
     .on('dblclick',Node.OnDblClick)
     .on('contextmenu',Node.OnContextMenu)
@@ -63,70 +71,72 @@ labels
         .on('start', Node.OnDragStart)
         .on('drag', Node.OnDrag)
         .on('end', Node.OnDragEnd)  
-        ) 
-
+        )
+    ;
 
 labels
-        .append('circle')
-            .attr('id', Node.UniqueId) 
-            .attr('r',Node.Radius)
-            .attr('fill',Node.FillColour)
-
-
-            ;
+    .append('circle')
+        .attr('id', Node.UniqueId) 
+        .attr('r',Node.Radius)
+        .attr('fill',Node.FillColour)
+        ;
 
 
 // TODO: special WYSIWYG interactive zoom & pan of each individual image so it's always centred in crop circle
 // eg using 'right-ctrl-down' or 'function-down' 
 
-    const 
-        width = 2*CROP_CIRCLE_CX,
-        height = width
-     ;
 
-        labels
-            .filter(d => d.img_src > "" )
-                        .append('g').classed('label',true)
-              //  .attr("class", Label.Classes) // let CSS handle the rest
-
-            .append('g')
-                .classed("image-group",true)
-                .attr('transform',Label.TransformGroupElement)
-            //    .attr('opacity',0.5) // adds a lot of CPU work when debugging
-                .attr('clip-path','url(#cropCircle)')
-                .append('image')
-                    .attr('href',d => d.img_src)
-                    .attr('width',width)
-                    .attr('height',height)
-                    .attr('transform', Label.TransformImageElement)
-                    ;
-
-
-        labels 
-            .append("foreignObject") // add a child element per node-group. 
-                .attr("x", Label.OffsetX) // relative to parent 'g' element, centred on node (x,y)
-                .attr("y", Label.OffsetY)
-                .attr("width", Label.Width)
-                .attr("height", Label.Height)
-                .append("xhtml:div") // add a grandchild DIV element inside the foreignObject - we need the strictness of XHTML when inside an SVG 
-                   .attr("class", Label.Classes) // let CSS handle the rest
-                    .style('color',Label.FontColour)
-             //       .style('font-size',Label.FontSize)  
-             //       .html(Label.HtmlText) 
-                    ;
+circles
+    .filter(d => d.img_src > "" )
+    .append('g') 
+    // TODO - this extra group is needed to apply the clip-path to both the image and its transform, 
+    // but it does add an extra level of nesting  - not sure if it's worth trying to avoid it?
+    // Maybe we can apply the clip-path to the label's main 'g' element instead, and then use a nested 'g' 
+    // just for the image transform?
+        .classed('label',true)
+    //  .attr("class", Label.Classes) // let CSS handle the rest
+        .append('g')
+            .classed("image-group",true)
+            .attr('transform',Label.TransformGroupElement) // changes with every re-size tick (mouse wheel event)
+            .attr('clip-path','url(#cropCircle)')
+            .append('image')
+                .attr('href',d => d.img_src)
+                .attr('width',CROP_CIRCLE_DIAMETER)
+                .attr('height',CROP_CIRCLE_DIAMETER)
+                .attr('transform', Label.TransformImageElement)  // one-time, position and scale the image relative to its crop circle
+                ;
+// TODO: subset filter for circles that (also) have HTML content, so we don't add the foreignObject if it's not needed.
+// if there's an image, it will appear behind the HTML content
+return;
+labels 
+    .append("foreignObject") // add a child element per node-group. 
+        .attr("x", Label.OffsetX) // relative to parent 'g' element, centred on node (x,y)
+        .attr("y", Label.OffsetY)
+        .attr("width", Label.Width)
+        .attr("height", Label.Height)
+        .append("xhtml:div") // add a grandchild DIV element inside the foreignObject - we need the strictness of XHTML when inside an SVG 
+            .attr("class", Label.Classes) // let CSS handle the rest
+            .style('color',Label.FontColour)
+        //       .style('font-size',Label.FontSize)  
+        //       .html(Label.HtmlText) 
+            ;
 
 
 }
 
-// circular clip path for photo inside node
+// generic clip path for jpg/svg inside node circles, before dynamic re-sizing
 // 
-const CROP_CIRCLE_CX = 150, CROP_CIRCLE_R = 150
-cropCircle = defs
-    .append("clipPath")
-        .attr("id","cropCircle") 
-        .append("circle")
-            // these attributes work for LinkedIn mugshots, but not for arbitrary photos
-            .attr("cx",CROP_CIRCLE_CX) 
-            .attr("cy",CROP_CIRCLE_CX)
-            .attr("r",CROP_CIRCLE_R)
-;
+
+const CROP_CIRCLE_CX = 150, CROP_CIRCLE_R = 150;
+
+const 
+    CROP_CIRCLE_RADIUS = 150, 
+    CROP_CIRCLE_DIAMETER = CROP_CIRCLE_RADIUS * 2,
+    cropCircle = defs
+        .append("clipPath")
+            .attr("id","cropCircle") 
+            .append("circle")
+                .attr("cx",CROP_CIRCLE_RADIUS) 
+                .attr("cy",CROP_CIRCLE_RADIUS)
+                .attr("r",CROP_CIRCLE_RADIUS)
+    ;
