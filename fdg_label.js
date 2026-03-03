@@ -48,11 +48,11 @@ const gTop = gNode.selectAll('g')
             .filter(Label.IsVisible)
             .filter(Node.ShowAsCircle), 
             Label.UniqueId)  
-        .join('g')  // top-level container for all elements of the label (circle, image, HTML content) 
-            .attr('id', Label.UniqueId)
-            .classed('labelmain',true)
-            .classed('disabled',true)
-            ;
+    .join('g')  // top-level container for all elements of the label (circle, image, HTML content) 
+        .attr('id', Label.UniqueId)
+        .classed('labelmain',true)
+        .classed('disabled',true)
+        ;
 
 gTop
     .classed('has_members',Node.HasMembers)

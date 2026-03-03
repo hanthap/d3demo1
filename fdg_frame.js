@@ -287,9 +287,7 @@ static DescendantShapesSVG(d) {
 
     static CornerRadius(d) { return 1.5 * radius ;};
 
-    static Margin(d) { return radius + 3*d.descendants.length }; // TODO: make this a function of the number of descendants, or the size of the largest descendant, or something else that reflects the need for more space around larger frames.
-
-
+    static Margin(d) { return radius + 3*d.descendants.length }; 
  
 }
 
@@ -316,8 +314,41 @@ function AllDescendantsOf(start, visited = new Set(), result = []) {
 
 //-------------------------------------------------------------------------------
 
-    // this has to wait until we've finished loading graph data, & cached derived variables
 function AppendFrameShapes() {
+
+gGroup.selectAll('g').remove();
+
+const gTop = 
+    gGroup.selectAll('rect') // in case we've already got some
+      .data(sorted_nodes
+        .filter(Node.ShowAsFloatingFrame), 
+        Node.UniqueId) 
+    .join('g')  // top-level container for all elements of the frame (rect, image, HTML content) 
+        .attr('id', Label.UniqueId)
+        .classed('framemain',true)
+        .classed('disabled',true);
+
+gTop
+    .classed('frame',true)
+    .on('click', Frame.OnClick)
+    .on('dblclick', Frame.OnDblClick)
+    .on('mouseover', Frame.OnMouseOver) 
+    .on('mouseout', Frame.OnMouseOut)
+    .on("contextmenu", Frame.OnContextMenu)
+    ;
+
+gTop
+    .append('rect')
+        .attr('id', Node.UniqueId) //primary key
+        .attr('rx', Frame.CornerRadius)
+        .attr('ry', Frame.CornerRadius)
+        .attr('fill',Node.FillColour) 
+;
+
+}
+
+    // this has to wait until we've finished loading graph data, & cached derived variables
+function AppendFrameShapes_OK() {
     gGroup.selectAll('rect') // in case we've already got some
       .data(sorted_nodes.filter(Node.ShowAsFloatingFrame), Node.UniqueId) 
         .join('rect') // one-step upsert|delete based on matching UniqueId
