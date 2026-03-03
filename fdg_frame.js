@@ -38,6 +38,7 @@ const
                                { y: v.k, x: Frame.Centre(d).x + ( Frame.HalfHeight(d) * Math.tan(v.a) ) } ;
 
   // TODO : what if the point falls at a rounded corner (within Frame.CornerRadius of that corner)
+  // maybe a clip path can help? Except it would have to change with every tick
 
 return point;
 
@@ -46,6 +47,13 @@ return point;
 //-------------------------------------------------------------------------------
 // 
 static ExclusionBuffer(d) {
+    return 25;
+}
+
+
+//-------------------------------------------------------------------------------
+// reserved space for banner heading at top of frame
+static BannerHeight(d) {
     return 25;
 }
 

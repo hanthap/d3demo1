@@ -97,7 +97,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         xMax = Math.max( ...visible_children.map( Node.Right ) ); // generate a list of right boundaries, then get the max value
         xMin = Math.min( ...visible_children.map( Node.Left ) );
         yMax = Math.max( ...visible_children.map( Node.Bottom ) );
-        yMin = Math.min( ...visible_children.map( Node.Top ) );
+        yMin = Math.min( ...visible_children.map( Node.Top ) ) - Frame.BannerHeight(d);
 
         // TODO add buffer margin around nested subsets
         d.x = xMin; 
