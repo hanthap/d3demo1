@@ -128,7 +128,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         .classed('disabled', d => !d.selected)        
      ;
 
-    gGroup.selectAll('.banner')
+    gGroup.selectAll('.frame-banner')
       .attr('transform',Frame.TransformGroupElement) 
  ;     
 

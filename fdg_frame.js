@@ -338,7 +338,7 @@ const gTop =
         .classed('disabled',true);
 
 gTop
-    .classed('frame',true)
+//    .classed('frame',true)
     .on('click', Frame.OnClick)
     .on('dblclick', Frame.OnDblClick)
     .on('mouseover', Frame.OnMouseOver) 
@@ -359,13 +359,11 @@ gTop
 gTop
     .filter(d => d.img_src > "" )
     .append('g') 
-
-        .classed('banner',true)
+        .classed('frame-banner',true) // used as a filter in ticked()
          .attr('transform',Frame.TransformGroupElement) // changes with every re-size tick (mouse wheel event)
     //  .attr("class", Label.Classes) // let CSS handle the rest
         .append('g')
-            .classed("image-group",true) // or "image-clipped"
-//            .attr('clip-path','url(#cropCircle)')
+            .classed("frame-image",true) 
             .append('image') 
                 .attr('href',d => d.img_src)
                 .attr('width',CROP_CIRCLE_DIAMETER)
