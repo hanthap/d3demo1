@@ -288,6 +288,24 @@ static DescendantShapesSVG(d) {
     static CornerRadius(d) { return 1.5 * radius ;};
 
     static Margin(d) { return radius + 3*d.descendants.length }; 
+
+static TransformGroupElement(d) { 
+        // TODO: for expanded frames, allow logo to be at top (dedicated header) or centre (background)
+        // 'top header mode' would need special treatment by active-exclusion force
+        // banner header would exclude child shapes from first x pixels of frame
+        // resize with cicle's radius
+        const 
+//            r = Frame.HalfWidth(d), 
+          //  h = Label.Height(d), // cater for rectangular frames as well as circular nodes
+          //  r = h < w ? h/2 : w/2, // scale to fit inside smaller dimension of the label
+//            scale = r / CROP_CIRCLE_RADIUS, 
+            scale = 0.1,
+            xoffset = Frame.Left(d) + 10, 
+            yoffset = Frame.Top(d);
+        return `translate(${xoffset}, ${yoffset}) scale(${scale})`;
+
+}
+
  
 }
 
@@ -339,13 +357,38 @@ gTop
 
 gTop
     .append('rect')
+        .classed('frame-rect',true)
         .attr('id', Node.UniqueId) //primary key
         .attr('rx', Frame.CornerRadius)
         .attr('ry', Frame.CornerRadius)
         .attr('fill',Node.FillColour) 
 ;
 
+
+gTop
+    .filter(d => d.img_src > "" )
+    .append('g') 
+
+        .classed('banner',true)
+         .attr('transform',Frame.TransformGroupElement) // changes with every re-size tick (mouse wheel event)
+    //  .attr("class", Label.Classes) // let CSS handle the rest
+        .append('g')
+            .classed("image-group",true) // or "image-clipped"
+//            .attr('clip-path','url(#cropCircle)')
+            .append('image') 
+                .attr('href',d => d.img_src)
+                .attr('width',CROP_CIRCLE_DIAMETER)
+                .attr('height',CROP_CIRCLE_DIAMETER)
+                .attr('transform', Label.TransformImageElement)  // one-time, position and scale the image relative to its crop circle
+                ;
+;
+
+
 }
+
+
+//-------------------------------------------------------------------------------
+
 
     // this has to wait until we've finished loading graph data, & cached derived variables
 function AppendFrameShapes_OK() {

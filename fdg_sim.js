@@ -118,7 +118,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         .classed('disabled', d => !d.selected)  
         ;
 
-    gGroup.selectAll('rect')
+    gGroup.selectAll('.frame-rect')
         .attr('x', Frame.Left ) 
         .attr('y', Frame.Top )
         .attr('height', Frame.Height )
@@ -127,6 +127,12 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
       .classed('selected', d => d.selected)  
         .classed('disabled', d => !d.selected)        
      ;
+
+    gGroup.selectAll('.banner')
+      .attr('transform',Frame.TransformGroupElement) 
+ ;     
+
+
 };
 
 //----------------------------------------------------------------
