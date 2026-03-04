@@ -160,10 +160,9 @@ static ToCircle(d, bExploded, cXcY) {
 
 
             }
-//        AppendShapes(); 
         AppendFrameShapes();
         AppendLines();
-        AppendLabels();
+        AppendLabels(); // now includes circles 
 
         RefreshSimData(); 
 
@@ -220,7 +219,7 @@ static DescendantShapesSVG(d) {
 
    static OnClick(e,d) {
 
-//    console.log('Frame.OnClick',e,d,this,Frame.DescendantShapesSVG(d));
+console.log('Frame.OnClick',e,d,this);
 //    const bb = GetCombinedBBox(Frame.DescendantShapesSVG(d));
 //    console.log('GetCombinedBBox()',bb);
 //    console.log(Frame.Coordinates(d));
@@ -290,15 +289,7 @@ static DescendantShapesSVG(d) {
     static Margin(d) { return radius + 3*d.descendants.length }; 
 
 static TransformGroupElement(d) { 
-        // TODO: for expanded frames, allow logo to be at top (dedicated header) or centre (background)
-        // 'top header mode' would need special treatment by active-exclusion force
-        // banner header would exclude child shapes from first x pixels of frame
-        // resize with cicle's radius
         const 
-//            r = Frame.HalfWidth(d), 
-          //  h = Label.Height(d), // cater for rectangular frames as well as circular nodes
-          //  r = h < w ? h/2 : w/2, // scale to fit inside smaller dimension of the label
-//            scale = r / CROP_CIRCLE_RADIUS, 
             scale = 0.1,
             xoffset = Frame.Left(d) + 10, 
             yoffset = Frame.Top(d);
@@ -343,7 +334,7 @@ const gTop =
         Node.UniqueId) 
     .join('g')  // top-level container for all elements of the frame (rect, image, HTML content) 
         .attr('id', Label.UniqueId)
-        .classed('framemain',true)
+        .classed('frame-main',true)
         .classed('disabled',true);
 
 gTop

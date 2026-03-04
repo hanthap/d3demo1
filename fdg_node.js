@@ -213,7 +213,7 @@ static OnContextMenu(e,d) {
 
         console.log('Node.OnClick',k,d,this);
 
-        let clicked_element = d3.select(this);  
+        let clicked_d3selection = d3.select(this);  
             // DEBUG: if the element is already in foreground , the whole event happens twice 
             // appearance is the toggle doesn't happen 
             // EndDrag event happens AND the OnClick ) 
@@ -228,7 +228,7 @@ static OnContextMenu(e,d) {
 
             default: // toggle foreground/selected status
                 d.selected ^= 1;
-                clicked_element
+                clicked_d3selection
                     .classed('selected', d => d.selected)
                     .classed('disabled', d => !d.selected) // for grayscaling unselected nodes
                 break;
