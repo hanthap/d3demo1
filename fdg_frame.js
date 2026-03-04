@@ -333,12 +333,11 @@ const gTop =
         .filter(Node.ShowAsFloatingFrame), 
         Node.UniqueId) 
     .join('g')  // top-level container for all elements of the frame (rect, image, HTML content) 
-        .attr('id', Label.UniqueId)
+        .attr('id', Node.UniqueId)
         .classed('frame-main',true)
         .classed('disabled',true);
 
 gTop
-//    .classed('frame',true)
     .on('click', Frame.OnClick)
     .on('dblclick', Frame.OnDblClick)
     .on('mouseover', Frame.OnMouseOver) 
@@ -349,7 +348,7 @@ gTop
 gTop
     .append('rect')
         .classed('frame-rect',true)
-        .attr('id', Node.UniqueId) //primary key
+        .attr('id', Node.UniqueId) 
         .attr('rx', Frame.CornerRadius)
         .attr('ry', Frame.CornerRadius)
         .attr('fill',Node.FillColour) 
@@ -359,7 +358,7 @@ gTop
 gTop
     .filter(d => d.img_src > "" )
     .append('g') 
-        .classed('frame-banner',true) // used as a filter in ticked()
+        .classed('frame-banner',true)
          .attr('transform',Frame.TransformGroupElement) // changes with every re-size tick (mouse wheel event)
     //  .attr("class", Label.Classes) // let CSS handle the rest
         .append('g')

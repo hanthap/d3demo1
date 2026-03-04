@@ -122,9 +122,11 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         .attr('x', Frame.Left ) 
         .attr('y', Frame.Top )
         .attr('height', Frame.Height )
-        .attr('width', Frame.Width )
+        .attr('width', Frame.Width );
+
+    gGroup.selectAll('.frame-main')
         // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
-      .classed('selected', d => d.selected)  
+        .classed('selected', d => d.selected)  
         .classed('disabled', d => !d.selected)        
      ;
 
