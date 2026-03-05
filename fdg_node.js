@@ -249,6 +249,7 @@ static OnContextMenu(e,d) {
    //-------------------------------------------------------------------------------
 
 static OnMouseDown(e,d) {
+    // this is bypassed by OnDragStart() 
 //   console.log('Enter Node.OnMouseDown');
 //   Node.BringToFront(e.subject);
 //      console.log('Exit Node.OnMouseDown');
@@ -421,7 +422,7 @@ static OnMouseOver(e,d) {
         mouseover_d3selection = d3.select(this);
    //     mouseover_d3selection.raise(); 
 
-        console.log('Node.OnMouseOver',d,e,mouseover_d3selection);
+//        console.log('Node.OnMouseOver',d,e,mouseover_d3selection);
 
 
     }
@@ -534,6 +535,7 @@ static OnDragStart(e,d) {
     d.fy = e.y;     
     const selThisNode = d3.select(this);
  
+   d3.select(this).classed('left-mouse-down',true);
 
    if ( e.sourceEvent.shiftKey ) {
         DraftLink.OnDragStart(e,d,selThisNode);
@@ -579,7 +581,7 @@ if ( f )
 static OnDragEnd(e,d) {
     console.log('Node.OnDragEnd',e,d,this);
 
-    svg.classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
+    d3.select(this).classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
 
    const cursor = window.getComputedStyle(this).cursor;
 

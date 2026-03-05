@@ -20,16 +20,19 @@ svg {
     background-color: lightgray;
 }
 
-
-circle {
+.all_circles * {
     fill-opacity: 0.1;
     stroke:black;
     stroke-opacity: 0.1;
     stroke-width: 1;
-    cursor: grab;
+    cursor: grab; 
 }
 
-.shift-down circle {
+.left-mouse-down *  { /* TODO cursors don't cascade reliably in chrome/edge */
+     cursor: grabbing; 
+}
+
+.all_circles.shift-down * {
     cursor: crosshair;
 }
 
@@ -134,7 +137,13 @@ rect.frame {
     cursor: crosshair;
 }
 
+.frame-main  * {
+    fill-opacity: 0.5;
+}
 
+.frame-image  * {
+    opacity: 0.6;
+}
 
 rect.frame.selected {
     stroke-opacity: 1;
@@ -190,10 +199,10 @@ g.edge, div.label, foreignObject, xhtml:div {
     pointer-events: none; /* let mouse events pass through  */
 }
 
-
+/* 
 .labelxmain g {
-    pointer-events: none; /* let mouse events pass through  */
-}
+    pointer-events: none; /* let mouse events pass through  
+} */
 
 g.foreground * {
     pointer-events: none; /* let mouse events pass through  */
@@ -237,12 +246,12 @@ polygon.arrowhead {
     fill: context-fill; /* inherit polyline's RGBA fill colour INCLUDING opacity (alpha) */
     stroke: none; 
 }
-
+/* 
 circle.bullet {
     fill-opacity: 1;
-    fill: context-fill; /* inherit line's RGBA fill colour INCLUDING opacity (alpha) */
+    fill: context-fill;
     stroke: none; 
-}
+} */
 
 polyline.selected {
     stroke-dasharray: none;

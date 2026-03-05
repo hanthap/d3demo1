@@ -321,7 +321,8 @@ const gGroup = svg.append('g')
     .classed( 'group', true )
     ;
 
-const gNode = svg.append('g'); // circles = floating nodes
+const gNode = svg.append('g') // circles = floating nodes
+    .classed( 'all_circles', true );
 
 // links are rendered in front of circles. 
 
