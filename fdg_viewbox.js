@@ -384,3 +384,30 @@ menu.on("click", function(event) {
 d3.select("body").on("click", () => {
   menu.style("display", "none");
 });
+
+var staticFrameNodes = [
+    {   node_id: 'SQ1', 
+        x:-100, 
+        y:-200, 
+        w: 400, 
+        h: 300 
+    }
+/*  ,   {   node_id: 'SQ2', 
+        x: 100, 
+        y:-0, 
+        w: 100, 
+        h: 200 
+    } */
+
+];
+
+
+gStatic.selectAll('*')
+    .data(staticFrameNodes,d=>d.node_id)
+    .join('rect')
+    .classed('static-frame',true)
+    .attr('x',d=>d.x)
+    .attr('y',d=>d.y)
+    .attr('height',d=>d.h)
+    .attr('width',d=>d.w)
+; 

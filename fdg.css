@@ -347,6 +347,13 @@ rect.valid_target {
 }
 
 
+.static-frame {
+    fill:none;
+    stroke:red;
+
+}
+
+
 /* TODO explore uses for these special states & badges, (tweakable via Elements tab in Chromium Developer Tools)
 AUTOMATIC CLASSES (force state)
 :active
