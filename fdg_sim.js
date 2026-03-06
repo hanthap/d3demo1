@@ -105,8 +105,10 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         d.width = xMax - xMin;
         d.height =yMax - yMin ;
     } } );
+
+  // propagate latest coordinates to each bound DOM element  
     
-   Link.OnTick(); // update coordinates etc for each DOM element
+   Link.OnTick(); 
    Label.OnTick();
 
     gNode.selectAll('circle,g') // TODO this is a bit hacky, but it means we can apply the same classes to both circles and their nested image groups, without having to duplicate the code for each type of element
@@ -123,12 +125,6 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         .attr('y', Frame.Top )
         .attr('height', Frame.Height )
         .attr('width', Frame.Width );
-
-    //  gGroup.selectAll('.frame-main')
-    //     // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
-    //     .classed('selected', d => d.selected)  
-    //     .classed('disabled', d => !d.selected)        
-     ;
 
      gGroup.selectAll('.frame-banner')
       .attr('transform',Frame.TransformGroupElement) 

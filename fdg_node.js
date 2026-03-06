@@ -297,27 +297,29 @@ static OnDblClick(e,d) {
 //-------------------------------------------------------------------------------
 
 static AppendDatum(d,i) {
-    d.charge = 5 - ( 10 * Math.random()); // repulsive or attractive force
+    d.charge = 10; // 5 - ( 10 * Math.random()); // repulsive or attractive force
     d.cogX = 0;
     d.cogY = 0;
-    d.weight = 0.1;
+    d.weight = 0.2;
     //  d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
-    d.r = 10 + 30 * Math.random(); // random radius between 10 and 40
+    d.r = 30; 
     d.height = 2 * d.r;
     d.width = 2 * d.r;
     d.selected = 0;
     d.show_label = 1; // default to showing labels
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
+    d.is_group = 0; // DOES THIS HELP ???
     d.outLinks = [];
     d.inLinks = [];
     d.locked = 0; 
+    d.x = d.y = 0;
     // TODO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
     return d;
 }
 
 //-------------------------------------------------------------------------------
 // called by DraftLink.OnDragEnd() 
-static Create( [x,y] = [0,0], id=null,label=null) {
+static Create( [x,y] = [0,0], id=null,label=null, nodes_to_add=null) {
 
     const 
         nodeId = id ? id : 'N' + Math.round( Math.random() * 1000000 ),
@@ -329,20 +331,24 @@ static Create( [x,y] = [0,0], id=null,label=null) {
             descriptor: label ? label : `New node: ${nodeId}`,
             is_group: false,
             has_shape: 1,
-            hue_id: 'M',
+            hue_id: null,
             node_mass: 20,
             tag: '?',
             legal_text: null,
-            img_src: null,
-            bg_fill: null,
+            img_src: 'tba.svg',
+            bg_fill: 'white',
             locked: 0
             };
     d.descendants = [d]; 
     Node.AppendDatum(d);
     nodes.push(d);
     mapNodes.set(d.node_id, d);
-    // AppendShapes();
     AppendLabels();
+   
+    // TODO    .filter( n is not an ancestor of d ) // prevent circular nesting
+    // TODO    .filter( n is a visible circle ) // prevent extra links to nested children
+if ( nodes_to_add ) 
+    nodes_to_add.forEach( n => Link.Create(n,d) ); // new node is parent of each
 
     // no need to recalc link data as it has none, yet
     Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
@@ -361,7 +367,7 @@ static GetFromID( node_id ) {
 //-------------------------------------------------------------------------------
 // return a d3 selection of all {circles & rects} bound to node datum d
 static GetD3Selection( d, types="circle, rect" ) {
-    return d3.selectAll(types).filter(e => e === d ); // .filter() handles whatever you throw at it.
+    return d3.selectAll(types).filter(e => e === d ); 
 }
 
 //-------------------------------------------------------------------------------
@@ -382,7 +388,7 @@ static Centre(d) {
 
 static CollideRadius(d) { // called by d3.forceCollide().radius(...)
     //return d.r + 20; // +3 = extra to allow for stroke-width of circle element 
-    return d.r  + 5;
+    return d.r  + 10;
 }
 
 //-------------------------------------------------------------------------------

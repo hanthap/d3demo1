@@ -173,38 +173,14 @@ static ToCircle(d, bExploded, cXcY) {
 static Create(selContents=null) {
     // add a new frame node to the cache to contain all currently-selected nodes (by default)
     // or selContents, if that's provided
- const 
-    nodeId ='N' + Math.round( Math.random() * 1000000 ), 
-    d = {
-        node_id: nodeId,
-        x: 0,
-        y: 0,
-        r: 10,
-        descriptor: `New node: ${nodeId}`,
-        is_group: true,
-        has_shape: 1,
-        hue_id: 'M',
-        node_mass: 20,
-        tag: '?'
-    };
-    Node.AppendDatum(d);
-    nodes.push(d);
-    mapNodes.set(d.node_id, d);
-    
-    const nodes_to_add = selContents ? selContents.data() : nodes.filter(n => n.selected );
-    
+
     // TODO    .filter( n is not an ancestor of d ) // prevent circular nesting
     // TODO    .filter( n is a visible circle ) // prevent extra links to nested children
 
-    nodes_to_add
-        .forEach( n => Link.Create(n,d) ); // add new frame as parent of all currently selected nodes
-
-    Cache.RefreshAllDescendants();    // descendants, per node
-    Cache.RefreshSortedNodes(); 
-    Cache.ApplyFrameOrder();
-
-    Node.ToFrame(d);
-    return d;
+    const node_list = selContents ? selContents.data() : nodes.filter(n => n.selected);
+    let new_node = Node.Create( [0,0], null,null, node_list);
+    Node.ToFrame(new_node);
+    return new_node;
 
 }
 
