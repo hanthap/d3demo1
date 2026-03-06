@@ -250,9 +250,23 @@ console.log('Frame.OnClick',e,d,this);
 
     //-------------------------------------------------------------------------------
 
+    static SetLocked(d,element,status=null) {
+        d.locked = status == null ? !d.locked : status;
+        d3.select(element)
+            .attr('rx', Frame.CornerRadius)
+            .attr('ry', Frame.CornerRadius)
+            .classed('locked',d.locked)
+        ;
+      }
+
+    //-------------------------------------------------------------------------------
+
     // because smartphone doesn't have a shift key
    static OnDblClick(e,d) { //  show as a circle , hiding children
-        Frame.ToCircle(d, false, d3.pointer(e,svg.node())); // true => implode
+        if ( e.ctrlKey ) 
+            Frame.SetLocked(d,this);
+        else 
+            Frame.ToCircle(d, false, d3.pointer(e,svg.node())); // true => implode
         ticked();
 
    }
@@ -284,7 +298,7 @@ console.log('Frame.OnClick',e,d,this);
 
     static HalfHeight(d) { return d.height/2 + Frame.Margin(d) };
 
-    static CornerRadius(d) { return 1.5 * radius ;};
+    static CornerRadius(d) {  return d.locked ? 0  :1.5 * radius ;};
 
     static Margin(d) { return radius + 3*d.descendants.length }; 
 
@@ -338,21 +352,20 @@ const gTop =
         ;
 
 gTop
-    .on('click', Frame.OnClick)
+    .append('rect')
+        .classed('frame-rect',true)
+        .classed('locked',d=>d.locked)
+        .attr('id', Node.UniqueId) 
+        .attr('rx', Frame.CornerRadius)
+        .attr('ry', Frame.CornerRadius)
+        .attr('fill',Node.FillColour) 
+// pointer events go to (rounded) shape, not the parent g
+        .on('click', Frame.OnClick)
     .on('dblclick', Frame.OnDblClick)
     .on('mouseover', Frame.OnMouseOver) 
     .on('mouseout', Frame.OnMouseOut)
     .on("contextmenu", Frame.OnContextMenu)
     ;
-
-gTop
-    .append('rect')
-        .classed('frame-rect',true)
-        .attr('id', Node.UniqueId) 
-        .attr('rx', Frame.CornerRadius)
-        .attr('ry', Frame.CornerRadius)
-        .attr('fill',Node.FillColour) 
-;
 
 gTop
     .filter(d => d.img_src > "" )

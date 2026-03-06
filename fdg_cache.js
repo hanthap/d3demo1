@@ -150,8 +150,6 @@ links.forEach( d => {
     Cache.RefreshAllDescendants();    // descendants, per node
   //  Cache.RefreshAllExclusiveNodes(); // circles and frames in scope of active_exclusion force
     Cache.RefreshSortedNodes();       // z-order of nested frames
-
-  //  AppendShapes(); 
     AppendFrameShapes(); 
     AppendLines();
     AppendLabels();
@@ -224,8 +222,11 @@ static Download() {
     img_src: d.img_src,
     img_transform: d.img_transform,
     bg_fill: d.bg_fill,
+    locked: d.locked,
     fx: d.fx,
-    fy: d.fy
+    fy: d.fy,
+    fw: d.fw,
+    fh: d.fh
     }
     ));
    // Cache.DownloadJSON(trimmed_nodes,"nodes.json");

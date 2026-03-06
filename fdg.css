@@ -199,10 +199,10 @@ g.edge, div.label, foreignObject, xhtml:div {
     pointer-events: none; /* let mouse events pass through  */
 }
 
-/* 
-.labelxmain g {
+ 
+.frame-banner * {
     pointer-events: none; /* let mouse events pass through  
-} */
+} /
 
 g.foreground * {
     pointer-events: none; /* let mouse events pass through  */
@@ -347,8 +347,7 @@ rect.valid_target {
 }
 
 
-.static-frame {
-    fill:none;
+.locked {
     stroke:red;
 
 }

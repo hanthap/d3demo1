@@ -90,7 +90,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
     // Including descendants prevents this problem, not sure exactly why. 
     // It's NOT because of zombie simulations still running.
     visible_children = VisibleDescendantsOf(d); 
-    if ( visible_children.length ) {
+    if ( !d.locked  && visible_children.length ) {
 
       // PROBLEM: outer superset has to wait until all innersets have been positioned & sized
 

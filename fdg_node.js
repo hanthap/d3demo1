@@ -310,6 +310,7 @@ static AppendDatum(d,i) {
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
     d.outLinks = [];
     d.inLinks = [];
+    d.locked = 0; 
     // TODO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
     return d;
 }
@@ -333,7 +334,8 @@ static Create( [x,y] = [0,0], id=null,label=null) {
             tag: '?',
             legal_text: null,
             img_src: null,
-            bg_fill: null
+            bg_fill: null,
+            locked: 0
             };
     d.descendants = [d]; 
     Node.AppendDatum(d);
