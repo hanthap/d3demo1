@@ -230,19 +230,21 @@ console.log('Frame.OnClick',e,d,this);
         case 'zoom-out' : // switch to a circle either collapsed, or (if ctrl key) 'exploded';
             Frame.ToCircle(d, e.ctrlKey, d3.pointer(e,svg.node())); 
             break;
-        default: // toggle selected status
+        default: // toggle selected status then cascade
             d.selected ^= 1;
-
-            ChildrenOf(d).forEach( c => {
+            AllDescendantsOf(d).forEach( c => {
                 c.selected = d.selected;
-                // TODO: this only goes down to grandchildren. Should use d.descendants
-                ChildrenOf(c).forEach( gc => { 
-                        gc.selected = d.selected;
-                    //    d3.select('rect').filter( o => o == gc).classed('selected',d.selected) ;
-                    } );
-                } ) ; // set all children on or off
+            } );
+            gGroup.selectAll('.frame-main')
+                .filter(f => d.descendants.includes(f))
+                .classed('selected', d => d.selected)  
+                .classed('disabled', d => !d.selected)
+                ;
             break;
     }
+
+        // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
+   
 
     ticked();
 

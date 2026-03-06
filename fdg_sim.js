@@ -90,9 +90,9 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
     // Including descendants prevents this problem, not sure exactly why. 
     // It's NOT because of zombie simulations still running.
     visible_children = VisibleDescendantsOf(d); 
-    if ( !d.locked  && visible_children.length ) {
+    if ( !d.locked && visible_children.length ) { 
 
-      // PROBLEM: outer superset has to wait until all innersets have been positioned & sized
+      // PROBLEM: outer superset has to wait until all inner sets have been positioned & sized
 
         xMax = Math.max( ...visible_children.map( Node.Right ) ); // generate a list of right boundaries, then get the max value
         xMin = Math.min( ...visible_children.map( Node.Left ) );
@@ -124,13 +124,13 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         .attr('height', Frame.Height )
         .attr('width', Frame.Width );
 
-    gGroup.selectAll('.frame-main')
-        // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
-        .classed('selected', d => d.selected)  
-        .classed('disabled', d => !d.selected)        
+    //  gGroup.selectAll('.frame-main')
+    //     // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
+    //     .classed('selected', d => d.selected)  
+    //     .classed('disabled', d => !d.selected)        
      ;
 
-    gGroup.selectAll('.frame-banner')
+     gGroup.selectAll('.frame-banner')
       .attr('transform',Frame.TransformGroupElement) 
  ;     
 
