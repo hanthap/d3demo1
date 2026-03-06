@@ -349,6 +349,7 @@ rect.valid_target {
 
 .locked {
     stroke:red;
+    cursor: grab;
 
 }
 

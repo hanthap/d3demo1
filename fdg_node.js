@@ -259,9 +259,9 @@ static OnMouseDown(e,d) {
 
 // zoom in (expand) a collapsed node so it appears as a frame with visible child nodes
 
-// DEBUG: any nested frame should reappear just as it was when frame d was collapsed to a circle.
+// TODO DEBUG: any nested frame should reappear just as it was when frame d was collapsed to a circle.
 // Instead, it is displayed in "exploded" configuration, as a circle linked to its children.
-
+// TODO DEBUG: a locked frame should remember its latest width & height - but instead appears as a square
 
 static ToFrame(d) {
     if ( Node.HasMembers(d) ) {
@@ -278,7 +278,6 @@ static ToFrame(d) {
                 c.inLinks.forEach( lnk => { lnk.target = lnk.true_target; } );
                 c.outLinks.forEach( lnk => {lnk.source = lnk.true_source; } );
                 });
-        //   AppendShapes(); 
         AppendFrameShapes();
         AppendLines();
         AppendLabels();

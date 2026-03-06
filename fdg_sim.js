@@ -160,7 +160,17 @@ for(i=0; i < nIterations; i++) {
   frame_set.forEach( n => { // outer loop 
     const c0 = Frame.Centre(n); 
     circle_set.forEach( m => { // inner loop
-    if ( !(n.descendants.includes(m)) ) { // circle m is NOT a descendant of frame n 
+    if ( n.descendants.includes(m) ) { // circle m is a descendant of frame n 
+        if ( n.locked ) { // all descendants must stay inside a locked frame
+        // if m is not fully inside rect n then put it back by changing its midpoint coords
+          if ( Node.Right(m) > Frame.Right(n) ) m.x = Frame.Right(n) - Node.HalfWidth(m);
+          if ( Node.Left(m) < Frame.Left(n) ) m.x = Frame.Left(n) + Node.HalfWidth(m);
+          if ( Node.Bottom(m) > Frame.Bottom(n) ) m.y = Frame.Bottom(n) - Node.HalfHeight(m);
+          // save top boundary to last so as to ensure the frame banner stays visible
+          if ( Node.Top(m) < Frame.Top(n) + Frame.BannerHeight(n) ) m.y = Frame.Top(n) + Frame.BannerHeight(n) + Node.HalfHeight(m);
+        }
+    }
+    else { // circle m is NOT a descendant of frame n, so gently nudge it outside
         const 
           c1 = Node.Centre(m),
           dx = c1.x - c0.x,
