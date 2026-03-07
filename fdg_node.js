@@ -195,7 +195,10 @@ static OnContextMenu(e,d) {
         <div class="item">${d.descriptor}</div>
       `)
         .append('div').classed('item',true)
+        .style('background', Node.FillColour(d))
         .append("img")
+            .style('width', '150px')
+            .style('height', 'auto')
             .attr("src", Node.ImageSource(d))
             .attr("alt", Node.ImageAlt(d)) // mandatory
        //     .attr("width", '40px') automatic, if we specify height
@@ -269,21 +272,19 @@ static ToFrame(d) {
 
     if ( Node.HasMembers(d) ) {
         d.is_group = 1;
-        d.has_shape = 1;  // do we need this?
-        // are there some descendants we still need to hide? YES - see comment above
-        // looks like nested frame's is_group was not preserved when collapsing parent.
-        ChildrenOf(d) // ONLY force direct descendants back.
-            .filter(c => c != d)
+        d.has_shape = 1; 
+        ChildrenOf(d) // TODO: should be all descendants that were visible just before last collapse event - but how can we tell?
+            .filter(c => c != d) 
             .forEach( c => { 
                 console.log(c);
                 c.has_shape = 1;  
-                // for in and out lines, restore the true endpoints
-                // importantly, we already have true_source and true_target stored in each link
+                // for in and out lines, restore the true endpoints - TOO SIMPLISTIC?
+                // TODO: should we treat hierarchical links differently?
                 c.inLinks.forEach( lnk => { lnk.target = lnk.true_target; } );
                 c.outLinks.forEach( lnk => {lnk.source = lnk.true_source; } );
                 });
         AppendFrameShapes();
-        AppendLines(); // TODO: DEBUG on re-expanding, this creates visible lines for hierarchical links!
+        AppendLines(); 
         AppendLabels();
         RefreshSimData();
         if (!frozen) UnfreezeSim();

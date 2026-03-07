@@ -126,12 +126,12 @@ d3.selectAll('.frameinfo')
    }
 
    //-------------------------------------------------------------------------------
-
+// TODO: Save enough state info of every descendant so we can restore expand-collapse config exactly as it was.
 static ToCircle(d, bExploded, cXcY) {
         // replace the frame with a circle at cXcY, refresh attributes
         [d.x, d.y] = cXcY;
 
-        d.is_group = false; // OTOH, what do we really mean? It's still a group in the sense of being a container for other nodes, but it is no longer rendered as a frame. 
+        d.is_group = false; 
 
         if ( ! bExploded ) {  // default: 'implode' = hide its contents & transplant links so they point to this container node
             // should be all descendants other than self
@@ -149,7 +149,7 @@ static ToCircle(d, bExploded, cXcY) {
                     console.log(c);
                 } );
             // TODO: recalculate and cache the 'effective' node-pair for links that reference a leaf node that is now hidden (as a descendant node)
-            // if both ends now point to d then the link will not be in 
+            // if both ends now point to d then the link should not be rendered 
             // likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
 
 

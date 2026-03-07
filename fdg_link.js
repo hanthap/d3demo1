@@ -159,7 +159,9 @@ static IsHier(d) {
 //-------------------------------------------------------------------------------
 // TODO: are there any non-hierarchical "circle-within-frame" links that should be hidden?
 static ShowAsLine(d) {
-    return ( Node.HasShape(d.source) && Node.HasShape(d.target) );
+// only non-hierarchical links are visible when current target is a frame
+    if ( Node.ShowAsFloatingFrame(d.target) && Link.IsHier(d) ) return false;
+    else return ( Node.HasShape(d.source) && Node.HasShape(d.target) );
 }
 //-------------------------------------------------------------------------------
 // Exclude self-self links (eg a collapsed frame linking to itself)
@@ -401,7 +403,7 @@ static OnContextMenu(e,d) {
 
     const a = Link.Matches(d);
 
-    const sub = a.map( e => `<div class="item">${e.true_source.node_id} → ${e.true_target.node_id}: ${e.descriptor}</div>`).join("\n");
+    const sub = a.map( e => `<div class="item">${e.true_source.tag} ${e.tag} ${e.true_target.tag}: ${e.descriptor}</div>`).join("\n");
 
 
     menu
@@ -409,7 +411,7 @@ static OnContextMenu(e,d) {
       .style("left", e.pageX + "px")
       .style("top", e.pageY + "px")
       .html(`
-        <div class="item"><b>Link: ${d.source.node_id} ↔ ${d.target.node_id}</b> (${a.length})</div>${sub}`)
+        <div class="item"><b>Link: ${d.source.tag} ↔ ${d.target.tag}</b> (${a.length})</div>${sub}`)
       .on('click',LinkZone.OnMenuItemClick)
       ;
 
