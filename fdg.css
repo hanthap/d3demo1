@@ -28,7 +28,7 @@ svg {
     cursor: grab; 
 }
 
-.left-mouse-down *  { /* TODO cursors don't cascade reliably in chrome/edge */
+.left-mouse-down *  { /* TODO cursors don't cascade reliably in Chromium browsers */
      cursor: grabbing; 
 }
 
@@ -174,16 +174,16 @@ circle.dragging {
     cursor:cell; /* drop here (inside a frame) */
 }
 
-.shift-down line.linkzone  { 
+.shift-down line.all-linkzones  { 
      cursor: grab;  
  }
 
-.ctrl-down line.linkzone  { 
+.ctrl-down line.all-linkzones  { 
      cursor: copy;  /* arrow with plus superscript "click to insert here" */
  }
 
 
-.shift-down.left-mouse-down line.linkzone  { 
+.shift-down.left-mouse-down line.all-linkzones  { 
      cursor: grabbing;  
  }
 
@@ -195,7 +195,7 @@ circle.drafting {
     cursor: no-drop;
 }
 
-g.edge, div.label, foreignObject, xhtml:div {
+g.all-links, div.label, foreignObject, xhtml:div {
     pointer-events: none; /* let mouse events pass through  */
 }
 
@@ -208,7 +208,7 @@ g.foreground * {
     pointer-events: none; /* let mouse events pass through  */
 }
 
-line.linkzone { 
+.all-linkzones * { 
     stroke-width:  10;
     stroke: yellow; /* otherwise not clickable */
     stroke-opacity: 0;
@@ -219,14 +219,14 @@ line.bullet {
     stroke: none; 
 }
 
-line.linkzone.fixed-source { 
+line.all-linkzones.fixed-source { 
     stroke-width:  1.4;
     stroke: green; 
     stroke-opacity: 1;
     marker-start: url(#bullet);
 }
 
-line.linkzone.fixed-target { 
+line.all-linkzones.fixed-target { 
     stroke-width:  1.4;
     stroke: blue;
     stroke-opacity: 1;

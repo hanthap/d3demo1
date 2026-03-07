@@ -259,27 +259,31 @@ static OnMouseDown(e,d) {
 
 // zoom in (expand) a collapsed node so it appears as a frame with visible child nodes
 
-// TODO DEBUG: any nested frame should reappear just as it was when frame d was collapsed to a circle.
-// Instead, it is displayed in "exploded" configuration, as a circle linked to its children.
-// TODO DEBUG: a locked frame should remember its latest width & height - but instead appears as a square
+// TODO DEBUG: any nested node should reappear just as it was when its parent frame d was last collapsed 
+// Instead, it is displayed in "exploded" configuration, as a circle linked to its children. => is_group was clobbered with a 0?
+// TODO DEBUG: after collapsing & expanding a locked frame, the child circles have large positive y coordinates (off screen)
 
 static ToFrame(d) {
+
+    console.log('Node.ToFrame(d)',d);
+
     if ( Node.HasMembers(d) ) {
-        d.is_group = true;
+        d.is_group = 1;
         d.has_shape = 1;  // do we need this?
         // are there some descendants we still need to hide? YES - see comment above
-        d.descendants
+        // looks like nested frame's is_group was not preserved when collapsing parent.
+        ChildrenOf(d) // ONLY force direct descendants back.
             .filter(c => c != d)
             .forEach( c => { 
                 console.log(c);
-                c.has_shape = 1; 
+                c.has_shape = 1;  
                 // for in and out lines, restore the true endpoints
                 // importantly, we already have true_source and true_target stored in each link
                 c.inLinks.forEach( lnk => { lnk.target = lnk.true_target; } );
                 c.outLinks.forEach( lnk => {lnk.source = lnk.true_source; } );
                 });
         AppendFrameShapes();
-        AppendLines();
+        AppendLines(); // TODO: DEBUG on re-expanding, this creates visible lines for hierarchical links!
         AppendLabels();
         RefreshSimData();
         if (!frozen) UnfreezeSim();
@@ -328,7 +332,8 @@ static Create( [x,y] = [0,0], id=null,label=null, nodes_to_add=null) {
             y,
             r: 10,
             descriptor: label ? label : `New node: ${nodeId}`,
-            is_group: false,
+            is_group: nodes_to_add ? 1 : 0,
+            selected: 1,
             has_shape: 1,
             hue_id: null,
             node_mass: 20,
@@ -347,9 +352,8 @@ static Create( [x,y] = [0,0], id=null,label=null, nodes_to_add=null) {
     // TODO    .filter( n is not an ancestor of d ) // prevent circular nesting
     // TODO    .filter( n is a visible circle ) // prevent extra links to nested children
 if ( nodes_to_add ) 
-    nodes_to_add.forEach( n => Link.Create(n,d) ); // new node is parent of each
+    nodes_to_add.forEach( n => Link.Create(n,d) ); // each node n is added as child/part of the new node d
 
-    // no need to recalc link data as it has none, yet
     Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
     Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
     //    Cache.ApplyFrameOrder();
@@ -523,7 +527,7 @@ static IsVisible(d) {
         return ChildrenOf(d).length == 0 ;
     }
 
-// pre-drop sanity check. If false then the dragged circle c shouild have "no-drop" cursor
+// pre-drop sanity check. If false then the dragging circle c shouild have "no-drop" cursor
     static WouldAcceptChild(n,c) { 
         // TODO : check that n is not a descendant of c (circular)
         // TODO : check that c is not already a child of n (avoid duplicates)
@@ -687,39 +691,6 @@ function IsVisibleNode(d) {
     return ( (!p.stacked) || d == LeadingChildOf(p) );
 }
 
-
-
-//-------------------------------------------------------------------------------
-/* function AppendShapes() {
-return;
-
-    circles = gNode.selectAll('circle')
-        .data(nodes.filter(Node.ShowAsCircle), Node.UniqueId) 
-            .join('circle') 
-                .attr('id', Node.UniqueId) 
-                .attr('r',Node.Radius)
-                .attr('fill',Node.FillColour)
-                .attr('text',Node.TitleText) // "data-" attributes are HTML's way to tag an element with arbitrary key-value pairs, without side effects
-
-                .classed('has_members',Node.HasMembers)
-                .on('mouseover',Node.OnMouseOver) 
-                .on('mouseout',Node.OnMouseOut) 
-           //     .on('wheel',Node.OnWheel)  generalised in ViewBox.OnWheel()
-                .on('click',Node.OnClick)
-                .on('dblclick',Node.OnDblClick)
-                .on('contextmenu',Node.OnContextMenu)
-                .call(d3.drag()
-                    .on('start', Node.OnDragStart)
-                    .on('drag', Node.OnDrag)
-                    .on('end', Node.OnDragEnd)  
-                    ) 
-                ;
-
-
-}
-
-
- */
 
 //-------------------------------------------------------------------------------
 

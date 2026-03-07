@@ -174,7 +174,7 @@ switch (e.key) {
 //-------------------------------------------------------------------------------
 
 static OnMouseDown(e,d) {
-    console.log('ViewBox.OnMouseDown',e,d,this);
+ //   console.log('ViewBox.OnMouseDown',e,d,this);
     svg.classed('left-mouse-down',true);
 
 }
@@ -183,7 +183,7 @@ static OnMouseDown(e,d) {
 //-------------------------------------------------------------------------------
 // seems that d3 drag OnDragEnd event prevents mouseup?
 static OnMouseUp(e,d) {
-    console.log('ViewBox.OnMouseUp',e,d,this);
+//    console.log('ViewBox.OnMouseUp',e,d,this);
     svg.classed('left-mouse-down',false);
 }
 
@@ -317,7 +317,7 @@ const svg = body.append('svg')
 
 // group frames are passive shapes in the background
 const gGroup = svg.append('g')
-    .classed( 'group', true )
+    .classed( 'all-frames', true )
     ;
 
 const gNode = svg.append('g') // circles = floating nodes
@@ -327,11 +327,11 @@ const gNode = svg.append('g') // circles = floating nodes
 
 // next the polyline edge arrows 
 const gLink = svg.append('g')
-    .classed( 'edge', true )
+    .classed( 'all-links', true )
     ;
 // overlay the invisible click zones
 const gLinkZone = svg.append('g')
-    .classed( 'linkzone', true )
+    .classed( 'all-linkzones', true )
 
 
     // a foreground layer eg for drag-select rect, pop-up annotations

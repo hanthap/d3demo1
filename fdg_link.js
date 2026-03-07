@@ -163,6 +163,7 @@ static ShowAsLine(d) {
 }
 //-------------------------------------------------------------------------------
 // Exclude self-self links (eg a collapsed frame linking to itself)
+// TODO: DEBUG on re-expanding a nested frame, this creates visible lines for hierarchical links!
 static VisibleLine(d) {
     if ( Link.IsHier(d) && Node.ShowAsFloatingFrame(d.target) ) return false;
     return ( Link.ShowAsLine(d) && ( d.target != d.source ));
@@ -271,22 +272,18 @@ function IsActiveLink(d) {
 }
 
 //-------------------------------------------------------------------------------
-
+// TODO: DEBUG on re-expanding a nested frame, this creates visible lines for hierarchical links!
 function AppendLines() {
 
     gLinkZone.selectAll('line') 
         .data(links.filter(Link.VisibleLine),Link.UniqueId)
         .join('line')
         .attr('id', Link.UniqueId)
-        .classed('linkzone',true)
         .on('click',LinkZone.OnClick)
         .on('mouseover',LinkZone.OnMouseOver)
         .on('mouseout',LinkZone.OnMouseOut)
-
         .on('mousedown',ViewBox.OnMouseDown)
         .on('mouseup',ViewBox.OnMouseUp)
-
-
         .on('contextmenu',LinkZone.OnContextMenu)
     //    .style('stroke-width',LinkZone.StrokeWidth) // TBC - maybe leave it to CSS
         .call(d3.drag()
@@ -591,7 +588,7 @@ static OnDragEnd(e) {
         // DEBUG: "from_node_id" does not exist in newly added link objects
         if ( mouseover_datum && "source" in mouseover_datum ) { // over valid link => split that link and insert a new node
             // create a new node
-            lnk.target = lnk.true_target = Node.Create( d3.pointer(e,svg.node()));
+            lnk.target = lnk.true_target = Node.Create(d3.pointer(e,svg.node()));
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
             // also, splice the new node into the existing (mouseover) link
             Link.InsertNode(mouseover_datum,lnk.target);
@@ -599,7 +596,7 @@ static OnDragEnd(e) {
 
 
         else if ( mouseover_datum == null ) { // over empty space => create a new node & link to it
-            lnk.target = lnk.true_target = Node.Create( d3.pointer(e,svg.node()));
+            lnk.target = lnk.true_target = Node.Create(d3.pointer(e,svg.node()));
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
         }
 

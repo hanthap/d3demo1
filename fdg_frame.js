@@ -1,6 +1,3 @@
-// TOP DO: Look at https://observablehq.com/@d3/d3-packenclose ; https://d3js.org/d3-hierarchy/pack#packEnclose
-// maybe an enclosing circle will be more natural than enclosing rect?
-
 class Frame extends Node {
 
     static IsExclusive(d) {  
@@ -133,7 +130,6 @@ d3.selectAll('.frameinfo')
 static ToCircle(d, bExploded, cXcY) {
         // replace the frame with a circle at cXcY, refresh attributes
         [d.x, d.y] = cXcY;
-        d.width = d.height = 2*d.r; // referred to by Node.ContactPoints()
 
         d.is_group = false; // OTOH, what do we really mean? It's still a group in the sense of being a container for other nodes, but it is no longer rendered as a frame. 
 
@@ -157,8 +153,6 @@ static ToCircle(d, bExploded, cXcY) {
             // likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
 
 
-
-
             }
         AppendFrameShapes();
         AppendLines();
@@ -171,15 +165,15 @@ static ToCircle(d, bExploded, cXcY) {
 //-------------------------------------------------------------------------------
 
 static Create(selContents=null) {
-    // add a new frame node to the cache to contain all currently-selected nodes (by default)
+    // add a new frame node, to contain all currently-selected nodes (by default)
     // or selContents, if that's provided
 
     // TODO    .filter( n is not an ancestor of d ) // prevent circular nesting
     // TODO    .filter( n is a visible circle ) // prevent extra links to nested children
 
     const node_list = selContents ? selContents.data() : nodes.filter(n => n.selected);
-    let new_node = Node.Create( [0,0], null,null, node_list);
-    Node.ToFrame(new_node);
+    let new_node = Node.Create([0,0], null,null, node_list);
+    Node.ToFrame(new_node); // zoom in by default
     return new_node;
 
 }
@@ -195,10 +189,13 @@ static DescendantShapesSVG(d) {
 
    static OnClick(e,d) {
 
-console.log('Frame.OnClick',e,d,this);
-//    const bb = GetCombinedBBox(Frame.DescendantShapesSVG(d));
-//    console.log('GetCombinedBBox()',bb);
-//    console.log(Frame.Coordinates(d));
+    // TODO: debug - sometimes, jusst clicking a frame triggers Node.Create() - but why?
+
+
+        console.log('Frame.OnClick',e,d,this);
+        //    const bb = GetCombinedBBox(Frame.DescendantShapesSVG(d));
+        //    console.log('GetCombinedBBox()',bb);
+        //    console.log(Frame.Coordinates(d));
 
    const cursor = window.getComputedStyle(this).cursor;
 
@@ -206,21 +203,18 @@ console.log('Frame.OnClick',e,d,this);
         case 'zoom-out' : // switch to a circle either collapsed, or (if ctrl key) 'exploded';
             Frame.ToCircle(d, e.ctrlKey, d3.pointer(e,svg.node())); 
             break;
-        default: // toggle selected status then cascade
+        default: // toggle selected status, then cascade to all descendants
             d.selected ^= 1;
             AllDescendantsOf(d).forEach( c => {
                 c.selected = d.selected;
-            } );
+                } );
             gGroup.selectAll('.frame-main')
-                .filter(f => d.descendants.includes(f))
+                .filter(f => d.descendants.includes(f)) // or .has(f) ??
                 .classed('selected', d => d.selected)  
                 .classed('disabled', d => !d.selected)
                 ;
             break;
     }
-
-        // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
-   
 
     ticked();
 
@@ -245,18 +239,12 @@ console.log('Frame.OnClick',e,d,this);
             Frame.SetLocked(d,this);
         else 
             Frame.ToCircle(d, false, d3.pointer(e,svg.node())); // true => implode
+            d.selected = 1;
         ticked();
 
    }
 
    //-------------------------------------------------------------------------------
-
-   // currently assumes that x, y, height & width are determined by visible child circles
-
-   
-
-   //-------------------------------------------------------------------------------
-
 
     static Centre(d) { return { x: d.x + d.width/2, y: d.y + d.height/2 }    }
 
@@ -280,14 +268,14 @@ console.log('Frame.OnClick',e,d,this);
 
     static Margin(d) { return radius + 3*d.descendants.length }; 
 
-static TransformGroupElement(d) { 
-        const 
-            scale = 0.1,
-            xoffset = Frame.Left(d) + 10, 
-            yoffset = Frame.Top(d);
-        return `translate(${xoffset}, ${yoffset}) scale(${scale})`;
+    static TransformGroupElement(d) { 
+            const 
+                scale = 0.1,
+                xoffset = Frame.Left(d) + 10, 
+                yoffset = Frame.Top(d);
+            return `translate(${xoffset}, ${yoffset}) scale(${scale})`;
 
-}
+    }
 
  
 }
@@ -337,13 +325,13 @@ gTop
         .attr('rx', Frame.CornerRadius)
         .attr('ry', Frame.CornerRadius)
         .attr('fill',Node.FillColour) 
-// pointer events go to (rounded) shape, not the parent g
+// pointer events should go to (rounded) rect shape, not its parent g
         .on('click', Frame.OnClick)
-    .on('dblclick', Frame.OnDblClick)
-    .on('mouseover', Frame.OnMouseOver) 
-    .on('mouseout', Frame.OnMouseOut)
-    .on("contextmenu", Frame.OnContextMenu)
-    ;
+        .on('dblclick', Frame.OnDblClick)
+        .on('mouseover', Frame.OnMouseOver) 
+        .on('mouseout', Frame.OnMouseOut)
+        .on("contextmenu", Frame.OnContextMenu)
+        ;
 
 gTop
     .filter(d => d.img_src > "" )
@@ -363,30 +351,6 @@ gTop
 
 }
 
-
-//-------------------------------------------------------------------------------
-
-
-    // this has to wait until we've finished loading graph data, & cached derived variables
-function AppendFrameShapes_OK() {
-    gGroup.selectAll('rect') // in case we've already got some
-      .data(sorted_nodes.filter(Node.ShowAsFloatingFrame), Node.UniqueId) 
-        .join('rect') // one-step upsert|delete based on matching UniqueId
-        .attr('id', Node.UniqueId) //primary key
-        .attr('rx', Frame.CornerRadius)
-        .attr('ry', Frame.CornerRadius)
-        .attr('fill',Node.FillColour) 
-        // gradients are static defs, so we can't set them per-node here
-        .classed('frame',true)
-        .on('click', Frame.OnClick)
-        .on('dblclick', Frame.OnDblClick)
-        .on('mouseover', Frame.OnMouseOver) 
-        .on('mouseout', Frame.OnMouseOut)
-        .on("contextmenu", Frame.OnContextMenu)
-        ;
-
-
-}
 //---------------------------------------------------------------------------------
 function GetCombinedBBox( sel ) {
     const boundingBoxes = sel.nodes().map(shape => shape.getBBox());
@@ -402,60 +366,3 @@ function GetCombinedBBox( sel ) {
 
 }
 
-//------------------------------------------------------------------------------
-// a StaticFrame isolates its descendants from all other floating nodes by enforcing a hard boundary 
-// (Unlike a Frame, which passively moves to enclose all its descendants wherever they may wander
-// So, potential use as swim lanes for process diagram. or sections of a Kanban board
-
-// 25/2/26 Still TBD whether it's better to make static boundaries a property of Frame, rather than a whole subclass.
-// Simulation and ticked() would still need to filter accordingly. 
-// I'd like to generalise the concept of a fixed boundary that can be nested to arbitrary depth
-// AND COLLAPSED to a small rect. as with circles except they don't float
-// When expanded, any floating children are constrained BUT still LINK to other visible shapes.
-// The whole bounding rect can be moved and resized by dragging. All contents move together as one.
-// THIS seems like a good use case for nesting of g elements. 
-// BUT then how to calibrate, translate & align exact x,y, coordinates in a shared simulation? 
-// Given their 'native' coordinates will be relative to the innermost container?
-
-class StaticFrame extends Frame {
-
-// toggle between static and floating
-// if static, fixed position and size are controlled by mouse drag
-// could leverage the dragrect 
-
-static Create(rectDims,selContents=null) {
-    console.log('StaticFrame.Create(rectDims,selContents)',rectDims,selContents);
-    // create a new node for the static frame, and return its datum?
-    const f = Frame.Create(selContents); // f is added to nodes list
-    // now tweak datum so it's treated correctly by simulation etc....
-    // eg f.rect = selRect.node fx, fy, width, height, no rounding at corner
-    console.log('StaticFrame.Create(rectDims,selContents) returns f=',f);
-    f.fx = rectDims.x;
-    f.fy = rectDims.y;
-    f.width = rectDims.width;
-    f.height = rectDims.height;
-    f.static = 1;
-
-    }
-
-}
-
-//-------------------------------------------------------------------------------
-
-
-function AppendStaticFrameShapes() {
-    gStatic.selectAll('rect') 
-      .data(sorted_nodes.filter(Node.ShowAsStaticFrame), Node.UniqueId) 
-        .join('rect') 
-        .attr('id', Node.UniqueId)
-        .attr('fill',Node.FillColour) 
-        .classed('staticframe',true)
-        .on('click', StaticFrame.OnClick)
-        .on('dblclick', StaticFrame.OnDblClick)
-        .on('mouseover', StaticFrame.OnMouseOver) 
-        .on('mouseout', StaticFrame.OnMouseOut)
-        .on("contextmenu", StaticFrame.OnContextMenu)
-        ;
-
-
-}
