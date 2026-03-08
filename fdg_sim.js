@@ -82,19 +82,17 @@ function RunSim() {
 
 function ticked() { // invoked just before each 'repaint' so we can decide exactly how to render
 
-// only now can we decide where to position the frames, working from leaf (innermost) to root (outermost)
-[...sorted_nodes].reverse().filter( Node.ShowAsFloatingFrame ) // filter because sorted_nodes actually includes non-frame nodes... 
-.forEach( d => {
-    // TODO: assuming nodes are correctly pre-sorted, I thought we should only need to look at visible children, not all descendants
-    // BUT NO!!! Switching to Children only causes strange side-effect, where other frames expand in the same dimension, by 50%.
-    // Including descendants prevents this problem, not sure exactly why. 
-    // It's NOT because of zombie simulations still running.
+// only now can we decide where to position the frames
+[...sorted_nodes] // includes non-frame nodes... 
+  .reverse() // start with the innermost subsets, so supersets get a wider margin
+  .filter( Node.ShowAsFloatingFrame ) 
+  .forEach( d => {
     visible_children = VisibleDescendantsOf(d); 
     if ( !d.locked && visible_children.length ) { 
 
       // PROBLEM: outer superset has to wait until all inner sets have been positioned & sized
 
-        xMax = Math.max( ...visible_children.map( Node.Right ) ); // generate a list of right boundaries, then get the max value
+        xMax = Math.max( ...visible_children.map( Node.Right ) );
         xMin = Math.min( ...visible_children.map( Node.Left ) );
         yMax = Math.max( ...visible_children.map( Node.Bottom ) );
         yMin = Math.min( ...visible_children.map( Node.Top ) ) - Frame.BannerHeight(d);

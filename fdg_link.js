@@ -161,7 +161,7 @@ static IsHier(d) {
 static ShowAsLine(d) {
 // only non-hierarchical links are visible when current target is a frame
     if ( Node.ShowAsFloatingFrame(d.target) && Link.IsHier(d) ) return false;
-    else return ( Node.HasShape(d.source) && Node.HasShape(d.target) );
+    else return ( Node.IsVisible(d.source) && Node.IsVisible(d.target) );
 }
 //-------------------------------------------------------------------------------
 // Exclude self-self links (eg a collapsed frame linking to itself)

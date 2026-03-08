@@ -1,4 +1,4 @@
-var radius = 16;
+var radius = 8;
 var nodes = [];
 
 var mapNodes; // key,value lookup dict
@@ -100,7 +100,7 @@ static Top(d) {
 
 
 
-        d.x = bounded(d.x, d.r - width/2 - 2*radius, width/2-3*radius); 
+     //   d.x = bounded(d.x, d.r - width/2 - 2*radius, width/2-3*radius); 
         return d.x;
     }
 
@@ -108,7 +108,7 @@ static Top(d) {
 
     static BoundedY(d) {
         // bounded node centre needs to consider node's radius as well as the static viewport height, adjusted for corner radius of rounded frame
-        d.y = bounded(d.y, d.r - height/2 - 2*radius, height/2-3*radius); 
+      //  d.y = bounded(d.y, d.r - height/2 - 2*radius, height/2-3*radius); 
         return d.y;
     }
 
@@ -130,7 +130,7 @@ static Top(d) {
         if ( Node.ShowAsFloatingFrame(d) ) { //  DIY polymorphism 
             return Frame.ContactPoint(d,theta);
         }
-        if ( Node.ShowAsCircle(d) ) {
+        else {
             // where does the ray intersect the circle?
             return {
                 // TODO: adjust for stroke width
@@ -273,16 +273,22 @@ static ToFrame(d) {
     if ( Node.HasMembers(d) ) {
         d.is_group = 1;
         d.has_shape = 1; 
-        ChildrenOf(d) // TODO: should be all descendants that were visible just before last collapse event - but how can we tell?
-            .filter(c => c != d) 
+        d.descendants // TODO: should be all descendants that were visible just before last collapse event - but how can we tell?
+            .filter(c => c != d ) 
             .forEach( c => { 
                 console.log(c);
-                c.has_shape = 1;  
+              // c.has_shape = 1;  
+              c.soft_hide = 0;
                 // for in and out lines, restore the true endpoints - TOO SIMPLISTIC?
                 // TODO: should we treat hierarchical links differently?
                 c.inLinks.forEach( lnk => { lnk.target = lnk.true_target; } );
                 c.outLinks.forEach( lnk => {lnk.source = lnk.true_source; } );
                 });
+
+    Cache.RefreshAllDescendants();
+    Cache.RefreshSortedNodes(); 
+    Cache.ApplyFrameOrder();                
+
         AppendFrameShapes();
         AppendLines(); 
         AppendLabels();
@@ -306,13 +312,14 @@ static AppendDatum(d,i) {
     d.cogY = 0;
     d.weight = 0.2;
     //  d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
-    d.r = 30; 
+    d.r = 16; 
     d.height = 2 * d.r;
     d.width = 2 * d.r;
     d.selected = 0;
     d.show_label = 1; // default to showing labels
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
-    d.is_group = 0; // DOES THIS HELP ???
+    d.soft_hide = 0; // to decide which descendants will be visible on re-expanding a collapsed frame
+  //  d.is_group = 0; // DOES THIS HELP ???
     d.outLinks = [];
     d.inLinks = [];
     d.locked = 0; 
@@ -357,7 +364,7 @@ if ( nodes_to_add )
 
     Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
     Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
-    //    Cache.ApplyFrameOrder();
+    Cache.ApplyFrameOrder();
     console.log('Node.Create() return d=',d);
     return d;
 }
@@ -497,21 +504,21 @@ static HasShape(d) {
 }
 
 static IsVisible(d) {
-    return ( Node.HasShape(d) );
+    return ( Node.HasShape(d) && !d.soft_hide );
 }
 
 //-------------------------------------------------------------------------------
 
     static ShowAsFloatingFrame(d) {
         try {
-        return d.is_group && Node.HasShape(d) && HasVisibleChild(d);
+        return d.is_group && Node.HasShape(d) && HasVisibleChild(d) && !d.soft_hide;
         } catch (e) { return false }
     }
 
 //-------------------------------------------------------------------------------
 
     static ShowAsCircle(d) {
-        return Node.HasShape(d) && !Node.ShowAsFloatingFrame(d);
+        return Node.HasShape(d) && !Node.ShowAsFloatingFrame(d) && !d.soft_hide;
     }
 
 //-------------------------------------------------------------------------------
@@ -705,14 +712,13 @@ function ChildrenOf(d) {
 //-------------------------------------------------------------------------------
 
 function VisibleChildrenOf(d) {
-       // return ChildrenOf(d).filter(IsVisibleNode);
-        return ChildrenOf(d).filter(Node.HasShape);
+        return ChildrenOf(d).filter(Node.IsVisible);
 }
 
 //-------------------------------------------------------------------------------
 
 function VisibleDescendantsOf(d) {
-   return d.descendants.filter( Node.IsActive ); // includes frames?
+   return d.descendants.filter( Node.IsVisible ); 
 }
 
 //-------------------------------------------------------------------------------

@@ -51,7 +51,7 @@ static ExclusionBuffer(d) {
 //-------------------------------------------------------------------------------
 // reserved space for banner heading at top of frame
 static BannerHeight(d) {
-    return 25;
+    return 15;
 }
 
 //-------------------------------------------------------------------------------
@@ -126,28 +126,28 @@ d3.selectAll('.frameinfo')
    }
 
    //-------------------------------------------------------------------------------
-// TODO: Save enough state info of every descendant so we can restore expand-collapse config exactly as it was.
+// TODO: Save every descendant so we can restore expand-collapse config exactly as it was.
 static ToCircle(d, bExploded, cXcY) {
         // replace the frame with a circle at cXcY, refresh attributes
         [d.x, d.y] = cXcY;
 
-        d.is_group = false; 
+        d.is_group = 0; // render as circle
 
-        if ( ! bExploded ) {  // default: 'implode' = hide its contents & transplant links so they point to this container node
-            // should be all descendants other than self
-            d.descendants.filter(c => c != d).forEach( c => { 
-                    // for in and out lines, set this node d as the effective end point in place of any descendants of d
-                    // importantly, we already have true_source and true_target stored in each link
-                    c.inLinks.filter(Link.ShowAsLine).forEach( lnk => { 
-                        lnk.target = d;
-                        console.log(lnk);
-                    
-                    } );
-                    c.outLinks.filter(Link.ShowAsLine).forEach( lnk => { lnk.source = d } );
-                    c.has_shape = 0; // don't do this too soon as it influences Link.ShowAsLine()
-
+        if ( ! bExploded ) {  // default: 'implode' = soft-hide all contents & transplant connected links so they point to this container node
+            d.descendants
+                .filter( c => c != d ) 
+                .forEach( c => { // for each descendant except self
+                    c.soft_hide = 1;  // will be cleared when zooming in with Node.ToFrame()  
                     console.log(c);
-                } );
+                    // for all in and out links, set this node d as the virtual/effective end point
+                    c.inLinks
+                        //.filter(Link.ShowAsLine) //not sure if we need to exclude any?
+                        .forEach( lnk => { lnk.target = d; } );
+                    c.outLinks
+                        //.filter(Link.ShowAsLine)
+                        .forEach( lnk => { lnk.source = d } );
+
+                    } );
             // TODO: recalculate and cache the 'effective' node-pair for links that reference a leaf node that is now hidden (as a descendant node)
             // if both ends now point to d then the link should not be rendered 
             // likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
@@ -157,6 +157,12 @@ static ToCircle(d, bExploded, cXcY) {
         AppendFrameShapes();
         AppendLines();
         AppendLabels(); // now includes circles 
+
+
+        // these might not be necessary
+Cache.RefreshAllDescendants();
+Cache.RefreshSortedNodes();
+Cache.ApplyFrameOrder();
 
         RefreshSimData(); 
 
@@ -189,7 +195,7 @@ static DescendantShapesSVG(d) {
 
    static OnClick(e,d) {
 
-    // TODO: debug - sometimes, jusst clicking a frame triggers Node.Create() - but why?
+    // TODO: debug - sometimes, just clicking a frame triggers Node.Create() - but why?
 
 
         console.log('Frame.OnClick',e,d,this);

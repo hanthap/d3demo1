@@ -53,10 +53,11 @@ static OnWheel(e,d) {
     .attr( 'r', d => d.r );
 
     gNode.selectAll('.image-group') // nested g elements with a non-empty image tag
+        .filter(d => d.selected )
         .attr('transform',Label.TransformGroupElement) // the nested g and its image
     ;
-    // update collision force directly. This actually works!
-    simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));
+    // update the collision force directly. This actually works!
+   simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));
     ticked();
 }
 
