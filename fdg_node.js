@@ -329,18 +329,21 @@ static AppendDatum(d,i) {
 }
 
 //-------------------------------------------------------------------------------
-// called by DraftLink.OnDragEnd() 
-static Create( [x,y] = [0,0], id=null,label=null, nodes_to_add=null) {
+// called by DraftLink.OnDragEnd(), ViewBox.OnDragEnd()
+static Create( {x,y,width,height}, selNodes=null) {
 
     const 
-        nodeId = id ? id : 'N' + Math.round( Math.random() * 1000000 ),
+
+        nodeId = 'N' + Math.round( Math.random() * 1000000 ),
         d = {
             node_id: nodeId,
             x,
             y,
             r: 10,
-            descriptor: label ? label : `New node: ${nodeId}`,
-            is_group: nodes_to_add ? 1 : 0,
+            width,
+            height,
+            descriptor: `New node: ${nodeId}`,
+            is_group: 0,
             selected: 1,
             has_shape: 1,
             hue_id: null,
@@ -359,12 +362,24 @@ static Create( [x,y] = [0,0], id=null,label=null, nodes_to_add=null) {
    
     // TODO    .filter( n is not an ancestor of d ) // prevent circular nesting
     // TODO    .filter( n is a visible circle ) // prevent extra links to nested children
-if ( nodes_to_add ) 
-    nodes_to_add.forEach( n => Link.Create(n,d) ); // each node n is added as child/part of the new node d
+    if ( selNodes ) {
+        d.is_group = 1;
+        selNodes.data().forEach( n => Link.Create(n,d) ); // each node n is added as child/part of the new node d
+        Node.ToFrame(d);
+    }
+else { // new empty node
+        // Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
+        // Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
+        // Cache.ApplyFrameOrder();
 
-    Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
-    Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
-    Cache.ApplyFrameOrder();
+    //    AppendFrameShapes();
+    //     AppendLines(); 
+    //     AppendLabels();
+    //     RefreshSimData();
+    //     if (!frozen) UnfreezeSim();
+
+
+}
     console.log('Node.Create() return d=',d);
     return d;
 }

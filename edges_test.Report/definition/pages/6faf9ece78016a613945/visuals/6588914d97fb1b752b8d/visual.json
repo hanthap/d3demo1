@@ -5,8 +5,8 @@
     "x": 9.72644376899696,
     "y": 0,
     "z": 0,
-    "height": 201.33738601823708,
-    "width": 525.22796352583589,
+    "height": 377.38601823708206,
+    "width": 1210.9422492401216,
     "tabOrder": 0
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "EDGE"
                     }
                   },
-                  "Property": "EDGE_CDE"
+                  "Property": "type_cde"
                 }
               },
-              "queryRef": "edges?select=*.EDGE_CDE",
-              "nativeQueryRef": "EDGE_CDE"
+              "queryRef": "edges?select=*.type_cde",
+              "nativeQueryRef": "type_cde"
             },
             {
               "field": {
@@ -37,30 +37,132 @@
                       "Entity": "EDGE"
                     }
                   },
-                  "Property": "EDGE_TXT"
+                  "Property": "descriptor"
                 }
               },
-              "queryRef": "edges?select=*.EDGE_TXT",
-              "nativeQueryRef": "EDGE_TXT"
+              "queryRef": "edges?select=*.descriptor",
+              "nativeQueryRef": "descriptor"
             },
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
+                      "Entity": "FROM_NODE"
+                    }
+                  },
+                  "Property": "descriptor"
+                }
+              },
+              "queryRef": "FROM_NODE.descriptor",
+              "nativeQueryRef": "descriptor"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "TO_NODE"
+                    }
+                  },
+                  "Property": "descriptor"
+                }
+              },
+              "queryRef": "TO_NODE.descriptor",
+              "nativeQueryRef": "descriptor1"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
                       "Entity": "EDGE"
                     }
                   },
-                  "Property": "FROM_NODE_ID"
+                  "Property": "link_mass average per type_cde"
                 }
               },
-              "queryRef": "edges?select=*.FROM_NODE_ID",
-              "nativeQueryRef": "FROM_NODE_ID"
+              "queryRef": "EDGE.link_mass average per type_cde",
+              "nativeQueryRef": "link_mass average per type_cde"
             }
           ]
         }
       }
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "6aa7966d71543900807c",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "EDGE"
+              }
+            },
+            "Property": "type_cde"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "7954c0752bc20831750a",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "EDGE"
+              }
+            },
+            "Property": "descriptor"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "3c0fbe5c685b0beb2d17",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "FROM_NODE"
+              }
+            },
+            "Property": "descriptor"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "5350ddcfa7c062d306d8",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "TO_NODE"
+              }
+            },
+            "Property": "descriptor"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "85dd20b9bc7e16d576c5",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "EDGE"
+              }
+            },
+            "Property": "link_mass average per type_cde"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

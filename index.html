@@ -22,14 +22,14 @@
 class MyNode {
     
     constructor(d) {
-            this.NODE_ID = d.NODE_ID;
-            this.NODE_TXT = d.NODE_TXT;
+            this.node_id = d.node_id;
+            this.descriptor = d.descriptor;
             this.LAST_MOD_TS = d.LAST_MOD_TS;
-            // this.label = `${this.NODE_ID} = ${this.NODE_TXT}`;
+            // this.label = `${this.node_id} = ${this.descriptor}`;
     }
 
     label() {
-        return `${this.NODE_ID} = ${this.NODE_TXT}`;
+        return `${this.node_id} = ${this.descriptor}`;
     }
 }
 
@@ -37,8 +37,8 @@ class MyNode {
 
 
   function NodeInfo(d) {
-    if ( d.NODE_TXT ) {
-        return d.NODE_TXT.replace(/\|/g,'\n');
+    if ( d.descriptor ) {
+        return d.descriptor.replace(/\|/g,'\n');
     }
 }
 
@@ -49,8 +49,8 @@ function IsRoundedShape(d) {
 
 function AppendShapes(rs) {
     nodes = rs; // the 'master' array used by d3 to render shapes
-    // we also want to access each datum via its unique NODE_ID string
-    mapNodes = new Map ( nodes.map((x,i) => ( [x.NODE_ID, x ]) ) );
+    // we also want to access each datum via its unique node_id string
+    mapNodes = new Map ( nodes.map((x,i) => ( [x.node_id, x ]) ) );
   // console.log(mapNodes);  
     // create the SVG visual element
     gNode.selectAll('circle') // in case we've already got some
@@ -124,7 +124,7 @@ async function TestUpdate() {
 let update_promise  = supabaseClient
   .from('nodes')
   .update({ LAST_MOD_TS: new Date().toISOString() })
-  .eq('NODE_ID', 'XXX')
+  .eq('node_id', 'XXX')
   .select();
 
 const { data: u_data, error: e } = await update_promise; 

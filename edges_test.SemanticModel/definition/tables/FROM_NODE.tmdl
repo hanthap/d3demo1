@@ -1,0 +1,81 @@
+table FROM_NODE
+	lineageTag: ea2e4bd8-942c-48ba-b205-9fd9cd1f58ae
+
+	column node_id
+		dataType: string
+		lineageTag: ea97d277-8afa-48ed-b9a0-c4463a69071d
+		summarizeBy: none
+		sourceColumn: node_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column CUST_TYPE_CDE
+		dataType: string
+		lineageTag: eed5c944-1746-446a-ac5c-da48f68c966d
+		summarizeBy: none
+		sourceColumn: CUST_TYPE_CDE
+
+		annotation SummarizationSetBy = Automatic
+
+	column SRCE_CDE
+		dataType: string
+		lineageTag: 70e15d0b-9c10-4ee7-9824-42d678a3c54b
+		summarizeBy: none
+		sourceColumn: SRCE_CDE
+
+		annotation SummarizationSetBy = Automatic
+
+	column descriptor
+		dataType: string
+		lineageTag: b94fe552-0743-4465-8d23-55410fa37b83
+		summarizeBy: none
+		sourceColumn: descriptor
+
+		annotation SummarizationSetBy = Automatic
+
+	column NODE_TYPE
+		dataType: string
+		lineageTag: c5163f0b-f791-45ae-a7ac-fd8193381eca
+		summarizeBy: none
+		sourceColumn: NODE_TYPE
+
+		annotation SummarizationSetBy = Automatic
+
+	column LAST_MOD_TS
+		dataType: string
+		lineageTag: 11230243-1352-4155-b134-fecec4537c81
+		summarizeBy: none
+		sourceColumn: LAST_MOD_TS
+
+		annotation SummarizationSetBy = Automatic
+
+	column mass
+		dataType: string
+		lineageTag: c5722914-ea9b-4fe4-8264-3758074ad217
+		summarizeBy: none
+		sourceColumn: mass
+
+		annotation SummarizationSetBy = Automatic
+
+	column IS_GROUP
+		dataType: string
+		lineageTag: 5cd16c5c-f26e-4525-a2e0-bfdc542befb9
+		summarizeBy: none
+		sourceColumn: IS_GROUP
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FROM_NODE = m
+		mode: import
+		source =
+				let
+				    Source = Json.Document(Web.Contents("https://hfunworrmdfxzdtmbvth.supabase.co/rest/v1/nodes?select=*", [Headers=[#"Content-Type"="application/json", Accept="application/json", apikey="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU", Authorization="Bearer: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdW53b3JybWRmeHpkdG1idnRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTE1MzUsImV4cCI6MjA4MTY2NzUzNX0.lUOR-J6qY-EyjCQv9tPh83mBzdIRq7pCIzstOP7xktU"]])),
+				    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+				    #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to Table", "Column1", {"node_id", "CUST_TYPE_CDE", "SRCE_CDE", "descriptor", "NODE_TYPE", "LAST_MOD_TS", "mass", "IS_GROUP"}, {"node_id", "CUST_TYPE_CDE", "SRCE_CDE", "descriptor", "NODE_TYPE", "LAST_MOD_TS", "mass", "IS_GROUP"})
+				in
+				    #"Expanded Column1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

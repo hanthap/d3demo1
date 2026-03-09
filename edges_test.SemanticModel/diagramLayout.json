@@ -10,12 +10,39 @@
       "nodes": [
         {
           "location": {
-            "x": 0,
-            "y": 0
+            "x": 475,
+            "y": 62.5
           },
           "nodeIndex": "EDGE",
+          "nodeLineageTag": "2e5626bf-b0cc-44cc-abae-248576a4d0eb",
           "size": {
-            "height": 176,
+            "height": 294,
+            "width": 163
+          },
+          "zIndex": 1
+        },
+        {
+          "location": {
+            "x": 83,
+            "y": 28.5
+          },
+          "nodeIndex": "FROM_NODE",
+          "nodeLineageTag": "ea2e4bd8-942c-48ba-b205-9fd9cd1f58ae",
+          "size": {
+            "height": 372,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 787,
+            "y": 54.5
+          },
+          "nodeIndex": "TO_NODE",
+          "nodeLineageTag": "e09e330c-f933-4725-8e5e-95b2aacc64f8",
+          "size": {
+            "height": 272,
             "width": 234
           },
           "zIndex": 0

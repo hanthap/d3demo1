@@ -8,11 +8,13 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 1
 
-annotation PBI_QueryOrder = ["EDGE"]
+annotation PBI_QueryOrder = ["EDGE","FROM_NODE","TO_NODE"]
 
-annotation PBI_ProTooling = ["TMDLView_Desktop","DevMode"]
+annotation PBI_ProTooling = ["TMDLView_Desktop","DevMode","DaxQueryView_Desktop"]
 
 ref table EDGE
+ref table FROM_NODE
+ref table TO_NODE
 
 ref cultureInfo en-AU
 

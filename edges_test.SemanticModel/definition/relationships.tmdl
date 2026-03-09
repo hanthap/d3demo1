@@ -1,0 +1,8 @@
+relationship 21784d34-490a-2677-ea0f-70516e3a03a6
+	fromColumn: EDGE.from_node_id
+	toColumn: FROM_NODE.node_id
+
+relationship c40504bd-5ab5-0299-146b-202e6f45569c
+	fromColumn: EDGE.to_node_id
+	toColumn: TO_NODE.node_id
+

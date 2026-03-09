@@ -169,20 +169,17 @@ Cache.ApplyFrameOrder();
 }
 
 //-------------------------------------------------------------------------------
-
-static Create(selContents=null) {
-    // add a new frame node, to contain all currently-selected nodes (by default)
-    // or selContents, if that's provided
+/* // called by ViewBox.OnDragEnd()
+static Create([x,y,width,height],selContents) {
+    // add a new frame node, to contain selContents 
 
     // TODO    .filter( n is not an ancestor of d ) // prevent circular nesting
     // TODO    .filter( n is a visible circle ) // prevent extra links to nested children
-
-    const node_list = selContents ? selContents.data() : nodes.filter(n => n.selected);
-    let new_node = Node.Create([0,0], null,null, node_list);
+    let new_node = Node.Create([x,y,width,height],selContents);
     Node.ToFrame(new_node); // zoom in by default
     return new_node;
 
-}
+} */
 
    //-------------------------------------------------------------------------------
 
@@ -229,7 +226,7 @@ static DescendantShapesSVG(d) {
     //-------------------------------------------------------------------------------
 
     static SetLocked(d,element,status=null) {
-        d.locked = status == null ? !d.locked : status;
+        d.locked = status == null ? d.locked ^ 1 : status & 1 ;
         d3.select(element)
             .attr('rx', Frame.CornerRadius)
             .attr('ry', Frame.CornerRadius)

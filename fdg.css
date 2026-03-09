@@ -95,8 +95,9 @@ circle.selected {
     stroke-opacity: 1;
 }
 
-circle.has_members {
+.has_members circle {
         stroke: black;
+            stroke-opacity: 1;
 }
 
 /* .class name first => we only need to set class on the 'g' container. (CSS selectors cascade to all descendants) */

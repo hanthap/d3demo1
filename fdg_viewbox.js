@@ -137,7 +137,8 @@ static OnKeyDown(e) {
         // if hovering inside a frame => create child node
         // if hovering over a line => splice a new node
         // else if 2 or more nodes are selected, encapsulate them in a new frame
-        Frame.Create();
+        const selNodes = gNode.selectAll('circle').filter(d => d.selected);
+        Node.Create([0,0,20,20],selNodes);
         break;
 
     default:
@@ -247,17 +248,17 @@ static OnDrag(e,d) {
 static OnDragEnd(e,d) {
 
     if ( svg.classed("ctrl-down") ) {
-        // create a new StaticFrame using ViewBox.SelectRect
+        // create a new Frame using ViewBox.SelectRect
         const 
-            selNodes = gNode.selectAll('*')
+            selNodes = gNode.selectAll('circle')
                 .filter(ViewBox.DragRectIncludes)
                 .filter(Node.HasShape);
-        StaticFrame.Create(ViewBox.DragRectDims,selNodes);
+        Node.Create(ViewBox.DragRectDims,selNodes);
     }
 
     // TODO These selections are not visible until simulation unfreezes
     gNode.selectAll('circle.drag_selected')
-        .classed( 'drag_selected', false )
+        .classed('drag_selected',false)
         .each( d => { d.selected ^= 1 } ) // toggle selected flag
           ;
 

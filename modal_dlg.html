@@ -1,0 +1,114 @@
+<div id="svg-wrapper">
+  <svg id="mysvg" width="400" height="200" style="border:1px solid #ccc">
+    <rect x="50" y="50" width="100" height="60" fill="lightblue" />
+    <text x="60" y="85" font-size="14">Some SVG</text>
+  </svg>
+</div>
+
+<button id="openEditBtn">Edit</button>
+
+<!-- Modal overlay -->
+<div id="modalOverlay">
+  <div id="modalDialog">
+    <h3>Edit item</h3>
+    <label>
+      Label:
+      <input id="editLabel" type="text" />
+    </label>
+    <div class="buttons">
+      <button id="saveBtn">Save</button>
+      <button id="cancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-------------------------------------------->
+<style>
+#svg-wrapper {
+  position: relative; /* just to show modal can overlay it */
+}
+
+/* Hidden by default */
+#modalOverlay {
+  position: fixed;               /* sits over everything, including SVG */
+  inset: 0;                      /* top:0; right:0; bottom:0; left:0 */
+  background: rgba(0, 0, 0, 0.4);
+  display: none;                 /* toggle with JS */
+  align-items: center;           /* center dialog vertically */
+  justify-content: center;       /* center dialog horizontally */
+  z-index: 9999;
+}
+
+/* The dialog box */
+#modalDialog {
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 4px;
+  min-width: 260px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+#modalDialog h3 {
+  margin-top: 0;
+}
+
+#modalDialog .buttons {
+  margin-top: 12px;
+  text-align: right;
+}
+
+#modalDialog button {
+  margin-left: 8px;
+}
+</style>
+<!-------------------------------------------->
+
+<script>
+  const openBtn   = document.getElementById('openEditBtn');
+  const overlay   = document.getElementById('modalOverlay');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const saveBtn   = document.getElementById('saveBtn');
+  const editInput = document.getElementById('editLabel');
+
+  function openModal(initialText = '') {
+    editInput.value = initialText;
+    overlay.style.display = 'flex';   // flex to enable centering
+    editInput.focus();
+  }
+
+  function closeModal() {
+    overlay.style.display = 'none';
+  }
+
+  openBtn.addEventListener('click', () => {
+    // Here you’d read from the SVG element you’re “editing”
+    const currentLabel = 'Some SVG';  // example
+    openModal(currentLabel);
+  });
+
+  cancelBtn.addEventListener('click', closeModal);
+
+  saveBtn.addEventListener('click', () => {
+    const newLabel = editInput.value.trim();
+    console.log('Save clicked, new value:', newLabel);
+
+    // Example: update SVG text
+    const svgText = document.querySelector('#mysvg text');
+    if (svgText) svgText.textContent = newLabel;
+
+    closeModal();
+  });
+
+  // Close with ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.style.display === 'flex') {
+      closeModal();
+    }
+  });
+
+  // Optional: click outside dialog to close
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+</script>

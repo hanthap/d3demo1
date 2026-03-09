@@ -103,6 +103,7 @@ gTop
 // if there's an image, it will appear behind the HTML content
 return;
 labels 
+    .filter(d => d.show_label) 
     .append("foreignObject") // add a child element per node-group. 
         .attr("x", Label.OffsetX) // relative to parent 'g' element, centred on node (x,y)
         .attr("y", Label.OffsetY)

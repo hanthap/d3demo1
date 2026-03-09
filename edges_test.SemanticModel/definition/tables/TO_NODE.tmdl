@@ -1,0 +1,79 @@
+table TO_NODE
+	lineageTag: e09e330c-f933-4725-8e5e-95b2aacc64f8
+
+	column node_id
+		dataType: string
+		lineageTag: a74dd37c-692a-404f-9d63-85f3aefdab79
+		summarizeBy: none
+		sourceColumn: node_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column CUST_TYPE_CDE
+		dataType: string
+		lineageTag: 20e9e448-49a0-4667-875b-86e0e552d20b
+		summarizeBy: none
+		sourceColumn: CUST_TYPE_CDE
+
+		annotation SummarizationSetBy = Automatic
+
+	column SRCE_CDE
+		dataType: string
+		lineageTag: cddcdc1b-45ad-4500-9740-a83d5b260c5a
+		summarizeBy: none
+		sourceColumn: SRCE_CDE
+
+		annotation SummarizationSetBy = Automatic
+
+	column descriptor
+		dataType: string
+		lineageTag: 8604a3dc-9702-4b54-a1fd-14031a3d35ac
+		summarizeBy: none
+		sourceColumn: descriptor
+
+		annotation SummarizationSetBy = Automatic
+
+	column NODE_TYPE
+		dataType: string
+		lineageTag: 20cc89c3-9456-4671-a20f-aff3b29ad418
+		summarizeBy: none
+		sourceColumn: NODE_TYPE
+
+		annotation SummarizationSetBy = Automatic
+
+	column LAST_MOD_TS
+		dataType: string
+		lineageTag: a3c4c5fe-0412-49e2-94eb-39dcc7226636
+		summarizeBy: none
+		sourceColumn: LAST_MOD_TS
+
+		annotation SummarizationSetBy = Automatic
+
+	column mass
+		dataType: string
+		lineageTag: a8568971-8db5-4167-9312-d3864183755e
+		summarizeBy: none
+		sourceColumn: mass
+
+		annotation SummarizationSetBy = Automatic
+
+	column IS_GROUP
+		dataType: string
+		lineageTag: 9c2b077b-e2df-4695-90f1-d9e4467c5b41
+		summarizeBy: none
+		sourceColumn: IS_GROUP
+
+		annotation SummarizationSetBy = Automatic
+
+	partition TO_NODE = m
+		mode: import
+		source =
+				let
+				    Source = FROM_NODE
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

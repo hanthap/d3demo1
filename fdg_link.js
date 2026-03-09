@@ -566,16 +566,19 @@ static OnDragEnd(e) {
     // TODO: use cursor shape to decide whether to drop or ignore
     // then clear all temp classes
     console.log('DraftLink.OnDragEnd(e)',e);
+
+    const [x,y] = d3.pointer(e,svg.node());
+
     if ( e.sourceEvent.shiftKey ) { // bypass confirmation prompt, go ahead with edit
 
         const lnk = {
             true_source: DraftLink.FromDatum,
             source: DraftLink.FromDatum,
-            id:  'L' + 100000 + Math.round( 100000 * Math.random() ), // unique identifier
+            id: 'L' + 100000 + Math.round( 100000 * Math.random() ), // unique identifier
             descriptor: null,
             hue_id: 'B',
             type_cde: 1,
-            mass: 100,
+            mass: 50,
             strength: 0,
             selected: 1,
             opacity: 1,
@@ -590,7 +593,7 @@ static OnDragEnd(e) {
         // DEBUG: "from_node_id" does not exist in newly added link objects
         if ( mouseover_datum && "source" in mouseover_datum ) { // over valid link => split that link and insert a new node
             // create a new node
-            lnk.target = lnk.true_target = Node.Create(d3.pointer(e,svg.node()));
+            lnk.target = lnk.true_target = Node.Create({x,y,width:20,height:20});
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
             // also, splice the new node into the existing (mouseover) link
             Link.InsertNode(mouseover_datum,lnk.target);
@@ -598,7 +601,7 @@ static OnDragEnd(e) {
 
 
         else if ( mouseover_datum == null ) { // over empty space => create a new node & link to it
-            lnk.target = lnk.true_target = Node.Create(d3.pointer(e,svg.node()));
+            lnk.target = lnk.true_target = Node.Create({x,y,width:20,height:20});
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
         }
 

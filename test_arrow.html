@@ -40,10 +40,22 @@
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
   }
+
+  svg.theme-dark {
+  --top: #444;
+  --bottom: #111;
+}
+
+
 </style>
 
 </svg>
-<svg width="500" height="700">
+<!-- <svg width="500" height="700"> -->
+<svg width="712" height="738" 
+viewBox="-250 -250 500 500" 
+>
+
+
   <defs>
     <clipPath id="avatar-clip">
       <circle cx="150" cy="150" r="100"></circle>
@@ -53,13 +65,13 @@
   <g transform="translate(5, 5) scale(0.7)">
   <g clip-path="url(#avatar-clip)">
     <image
-      href="tara.jpg"
-      width="300"
-      height="300"
+      href="https://media.licdn.com/dms/image/v2/D5603AQFpNlTSeZnP1Q/profile-displayphoto-scale_200_200/B56ZriVLHOLAAc-/0/1764733793845?e=1772668800&v=beta&t=uWhfRc_hHs0sa0QOD4I_HTYKo9CKc7W1iSaxEBxENUs"
       transform="translate(-10, -20) scale(1)" 
+            width="300"  height="300"
+
     ></image>
   </g>
-  <circle cx="150" cy="150" r="100" tag="X"
+  <circle cx="150" cy="150" r="100"
           fill="none" stroke="black" stroke-width="1"></circle>
   <foreignObject x="0" y="250" width="270" height="50">
   <div class="caption-html">Hello world</div>
@@ -67,16 +79,17 @@
 
   </g>
 
-  <g transform="translate(60, 30) scale(1.2)" opacity="0.5">
-  <g clip-path="url(#avatar-clip)">
+  <g transform="translate(0,0) scale(0.5)" opacity="0.5">
+  <g   clip-path="url(#avatar-clip1)"  >
+  <circle cx="150" cy="150" r="100" fill="green" stroke="black" stroke-width="2"></circle>
     <image
-      href="tara.jpg"
-      width="300"
-      height="300"
-       transform="translate(+10, 20)""
+      href="https://cdn.worldvectorlogo.com/logos/warner-music-international.svg"
+          transform="translate(75,75) scale(0.06)"  
+               
+           <!-- 0.06 = 150/2500, 75 =  2500*100/300, where 2500 is a property in the svg file-->
+        </image>
     ></image>
   </g>
-  <circle cx="150" cy="150" r="100" fill="none" stroke="black" stroke-width="2"></circle>
   <foreignObject x="100" y="300" width="200" height="50">
   <div class="caption-html">Hello world</div>
 </foreignObject>
@@ -86,4 +99,70 @@
  <circle cx="150" cy="150" r="100" fill="none" stroke="blue" stroke-width="2"></circle>
 
 
+
+<g id="MSN" class="frame-main disabled frame">
+  <rect class="frame-rect" id="MSN" rx="24" ry="24" fill="lightblue" x="-124.68223066495243" y="-163.645988076324" height="193.06378719850466" width="187.75549180250334"></rect>
+  <g class="banner" transform="translate(-114.68223066495243, -163.645988076324) scale(0.1)">
+    <g class="image-group">
+      <image href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" width="300" height="300" transform="translate(25,25) scale(0.8)">
+
+      </image>
+    </g>
+  </g>
+</g>
+
+
 </svg>
+
+
+<svg width="200" height="200" style="--top:#ffffff; --bottom:#cccccc;">
+  <defs>
+    <linearGradient id="fixedGrad"
+                    x1="0" y1="0"
+                    x2="0" y2="200"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="var(--top)" />
+      <stop offset="100%" stop-color="var(--bottom)" />
+    </linearGradient>
+  </defs>
+
+  <rect x="20" y="20" width="160" height="100" fill="url(#fixedGrad)" />
+
+    <rect x="100" y="100" width="100" height="160" fill="url(#fixedGrad)" />
+</svg>
+
+        <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const csv = `
+id,value,name
+1,10,Alice
+2,20,Bob
+3,30,Carol
+`;
+// trim() is important. d3 only looks at the first line for column nanmes, even if it's empty
+const data = d3.csvParse(csv.trim(), d => ({
+  id: +d.id,
+  value: +d.value,
+  name: d.name
+}));
+
+console.log(csv,data);
+
+
+//  Image.naturalWidth  and Image.naturalHeight work for JPG and SVG images
+// having loaded it, at least it's now in the browser cache. Any benefit in using the blob while it's in memory? 
+// or just discard after calculating offset and scale?
+
+const
+href = "https://cdn.worldvectorlogo.com/logos/warner-music-international.svg";
+href="https://media.licdn.com/dms/image/v2/D5603AQFpNlTSeZnP1Q/profile-displayphoto-scale_200_200/B56ZriVLHOLAAc-/0/1764733793845?e=1772668800&v=beta&t=uWhfRc_hHs0sa0QOD4I_HTYKo9CKc7W1iSaxEBxENUs";
+   
+
+const img = new Image();
+img.src = href;
+
+img.onload = () => {
+  console.log(img.naturalWidth, img.naturalHeight);
+};
+
+</script>
