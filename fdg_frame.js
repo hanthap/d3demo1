@@ -306,6 +306,21 @@ function AllDescendantsOf(start, visited = new Set(), result = []) {
 
 //-------------------------------------------------------------------------------
 
+function AllAncestorsOf(start, visited = new Set(), result = []) {
+  if (visited.has(start)) // avoid cycles
+    return result;
+
+  visited.add(start); 
+  result.push(start);
+
+  for (const parent of ParentsOf(start) || []) {
+    AllAncestorsOf(parent, visited, result);
+  }
+  return result;
+}
+
+//-------------------------------------------------------------------------------
+
 function AppendFrameShapes() {
 
 gGroup.selectAll('g').remove();
@@ -313,7 +328,7 @@ gGroup.selectAll('g').remove();
 const gTop = 
     gGroup.selectAll('rect') // in case we've already got some
       .data(sorted_nodes
-        .filter(Node.ShowAsFloatingFrame), 
+        .filter(Node.ShowAsFrame), 
         Node.UniqueId) 
     .join('g')  // top-level container for all elements of the frame (rect, image, HTML content) 
         .attr('id', Node.UniqueId)

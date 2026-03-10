@@ -26,6 +26,10 @@ static RefreshAllDescendants() {
     nodes.forEach( d => { d.descendants = AllDescendantsOf(d) } )
     // CAVEAT: to avoid side effects AllDescendantsOf() must not save directly to d.descendants
 
+    nodes.forEach( d => { d.ancestors = AllAncestorsOf(d) } )
+
+
+
 }
 
   //-------------------------------------------------------------------------------

@@ -160,14 +160,14 @@ static IsHier(d) {
 // TODO: are there any non-hierarchical "circle-within-frame" links that should be hidden?
 static ShowAsLine(d) {
 // only non-hierarchical links are visible when current target is a frame
-    if ( Node.ShowAsFloatingFrame(d.target) && Link.IsHier(d) ) return false;
+    if ( Node.ShowAsFrame(d.target) && Link.IsHier(d) ) return false;
     else return ( Node.IsVisible(d.source) && Node.IsVisible(d.target) );
 }
 //-------------------------------------------------------------------------------
 // Exclude self-self links (eg a collapsed frame linking to itself)
 // TODO: DEBUG on re-expanding a nested frame, this creates visible lines for hierarchical links!
 static VisibleLine(d) {
-    if ( Link.IsHier(d) && Node.ShowAsFloatingFrame(d.target) ) return false;
+    if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) return false;
     return ( Link.ShowAsLine(d) && ( d.target != d.source ));
 
 }

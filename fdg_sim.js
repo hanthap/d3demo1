@@ -85,7 +85,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 // only now can we decide where to position the frames
 [...sorted_nodes] // includes non-frame nodes... 
   .reverse() // start with the innermost subsets, so supersets get a wider margin
-  .filter( Node.ShowAsFloatingFrame ) 
+  .filter( Node.ShowAsFrame ) 
   .forEach( d => {
     visible_children = VisibleDescendantsOf(d); 
     if ( !d.locked && visible_children.length ) { 

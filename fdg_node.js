@@ -127,7 +127,7 @@ static Top(d) {
    //-------------------------------------------------------------------------------
 
     static ContactPoint(d,theta) {  
-        if ( Node.ShowAsFloatingFrame(d) ) { //  DIY polymorphism 
+        if ( Node.ShowAsFrame(d) ) { //  DIY polymorphism 
             return Frame.ContactPoint(d,theta);
         }
         else {
@@ -260,6 +260,20 @@ static OnMouseDown(e,d) {
 
    //-------------------------------------------------------------------------------
 
+static ApparentCircle(d) {
+    // find the currently visible circle that encapsulates this node d, and return its datum
+    // working up through all ancestors, stop at the first one that is visible and not a frame
+    // drives the current virtual endpoints of a link's line
+    // DEFEND AGAINST LOOPS
+    for ( var n in d.ancestors ) {
+        if ( Node.IsVisible(n) ) return n; // TODO : what if the first one we find is a frame rect? 
+    }
+    return d;
+
+}
+
+   //-------------------------------------------------------------------------------
+
 // zoom in (expand) a collapsed node so it appears as a frame with visible child nodes
 
 // TODO DEBUG: any nested node should reappear just as it was when its parent frame d was last collapsed 
@@ -274,15 +288,24 @@ static ToFrame(d) {
         d.is_group = 1;
         d.has_shape = 1; 
         d.descendants // TODO: should be all descendants that were visible just before last collapse event - but how can we tell?
+
+// OK BUT WHY DO COLLAPSED CHILD SUBSETS (is_group=0) COME BACK WITH GRANDCHILDREN EXPLODED?
+// the grandchildren should still be hidden 
+// is_group == 0 and a 
+
             .filter(c => c != d ) 
             .forEach( c => { 
                 console.log(c);
               // c.has_shape = 1;  
               c.soft_hide = 0;
-                // for in and out lines, restore the true endpoints - TOO SIMPLISTIC?
-                // TODO: should we treat hierarchical links differently?
-                c.inLinks.forEach( lnk => { lnk.target = lnk.true_target; } );
-                c.outLinks.forEach( lnk => {lnk.source = lnk.true_source; } );
+                // for in and out lines, restore the true endpoints - TOO SIMPLISTIC!
+                // TODO: the correct target/source may still be a collapsed frame (circle), 
+                // therefore not safe to blithely restore 'true' source/target
+                // each link needs to be adjusted based on what's now VISIBLE
+                // ask both 'true' end nodes for their lowest VISIBLE ancestor
+
+                c.inLinks.forEach( lnk => { lnk.target = Node.ApparentCircle(lnk.true_target); } );
+                c.outLinks.forEach( lnk => {lnk.source = Node.ApparentCircle(lnk.true_source); } );
                 });
 
     Cache.RefreshAllDescendants();
@@ -290,8 +313,8 @@ static ToFrame(d) {
     Cache.ApplyFrameOrder();                
 
         AppendFrameShapes();
-        AppendLines(); 
         AppendLabels();
+        AppendLines(); 
         RefreshSimData();
         if (!frozen) UnfreezeSim();
     }
@@ -355,6 +378,7 @@ static Create( {x,y,width,height}, selNodes=null) {
             locked: 0
             };
     d.descendants = [d]; 
+    d.ancestors = [d];
     Node.AppendDatum(d);
     nodes.push(d);
     mapNodes.set(d.node_id, d);
@@ -406,7 +430,7 @@ static BringToFront( d ) {
 //-------------------------------------------------------------------------------
 
 static Centre(d) {
-    if ( Node.ShowAsFloatingFrame(d) ) return Frame.Centre(d); // DIY polymorphism
+    if ( Node.ShowAsFrame(d) ) return Frame.Centre(d); // DIY polymorphism
     else return { 'x': d.x, 'y': d.y };  
 }
 
@@ -502,7 +526,7 @@ static ParentsOf(d) {
 
 static IsNotNested(d) {
     return ( Node.ParentsOf(d)
-        .filter(Node.ShowAsFloatingFrame)
+        .filter(Node.ShowAsFrame)
         .length == 0
     );
 
@@ -512,7 +536,7 @@ static IsNotNested(d) {
 // Decide whether we want a DOM shape element (visible or not) to be bound to this node 
 
 static HasShape(d) {
-    // TODO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFloatingFrame(d) == False
+    // TODO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFrame(d) == False
     try {
     return d.has_shape;
     } catch { debugger }
@@ -524,7 +548,7 @@ static IsVisible(d) {
 
 //-------------------------------------------------------------------------------
 
-    static ShowAsFloatingFrame(d) {
+    static ShowAsFrame(d) {
         try {
         return d.is_group && Node.HasShape(d) && HasVisibleChild(d) && !d.soft_hide;
         } catch (e) { return false }
@@ -533,7 +557,7 @@ static IsVisible(d) {
 //-------------------------------------------------------------------------------
 
     static ShowAsCircle(d) {
-        return Node.HasShape(d) && !Node.ShowAsFloatingFrame(d) && !d.soft_hide;
+        return Node.HasShape(d) && !Node.ShowAsFrame(d) && !d.soft_hide;
     }
 
 //-------------------------------------------------------------------------------
@@ -595,7 +619,7 @@ static OnDrag(e,d) {
      const svgElement = hits;
 // //    console.log('svgElement',hits, svgElement);
 
-    const selHits = d3.selectAll(svgElement).filter(Node.ShowAsFloatingFrame),
+    const selHits = d3.selectAll(svgElement).filter(Node.ShowAsFrame),
         f = selHits.data().at(1); 
 
 
@@ -637,7 +661,7 @@ static OnDragEnd(e,d) {
     switch ( cursor ) {
 
         case 'cell' : 
-            if (  Node.ShowAsFloatingFrame(f) && Node.WouldAcceptChild(f,d) ) {
+            if (  Node.ShowAsFrame(f) && Node.WouldAcceptChild(f,d) ) {
                 Link.Create(d,f);
                 // TODO: make this more efficient
                 Cache.RefreshAllDescendants();    // descendants, per node
@@ -723,7 +747,14 @@ function ChildrenOf(d) {
     } else return [];
 
 }
+//-------------------------------------------------------------------------------
 
+function ParentsOf(d) {
+    if ( d.ourLinks ) {
+            return ( d.outLinks.filter( Link.IsHier ).map( e => e.true_target ) )
+    } else return [];
+
+}
 //-------------------------------------------------------------------------------
 
 function VisibleChildrenOf(d) {
@@ -736,12 +767,4 @@ function VisibleDescendantsOf(d) {
    return d.descendants.filter( Node.IsVisible ); 
 }
 
-//-------------------------------------------------------------------------------
-function ParentOf(d) {
-    if ( d.outLinks ) {
-        t = d.outLinks.filter( Link.IsHier );
-        // if more than 1, just pick the first for now.. might need to take a different approach
-        return( t.length ? t[0].target : d ); 
-    } else return d;
-}
 
