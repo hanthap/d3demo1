@@ -3,7 +3,7 @@ class Frame extends Node {
     static IsExclusive(d) {  
         // to decide whether non-members will be pushed out by active_exclusion force
         // TODO: a frame is exclusive iff it is in the foreground ??
-        return ( HasVisibleChild(d) ); // for now, all frame rects are exclusive    
+        return ( d.is_group && HasVisibleChild(d) ); // for now, all frame rects are exclusive    
     }
 
     //-------------------------------------------------------------------------------

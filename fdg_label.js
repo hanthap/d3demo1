@@ -21,6 +21,9 @@ class Label extends Node {
             ;
             }
     static TransformImageElement(d) { return d.img_transform; }
+
+// THIS MIGHT BE A SUSPECT
+
     static TransformGroupElement(d) { 
         // TODO: for expanded frames, allow logo to be at top (dedicated header) or centre (background)
         // 'top header mode' would need special treatment by active-exclusion force
@@ -36,6 +39,8 @@ class Label extends Node {
 }
 }
 
+//----------------------------------------------------------------
+
 function AppendLabels() {
 
 // This is superseding the AppendNodes function. Will need to change names later to reflect this.
@@ -45,7 +50,7 @@ gNode.selectAll('g').remove(); // otherwise we get duplicates on data refresh
     
 const gTop = gNode.selectAll('g') 
     .data(nodes
-            .filter(Label.IsVisible)
+        //    .filter(Label.IsVisible)
             .filter(Node.ShowAsCircle), 
             Label.UniqueId)  
     .join('g')  // top-level container for all elements of the label (circle, image, HTML content) 
@@ -118,6 +123,8 @@ labels
 
 
 }
+
+//----------------------------------------------------------------
 
 // generic clip path for jpg/svg inside node circles, before dynamic re-sizing
 // 

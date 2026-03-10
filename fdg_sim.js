@@ -88,6 +88,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
   .filter( Node.ShowAsFrame ) 
   .forEach( d => {
     visible_children = VisibleDescendantsOf(d); 
+    //visible_children = VisibleChildrenOf(d);  // doesn't handle exploded grandchidren
     if ( !d.locked && visible_children.length ) { 
 
       // PROBLEM: outer superset has to wait until all inner sets have been positioned & sized
@@ -155,29 +156,29 @@ const nIterations = 3; // per tick
 
 for(i=0; i < nIterations; i++) {
 
-  frame_set.forEach( n => { // outer loop 
-    const c0 = Frame.Centre(n); 
+  frame_set.forEach( f => { // outer loop 
+    const c0 = Frame.Centre(f); 
     circle_set.forEach( m => { // inner loop
-    if ( n.descendants.includes(m) ) { // circle m is a descendant of frame n 
-        if ( n.locked ) { // all descendants must stay inside a locked frame
+    if ( f.descendants.includes(m) ) { // circle m is a descendant of frame n 
+        if ( f.locked ) { // all descendants must stay inside a locked frame
         // if m is not fully inside rect n then put it back by changing its midpoint coords
-          if ( Node.Right(m) > Frame.Right(n) ) m.x = Frame.Right(n) - Node.HalfWidth(m);
-          if ( Node.Left(m) < Frame.Left(n) ) m.x = Frame.Left(n) + Node.HalfWidth(m);
-          if ( Node.Bottom(m) > Frame.Bottom(n) ) m.y = Frame.Bottom(n) - Node.HalfHeight(m);
+          if ( Node.Right(m) > Frame.Right(f) ) m.x = Frame.Right(f) - Node.HalfWidth(m);
+          if ( Node.Left(m) < Frame.Left(f) ) m.x = Frame.Left(f) + Node.HalfWidth(m);
+          if ( Node.Bottom(m) > Frame.Bottom(f) ) m.y = Frame.Bottom(f) - Node.HalfHeight(m);
           // save top boundary to last so as to ensure the frame banner stays visible
-          if ( Node.Top(m) < Frame.Top(n) + Frame.BannerHeight(n) ) m.y = Frame.Top(n) + Frame.BannerHeight(n) + Node.HalfHeight(m);
+          if ( Node.Top(m) < Frame.Top(f) + Frame.BannerHeight(f) ) m.y = Frame.Top(f) + Frame.BannerHeight(f) + Node.HalfHeight(m);
         }
     }
-    else { // circle m is NOT a descendant of frame n, so gently nudge it outside
+    else { // circle m is NOT a descendant of frame f, so gently nudge it outside
         const 
           c1 = Node.Centre(m),
           dx = c1.x - c0.x,
           dy = c1.y - c0.y,
           theta_out = Math.atan2( dy,  dx),
           theta_in =  Math.atan2(-dy, -dx),
-          p0 = Frame.ContactPoint(n,theta_out),
+          p0 = Frame.ContactPoint(f,theta_out),
           p1 = Node.ContactPoint(m,theta_in),  
-          h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y )  + Frame.ExclusionBuffer(n), // frame centre to frame edge
+          h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y )  + Frame.ExclusionBuffer(f), // frame centre to frame edge
           h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) //  - Node.CollideRadius(m); // frame centre to circle edge
         ;
           if ( h0 > h1 ) { // overlapping shapes

@@ -247,8 +247,11 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
 
+        if ( ViewBox.DragRectDims == null ) return; // shouldn't happen!
+
     if ( svg.classed("ctrl-down") ) {
         // create a new Frame using ViewBox.SelectRect
+
         const 
             selNodes = gNode.selectAll('circle')
                 .filter(ViewBox.DragRectIncludes)
