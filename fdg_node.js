@@ -157,13 +157,11 @@ static Top(d) {
     //-------------------------------------------------------------------------------
 
     static TitleText(d) {
-        return d.legal_text ? d.legal_text : null;
-        if ( d.descriptor ) {
-            return d.descriptor.replace(/\|/g,'\n');
+        return (
+            d.legal_text ? d.legal_text : 
+            d.descriptor ? d.descriptor.replace(/\|/g,'\n') :
+            '??' )
         }
-    }
-
-
 //-------------------------------------------------------------------------------
 
 static OnMenuItemClick(e,d) {
@@ -178,7 +176,6 @@ static ImageSource(d) {
 //-------------------------------------------------------------------------------
 
 static ImageAlt(d) { return d.tag };
-
 
 //-------------------------------------------------------------------------------
 
@@ -264,7 +261,7 @@ static ApparentCircle(d) {
     // find the currently visible circle that encapsulates this node d, and return its datum
     // working up through all ancestors, stop at the first one that is visible and not a frame
     // drives the current virtual endpoints of a link's line
-    // DEFEND AGAINST LOOPS
+    // TODO: DEFEND AGAINST LOOPS
     for ( var n in d.ancestors ) {
         if ( Node.IsVisible(n) ) return n; // TODO : what if the first one we find is a frame rect? 
     }
@@ -274,7 +271,7 @@ static ApparentCircle(d) {
 
    //-------------------------------------------------------------------------------
 
-// zoom in (expand) a collapsed node so it appears as a frame with visible child nodes
+// zoom in (expand, unpack) a collapsed node so it appears as a frame with visible child nodes
 
 // TODO DEBUG: any nested node should reappear just as it was when its parent frame d was last collapsed 
 // Instead, it is displayed in "exploded" configuration, as a circle linked to its children. => is_group was clobbered with a 0?
@@ -294,10 +291,11 @@ static ToFrame(d) {
 // is_group == 0 and a 
 
             .filter(c => c != d ) 
+            .filter( c => c.collapsed_into_node == d ) // only unpack these ones, NOT every descendant
             .forEach( c => { 
                 console.log(c);
-              // c.has_shape = 1;  
               c.soft_hide = 0;
+              c.collapsed_into_node = null; 
                 // for in and out lines, restore the true endpoints - TOO SIMPLISTIC!
                 // TODO: the correct target/source may still be a collapsed frame (circle), 
                 // therefore not safe to blithely restore 'true' source/target
@@ -392,14 +390,14 @@ static Create( {x,y,width,height}, selNodes=null) {
         Node.ToFrame(d);
     }
 else { // new empty node
-        // Cache.RefreshAllDescendants();    // descendants, per node - seems to work now
-        // Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
-        // Cache.ApplyFrameOrder();
+Cache.RefreshAllDescendants();    // descendants & ancestors, per node - seems to work now
+Cache.RefreshSortedNodes();  // sometimes enough to exclude from frames, why sometimes hang?
+Cache.ApplyFrameOrder();
 
     //    AppendFrameShapes();
     //     AppendLines(); 
     //     AppendLabels();
-    //     RefreshSimData();
+//       RefreshSimData();
     //     if (!frozen) UnfreezeSim();
 
 
@@ -542,22 +540,28 @@ static HasShape(d) {
     } catch { debugger }
 }
 
-static IsVisible(d) {
-    return ( Node.HasShape(d) && !d.soft_hide );
-}
 
 //-------------------------------------------------------------------------------
 
+// TODO: soft_hide is deprecated. Should test for "d.collapsed_into_node == null" 
+// see also Frame.ToCircle()
+
+static IsVisible(d) {
+    return ( Node.HasShape(d) && !d.soft_hide  && d.collapsed_into_node == null);
+}
+
+//-------------------------------------------------------------------------------
+// TODO: soft_hide is deprecated. Should test for "d.collapsed_into_node == null" 
     static ShowAsFrame(d) {
         try {
-        return d.is_group && Node.HasShape(d) && HasVisibleChild(d) && !d.soft_hide;
+        return d.is_group && Node.HasShape(d) && HasVisibleChild(d) && !d.soft_hide   && d.collapsed_into_node == null;
         } catch (e) { return false }
     }
 
 //-------------------------------------------------------------------------------
-
+// TODO: soft_hide is deprecated. Should test for "d.collapsed_into_node == null" 
     static ShowAsCircle(d) {
-        return Node.HasShape(d) && !Node.ShowAsFrame(d) && !d.soft_hide;
+        return Node.HasShape(d) && !Node.ShowAsFrame(d) && !d.soft_hide  && d.collapsed_into_node == null;
     }
 
 //-------------------------------------------------------------------------------

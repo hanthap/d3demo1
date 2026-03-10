@@ -136,8 +136,10 @@ static ToCircle(d, bExploded, cXcY) {
         if ( ! bExploded ) {  // default: 'implode' = soft-hide all contents & transplant connected links so they point to this container node
             d.descendants
                 .filter( c => c != d ) 
+                .filter( c => c.collapsed_into_node == null ) // no need to touch if already collapsed
                 .forEach( c => { // for each descendant except self
-                    c.soft_hide = 1;  // will be cleared when zooming in with Node.ToFrame()  
+                    c.soft_hide = 1;  // DEPRECATED
+                    c.collapsed_into_node = d;
                     console.log(c);
                     // for all in and out links, set this node d as the virtual/effective end point
                     c.inLinks

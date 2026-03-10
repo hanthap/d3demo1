@@ -43,17 +43,17 @@ class Label extends Node {
 
 function AppendLabels() {
 
-// This is superseding the AppendNodes function. Will need to change names later to reflect this.
+// This has superseded the AppendNodes function. Will need to change names later to reflect this.
 
 gNode.selectAll('g').remove(); // otherwise we get duplicates on data refresh
 // which seems odd, i thought join('g') would handle all that
     
 const gTop = gNode.selectAll('g') 
-    .data(nodes
-        //    .filter(Label.IsVisible)
-            .filter(Node.ShowAsCircle), 
-            Label.UniqueId)  
-    .join('g')  // top-level container for all elements of the label (circle, image, HTML content) 
+    .data( nodes
+            .filter(Node.ShowAsCircle) 
+            .filter(Node.IsVisible) // to be improved using d.collapsed_into_node
+          ,Label.UniqueId)  
+    .join('g')  // all elements of the label (circle, image, HTML content) 
         .attr('id', Label.UniqueId)
         .classed('labelmain',true)
         .classed('disabled',true)
@@ -76,7 +76,7 @@ gTop
 
 gTop
     .append('circle')
-        .attr('id', Node.UniqueId) 
+        .attr('id',Node.UniqueId) 
         .attr('r',Node.Radius)
         .attr('fill',Node.FillColour)
 
@@ -120,7 +120,6 @@ labels
         //       .style('font-size',Label.FontSize)  
         //       .html(Label.HtmlText) 
             ;
-
 
 }
 
