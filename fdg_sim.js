@@ -78,37 +78,16 @@ function RunSim() {
 
 }
 
+
+
 //-------------------------------------------------------------------------------
 
 function ticked() { // invoked just before each 'repaint' so we can decide exactly how to render
 
-// only now can we decide where to position the frames
-[...sorted_nodes] // includes non-frame nodes... 
-  .reverse() // start with the innermost subsets, so supersets get a wider margin
-  .filter( Node.ShowAsFrame ) 
-  .forEach( d => {
-    visible_children = VisibleDescendantsOf(d); 
-    //visible_children = VisibleChildrenOf(d);  // doesn't handle exploded grandchidren
-    if ( !d.locked && visible_children.length ) { 
-
-      // PROBLEM: outer superset has to wait until all inner sets have been positioned & sized
-
-        xMax = Math.max( ...visible_children.map( Node.Right ) );
-        xMin = Math.min( ...visible_children.map( Node.Left ) );
-        yMax = Math.max( ...visible_children.map( Node.Bottom ) );
-        yMin = Math.min( ...visible_children.map( Node.Top ) ) - Frame.BannerHeight(d);
-
-        // TODO add buffer margin around nested subsets
-        d.x = xMin; 
-        d.y = yMin;
-        d.width = xMax - xMin;
-        d.height =yMax - yMin ;
-    } } );
-
   // propagate latest coordinates to each bound DOM element  
-    
-   Link.OnTick(); 
-   Label.OnTick();
+    Frame.OnTick(); // TODO: might be better to invoke this during active_exclusion
+    Link.OnTick(); 
+    Label.OnTick();
 
     gNode.selectAll('circle,g') // TODO this is a bit hacky, but it means we can apply the same classes to both circles and their nested image groups, without having to duplicate the code for each type of element
          .attr('cx', Node.BoundedX ) 
@@ -161,7 +140,7 @@ for(i=0; i < nIterations; i++) {
     circle_set.forEach( m => { // inner loop
     if ( f.descendants.includes(m) ) { // circle m is a descendant of frame n 
         if ( f.locked ) { // all descendants must stay inside a locked frame
-        // if m is not fully inside rect n then put it back by changing its midpoint coords
+        // if m is not fully inside rect n then put it back, by changing its midpoint coords
           if ( Node.Right(m) > Frame.Right(f) ) m.x = Frame.Right(f) - Node.HalfWidth(m);
           if ( Node.Left(m) < Frame.Left(f) ) m.x = Frame.Left(f) + Node.HalfWidth(m);
           if ( Node.Bottom(m) > Frame.Bottom(f) ) m.y = Frame.Bottom(f) - Node.HalfHeight(m);

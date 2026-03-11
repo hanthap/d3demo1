@@ -283,6 +283,42 @@ static DescendantShapesSVG(d) {
 
     }
 
+//-------------------------------------------------------------------------------
+// TODO maybe execute this during active_exclusion force, 
+// so circles can find their way out more smoothly
+
+static OnTick() {
+
+// only now can we decide where to position the frames
+[...sorted_nodes] // includes non-frame nodes... 
+  .reverse() // start with the innermost subsets, so supersets get a wider margin
+  .filter(Node.ShowAsFrame) 
+  .forEach(Frame.Resize);
+
+}
+
+//-------------------------------------------------------------------------------
+
+// called by Frame.OnTick()
+
+static Resize(d) {
+
+    const visible_children = VisibleDescendantsOf(d); 
+    if ( !d.locked && visible_children.length ) { 
+
+      // PROBLEM: outer superset has to wait until all inner sets have been positioned & sized
+        const
+            xMax = Math.max( ...visible_children.map( Node.Right ) ),
+            xMin = Math.min( ...visible_children.map( Node.Left ) ),
+            yMax = Math.max( ...visible_children.map( Node.Bottom ) ),
+            yMin = Math.min( ...visible_children.map( Node.Top ) ) - Frame.BannerHeight(d);
+        // TODO add buffer margin around nested subsets
+        d.x = xMin,
+        d.y = yMin,
+        d.width = xMax - xMin,
+        d.height =yMax - yMin ;
+    } };
+
  
 }
 
