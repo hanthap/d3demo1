@@ -53,18 +53,16 @@ try {
 
 //-------------------------------------------------------------------------------
 
-// Given 2 nodes (circle or frame) calculate the shortest line segment from perimeter to perimeter, with a break at the visual midpoint (for a central arrowhead marker)
-// this ensures the line's endpoints will coincide with the outer perimeter of each shape.
-// TODO: handle scenario where source node overlaps the destination (or vice versa)
-
+// Given a link datum, get the coordinates of both endpoints, plus the visual midpoint
+// various uses eg to populate attributes for a line or polyline shape
 
 static PolyLinePointTuple( d ) {
 
-    const cp = Link.ContactPoints(d);
-
-    // visual midpoint = half-way along the visible line segment, NOT half-way between node centres
-    var xMid = ( cp.p0.x + cp.p1.x ) / 2; 
-    var yMid = ( cp.p0.y + cp.p1.y ) / 2;
+    const 
+        cp = Link.ContactPoints(d),
+        // visual midpoint = half-way along the visible line segment
+        xMid = ( cp.p0.x + cp.p1.x ) / 2,
+        yMid = ( cp.p0.y + cp.p1.y ) / 2;
 
     return { 'start': { 'x': cp.p0.x , 'y': cp.p0.y },
              'mid' :  { 'x': xMid,     'y': yMid },
@@ -72,9 +70,9 @@ static PolyLinePointTuple( d ) {
             };
 }
 //-------------------------------------------------------------------------------
-
+// generate a string in the required format for SVG "polyline"
 static PolyLinePointString( d ) {
-    let t = Link.PolyLinePointTuple(d);
+    const t = Link.PolyLinePointTuple(d);
     return `${t.start.x},${t.start.y} ${t.mid.x},${t.mid.y} ${t.end.x},${t.end.y}`
 }
 
@@ -147,13 +145,9 @@ static SetAttributes(d)   {
 }
 
  //-------------------------------------------------------------------------------
-    // TODO: handle multiple containership hierarchies => need a priority order in case of 
-static IsHier(d) {
-    console.assert(d.type_cde);
-    return ( false 
-        || ( 'H').includes( d.type_cde )
-    );
 
+ static IsHier(d) {
+    return ( 'H' == d.type_cde );
 }
 
 //-------------------------------------------------------------------------------
@@ -165,7 +159,10 @@ static ShowAsLine(d) {
 }
 //-------------------------------------------------------------------------------
 // Exclude self-self links (eg a collapsed frame linking to itself)
-// TODO: DEBUG on re-expanding a nested frame, this creates visible lines for hierarchical links!
+
+// Render a line from source to target UNLESS it's a 'H' link and target is showing as a frame rect.
+// TODO: DO NOT soft-hide a node until/unless ALL its parents are circles, not Frames
+
 static VisibleLine(d) {
     if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) return false;
     return ( Link.ShowAsLine(d) && ( d.target != d.source ));
@@ -214,7 +211,7 @@ return info;
 static ContactPoints(d) {
 
     const 
-    c0 = Node.Centre(d.source), // careful with rect
+    c0 = Node.Centre(d.source), 
     c1 = Node.Centre(d.target),
     t =  Link.Theta(c0,c1),
     p0 = Node.ContactPoint(d.source,t.theta_out),
@@ -246,14 +243,12 @@ static SwapEnds(d) {
 }
 
 //-------------------------------------------------------------------------------
-
+// force link Y to "take a detour" via node X
 
 static InsertNode(lnk,node) {
     console.log('Link.InsertNode(lnk,node)',lnk,node);
-    
-    console.log('Copy link as new_link');
     const new_lnk = { ...lnk };
-    new_lnk.id =  'L' + 100000 + Math.round( 100000 * Math.random() ); // unique identifier
+    new_lnk.id =  'L' + 100000 + Math.round( 100000 * Math.random() );
 
     console.log('Bind new_link.source & true_source to node');
     new_lnk.source = new_lnk.true_source = node;
@@ -263,7 +258,7 @@ static InsertNode(lnk,node) {
 
     links.push(new_lnk);
 
-}
+    }
 
 
 }
@@ -274,7 +269,7 @@ function IsActiveLink(d) {
 }
 
 //-------------------------------------------------------------------------------
-// TODO: DEBUG on re-expanding a nested frame, this creates visible lines for hierarchical links!
+
 function AppendLines() {
 
     gLinkZone.selectAll('line') 
@@ -569,7 +564,7 @@ static OnDragEnd(e) {
 
     const [x,y] = d3.pointer(e,svg.node());
 
-    if ( e.sourceEvent.shiftKey ) { // bypass confirmation prompt, go ahead with edit
+    if ( e.sourceEvent.shiftKey ) { // bypass confirmation prompt, go ahead & commit
 
         const lnk = {
             true_source: DraftLink.FromDatum,
@@ -584,7 +579,11 @@ static OnDragEnd(e) {
             opacity: 1,
             type_cde: '1', // not 'H' 
             tag: '?',
-            has_shape: 1
+            has_shape: 1,
+
+            from_node_id: '?',
+            to_node_id: '?'
+
             }
 
         if ( mouseover_datum && "node_id" in mouseover_datum ) { // over valid node => update original link
@@ -602,6 +601,7 @@ static OnDragEnd(e) {
 
         else if ( mouseover_datum == null ) { // over empty space => create a new node & link to it
             lnk.target = lnk.true_target = Node.Create({x,y,width:20,height:20});
+            lnk.target.selected = 1; // why does this help?
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
         }
 

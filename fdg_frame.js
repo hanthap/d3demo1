@@ -138,7 +138,8 @@ static ToCircle(d, bExploded, cXcY) {
                 .filter( c => c != d ) 
                 .filter( c => c.collapsed_into_node == null ) // no need to touch if already collapsed
                 .forEach( c => { // for each descendant except self
-                    c.soft_hide = 1;  // DEPRECATED
+                  //  c.soft_hide = 1;  // DEPRECATED
+                    // TODO: Do NOT collapse until/unless ALL visible parents are now circles, not nodes
                     c.collapsed_into_node = d;
                     console.log(c);
                     // for all in and out links, set this node d as the virtual/effective end point

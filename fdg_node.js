@@ -256,7 +256,9 @@ static OnMouseDown(e,d) {
 }
 
    //-------------------------------------------------------------------------------
-
+// TODO:  handle case where node d is an element of the intersection A 
+//      and more than one of those supersets is collapsed to an apparent circle
+//   
 static ApparentCircle(d) {
     // find the currently visible circle that encapsulates this node d, and return its datum
     // working up through all ancestors, stop at the first one that is visible and not a frame
@@ -286,22 +288,14 @@ static ToFrame(d) {
         d.has_shape = 1; 
         d.descendants // TODO: should be all descendants that were visible just before last collapse event - but how can we tell?
 
-// OK BUT WHY DO COLLAPSED CHILD SUBSETS (is_group=0) COME BACK WITH GRANDCHILDREN EXPLODED?
-// the grandchildren should still be hidden 
-// is_group == 0 and a 
-
             .filter(c => c != d ) 
+            // TODO: c.collapsed_into_node should be ALL the apparent circles that include node c
             .filter( c => c.collapsed_into_node == d ) // only unpack these ones, NOT every descendant
             .forEach( c => { 
                 console.log(c);
-              c.soft_hide = 0;
+           //   c.soft_hide = 0;
               c.collapsed_into_node = null; 
-                // for in and out lines, restore the true endpoints - TOO SIMPLISTIC!
-                // TODO: the correct target/source may still be a collapsed frame (circle), 
-                // therefore not safe to blithely restore 'true' source/target
-                // each link needs to be adjusted based on what's now VISIBLE
                 // ask both 'true' end nodes for their lowest VISIBLE ancestor
-
                 c.inLinks.forEach( lnk => { lnk.target = Node.ApparentCircle(lnk.true_target); } );
                 c.outLinks.forEach( lnk => {lnk.source = Node.ApparentCircle(lnk.true_source); } );
                 });
@@ -339,7 +333,8 @@ static AppendDatum(d,i) {
     d.selected = 0;
     d.show_label = 1; // default to showing labels
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
-    d.soft_hide = 0; // to decide which descendants will be visible on re-expanding a collapsed frame
+   // d.soft_hide = 0; // to decide which descendants will be visible on re-expanding a collapsed frame
+   d.collapsed_into_node = null;
   //  d.is_group = 0; // DOES THIS HELP ???
     d.outLinks = [];
     d.inLinks = [];
@@ -352,6 +347,8 @@ static AppendDatum(d,i) {
 //-------------------------------------------------------------------------------
 // called by DraftLink.OnDragEnd(), ViewBox.OnDragEnd()
 static Create( {x,y,width,height}, selNodes=null) {
+
+//debugger;
 
     const 
 
@@ -373,7 +370,9 @@ static Create( {x,y,width,height}, selNodes=null) {
             legal_text: null,
             img_src: 'tba.svg',
             bg_fill: 'white',
-            locked: 0
+            locked: 0,
+            fx: x,
+            fy: y
             };
     d.descendants = [d]; 
     d.ancestors = [d];
@@ -382,8 +381,8 @@ static Create( {x,y,width,height}, selNodes=null) {
     mapNodes.set(d.node_id, d);
     AppendLabels();
    
-    // TODO    .filter( n is not an ancestor of d ) // prevent circular nesting
-    // TODO    .filter( n is a visible circle ) // prevent extra links to nested children
+    // TODO    .filter( n is not in d.ancestors ) // prevent circular nesting
+    // TODO    .filter( n is not a descendant of any other selected node ) // prevent extra links to nested children
     if ( selNodes ) {
         d.is_group = 1;
         selNodes.data().forEach( n => Link.Create(n,d) ); // each node n is added as child/part of the new node d
@@ -397,7 +396,7 @@ Cache.ApplyFrameOrder();
     //    AppendFrameShapes();
     //     AppendLines(); 
     //     AppendLabels();
-//       RefreshSimData();
+       RefreshSimData();
     //     if (!frozen) UnfreezeSim();
 
 
@@ -543,25 +542,25 @@ static HasShape(d) {
 
 //-------------------------------------------------------------------------------
 
-// TODO: soft_hide is deprecated. Should test for "d.collapsed_into_node == null" 
 // see also Frame.ToCircle()
+// TODO: DO NOT soft-hide a node until/unless ALL its parents are circles, not Frames
+// if one of its parents is collapsed, that H-link will become visible just as for an exploded view
 
 static IsVisible(d) {
-    return ( Node.HasShape(d) && !d.soft_hide  && d.collapsed_into_node == null);
+    return ( Node.HasShape(d) && d.collapsed_into_node == null);
 }
 
 //-------------------------------------------------------------------------------
-// TODO: soft_hide is deprecated. Should test for "d.collapsed_into_node == null" 
     static ShowAsFrame(d) {
         try {
-        return d.is_group && Node.HasShape(d) && HasVisibleChild(d) && !d.soft_hide   && d.collapsed_into_node == null;
+        return d.is_group && Node.HasShape(d) && HasVisibleChild(d) && d.collapsed_into_node == null;
         } catch (e) { return false }
     }
 
 //-------------------------------------------------------------------------------
-// TODO: soft_hide is deprecated. Should test for "d.collapsed_into_node == null" 
+
     static ShowAsCircle(d) {
-        return Node.HasShape(d) && !Node.ShowAsFrame(d) && !d.soft_hide  && d.collapsed_into_node == null;
+        return Node.HasShape(d) && !Node.ShowAsFrame(d) && d.collapsed_into_node == null;
     }
 
 //-------------------------------------------------------------------------------
@@ -647,20 +646,17 @@ static OnDragEnd(e,d) {
 
    const cursor = window.getComputedStyle(this).cursor;
 
-// 
-    const [x, y] = d3.pointer(e); // must use screen space, not SVG space
+    const [x, y] = d3.pointer(e); // document.elementsFromPoint must use screen space, not SVG space
 
-    const hits = document.elementsFromPoint(x, y)
-    .filter(el => el instanceof SVGElement)
-    ; // exclude non-SVG?
+    const 
+        svgElement = document.elementsFromPoint(x, y)
+            .filter(el => el instanceof SVGElement)
+        , selHits = d3.selectAll(svgElement)
+        , f = selHits.data().at(1); // for now, just the top-most SVG element's datum
 
-    const svgElement = hits;
-    console.log('svgElement',hits, svgElement);
-
-    const selHits = d3.selectAll(svgElement),
-        f = selHits.data().at(1); // 
     console.log('d3.select(selHits), f,d',selHits,f,d);
-    // TODO: generalise and drop node d into multiple overlapping frames
+    // TODO: drop node d into the intersection of multiple overlapping frames
+    // excluding any superset frames
 
     switch ( cursor ) {
 
