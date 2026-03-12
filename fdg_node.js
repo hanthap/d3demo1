@@ -596,14 +596,14 @@ static OnDragStart(e,d) {
     d.fy = e.y;     
     const selThisNode = d3.select(this);
  
-   d3.select(this).classed('left-mouse-down',true);
+   svg.classed('left-mouse-down',true);
 
    if ( e.sourceEvent.shiftKey ) {
         DraftLink.OnDragStart(e,d,selThisNode);
         }
 
    else {
-        Node.DraggedD3Selection = selThisNode.classed("dragging", true); // add special CSS styling
+        Node.DraggedD3Selection = selThisNode; // .classed("dragging", true); // add special CSS styling
         Node.BringToFront(Node.DraggedD3Selection);
         }
 
@@ -625,6 +625,13 @@ static OnDrag(e,d) {
     const selHits = d3.selectAll(svgElement).filter(Node.ShowAsFrame),
         f = selHits.data().at(1); 
 
+        // TODO: If dragged node d is now outside of the innermost locked frame, => "no drop" cursor
+
+        const bCanDropHere = 
+            Node.WouldAcceptChild(f,d) && 
+            ( Node.IsWithinBounds(d) || e.ctrlKey ) // ctrl means 'do the non-default behaviour' typically changing more than just layout/visibility
+                // shift means 'don't ask for confirmation'
+
 
 if ( f ) 
         Node.DraggedD3Selection.classed("no-drop", !Node.WouldAcceptChild(f,d) );
@@ -642,7 +649,8 @@ if ( f )
 static OnDragEnd(e,d) {
     console.log('Node.OnDragEnd',e,d,this);
 
-    d3.select(this).classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
+   // d3.select(this).classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
+        svg.classed('left-mouse-down',false);
 
    const cursor = window.getComputedStyle(this).cursor;
 
@@ -676,7 +684,7 @@ static OnDragEnd(e,d) {
 
 // TODO : clean up these lines...
     if ( Node.DraggedD3Selection ) {  
-        Node.DraggedD3Selection.classed("dragging", false);
+      //  Node.DraggedD3Selection.classed("dragging", false);
         Node.DraggedD3Selection = null;
         }
 

@@ -133,6 +133,10 @@ rect.frame {
     cursor: zoom-out;
 }
 
+rect.shift-down.frame-rect    {
+    cursor: zoom-out;
+}
+
 .ctrl-down.shift-down g {
     fill-opacity: 1;
     cursor: crosshair;
@@ -164,7 +168,7 @@ circle.drag_selected {
 }
 
 
-circle.dragging {
+.dragging * {
     stroke:red;
     stroke-dasharray: none;
     stroke-opacity: 1;

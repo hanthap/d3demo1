@@ -249,6 +249,9 @@ static OnDragEnd(e,d) {
 
         if ( ViewBox.DragRectDims == null ) return; // shouldn't happen!
 
+
+    svg.classed('left-mouse-down',false);
+
     if ( svg.classed("ctrl-down") ) {
         // create a new Frame using ViewBox.SelectRect
 
