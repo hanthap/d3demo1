@@ -627,11 +627,11 @@ static OnDrag(e,d) {
 
         // TODO: If dragged node d is now outside of the innermost locked frame, => "no drop" cursor
 
-        const bCanDropHere = 
+/*         const bCanDropHere = 
             Node.WouldAcceptChild(f,d) && 
             ( Node.IsWithinBounds(d) || e.ctrlKey ) // ctrl means 'do the non-default behaviour' typically changing more than just layout/visibility
-                // shift means 'don't ask for confirmation'
-
+            ;    // shift means 'don't ask for confirmation'
+ */
 
 if ( f ) 
         Node.DraggedD3Selection.classed("no-drop", !Node.WouldAcceptChild(f,d) );

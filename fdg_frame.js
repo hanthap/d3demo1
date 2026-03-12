@@ -288,12 +288,13 @@ static DescendantShapesSVG(d) {
 // so circles can find their way out more smoothly
 
 static OnTick() {
-
+//  TODO: reuse the (yet to be created) static "frame_set" - as (will be) used in active_exclusion()
 // only now can we decide where to position the frames
-[...sorted_nodes] // includes non-frame nodes... 
-  .reverse() // start with the innermost subsets, so supersets get a wider margin
-  .filter(Node.ShowAsFrame) 
-  .forEach(Frame.Resize);
+// [...sorted_nodes] // includes non-frame nodes... 
+//   .reverse() // start with the innermost subsets, so supersets get a wider margin
+//   .filter(Node.ShowAsFrame) 
+
+  Cache.FrameSet.forEach(Frame.Resize);
 
 }
 

@@ -39,6 +39,9 @@ static RefreshSortedNodes() {
 
     let root_nodes = nodes.filter(Node.IsNotNested); 
     sorted_nodes = Cache.FlattenByGeneration(root_nodes); // global, in fdg_nodes.js
+
+    Cache.FrameSet = new Set(sorted_nodes.filter(Node.ShowAsFrame).reverse());
+    Cache.CircleSet = new Set(sorted_nodes.filter(Node.ShowAsCircle));
 }
 
 //-------------------------------------------------------------------------------

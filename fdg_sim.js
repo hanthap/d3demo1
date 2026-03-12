@@ -128,16 +128,16 @@ function active_exclusion(alpha) {
 // result: the visual gap is smaller that expected, most notably toward the ends of an elongated frame rect
 // and circles seem to drift away from the 'obvious' spot. 
 
-const frame_set = new Set(sorted_nodes.filter(Frame.IsExclusive).reverse());
-const circle_set = new Set(sorted_nodes.filter(Node.IsExclusive));
+// TODO : for performance these could be static, only refreshed after a data change
+// const frame_set = new Set(sorted_nodes.filter(Frame.IsExclusive).reverse());
+// const circle_set = new Set(sorted_nodes.filter(Node.IsExclusive));
 
 const nIterations = 3; // per tick
 
 for(i=0; i < nIterations; i++) {
-
-  frame_set.forEach( f => { // outer loop 
+ Cache.FrameSet.forEach( f => { // outer loop 
     const c0 = Frame.Centre(f); 
-    circle_set.forEach( m => { // inner loop
+    Cache.CircleSet.forEach( m => { // inner loop
     if ( f.descendants.includes(m) ) { // circle m is a descendant of frame n 
         if ( f.locked ) { // all descendants must stay inside a locked frame
         // if m is not fully inside rect n then put it back, by changing its midpoint coords
