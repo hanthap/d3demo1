@@ -96,8 +96,8 @@ circle.selected {
 }
 
 .has_members circle {
-        stroke: black;
-            stroke-opacity: 1;
+    stroke: black;
+    stroke-opacity: 1;
 }
 
 /* .class name first => we only need to set class on the 'g' container. (CSS selectors cascade to all descendants) */
@@ -215,7 +215,7 @@ g.foreground * {
 
 .all-linkzones * { 
     stroke-width:  10;
-    stroke: yellow; /* otherwise not clickable */
+    stroke: yellow; /* can't be none, otherwise not clickable */
     stroke-opacity: 0;
 }
 
@@ -352,7 +352,7 @@ rect.valid_target {
 }
 
 
-.locked {
+.locked * {
     stroke:red;
     cursor: grab;
 

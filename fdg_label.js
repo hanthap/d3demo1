@@ -61,6 +61,7 @@ const gTop = gNode.selectAll('g')
 
 gTop
     .classed('has_members',Node.HasMembers)
+    .classed('locked',d => d.locked)
     .on('mouseover',Node.OnMouseOver) 
     .on('mouseout',Node.OnMouseOut) 
     .on('click',Node.OnClick)

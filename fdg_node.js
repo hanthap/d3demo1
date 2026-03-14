@@ -337,6 +337,8 @@ static AppendDatum(d) {
     d.is_group = 0;
     d.outLinks = [];
     d.inLinks = [];
+    d.descendants = [d];
+    d.ancestors = [d];
     d.locked = 0; 
     d.x = d.y = 0;
     return d;
@@ -351,18 +353,7 @@ static Create( {x,y,width,height}, selNodes=null) {
     const d = Node.AppendDatum({ node_id : 'N' + Math.round( Math.random() * 1000000 ) });
     if (x) { d.x = x; d.y = y; }
     if (width) { d.width = width; d.Height = height };
-        // selected: 1,
-        // has_shape: 1,
-        // hue_id: null,
-        // node_mass: 20,
-        // tag: '?',
-        // legal_text: null,
-        // img_src: 'tba.svg',
-        // bg_fill: 'white',
-        // locked: 0,
-        // fx: x,
-        // fy: y
-        // };
+
 
     nodes.push(d);
     mapNodes.set(d.node_id, d);
