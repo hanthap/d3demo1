@@ -261,7 +261,11 @@ static DescendantShapesSVG(d) {
 
     static Left(d) { return d.x - Frame.Margin(d) }; 
 
-    static Top(d) { return d.y - Frame.Margin(d) };
+   static Top(d) { return d.y - Frame.Margin(d) };
+
+// static Top(d) { return d.y - Frame.BannerHeight(d) }; 
+//  TODO avoid unwanted side effects when used by Frame.ContactPoint()
+// Frames must clearly distinguish between 'inner' and 'outer' boundaries. 
  
     static Right(d) { return d.x + d.width + Frame.Margin(d) }; 
 
@@ -275,9 +279,11 @@ static DescendantShapesSVG(d) {
 
     static HalfHeight(d) { return d.height/2 + Frame.Margin(d) };
 
-    static CornerRadius(d) {  return d.locked ? 0  :1.5 * radius ;};
-
+    static CornerRadius(d) {  return d.locked ? 0 : 1.5 * radius ;};
+   
+    // TODO: we want a way to reflect the nesting depth as currently visible
     static Margin(d) { return radius + 3*d.descendants.length }; 
+    // static Margin(d) { return radius + 3 }; 
 
     static TransformGroupElement(d) { 
             const 

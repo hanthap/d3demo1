@@ -82,7 +82,10 @@ static OnKeyDown(e) {
         // clear all highlights by removing the 'selected' class
         nodes.forEach( d => d.selected = 0 );
         links.forEach( d => d.selected = 0 );
-        svg.selectAll('*').classed('selected',false) 
+        svg.selectAll('*').classed('selected',false) // not enough for polylines
+        gLink.selectAll('polyline') // line colours are resistant to class-driven CSS grey filter
+            .style('stroke', Link.StrokeColour )  
+            .style('fill', Link.FillColour ); 
        // svg.classed('disabled',true);
 
         break;

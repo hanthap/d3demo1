@@ -77,8 +77,12 @@ class Node {
 
     //-------------------------------------------------------------------------------
     
-static Right(d) {
-    return (Node.Centre(d).x + Node.HalfWidth(d));
+// TODO : (Frame) Top & Left need to adjust for Frame.BannerHeight and Frame.StubWidth.
+// but is this the right place to do that?
+// this is so that nested frames allow the appropriate space for heading bar
+
+static Top(d) {
+    return (Node.Centre(d).y - Node.HalfHeight(d));
 }
 
 static Left(d) {
@@ -89,8 +93,8 @@ static Bottom(d) {
     return (Node.Centre(d).y + Node.HalfHeight(d));
 }
 
-static Top(d) {
-    return (Node.Centre(d).y - Node.HalfHeight(d));
+static Right(d) {
+    return (Node.Centre(d).x + Node.HalfWidth(d));
 }
 
     //-------------------------------------------------------------------------------

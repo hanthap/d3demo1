@@ -372,9 +372,9 @@ static OnClick(e,d) {
             break;
 
         default : 
-            d.selected ^= 1;
-            d.source.selected = d.selected;
-            d.target.selected = d.selected;
+            // Selection propagates, but de-selection does not
+            if ( d.selected ^= 1 ) 
+                d.source.selected = d.target.selected = 1;
             break;
 
     }
