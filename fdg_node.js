@@ -283,7 +283,7 @@ static ToFrame(d) {
 
     console.log('Node.ToFrame(d)',d);
 
-    if ( Node.HasMembers(d) ) {
+    if ( Node.HasMembers(d) || d.locked ) {
         d.is_group = 1;
         d.has_shape = 1; 
         d.descendants // TODO: should be all descendants that were visible just before last collapse event - but how can we tell?
@@ -321,7 +321,7 @@ static OnDblClick(e,d) {
 
 //-------------------------------------------------------------------------------
 
-static AppendDatum(d,i) {
+static AppendDatum(d) {
     d.charge = 10; // 5 - ( 10 * Math.random()); // repulsive or attractive force
     d.cogX = 0;
     d.cogY = 0;
@@ -329,18 +329,16 @@ static AppendDatum(d,i) {
     //  d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
     d.r = 16; 
     d.height = 2 * d.r;
-    d.width = 2 * d.r;
+    d.width = d.r;
     d.selected = 0;
     d.show_label = 1; // default to showing labels
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
-   // d.soft_hide = 0; // to decide which descendants will be visible on re-expanding a collapsed frame
-   d.collapsed_into_node = null;
-  //  d.is_group = 0; // DOES THIS HELP ???
+    d.collapsed_into_node = null;
+    d.is_group = 0;
     d.outLinks = [];
     d.inLinks = [];
     d.locked = 0; 
     d.x = d.y = 0;
-    // TODO: what if this node is inside a collapsed container? What if there are 2+ parent containers? Do we pro-rate the values?
     return d;
 }
 
@@ -350,40 +348,29 @@ static Create( {x,y,width,height}, selNodes=null) {
 
 //debugger;
 
-    const 
+    const d = Node.AppendDatum({ node_id : 'N' + Math.round( Math.random() * 1000000 ) });
+    if (x) { d.x = x; d.y = y; }
+    if (width) { d.width = width; d.Height = height };
+        // selected: 1,
+        // has_shape: 1,
+        // hue_id: null,
+        // node_mass: 20,
+        // tag: '?',
+        // legal_text: null,
+        // img_src: 'tba.svg',
+        // bg_fill: 'white',
+        // locked: 0,
+        // fx: x,
+        // fy: y
+        // };
 
-        nodeId = 'N' + Math.round( Math.random() * 1000000 ),
-        d = {
-            node_id: nodeId,
-            x,
-            y,
-            r: 10,
-            width,
-            height,
-            descriptor: `New node: ${nodeId}`,
-            is_group: 0,
-            selected: 1,
-            has_shape: 1,
-            hue_id: null,
-            node_mass: 20,
-            tag: '?',
-            legal_text: null,
-            img_src: 'tba.svg',
-            bg_fill: 'white',
-            locked: 0,
-            fx: x,
-            fy: y
-            };
-    d.descendants = [d]; 
-    d.ancestors = [d];
-    Node.AppendDatum(d);
     nodes.push(d);
     mapNodes.set(d.node_id, d);
     AppendLabels();
    
     // TODO    .filter( n is not in d.ancestors ) // prevent circular nesting
     // TODO    .filter( n is not a descendant of any other selected node ) // prevent extra links to nested children
-    if ( selNodes ) {
+    if ( selNodes ) { 
         d.is_group = 1;
         selNodes.data().forEach( n => Link.Create(n,d) ); // each node n is added as child/part of the new node d
         Node.ToFrame(d);
@@ -553,7 +540,7 @@ static IsVisible(d) {
 //-------------------------------------------------------------------------------
     static ShowAsFrame(d) {
         try {
-        return d.is_group && Node.HasShape(d) && HasVisibleChild(d) && d.collapsed_into_node == null;
+        return d.is_group && Node.HasShape(d) && ( d.locked || HasVisibleChild(d) ) && d.collapsed_into_node == null;
         } catch (e) { return false }
     }
 

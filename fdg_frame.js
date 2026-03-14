@@ -42,7 +42,7 @@ return point;
 }
 
 //-------------------------------------------------------------------------------
-// 
+// extra space to push non-member circles further outside
 static ExclusionBuffer(d) {
     return 25;
 }
@@ -54,6 +54,11 @@ static BannerHeight(d) {
     return 15;
 }
 
+//-------------------------------------------------------------------------------
+// reserved space for rotated heading at left of frame
+static StubWidth(d) {
+    return 15;
+}
 //-------------------------------------------------------------------------------
 
 static OnMenuItemClick(e,d) {
@@ -284,21 +289,6 @@ static DescendantShapesSVG(d) {
     }
 
 //-------------------------------------------------------------------------------
-// TODO maybe execute this during active_exclusion force, 
-// so circles can find their way out more smoothly
-
-static OnTick() {
-//  TODO: reuse the (yet to be created) static "frame_set" - as (will be) used in active_exclusion()
-// only now can we decide where to position the frames
-// [...sorted_nodes] // includes non-frame nodes... 
-//   .reverse() // start with the innermost subsets, so supersets get a wider margin
-//   .filter(Node.ShowAsFrame) 
-
-  Cache.FrameSet.forEach(Frame.Resize);
-
-}
-
-//-------------------------------------------------------------------------------
 
 // called by Frame.OnTick()
 
@@ -310,7 +300,7 @@ static Resize(d) {
       // PROBLEM: outer superset has to wait until all inner sets have been positioned & sized
         const
             xMax = Math.max( ...visible_children.map( Node.Right ) ),
-            xMin = Math.min( ...visible_children.map( Node.Left ) ),
+            xMin = Math.min( ...visible_children.map( Node.Left ) ) - Frame.StubWidth(d),
             yMax = Math.max( ...visible_children.map( Node.Bottom ) ),
             yMin = Math.min( ...visible_children.map( Node.Top ) ) - Frame.BannerHeight(d);
         // TODO add buffer margin around nested subsets
@@ -366,7 +356,7 @@ function AppendFrameShapes() {
 gGroup.selectAll('g').remove();
 
 const gTop = 
-    gGroup.selectAll('rect') // in case we've already got some
+    gGroup.selectAll('rect') 
       .data(sorted_nodes
         .filter(Node.ShowAsFrame), 
         Node.UniqueId) 
@@ -391,9 +381,11 @@ gTop
         .on("contextmenu", Frame.OnContextMenu)
         ;
 
-gTop
+const gHeading = gTop
     .filter(d => d.img_src > "" )
-    .append('g') 
+    .append('g') ;
+// TODO: cater for rotated frame-stub on left edge, not just frame-banner
+gHeading
         .classed('frame-banner',true)
     //  .attr("class", Label.Classes) // let CSS handle the rest
         .append('g')

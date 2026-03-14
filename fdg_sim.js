@@ -85,7 +85,7 @@ function RunSim() {
 function ticked() { // invoked just before each 'repaint' so we can decide exactly how to render
 
   // propagate latest coordinates to each bound DOM element  
-    Frame.OnTick(); // TODO: might be better to invoke this during active_exclusion
+ //   Frame.OnTick(); // TODO: might be better to invoke this during active_exclusion
     Link.OnTick(); 
     Label.OnTick();
 
@@ -134,7 +134,12 @@ function active_exclusion(alpha) {
 
 const nIterations = 3; // per tick
 
+ Cache.FrameSet.forEach(Frame.Resize);
+
 for(i=0; i < nIterations; i++) {
+
+
+
  Cache.FrameSet.forEach( f => { // outer loop 
     const c0 = Frame.Centre(f); 
     Cache.CircleSet.forEach( m => { // inner loop
@@ -142,9 +147,9 @@ for(i=0; i < nIterations; i++) {
         if ( f.locked ) { // all descendants must stay inside a locked frame
         // if m is not fully inside rect n then put it back, by changing its midpoint coords
           if ( Node.Right(m) > Frame.Right(f) ) m.x = Frame.Right(f) - Node.HalfWidth(m);
-          if ( Node.Left(m) < Frame.Left(f) ) m.x = Frame.Left(f) + Node.HalfWidth(m);
           if ( Node.Bottom(m) > Frame.Bottom(f) ) m.y = Frame.Bottom(f) - Node.HalfHeight(m);
-          // save top boundary to last so as to ensure the frame banner stays visible
+          // calc top & left boundaries last so the header isn't covered
+          if ( Node.Left(m) < Frame.Left(f) ) m.x = Frame.Left(f) +  Frame.StubWidth(f) + Node.HalfWidth(m);
           if ( Node.Top(m) < Frame.Top(f) + Frame.BannerHeight(f) ) m.y = Frame.Top(f) + Frame.BannerHeight(f) + Node.HalfHeight(m);
         }
     }
@@ -158,7 +163,7 @@ for(i=0; i < nIterations; i++) {
           p0 = Frame.ContactPoint(f,theta_out),
           p1 = Node.ContactPoint(m,theta_in),  
           h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y )  + Frame.ExclusionBuffer(f), // frame centre to frame edge
-          h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) //  - Node.CollideRadius(m); // frame centre to circle edge
+          h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y )  - Node.CollideRadius(m); // frame centre to circle edge
         ;
           if ( h0 > h1 ) { // overlapping shapes
             // hardcoded 0.5 by experimentation
@@ -173,6 +178,9 @@ for(i=0; i < nIterations; i++) {
       );
     }
   );
+
+
+
 };
 
   return active_exclusion; // return self, enabling a chain of forces if needed
@@ -186,18 +194,18 @@ for(i=0; i < nIterations; i++) {
 
 function active_exclusion_WIP(alpha) {
 
-const frame_set = new Set(sorted_nodes.filter(Frame.IsExclusive).reverse());
-const circle_set = new Set(sorted_nodes.filter(Node.IsExclusive));
+
 
 const nIterations = 3; // per tick
 
 for(i=0; i < nIterations; i++) {
 
-  frame_set.forEach( n => { // outer loop 
+
+   Cache.FrameSet.forEach( n => { // outer loop 
     const 
       r0 = Node.Coordinates(n);
 
-    circle_set.forEach( m => { // inner loop
+    Cache.CircleSet.forEach( m => { // inner loop
     if ( !(n.descendants.includes(m)) ) { // circle m is NOT a descendant of frame n 
         const r1 = Node.Coordinates(m);
         const v = expel_vector(r0,r1);
@@ -214,8 +222,10 @@ for(i=0; i < nIterations; i++) {
       );
     }
   );
-};
 
+
+};
+   Cache.FrameSet.forEach(Frame.Resize);
   return active_exclusion; // return self, enabling a chain of forces if needed
 
 }

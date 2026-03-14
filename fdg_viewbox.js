@@ -82,6 +82,9 @@ static OnKeyDown(e) {
         // clear all highlights by removing the 'selected' class
         nodes.forEach( d => d.selected = 0 );
         links.forEach( d => d.selected = 0 );
+        svg.selectAll('*').classed('selected',false) 
+       // svg.classed('disabled',true);
+
         break;
 
     case 'End': // release any 'pegged' circles
@@ -258,8 +261,10 @@ static OnDragEnd(e,d) {
         const 
             selNodes = gNode.selectAll('circle')
                 .filter(ViewBox.DragRectIncludes)
-                .filter(Node.HasShape);
-        Node.Create(ViewBox.DragRectDims,selNodes);
+                .filter(Node.HasShape),
+            f = Node.Create(ViewBox.DragRectDims,selNodes)           
+            ;
+            if (e.shiftKey) f.locked = 1;
     }
 
     // TODO These selections are not visible until simulation unfreezes
