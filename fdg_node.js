@@ -85,16 +85,37 @@ static Top(d) {
     return (Node.Centre(d).y - Node.HalfHeight(d));
 }
 
+static TopOuter(d) {
+    if ( Node.ShowAsFrame(d) ) return d.y; // already adjusted
+    else  return (Node.Centre(d).y - Node.HalfHeight(d));
+}
+
 static Left(d) {
     return (Node.Centre(d).x - Node.HalfWidth(d));
 }
+
+static LeftOuter(d) {
+    if ( Node.ShowAsFrame(d) ) return d.x; 
+    else return (Node.Centre(d).x - Node.HalfWidth(d));
+}
+
 
 static Bottom(d) {
     return (Node.Centre(d).y + Node.HalfHeight(d));
 }
 
+static BottomOuter(d) {
+    if ( Node.ShowAsFrame(d) ) return d.y + d.height; 
+    else return (Node.Centre(d).y + Node.HalfHeight(d));
+}
+
 static Right(d) {
     return (Node.Centre(d).x + Node.HalfWidth(d));
+}
+
+static RightOuter(d) {
+    if ( Node.ShowAsFrame(d) ) return d.x + d.width; 
+    else return (Node.Centre(d).x + Node.HalfWidth(d));
 }
 
     //-------------------------------------------------------------------------------

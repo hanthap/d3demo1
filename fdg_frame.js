@@ -24,11 +24,11 @@ const
         crit_rad = Math.atan2( Frame.Height(d), Frame.Width(d) ), // allow for outer margin
         c = crit_rad * (180 / Math.PI), // range [0,90]
 
-        v =   t < c -180 ?  { side: 'left',   dim: 'x', k: Frame.Left(d),   a: -theta } :
-              t < 0-c ?     { side: 'top',    dim: 'y', k: Frame.Top(d),    a: theta-Math.PI/2 } :
-              t < c ?       { side: 'right',  dim: 'x', k: Frame.Right(d),  a: theta+Math.PI } :
-              t < 180-c ?   { side: 'bottom', dim: 'y', k: Frame.Bottom(d), a: -theta-Math.PI/2 } :
-                            { side: 'left',   dim: 'x', k: Frame.Left(d),   a: -theta },
+        v =   t < c -180 ?  { side: 'left',   dim: 'x', k: Frame.LeftOuter(d),   a: -theta } :
+              t < 0-c ?     { side: 'top',    dim: 'y', k: Frame.TopOuter(d),    a: theta-Math.PI/2 } :
+              t < c ?       { side: 'right',  dim: 'x', k: Frame.RightOuter(d),  a: theta+Math.PI } :
+              t < 180-c ?   { side: 'bottom', dim: 'y', k: Frame.BottomOuter(d), a: -theta-Math.PI/2 } :
+                            { side: 'left',   dim: 'x', k: Frame.LeftOuter(d),   a: -theta },
 
 
         point = v.dim == 'x' ? { x: v.k, y: Frame.Centre(d).y + ( Frame.HalfWidth(d)  * Math.tan(v.a) ) } :
@@ -51,14 +51,18 @@ static ExclusionBuffer(d) {
 //-------------------------------------------------------------------------------
 // reserved space for banner heading at top of frame
 static BannerHeight(d) {
-    return 15;
+    return 20;
 }
 
 //-------------------------------------------------------------------------------
 // reserved space for rotated heading at left of frame
 static StubWidth(d) {
-    return 15;
+    return 20;
 }
+//-------------------------------------------------------------------------------
+// default buffer for non-heading sides
+    static Margin(d) { return 10 }; 
+
 //-------------------------------------------------------------------------------
 
 static OnMenuItemClick(e,d) {
@@ -260,20 +264,27 @@ static DescendantShapesSVG(d) {
     static Centre(d) { return { x: d.x + d.width/2, y: d.y + d.height/2 }    }
 
     static Left(d) { return d.x - Frame.Margin(d) }; 
+    static LeftInner(d) { return d.x + Frame.StubWidth(d) }; 
+    static LeftOuter(d) { return d.x }; 
 
    static Top(d) { return d.y - Frame.Margin(d) };
+    static TopOuter(d) { return d.y };
 
 // static Top(d) { return d.y - Frame.BannerHeight(d) }; 
 //  TODO avoid unwanted side effects when used by Frame.ContactPoint()
 // Frames must clearly distinguish between 'inner' and 'outer' boundaries. 
  
     static Right(d) { return d.x + d.width + Frame.Margin(d) }; 
+    static RightOuter(d) { return d.x + d.width }; 
 
     static Bottom(d) { return d.y + d.height + Frame.Margin(d) };
+    static BottomOuter(d) { return d.y + d.height };
  
     static Width(d) { return d.width + 2*Frame.Margin(d) } ;
+    static WidthOuter(d) { return d.width } ;
 
     static Height(d) { return d.height + 2*Frame.Margin(d) } ;
+    static HeightOuter(d) { return d.height } ;
 
     static HalfWidth(d)  { return d.width/2 + Frame.Margin(d) };
 
@@ -281,14 +292,12 @@ static DescendantShapesSVG(d) {
 
     static CornerRadius(d) {  return d.locked ? 0 : 1.5 * radius ;};
    
-    // TODO: we want a way to reflect the nesting depth as currently visible
-    static Margin(d) { return radius + 3*d.descendants.length }; 
-    // static Margin(d) { return radius + 3 }; 
+
 
     static TransformGroupElement(d) { 
             const 
                 scale = 0.1,
-                xoffset = Frame.Left(d) + 10, 
+                xoffset = Frame.LeftOuter(d) + 10, 
                 yoffset = Frame.Top(d);
             return `translate(${xoffset}, ${yoffset}) scale(${scale})`;
 
@@ -300,18 +309,21 @@ static DescendantShapesSVG(d) {
 
 static Resize(d) {
 
-    const visible_children = VisibleDescendantsOf(d); 
+//    DO NOT use VisibleDescendantsOf(d) here
+    const visible_children = VisibleChildrenOf(d); 
+
     if ( !d.locked && visible_children.length ) { 
 
       // PROBLEM: outer superset has to wait until all inner sets have been positioned & sized
+
         const
-            xMax = Math.max( ...visible_children.map( Node.Right ) ),
-            xMin = Math.min( ...visible_children.map( Node.Left ) ) - Frame.StubWidth(d),
-            yMax = Math.max( ...visible_children.map( Node.Bottom ) ),
-            yMin = Math.min( ...visible_children.map( Node.Top ) ) - Frame.BannerHeight(d);
+            xMax = Math.max( ...visible_children.map( Node.RightOuter ) ) + Frame.Margin(d),
+            xMin = Math.min( ...visible_children.map( Node.LeftOuter) ) - Frame.StubWidth(d),
+            yMax = Math.max( ...visible_children.map( Node.BottomOuter ) ) + Frame.Margin(d),
+            yMin = Math.min( ...visible_children.map( Node.TopOuter ) )  - Frame.BannerHeight(d);
         // TODO add buffer margin around nested subsets
         d.x = xMin,
-        d.y = yMin,
+        d.y = yMin ,
         d.width = xMax - xMin,
         d.height =yMax - yMin ;
     } };

@@ -99,10 +99,10 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         ;
 
     gGroup.selectAll('.frame-rect')
-        .attr('x', Frame.Left ) 
+        .attr('x', Frame.LeftOuter ) 
         .attr('y', Frame.Top )
         .attr('height', Frame.Height )
-        .attr('width', Frame.Width );
+        .attr('width', Frame.WidthOuter );
 
      gGroup.selectAll('.frame-banner')
       .attr('transform',Frame.TransformGroupElement) 
@@ -149,7 +149,7 @@ for(i=0; i < nIterations; i++) {
           if ( Node.Right(m) > Frame.Right(f) ) m.x = Frame.Right(f) - Node.HalfWidth(m);
           if ( Node.Bottom(m) > Frame.Bottom(f) ) m.y = Frame.Bottom(f) - Node.HalfHeight(m);
           // calc top & left boundaries last so the header isn't covered
-          if ( Node.Left(m) < Frame.Left(f) ) m.x = Frame.Left(f) +  Frame.StubWidth(f) + Node.HalfWidth(m);
+          if ( Node.Left(m) < Frame.LeftInner(f) ) m.x = Frame.LeftInner(f) + Node.HalfWidth(m);
           if ( Node.Top(m) < Frame.Top(f) + Frame.BannerHeight(f) ) m.y = Frame.Top(f) + Frame.BannerHeight(f) + Node.HalfHeight(m);
         }
     }
@@ -162,8 +162,11 @@ for(i=0; i < nIterations; i++) {
           theta_in =  Math.atan2(-dy, -dx),
           p0 = Frame.ContactPoint(f,theta_out),
           p1 = Node.ContactPoint(m,theta_in),  
-          h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y )  + Frame.ExclusionBuffer(f), // frame centre to frame edge
-          h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y )  - Node.CollideRadius(m); // frame centre to circle edge
+
+          // TODO: efficient but doesn't push far enough for oblique angles eg where the frame is an elongated rect
+          // maybe some extra trigonometry can adjust for that?
+          h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ) + Frame.ExclusionBuffer(f), // frame centre to frame edge
+          h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) - Node.CollideRadius(m); // frame centre to circle edge
         ;
           if ( h0 > h1 ) { // overlapping shapes
             // hardcoded 0.5 by experimentation
