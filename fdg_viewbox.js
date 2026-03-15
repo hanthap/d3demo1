@@ -88,6 +88,11 @@ static OnKeyDown(e) {
             .style('fill', Link.FillColour ); 
        // svg.classed('disabled',true);
 
+        gGroup.selectAll('.frame-whole')
+          //  .classed('selected', false)  
+            .classed('disabled', true)
+            ;
+
         break;
 
     case 'End': // release any 'pegged' circles
@@ -190,9 +195,10 @@ static OnMouseDown(e,d) {
 
 //-------------------------------------------------------------------------------
 // seems that d3 drag OnDragEnd event prevents mouseup?
-static OnMouseUp(e,d) {
+static OnClick(e,d) {
 //    console.log('ViewBox.OnMouseUp',e,d,this);
     svg.classed('left-mouse-down',false);
+        body.classed('crosshair',false);
 }
 
 //-------------------------------------------------------------------------------
@@ -253,10 +259,9 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
 
-        if ( ViewBox.DragRectDims == null ) return; // shouldn't happen!
-
-
-    svg.classed('left-mouse-down',false);
+        svg.classed('left-mouse-down',false);
+                body.classed('crosshair',false);
+        if ( ViewBox.DragRectDims == null ) return; // click is treated as drag start
 
     if ( svg.classed("ctrl-down") ) {
         // create a new Frame using ViewBox.SelectRect
@@ -315,7 +320,7 @@ const svg = body.append('svg')
     .attr('viewBox', [-500, -500, 1000, 1000] ) // case-sensitive attribute name !!
     .on('contextmenu',e => e.preventDefault() ) // applies to all elements! => use Ctrl+Shift+I to open Console inspect
     .on('mousedown',ViewBox.OnMouseDown)
-    .on('mouseup',ViewBox.OnMouseUp)
+    .on('click',ViewBox.OnClick)
         .on('wheel',ViewBox.OnWheel)
 
     .call(d3.drag()

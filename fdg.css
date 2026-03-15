@@ -142,7 +142,7 @@ rect.shift-down.frame-rect    {
     cursor: crosshair;
 }
 
-.frame-main  * {
+.frame-whole  * {
     fill-opacity: 0.5;
 }
 
@@ -159,6 +159,10 @@ rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover {
     stroke:black;
     stroke-dasharray: 2,2;
     stroke-opacity: 1;
+}
+
+.frame-whole.shift-down {
+    cursor: zoom-out;
 }
 
 circle.drag_selected {

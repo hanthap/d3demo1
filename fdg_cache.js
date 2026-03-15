@@ -49,7 +49,7 @@ static RefreshSortedNodes() {
 
 static ApplyFrameOrder() {
     // ensure that existing frame shapes are rendered with superset containers behind their nested subsets.
-    gGroup.selectAll('.frame-main') 
+    gGroup.selectAll('.frame-whole') 
         .data(sorted_nodes, Node.UniqueId) // sorted_nodes initialised by Cache.RefreshSortedNodes()
         .order();
 

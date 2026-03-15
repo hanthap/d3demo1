@@ -223,7 +223,7 @@ static DescendantShapesSVG(d) {
             AllDescendantsOf(d).forEach( c => {
                 c.selected = d.selected;
                 } );
-            gGroup.selectAll('.frame-main')
+            gGroup.selectAll('.frame-whole')
                 .filter(f => d.descendants.includes(f)) // or .has(f) ??
                 .classed('selected', d => d.selected)  
                 .classed('disabled', d => !d.selected)
@@ -252,9 +252,14 @@ static DescendantShapesSVG(d) {
    static OnDblClick(e,d) { //  show as a circle , hiding children
         if ( e.ctrlKey ) 
             Frame.SetLocked(d,this);
-        else 
+        else  
             Frame.ToCircle(d, false, d3.pointer(e,svg.node())); // true => implode
-            d.selected = 1;
+        
+        d.selected = 1;
+        d.descendants.forEach(c => c.selected = 1);
+
+
+
         ticked();
 
    }
@@ -379,7 +384,7 @@ const gTop =
         Node.UniqueId) 
     .join('g')  // top-level container for all elements of the frame (rect, image, HTML content) 
         .attr('id', Node.UniqueId)
-        .classed('frame-main',true)
+        .classed('frame-whole',true)
         ;
 
 gTop
