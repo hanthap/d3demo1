@@ -61,7 +61,7 @@ static StubWidth(d) {
 }
 //-------------------------------------------------------------------------------
 // default buffer for non-heading sides
-    static Margin(d) { return 10 }; 
+    static Margin(d) { return 0 }; 
 
 //-------------------------------------------------------------------------------
 
@@ -286,9 +286,11 @@ static DescendantShapesSVG(d) {
     static Height(d) { return d.height + 2*Frame.Margin(d) } ;
     static HeightOuter(d) { return d.height } ;
 
-    static HalfWidth(d)  { return d.width/2 + Frame.Margin(d) };
+    // static HalfWidth(d)  { return d.width/2 + Frame.Margin(d) };
+       static HalfWidth(d)  { return d.width/2 };
 
-    static HalfHeight(d) { return d.height/2 + Frame.Margin(d) };
+//    static HalfHeight(d) { return d.height/2 + Frame.Margin(d) };
+    static HalfHeight(d) { return d.height/2 };
 
     static CornerRadius(d) {  return d.locked ? 0 : 1.5 * radius ;};
    
@@ -314,14 +316,11 @@ static Resize(d) {
 
     if ( !d.locked && visible_children.length ) { 
 
-      // PROBLEM: outer superset has to wait until all inner sets have been positioned & sized
-
         const
             xMax = Math.max( ...visible_children.map( Node.RightOuter ) ) + Frame.Margin(d),
             xMin = Math.min( ...visible_children.map( Node.LeftOuter) ) - Frame.StubWidth(d),
             yMax = Math.max( ...visible_children.map( Node.BottomOuter ) ) + Frame.Margin(d),
             yMin = Math.min( ...visible_children.map( Node.TopOuter ) )  - Frame.BannerHeight(d);
-        // TODO add buffer margin around nested subsets
         d.x = xMin,
         d.y = yMin ,
         d.width = xMax - xMin,
