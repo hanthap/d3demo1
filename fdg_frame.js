@@ -285,7 +285,7 @@ static DescendantShapesSVG(d) {
 
     static CornerRadius(d) {  return d.locked ? 0 : 1.5 * radius ;};
    
-    static TransformImageElement(d) { return `${d.img_transform} scale(0.1)` ; }
+    static TransformImageElement(d) { return `${d.img_transform}` ; }
 //    static TransformImageElement(d) { return `${d.img_transform}` ; }
 
 //-------------------------------------------------------------------------------
@@ -427,9 +427,10 @@ gHeader
 gHeader
     .append('foreignObject')
         .classed('frame-foreignObject',true)
-        .attr('x', Frame.StubWidth)
-        .attr("width", Frame.WidthOuter)
-        .attr('height',Frame.BannerHeight)
+        .attr('x', d => Frame.StubWidth(d)+5)
+        .attr('y', 4)
+        .attr("width", Frame.WidthOuter) // should be inner
+        .attr('height',d => Frame.BannerHeight(d)+5)
         .append('xhtml:div')
             .classed('frame-div',true)
             .html(Label.HtmlText) ;
