@@ -556,14 +556,19 @@ static IsVisible(d) {
 //-------------------------------------------------------------------------------
     static ShowAsFrame(d) {
         try {
-        return d.is_group && Node.HasShape(d) && ( d.locked || HasVisibleChild(d) ) && d.collapsed_into_node == null;
+        return d.is_group 
+            && Node.HasShape(d) 
+            && ( d.locked || HasVisibleChild(d) ) 
+            && d.collapsed_into_node == null;
         } catch (e) { return false }
     }
 
 //-------------------------------------------------------------------------------
 
     static ShowAsCircle(d) {
-        return Node.HasShape(d) && !Node.ShowAsFrame(d) && d.collapsed_into_node == null;
+        return Node.HasShape(d) 
+            && !Node.ShowAsFrame(d) 
+            && d.collapsed_into_node == null;
     }
 
 //-------------------------------------------------------------------------------
@@ -606,7 +611,12 @@ static OnDragStart(e,d) {
         }
 
    else {
-        Node.DraggedD3Selection = selThisNode; // .classed("dragging", true); // add special CSS styling
+        Node.DraggedFromD3Selection = ViewBox.HitTestSelection(e);
+        Node.DraggedFromParentFrames = Node.DraggedFromD3Selection
+                .filter(Node.ShowAsFrame)
+                .filter(f => ChildrenOf(f).includes(d))
+                .data();
+        Node.DraggedD3Selection = selThisNode.classed("dragging", true); 
         Node.BringToFront(Node.DraggedD3Selection);
         }
 
@@ -615,17 +625,10 @@ static OnDragStart(e,d) {
 //-------------------------------------------------------------------------------
 
 static OnDrag(e,d) {
-// TODO: uppdate mouseover ref using document.elementsFromPoint(x, y) - see below
+// TODO: uppdate mouseover ref using HitTestSelection - see below
 
-     const [x, y] = d3.pointer(e); // must use screen space, not SVG space
-
-     const hits = document.elementsFromPoint(x, y)
-         .filter(el => el instanceof SVGElement);
-
-     const svgElement = hits;
-// //    console.log('svgElement',hits, svgElement);
-
-    const selHits = d3.selectAll(svgElement).filter(Node.ShowAsFrame),
+    const 
+        selHits = ViewBox.HitTestSelection(e).filter(Node.ShowAsFrame),
         f = selHits.data().at(1); 
 
         // TODO: If dragged node d is now outside of the innermost locked frame, => "no drop" cursor
@@ -651,23 +654,16 @@ if ( f )
 
 static OnDragEnd(e,d) {
     console.log('Node.OnDragEnd',e,d,this);
-
-   // d3.select(this).classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
-        svg.classed('left-mouse-down',false);
-
+    svg.classed('left-mouse-down',false);  // because OnDragEnd() blocks mouseup?
    const cursor = window.getComputedStyle(this).cursor;
 
-    const [x, y] = d3.pointer(e); // document.elementsFromPoint must use screen space, not SVG space
-
     const 
-        svgElement = document.elementsFromPoint(x, y)
-            .filter(el => el instanceof SVGElement)
-        , selHits = d3.selectAll(svgElement)
-        , f = selHits.data().at(1); // for now, just the top-most SVG element's datum
+        selHits = ViewBox.HitTestSelection(e),
+        f = selHits.data().at(1); // for now, just the top-most SVG element's datum
 
     console.log('d3.select(selHits), f,d',selHits,f,d);
     // TODO: drop node d into the intersection of multiple overlapping frames
-    // excluding any superset frames
+    // BUT EXCLUDING any superset frames
 
     switch ( cursor ) {
 
@@ -687,14 +683,16 @@ static OnDragEnd(e,d) {
 
 // TODO : clean up these lines...
     if ( Node.DraggedD3Selection ) {  
-      //  Node.DraggedD3Selection.classed("dragging", false);
+        Node.DraggedD3Selection.classed("dragging", false);
         Node.DraggedD3Selection = null;
+        Node.DraggedFromD3Selection = null;
+        Node.DraggedFromParentFrames = null; 
         }
 
     if ( DraftLink.LineElement ) DraftLink.OnDragEnd(e);
 
-    if ( ! e.sourceEvent.ctrlKey ) {
-            d.fx = d.fy = null; // Crtl key => node 'stays put'
+    if ( ! ( e.sourceEvent.ctrlKey || d.locked ) ) {
+            d.fx = d.fy = null; // locked or Crtl key => node 'stays put'
         }
 
     ticked();

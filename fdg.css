@@ -361,13 +361,24 @@ rect.valid_target {
 }
 
 
-.locked.frame-rect {
+.locked.frame-rect  {
     stroke:red;
     cursor: grab;
 
 }
+
+.locked.labelmain * {
+    stroke:red;
+    cursor: grab;
+
+}
+
+.locked.left-mouse-down * {
+    cursor:move;
+}
+
 .locked.frame-rect.left-mouse-down {
-    cursor: grabbing;
+    cursor: move;
 
 }
 

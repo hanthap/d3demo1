@@ -294,6 +294,22 @@ static OnDragEnd(e,d) {
 }
 
 //-------------------------------------------------------------------------------
+// return a D3 selection with all SVG elements that contain the pointer coordinates
+// used by Node.OnDragEnd(), OnDrag()
+
+static HitTestSelection(e) {
+
+    const [x, y] = d3.pointer(e); // must use screen space, not SVG space
+
+    const svgElements = document.elementsFromPoint(x, y)
+        .filter(el => el instanceof SVGElement);
+
+    const selHits = d3.selectAll(svgElements);
+
+    return selHits;
+
+}
+
 
 
 }
