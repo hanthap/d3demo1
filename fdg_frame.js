@@ -180,19 +180,6 @@ Cache.ApplyFrameOrder();
 
 }
 
-//-------------------------------------------------------------------------------
-/* // called by ViewBox.OnDragEnd()
-static Create([x,y,width,height],selContents) {
-    // add a new frame node, to contain selContents 
-
-    // TODO    .filter( n is not an ancestor of d ) // prevent circular nesting
-    // TODO    .filter( n is a visible circle ) // prevent extra links to nested children
-    let new_node = Node.Create([x,y,width,height],selContents);
-    Node.ToFrame(new_node); // zoom in by default
-    return new_node;
-
-} */
-
    //-------------------------------------------------------------------------------
 
 static DescendantShapesSVG(d) {
@@ -275,7 +262,6 @@ static DescendantShapesSVG(d) {
    static Top(d) { return d.y - Frame.Margin(d) };
     static TopOuter(d) { return d.y };
 
-// static Top(d) { return d.y - Frame.BannerHeight(d) }; 
 //  TODO avoid unwanted side effects when used by Frame.ContactPoint()
 // Frames must clearly distinguish between 'inner' and 'outer' boundaries. 
  
@@ -299,17 +285,30 @@ static DescendantShapesSVG(d) {
 
     static CornerRadius(d) {  return d.locked ? 0 : 1.5 * radius ;};
    
+    static TransformImageElement(d) { return `${d.img_transform} scale(0.1)` ; }
+//    static TransformImageElement(d) { return `${d.img_transform}` ; }
+
+//-------------------------------------------------------------------------------
+// called at each tick(), for each frame
+
+static TransformGroupElement_XX(d) { 
+        // resize with cicle's radius
+        const 
+            r = d.width, 
+            scale = r / CROP_CIRCLE_RADIUS, 
+            offset = -r;
+        return `translate(${offset}, ${offset}) scale(${scale})`;
+
+}
 
 
     static TransformGroupElement(d) { 
             const 
-                scale = 0.1,
-                xoffset = Frame.LeftOuter(d) + 10, 
-                yoffset = Frame.Top(d);
-            return `translate(${xoffset}, ${yoffset}) scale(${scale})`;
+                xoffset = Frame.LeftOuter(d), 
+                yoffset = Frame.TopOuter(d);
+            return `translate(${xoffset}, ${yoffset})`;
 
     }
-
 //-------------------------------------------------------------------------------
 
 // called by Frame.OnTick()
@@ -403,23 +402,37 @@ gTop
         .on("contextmenu", Frame.OnContextMenu)
         ;
 
-const gHeading = gTop
+const gHeader = gTop
     .filter(d => d.img_src > "" )
-    .append('g') ;
-// TODO: cater for rotated frame-stub on left edge, not just frame-banner
-gHeading
-        .classed('frame-banner',true)
-    //  .attr("class", Label.Classes) // let CSS handle the rest
+    .append('g')
+    .classed('frame-header',true) // this is the element that is transformed every tick
+    ;
+// TODO: cater for rotated frame-stub on left edge, not just frame-header
+
+gHeader 
+    .append('g') // extra level of grouping seems to help
+        .classed("frame-image-whole",true) 
+        .attr('transform','translate(3,3) scale(0.08)') 
         .append('g')
-            .classed("frame-image",true) 
+            .classed("frame-image-clipped",true) 
+            .attr('transform',Frame.TransformGroupElement)  
+            .attr('clip-path','url(#cropCircle)')
             .append('image') 
                 .attr('href',d => d.img_src)
                 .attr('width',CROP_CIRCLE_DIAMETER)
                 .attr('height',CROP_CIRCLE_DIAMETER)
-                .attr('transform', Label.TransformImageElement)  // one-time, position and scale the image relative to its crop circle
+                .attr('transform', Frame.TransformImageElement)
                 ;
-;
 
+gHeader
+    .append('foreignObject')
+        .classed('frame-foreignObject',true)
+        .attr('x', Frame.StubWidth)
+        .attr("width", Frame.WidthOuter)
+        .attr('height',Frame.BannerHeight)
+        .append('xhtml:div')
+            .classed('frame-div',true)
+            .html(Label.HtmlText) ;
 
 }
 

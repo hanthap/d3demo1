@@ -90,22 +90,26 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
     Label.OnTick();
 
     gNode.selectAll('circle,g') // TODO this is a bit hacky, but it means we can apply the same classes to both circles and their nested image groups, without having to duplicate the code for each type of element
+        // TODO: could exclude locked circles (but for the drag selection logic)
          .attr('cx', Node.BoundedX ) 
          .attr('cy', Node.BoundedY )
         .classed('drag_selected', ViewBox.DragRectIncludes )
-        // DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
+        // TODO DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
         .classed('selected', d => d.selected)  
         .classed('disabled', d => !d.selected)  
         ;
 
     gGroup.selectAll('.frame-rect')
+        // TODO: could exclude locked frames (but for the drag selection logic)
+        .classed('drag_selected', ViewBox.DragRectIncludes )
         .attr('x', Frame.LeftOuter ) 
-        .attr('y', Frame.Top )
-        .attr('height', Frame.Height )
+        .attr('y', Frame.TopOuter )
+        .attr('height', Frame.HeightOuter )
         .attr('width', Frame.WidthOuter );
 
-     gGroup.selectAll('.frame-banner')
-      .attr('transform',Frame.TransformGroupElement) 
+     gGroup.selectAll('.frame-header')
+        // keep header at top left of its frame
+       .attr('transform',Frame.TransformGroupElement) 
  ;     
 
 

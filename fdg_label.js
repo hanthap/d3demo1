@@ -22,12 +22,8 @@ class Label extends Node {
             }
     static TransformImageElement(d) { return d.img_transform; }
 
-// THIS MIGHT BE A SUSPECT
 
     static TransformGroupElement(d) { 
-        // TODO: for expanded frames, allow logo to be at top (dedicated header) or centre (background)
-        // 'top header mode' would need special treatment by active-exclusion force
-        // banner header would exclude child shapes from first x pixels of frame
         // resize with cicle's radius
         const 
             w = Label.Width(d), h = Label.Height(d), // cater for rectangular frames as well as circular nodes

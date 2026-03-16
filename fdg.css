@@ -165,6 +165,11 @@ rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover {
     cursor: zoom-out;
 }
 
+.frame-banner {
+        fill-opacity: 0.8;
+        fill:orange;
+}
+
 circle.drag_selected {
     stroke:purple;
     stroke-dasharray: 2,2;
@@ -209,7 +214,7 @@ g.all-links, div.label, foreignObject, xhtml:div {
 }
 
  
-.frame-banner * {
+.frame-header * {
     pointer-events: none; /* let mouse events pass through  
 } /
 
