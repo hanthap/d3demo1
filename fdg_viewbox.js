@@ -298,12 +298,14 @@ static OnDragEnd(e,d) {
 // used by Node.OnDragEnd(), OnDrag()
 
 static HitTestSelection(e) {
-
-    const [x, y] = d3.pointer(e); // must use screen space, not SVG space
-
+//console.log('ViewBox.HitTestSelection(e)',e);
+   // const [x, y] = d3.pointer(e); // must use screen space, not SVG space
+    const [x, y] = [e.sourceEvent.clientX ,e.sourceEvent.clientY]; 
+//console.log('ViewBox.HitTestSelection: d3.pointer(e)',x,y);
+    
     const svgElements = document.elementsFromPoint(x, y)
         .filter(el => el instanceof SVGElement);
-
+//console.log('ViewBox.HitTestSelection:svgElements',svgElements);
     const selHits = d3.selectAll(svgElements);
 
     return selHits;

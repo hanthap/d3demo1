@@ -18,6 +18,8 @@ class Node {
 
     static DragStartPos;
     static DraggedD3Selection;
+    static DraggedFromD3Selection;
+    static DraggedFromParentFrames;
 
 
     constructor( d ) {
@@ -586,7 +588,7 @@ static IsVisible(d) {
     }
 
 // pre-drop sanity check. If false then the dragging circle c shouild have "no-drop" cursor
-    static WouldAcceptChild(n,c) { 
+    static WouldAcceptAsChild(n,c) { 
         // TODO : check that n is not a descendant of c (circular)
         // TODO : check that c is not already a child of n (avoid duplicates)
         // IGNORE if n == c OR n.children contains c
@@ -598,7 +600,8 @@ static IsVisible(d) {
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
-    console.log('Node.OnDragStart',e,d,this);
+    const selHits = ViewBox.HitTestSelection(e);
+ //   console.log('Node.OnDragStart',e,d,this,selHits);
 
     d.fx = e.x; // fix the node position.. 
     d.fy = e.y;     
@@ -611,12 +614,13 @@ static OnDragStart(e,d) {
         }
 
    else {
-        Node.DraggedFromD3Selection = ViewBox.HitTestSelection(e);
+        Node.DraggedFromD3Selection = selHits;
         Node.DraggedFromParentFrames = Node.DraggedFromD3Selection
                 .filter(Node.ShowAsFrame)
                 .filter(f => ChildrenOf(f).includes(d))
                 .data();
         Node.DraggedD3Selection = selThisNode.classed("dragging", true); 
+   //     console.log('OnDragStart: Node.DraggedFromD3Selection',selHits, Node.DraggedFromD3Selection, Node.DraggedFromParentFrames );
         Node.BringToFront(Node.DraggedD3Selection);
         }
 
@@ -626,7 +630,7 @@ static OnDragStart(e,d) {
 
 static OnDrag(e,d) {
 // TODO: uppdate mouseover ref using HitTestSelection - see below
-
+if ( false ) {
     const 
         selHits = ViewBox.HitTestSelection(e).filter(Node.ShowAsFrame),
         f = selHits.data().at(1); 
@@ -640,7 +644,8 @@ static OnDrag(e,d) {
  */
 
 if ( f ) 
-        Node.DraggedD3Selection.classed("no-drop", !Node.WouldAcceptChild(f,d) );
+        Node.DraggedD3Selection.classed("no-drop", !Node.WouldAcceptAsChild(f,d) );
+}
 
     if ( DraftLink.LineElement ) DraftLink.OnDrag(e);
     else { 
@@ -661,14 +666,15 @@ static OnDragEnd(e,d) {
         selHits = ViewBox.HitTestSelection(e),
         f = selHits.data().at(1); // for now, just the top-most SVG element's datum
 
-    console.log('d3.select(selHits), f,d',selHits,f,d);
+  console.log('Node.OnDragEnd(e,d) selHits,f,d',selHits,f,d);
     // TODO: drop node d into the intersection of multiple overlapping frames
     // BUT EXCLUDING any superset frames
 
     switch ( cursor ) {
 
-        case 'cell' : 
-            if (  Node.ShowAsFrame(f) && Node.WouldAcceptChild(f,d) ) {
+       // case 'cell' : 
+        default:
+            if ( Node.ShowAsFrame(f) && Node.WouldAcceptAsChild(f,d) ) {
                 Link.Create(d,f);
                 // TODO: make this more efficient
                 Cache.RefreshAllDescendants();    // descendants, per node
@@ -677,12 +683,13 @@ static OnDragEnd(e,d) {
                 }
         break;
 
-        default:
-            break;
+        // default:
+        //     break;
     }
 
 // TODO : clean up these lines...
     if ( Node.DraggedD3Selection ) {  
+        console.log('OnDragEnd: Node.DraggedFromD3Selection',Node.DraggedFromD3Selection );
         Node.DraggedD3Selection.classed("dragging", false);
         Node.DraggedD3Selection = null;
         Node.DraggedFromD3Selection = null;

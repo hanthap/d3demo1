@@ -51,7 +51,7 @@ const gTop = gNode.selectAll('g')
           ,Label.UniqueId)  
     .join('g')  // all elements of the label (circle, image, HTML content) 
         .attr('id', Label.UniqueId)
-        .classed('labelmain',true)
+        .classed('circle-whole',true)
         .classed('disabled',true)
         ;
 

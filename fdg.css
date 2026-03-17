@@ -367,7 +367,7 @@ rect.valid_target {
 
 }
 
-.locked.labelmain * {
+.locked.circle-whole * {
     stroke:red;
     cursor: grab;
 
