@@ -368,6 +368,8 @@ static AppendDatum(d) {
     d.ancestors = [d];
     d.locked = 0; 
     d.x = d.y = 0;
+    if (!d.bg_fill) d.bg_fill = 'white';
+    if (!d.img_src) d.img_src = 'tba.svg';
     return d;
 }
 
@@ -663,8 +665,8 @@ static OnDragEnd(e,d) {
    const cursor = window.getComputedStyle(this).cursor;
 
     const 
-        selHits = ViewBox.HitTestSelection(e),
-        f = selHits.data().at(1); // for now, just the top-most SVG element's datum
+        selHits = ViewBox.HitTestSelection(e).filter(Node.ShowAsFrame),
+        f  = selHits.data().at(0); // for now, just the top-most SVG element's datum
 
   console.log('Node.OnDragEnd(e,d) selHits,f,d',selHits,f,d);
     // TODO: drop node d into the intersection of multiple overlapping frames
@@ -675,7 +677,18 @@ static OnDragEnd(e,d) {
        // case 'cell' : 
         default:
             if ( Node.ShowAsFrame(f) && Node.WouldAcceptAsChild(f,d) ) {
+                // Step 1: delete node d's current connection to each of its visible parent frames
+                const deleting_links = links
+                    .filter(Link.IsHier)
+                    .filter(e => e.source == d)
+                    .filter(e => Node.DraggedFromParentFrames.includes(e.target));
+                const deleting_set = new Set(deleting_links);
+                  console.log('Node.OnDragEnd(e,d) deleting_set',deleting_set,links);
+                links = links.filter(obj => !deleting_set.has(obj));
+
+
                 Link.Create(d,f);
+                AppendLines();
                 // TODO: make this more efficient
                 Cache.RefreshAllDescendants();    // descendants, per node
                 Cache.RefreshSortedNodes(); 
@@ -689,7 +702,7 @@ static OnDragEnd(e,d) {
 
 // TODO : clean up these lines...
     if ( Node.DraggedD3Selection ) {  
-        console.log('OnDragEnd: Node.DraggedFromD3Selection',Node.DraggedFromD3Selection );
+        console.log('OnDragEnd: Node.DraggedFromD3Selection, Node.DraggedFromParentFrames',Node.DraggedFromD3Selection, Node.DraggedFromParentFrames );
         Node.DraggedD3Selection.classed("dragging", false);
         Node.DraggedD3Selection = null;
         Node.DraggedFromD3Selection = null;
