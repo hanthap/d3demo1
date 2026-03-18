@@ -215,8 +215,8 @@ g.all-links, div.label, foreignObject, xhtml:div {
 
  
 .frame-header * {
-    pointer-events: none; /* let mouse events pass through  
-} /
+    pointer-events: none; /* let mouse events pass through  */
+}
 
 g.foreground * {
     pointer-events: none; /* let mouse events pass through  */
@@ -249,7 +249,7 @@ line.all-linkzones.fixed-target {
 }
 
 polyline.arrow { /* directed line, with arrow */
-    stroke-width: 1.4;
+   /*  stroke-width: 1.4; attribute set in JS */
     marker-mid: url(#arrow);
 
 }
@@ -266,6 +266,16 @@ circle.bullet {
     fill: context-fill;
     stroke: none; 
 } */
+
+
+
+
+polyline.space-bar.selected {
+    visibility:visible;
+}
+
+
+/* , g.all-circles, g.all-frames */
 
 polyline.selected {
     stroke-dasharray: none;
@@ -409,3 +419,16 @@ starting style
 popover
 grid-lanes
 view-source
+
+*/
+
+
+.space-bar polyline {
+    visibility: hidden;
+}
+
+
+.space-bar line {
+pointer-events: none; 
+}
+

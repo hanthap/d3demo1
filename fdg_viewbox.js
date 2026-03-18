@@ -73,7 +73,7 @@ static OnKeyDown(e) {
 
     case 'A' :
         if ( e.ctrlKey) { // Ctrl+A => Select All
-        nodes.filter(Node.ShowAsCircle).forEach( d => d.selected = 1 );
+        nodes.forEach( d => d.selected = 1 );
         links.forEach( d => d.selected = 1 );
         }
         break;
@@ -131,7 +131,8 @@ static OnKeyDown(e) {
         }
         break;
 
-    case 'Space' :
+    case ' ' :
+        svg.classed("space-bar",!svg.classed("space-bar"));
         // TODO: toggle visibility of unselected lines & nodes
         // shift+space add/remove them from the simulation as well
         break;
@@ -181,6 +182,7 @@ switch (e.key) {
     case 'Control':
         svg.classed("ctrl-down",false);
         break;
+
     }
 }
 

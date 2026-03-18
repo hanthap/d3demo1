@@ -373,8 +373,13 @@ static OnClick(e,d) {
 
         default : 
             // Selection propagates, but de-selection does not
-            if ( d.selected ^= 1 ) 
+            if ( d.selected ^= 1 )
                 d.source.selected = d.target.selected = 1;
+                // TODO: set class = selected for source & target elements
+
+            // so space-bar doesn't hide the selected links
+            gLink.selectAll(lnk => lnk == d).classed('selected',d.selected); 
+
             break;
 
     }
