@@ -662,14 +662,18 @@ if ( f )
 static OnDragEnd(e,d) {
 
     console.log('Node.OnDragEnd',e,d,this);
-    svg.classed('left-mouse-down',false);  // because OnDragEnd() blocks mouseup?
+    svg.classed('left-mouse-down',false);  // because OnDragEnd() blocks mouseup
    const cursor = window.getComputedStyle(this).cursor;
 
     const 
-        selHits = ViewBox.HitTestSelection(e).filter(Node.ShowAsFrame),
-        f  = selHits.data().at(0); // for now, just the top-most SVG element's datum
+        selHits = ViewBox.HitTestSelection(e)
+            .filter(Node.ShowAsFrame)
+            .filter(f => Node.WouldAcceptAsChild(f,d)),
+        valid_recipients  = selHits.data(); 
 
-  console.log('Node.OnDragEnd(e,d) selHits,f,d',selHits,f,d);
+        // TODO exclude 'grandparent' recipients with a descendant in selHits
+
+  console.log('Node.OnDragEnd(e,d) selHits,f,d',selHits,valid_recipients,d);
     // TODO: drop node d into the intersection of multiple overlapping frames
     // BUT EXCLUDING any superset frames
 
@@ -677,30 +681,26 @@ static OnDragEnd(e,d) {
 
        // case 'cell' : 
         default:
-            if ( e.sourceEvent.shiftKey ) {
-                if ( Node.ShowAsFrame(f) && Node.WouldAcceptAsChild(f,d) ) {
-                    // Step 1: delete node d's current connection to each of its visible parent frames
+            if ( e.sourceEvent.shiftKey ) { //shiftkey 'feels right' here
+
+                    // Step 1: disconnect from parent frames we captured at start of drag
                     const deleting_links = links
                         .filter(Link.IsHier)
                         .filter(e => e.source === d) 
                         .filter(e => Node.DraggedFromParentFrames.includes(e.target));
                     const deleting_set = new Set(deleting_links);
-                    console.log('Node.OnDragEnd(e,d) deleting_set',deleting_set,links);
-                    links = Node.retained_links = links.filter(obj => !deleting_set.has(obj));
-//links = Node.retained_links;
-                Link.Create(d,f);
-
-                // TODO what else is needed to re-render the nesting of frames in VisibleChildrenOf /active_exclusion
-                // d.inLinks 
+                  //  console.log('Node.OnDragEnd(e,d) deleting_set',deleting_set,links);
+                    links = links.filter(obj => !deleting_set.has(obj));
+                    // create new hierarchical links  
+                valid_recipients.forEach( f => Link.Create(d,f) );
                     // TODO: make this more efficient
-                    Cache.RefreshNodeInOutLinks();
+                    Cache.RefreshNodeInOutLinks(); // important!
                     Cache.RefreshAllDescendants();    // descendants, per node
                     Cache.RefreshSortedNodes(); 
                     Cache.ApplyFrameOrder();
                     AppendLines();
 
                     RefreshSimData();
-                    }
             }
         break;
 
