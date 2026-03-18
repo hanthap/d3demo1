@@ -660,6 +660,7 @@ if ( f )
 //-------------------------------------------------------------------------------
 
 static OnDragEnd(e,d) {
+
     console.log('Node.OnDragEnd',e,d,this);
     svg.classed('left-mouse-down',false);  // because OnDragEnd() blocks mouseup?
    const cursor = window.getComputedStyle(this).cursor;
@@ -676,24 +677,31 @@ static OnDragEnd(e,d) {
 
        // case 'cell' : 
         default:
-            if ( Node.ShowAsFrame(f) && Node.WouldAcceptAsChild(f,d) ) {
-                // Step 1: delete node d's current connection to each of its visible parent frames
-                const deleting_links = links
-                    .filter(Link.IsHier)
-                    .filter(e => e.source == d)
-                    .filter(e => Node.DraggedFromParentFrames.includes(e.target));
-                const deleting_set = new Set(deleting_links);
-                  console.log('Node.OnDragEnd(e,d) deleting_set',deleting_set,links);
-                links = links.filter(obj => !deleting_set.has(obj));
-
-
+            if ( e.sourceEvent.shiftKey ) {
+                if ( Node.ShowAsFrame(f) && Node.WouldAcceptAsChild(f,d) ) {
+                    // Step 1: delete node d's current connection to each of its visible parent frames
+                    const deleting_links = links
+                        .filter(Link.IsHier)
+                        .filter(e => e.source === d) 
+                        .filter(e => Node.DraggedFromParentFrames.includes(e.target));
+                    const deleting_set = new Set(deleting_links);
+                    console.log('Node.OnDragEnd(e,d) deleting_set',deleting_set,links);
+                    links = Node.retained_links = links.filter(obj => !deleting_set.has(obj));
+//links = Node.retained_links;
                 Link.Create(d,f);
-                AppendLines();
-                // TODO: make this more efficient
-                Cache.RefreshAllDescendants();    // descendants, per node
-                Cache.RefreshSortedNodes(); 
-                Cache.ApplyFrameOrder();
-                }
+
+                // TODO what else is needed to re-render the nesting of frames in VisibleChildrenOf /active_exclusion
+                // d.inLinks 
+                    // TODO: make this more efficient
+                    Cache.RefreshNodeInOutLinks();
+                    Cache.RefreshAllDescendants();    // descendants, per node
+                    Cache.RefreshSortedNodes(); 
+                    Cache.ApplyFrameOrder();
+                    AppendLines();
+
+                    RefreshSimData();
+                    }
+            }
         break;
 
         // default:

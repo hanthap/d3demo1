@@ -141,13 +141,15 @@ static RefreshNodeInOutLinks() {
 // final init steps that have to wait until nodes AND links are both populated 
 static AfterLoad() {
     
-    // collect all immediate links into/out of each node regardless of type
+
+// Cache.RefreshNodeInOutLinks(); // no useful here as we have to rely on node_id
+// collect all immediate links into/out of each node regardless of type
     nodes.forEach( d => { 
         d.inLinks  = links.filter( x => ( x.to_node_id   == d.node_id ) ); 
         d.outLinks = links.filter( x => ( x.from_node_id == d.node_id ) );
     } );
 
-// initialise true source/target references in each link
+    // initialise true source/target references in each link
 links.forEach( d => {
     d.true_source = d.source;
     d.true_target = d.target;
