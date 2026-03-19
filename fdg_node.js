@@ -682,7 +682,8 @@ static OnDragEnd(e,d) {
        // case 'cell' : 
         default:
             if ( e.sourceEvent.shiftKey ) { //shiftkey 'feels right' here
-
+                
+                if ( Node.DraggedFromParentFrames ) { // remove old links
                     // Step 1: disconnect from parent frames we captured at start of drag
                     const deleting_links = links
                         .filter(Link.IsHier)
@@ -691,7 +692,9 @@ static OnDragEnd(e,d) {
                     const deleting_set = new Set(deleting_links);
                   //  console.log('Node.OnDragEnd(e,d) deleting_set',deleting_set,links);
                     links = links.filter(obj => !deleting_set.has(obj));
-                    // create new hierarchical links  
+                    // create new hierarchical links 
+                } 
+
                 valid_recipients.forEach( f => Link.Create(d,f) );
                     // TODO: make this more efficient
                     Cache.RefreshNodeInOutLinks(); // important!

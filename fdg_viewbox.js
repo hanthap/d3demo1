@@ -70,13 +70,18 @@ static OnKeyDown(e) {
  ;
  
    switch (e.key) {
-
+    case 'a' :
     case 'A' :
         if ( e.ctrlKey) { // Ctrl+A => Select All
         nodes.forEach( d => d.selected = 1 );
         links.forEach( d => d.selected = 1 );
         }
         break;
+
+
+
+
+
 
     case 'Escape' : 
         // clear all highlights by removing the 'selected' class
@@ -198,10 +203,23 @@ static OnMouseDown(e,d) {
 //-------------------------------------------------------------------------------
 // seems that d3 drag OnDragEnd event prevents mouseup?
 static OnClick(e,d) {
-//    console.log('ViewBox.OnMouseUp',e,d,this);
+    console.log('ViewBox.OnClick',e,d,this);
     svg.classed('left-mouse-down',false);
         body.classed('crosshair',false);
+
+if ( e.ctrlKey && e.shiftKey ) {
+    // set centre of gravity here, for all unlocked & visible & selected circle nodes
+    const [x,y] = d3.pointer(e,svg.node());
+    const a = nodes.filter(Node.ShowAsCircle).filter(d=>d.selected && !d.locked);
+    console.log('ViewBox.OnClick a',a);
+    a.forEach(d => { d.cogX = x; d.cogY = y; } )
+        ;
+    RefreshSimData();
+    ticked();
+    }
+
 }
+
 
 //-------------------------------------------------------------------------------
 

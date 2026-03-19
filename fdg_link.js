@@ -597,6 +597,7 @@ static OnDragEnd(e) {
         // DEBUG: "from_node_id" does not exist in newly added link objects
         if ( mouseover_datum && "source" in mouseover_datum ) { // over valid link => split that link and insert a new node
             // create a new node
+            // TODO: add the new intermediate node as a child of any frames containing at the pointer location
             lnk.target = lnk.true_target = Node.Create({x,y,width:20,height:20});
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
             // also, splice the new node into the existing (mouseover) link
