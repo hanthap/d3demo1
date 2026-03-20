@@ -78,10 +78,29 @@ static OnKeyDown(e) {
         }
         break;
 
+    case 'q' :
+    case 'Q' :
+        if ( e.ctrlKey) { 
+            function randomHex24() {
+                const n = Math.floor(Math.random() * (1 << 24)); // 0 to 2^24 - 1
+                return "#" + n.toString(16).padStart(6, "0");
+            }
 
+        nodes
+            .filter( d => d.selected )
+            .forEach(d=>d.bg_fill = randomHex24() );
 
+        }
+        AppendLabels();
+        AppendFrames();
+        
+        break;
 
-
+// TODO: CTRL+Q randomise bg_fill colour of each selected node, individually
+//  - a 'lazy' way to add/change distinguishing features 
+// ditto for 'random' icons?
+// CTRL+SHIFT+R choose 1 colour and apply that colour to all selected nodes
+// except where the source image is a brand logo
 
     case 'Escape' : 
         // clear all highlights by removing the 'selected' class

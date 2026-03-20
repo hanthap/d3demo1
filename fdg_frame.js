@@ -331,7 +331,67 @@ static Resize(d) {
         d.height =yMax - yMin ;
     } };
 
- 
+ //------------------------------------------------------------
+
+static OnDragStart(e,d) {
+   const selThisNode = d3.select(this);
+//   const selHits = ViewBox.HitTestSelection(e);
+   svg.classed('left-mouse-down',true);
+
+    console.log('Frame.OnDragStart',e,d,this,selThisNode);
+    Frame.DraggedFromInfo = 
+        {   x: d.x, y: d.y, 
+            w: d.width, h: d.height, 
+            cx: d.x+d.width/2, cy: d.y+d.height/2,
+            dx: e.x - d.x, dy: e.y - d.y
+        };
+    Frame.DraggedD3Selection = selThisNode.classed("dragging", true); 
+    Node.BringToFront(Frame.DraggedD3Selection);
+        
+    ticked();
+}
+//-------------------------------------------------------------------------------
+
+static OnDrag(e,d) {
+
+if ( d.locked ) {
+    // move the rect 
+
+} else {
+// induce descendants to move, by setting their COG - let the unlocked frame float with them
+const [x,y] = d3.pointer(e,svg.node());
+
+    d.descendants.forEach(d => { 
+            d.cogX = x - Frame.DraggedFromInfo.dx ; 
+            d.cogY = y - Frame.DraggedFromInfo.dy }
+        )
+            simulation
+                .force( 'cogX', d3.forceX( Node.COGX )
+                    .strength( Node.ForceX ) )
+                .force( 'cogY', d3.forceY( Node.COGY )
+                    .strength( Node.ForceY ) );
+    }
+
+    ticked();
+}
+
+//-------------------------------------------------------------------------------
+
+static OnDragEnd(e,d) {
+
+    console.log('Frame.OnDragEnd',e,d,this);
+    svg.classed('left-mouse-down',false);  // because OnDragEnd() blocks mouseup
+   const cursor = window.getComputedStyle(this).cursor;
+
+    Frame.DraggedD3Selection.classed("dragging", false); 
+    Frame.DraggedD3Selection = null;
+
+    ticked();
+
+}
+
+//-------------------------------------------------------------------------------
+
 }
 
 //-------------------------------------------------------------------------------
@@ -400,6 +460,11 @@ gTop
         .on('mouseover', Frame.OnMouseOver) 
         .on('mouseout', Frame.OnMouseOut)
         .on("contextmenu", Frame.OnContextMenu)
+        .call(d3.drag()
+            .on('start', Frame.OnDragStart)
+            .on('drag', Frame.OnDrag)
+            .on('end', Frame.OnDragEnd)  
+            )
         ;
 
 const gHeader = gTop

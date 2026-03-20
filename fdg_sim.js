@@ -32,6 +32,7 @@ function RunSim() {
       // putting this first =>  better exclusion but less likely to settle
         .force("active_exclusion", active_exclusion) 
 
+        
         .force('collide', d3.forceCollide().radius(Node.CollideRadius))
     
         // electrostatic forces attract/repel based on charge 
@@ -46,16 +47,14 @@ function RunSim() {
         .strength(0.05) 
       ) 
 
-
-        // in case we want to add a per-node centroid, eg as an 'attractor' for specific node clusters
-        // for now, they just help keep nodes near the centre of the window
+        // ViewBox.OnClick now sets attractor centroid (d.cogX, d.cogY) (given SHIFT+CTRL+CLICK) 
 
         .force( 'cogX', d3.forceX( Node.COGX )
             .strength( Node.ForceX ) )
         .force( 'cogY', d3.forceY( Node.COGY )
             .strength( Node.ForceY ) )
 
-        // each edge typically acts as a spring between 2 specific nodes (like a covalent bond)
+        // each edge link can act as a spring between 2 specific nodes (like a covalent bond)
   
         .force('link', d3.forceLink()
             .links(links.filter(Link.ShowAsLine)) 
