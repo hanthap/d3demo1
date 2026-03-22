@@ -78,8 +78,14 @@ static OnKeyDown(e) {
         }
         break;
 
-    case 'q' :
-    case 'Q' :
+
+// CTRL+B randomise bg_fill colour of each selected node, individually
+//  - a 'lazy' way to add/change distinguishing features 
+// ditto for 'random' icons?
+// TODO CTRL+SHIFT+B choose 1 colour and apply that colour to all selected nodes
+// except where the source image is a brand logo
+    case 'b' : 
+    case 'B' :
         if ( e.ctrlKey) { 
             function randomHex24() {
                 const n = Math.floor(Math.random() * (1 << 24)); // 0 to 2^24 - 1
@@ -88,7 +94,7 @@ static OnKeyDown(e) {
 
         nodes
             .filter( d => d.selected )
-            .forEach(d=>d.bg_fill = randomHex24() );
+            .forEach(d=>d.bg_fill = randomHex24());
 
         }
         AppendLabels();
@@ -96,11 +102,6 @@ static OnKeyDown(e) {
         
         break;
 
-// TODO: CTRL+Q randomise bg_fill colour of each selected node, individually
-//  - a 'lazy' way to add/change distinguishing features 
-// ditto for 'random' icons?
-// CTRL+SHIFT+R choose 1 colour and apply that colour to all selected nodes
-// except where the source image is a brand logo
 
     case 'Escape' : 
         // clear all highlights by removing the 'selected' class
@@ -147,10 +148,11 @@ static OnKeyDown(e) {
         }
         break;
 
-    case 's' : // Alt+s => export data as JSON & CSV
+    case 'S' : 
+    case 's' : // Alt+S => export data as JSON & CSV
         if ( e.altKey ) {
             console.log(e);
-            // TODO: keyboard modifiers decide whether TODOwnload just the current selection
+            // TODO: keyboard modifiers decide whether to download just the current selection
             Cache.Download();
         }
         break;

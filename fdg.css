@@ -278,7 +278,7 @@ polyline.space-bar.selected {
 /* , g.all-circles, g.all-frames */
 
 polyline.selected {
-    stroke-dasharray: none;
+    stroke-dasharray: none; /* appear as solid colour */
 }
 
 polyline.xhover { 
@@ -427,6 +427,9 @@ view-source
     visibility: hidden;
 }
 
+.space-bar.selected polyline  {
+        visibility:visible;
+}
 
 .space-bar line {
 pointer-events: none; 

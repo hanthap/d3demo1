@@ -42,7 +42,7 @@ try {
         type_cde: "H",
         distance: 20 * Math.random(),
         strength: 0.4 * Math.random(),
-        id: 'L' + links.length + 1, // unique identifier
+        id: 'L' + Math.round( Math.random() * 1000000 ),
         descriptor: `New link: ${child.node_id} ∈ ${parent.node_id}`,
         opacity: 1
     };
@@ -378,7 +378,7 @@ static OnClick(e,d) {
                 // TODO: set class = selected for source & target elements
 
             // so space-bar doesn't hide the selected links
-            gLink.selectAll(lnk => lnk == d).classed('selected',d.selected); 
+            gLink.selectAll('*').filter(lnk => lnk === d).classed('selected',d.selected); 
 
             break;
 

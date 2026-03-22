@@ -349,7 +349,7 @@ static OnDblClick(e,d) {
 //-------------------------------------------------------------------------------
 
 static AppendDatum(d) {
-    d.charge = 10; // 5 - ( 10 * Math.random()); // repulsive or attractive force
+    d.charge = 10; 
     d.cogX = 0;
     d.cogY = 0;
     d.weight = 0.2;
@@ -632,6 +632,9 @@ static OnDragStart(e,d) {
 
 static OnDrag(e,d) {
 // TODO: uppdate mouseover ref using HitTestSelection - see below
+
+
+
 if ( false ) {
     const 
         selHits = ViewBox.HitTestSelection(e).filter(Node.ShowAsFrame),
@@ -676,6 +679,20 @@ static OnDragEnd(e,d) {
   console.log('Node.OnDragEnd(e,d) selHits,f,d',selHits,valid_recipients,d);
     // TODO: drop node d into the intersection of multiple overlapping frames
     // BUT EXCLUDING any superset frames
+
+// set the dropped node's COG to current pointer x,y
+    const [x,y] = d3.pointer(e,svg.node());
+
+    d.cogX = x ; 
+    d.cogY = y ;
+
+    simulation
+        .force( 'cogX', d3.forceX( Node.COGX )
+            .strength( Node.ForceX ) )
+        .force( 'cogY', d3.forceY( Node.COGY )
+            .strength( Node.ForceY ) );
+
+
 
     switch ( cursor ) {
 
