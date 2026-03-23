@@ -338,12 +338,14 @@ static OnDragStart(e,d) {
 //   const selHits = ViewBox.HitTestSelection(e);
    svg.classed('left-mouse-down',true);
 
+   const [x,y] = d3.pointer(e,svg.node());
+
     console.log('Frame.OnDragStart',e,d,this,selThisNode);
     Frame.DraggedFromInfo = 
         {   x: d.x, y: d.y, 
             w: d.width, h: d.height, 
             cx: d.x+d.width/2, cy: d.y+d.height/2,
-            dx: e.x - d.x, dy: e.y - d.y
+            dx: x - d.x, dy: y - d.y
         };
     Frame.DraggedD3Selection = selThisNode.classed("dragging", true); 
     Node.BringToFront(Frame.DraggedD3Selection);
@@ -354,25 +356,27 @@ static OnDragStart(e,d) {
 
 static OnDrag(e,d) {
 
-if ( d.locked ) {
-    // move the rect 
-
-} else {
-// induce descendants to move, by setting their COG - let the unlocked frame float with them
 const [x,y] = d3.pointer(e,svg.node());
 
-    d.descendants.forEach(d => { 
-            d.cogX = x - Frame.DraggedFromInfo.dx ; 
-            d.cogY = y - Frame.DraggedFromInfo.dy }
-        )
-            simulation
-                .force( 'cogX', d3.forceX( Node.COGX )
-                    .strength( Node.ForceX ) )
-                .force( 'cogY', d3.forceY( Node.COGY )
-                    .strength( Node.ForceY ) );
-    }
 
-    ticked();
+if ( d.locked ) {
+    // move the rect 
+            d.x = x - Frame.DraggedFromInfo.dx ; 
+            d.y = y - Frame.DraggedFromInfo.dy ;
+} 
+
+// regardless, we also induce descendants to move, by setting their COG
+// (If d is unlocked then the frame floats with them...)
+
+d.descendants.forEach(d => { d.cogX = x, d.cogY = y } );
+
+simulation
+    .force( 'cogX', d3.forceX( Node.COGX )
+        .strength( Node.ForceX ) )
+    .force( 'cogY', d3.forceY( Node.COGY )
+        .strength( Node.ForceY ) );
+
+ticked();
 }
 
 //-------------------------------------------------------------------------------

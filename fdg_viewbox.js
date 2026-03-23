@@ -157,6 +157,8 @@ static OnKeyDown(e) {
         }
         break;
 
+
+        // TODO Shift+Cmd+. shows hidden folders in MacOS. Maybe use the same for showing hidden nodes?
     case ' ' :
         svg.classed("space-bar",!svg.classed("space-bar"));
         // TODO: toggle visibility of unselected lines & nodes
