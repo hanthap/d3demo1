@@ -363,20 +363,33 @@ if ( d.locked ) {
     // move the rect 
             d.x = x - Frame.DraggedFromInfo.dx ; 
             d.y = y - Frame.DraggedFromInfo.dy ;
+
+    // TODO: How to treat 'shared custody' child elements 'left behind' inside another locked rect?
+    // Aautomatically show the 'problem' link as a line instead (with the left-behind node staying in its non-dragged container)
+    // that involves creating a polyline, temporarily! Then deleting it as soon as we don't need it any more?
+    // or is it better to create all polylines that only participate in sim & tick while they are visible?
+    // just like other situations where Euler-diagram mode is disabled or unsupported
+    // basically whenever there are 2+ parent nodes with Venn mode preferred, but perimeters not able to intersect
+    // also for each visible parent NOT in Euler mode, we treat the child-to-parent 'H' connection as a directed line instead.
+    
 } 
 
-// regardless, we also induce descendants to move, by setting their COG
-// (If d is unlocked then the frame floats with them...)
+
+// regardless, we also induce all descendants to move en masse, by setting their COG
+// (If d is unlocked then its frame moves with them...)
 
 d.descendants.forEach(d => { d.cogX = x, d.cogY = y } );
 
+// TODO: if we don't explicitly recreate forceX & forceY while dragging, the children 
+// don't move and neither does the floating parent frame?
 simulation
     .force( 'cogX', d3.forceX( Node.COGX )
         .strength( Node.ForceX ) )
     .force( 'cogY', d3.forceY( Node.COGY )
         .strength( Node.ForceY ) );
 
-ticked();
+
+ ticked();
 }
 
 //-------------------------------------------------------------------------------

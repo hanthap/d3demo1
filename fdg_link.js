@@ -373,11 +373,15 @@ static OnClick(e,d) {
 
         default : 
             // Selection propagates, but de-selection does not
-            if ( d.selected ^= 1 )
+            if ( d.selected ^= 1 ) {
                 d.source.selected = d.target.selected = 1;
-                // TODO: set class = selected for source & target elements
+                Node.Activate([d.source,d.target]);
+                
+                // TODO: set classed(selected,true) for source & target elements, (circles AND frames)
+            }
 
-            // so space-bar doesn't hide the selected links
+            // so space-bar doesn't hide the selected links - 
+            // TODO more work needed in CSS for this...
             gLink.selectAll('*').filter(lnk => lnk === d).classed('selected',d.selected); 
 
             break;

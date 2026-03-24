@@ -99,8 +99,10 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         ;
 
     gGroup.selectAll('.frame-rect')
-        // TODO: could exclude locked frames (but for the drag selection logic)
+        // don't exclude locked frame just in case its being dragged
         .classed('drag_selected', ViewBox.DragRectIncludes )
+
+//        .classed('disabled', d => !d.selected)          
         .attr('x', Frame.LeftOuter ) 
         .attr('y', Frame.TopOuter )
         .attr('height', Frame.HeightOuter )
@@ -110,7 +112,6 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         // keep header at top left of its frame
        .attr('transform',Frame.TransformGroupElement) 
  ;     
-
 
 };
 

@@ -339,8 +339,10 @@ static OnDragEnd(e,d) {
 //-------------------------------------------------------------------------------
 // return a D3 selection with all SVG elements that contain the pointer coordinates
 // used by Node.OnDragEnd(), OnDrag()
+// https://en.wikipedia.org/wiki/Canonical_normal_form#Minterm
 
-static HitTestSelection(e) {
+
+static HitTestSelection(e) { // used to determine the "minterm" at the given coords
 //console.log('ViewBox.HitTestSelection(e)',e);
    // const [x, y] = d3.pointer(e); // must use screen space, not SVG space
     const [x, y] = [e.sourceEvent.clientX ,e.sourceEvent.clientY]; 

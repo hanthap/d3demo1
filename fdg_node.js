@@ -633,7 +633,9 @@ static OnDragStart(e,d) {
 static OnDrag(e,d) {
 // TODO: uppdate mouseover ref using HitTestSelection - see below
 
-
+// TODO: check if droppable at this location. If not, then set class so node d appears grey with 'no-drop' cursor
+// for example, if the target dropzone coincides with another unrelated frame.  
+// Override this by pressing Ctrl key and it displays as droppable cursor & colour? (i.e. creates a non-empty intersection)
 
 if ( false ) {
     const 
@@ -770,6 +772,22 @@ static OnDragEnd(e,d) {
 
   console.debug('Exit Node.OnDragEnd');
 */
+}
+
+//-------------------------------------------------------------------------------
+
+static Activate( data ) {
+
+if ( data && data.length ) {
+    d3.selectAll('.circle-whole, .frame-whole')
+    .filter( d => data.includes(d) )
+    .classed('selected',true)
+    .classed('disabled',false) // TODO want to eliminate the need for 'disabled' as a class
+    ;
+
+}
+
+
 }
 
 }
