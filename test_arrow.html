@@ -1,3 +1,32 @@
+<svg width="300" height="200">
+  <defs>
+    <filter id="intersectionFilter" x="0" y="0" width="100%" height="100%">
+      <!-- Bring rect A into the filter -->
+      <feImage href="#rectA" result="A"/>
+      <!-- Bring rect B into the filter -->
+      <feImage href="#rectB" result="B"/>
+
+      <!-- Compute intersection -->
+      <feBlend in="A" in2="B" mode="multiply" result="intersection"/>
+
+      <!-- Tint it -->
+      <feFlood flood-color="rgba(0,0,0,0.8)" result="shade"/>
+      <feComposite in="shade" in2="intersection" operator="in"/>
+    </filter>
+  </defs>
+
+  <!-- Visible rects -->
+  <rect id="rectA" x="40" y="40" width="150" height="100" fill="cyan"/>
+  <rect id="rectB" x="120" y="20" width="150" height="120" fill="lightgreen"/>
+
+  <!-- Apply filter -->
+  <g filter="url(#intersectionFilter)"></g>
+</svg>
+
+
+
+
+
 <svg width="300" height="100">
   <defs>
 
@@ -100,7 +129,7 @@ viewBox="-250 -250 500 500"
 
 
 
-<g id="MSN" class="frame-main disabled frame">
+<g id="MSN" class="frame-whole disabled frame">
   <rect class="frame-rect" id="MSN" rx="24" ry="24" fill="lightblue" x="-124.68223066495243" y="-163.645988076324" height="193.06378719850466" width="187.75549180250334"></rect>
   <g class="banner" transform="translate(-114.68223066495243, -163.645988076324) scale(0.1)">
     <g class="image-group">
@@ -131,6 +160,8 @@ viewBox="-250 -250 500 500"
     <rect x="100" y="100" width="100" height="160" fill="url(#fixedGrad)" />
 </svg>
 
+
+
         <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
 const csv = `
@@ -153,16 +184,5 @@ console.log(csv,data);
 // having loaded it, at least it's now in the browser cache. Any benefit in using the blob while it's in memory? 
 // or just discard after calculating offset and scale?
 
-const
-href = "https://cdn.worldvectorlogo.com/logos/warner-music-international.svg";
-href="https://media.licdn.com/dms/image/v2/D5603AQFpNlTSeZnP1Q/profile-displayphoto-scale_200_200/B56ZriVLHOLAAc-/0/1764733793845?e=1772668800&v=beta&t=uWhfRc_hHs0sa0QOD4I_HTYKo9CKc7W1iSaxEBxENUs";
-   
-
-const img = new Image();
-img.src = href;
-
-img.onload = () => {
-  console.log(img.naturalWidth, img.naturalHeight);
-};
 
 </script>
