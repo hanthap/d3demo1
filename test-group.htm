@@ -1,0 +1,234 @@
+<style>
+
+* {
+    font-family: Arial, Helvetica, sans-serif;
+    }
+
+svg {
+    touch-action: none; /* disable default touch actions e.g. scrolling when touching svg */
+    background-color: lightgray;
+    }
+
+.region-whole * { 
+    filter:grayscale(100%);
+    opacity:0.5;
+}
+
+.region-rect { 
+    fill:aquamarine;
+    fill-opacity: 0.4;
+    stroke:black; /* the "contour" */
+    rx: 16;
+    ry: 16;
+}
+
+.locked * { 
+    stroke:red;
+    rx: 0;
+    ry: 0;
+}
+
+foreignObject {
+    background-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.fob-banner {
+    padding: 5;
+}
+
+.fob-body {
+    font-size: smaller;
+    padding: 5;
+}
+
+.fob-stub {
+    display: flex;
+    text-align: center;
+    vertical-align: center;  /* has no visible effect */
+    transform-origin: top left;
+    transform: translate(0, 300px) rotate(270deg);
+}
+
+.div-stub {
+    padding: 6;
+}
+
+.scrollable {
+  max-height: 100%;
+  overflow-y: auto;    /* enable vertical scrolling */
+  overflow-x: hidden; 
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+
+}
+
+/* 
+.scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+  background: #ddd;
+} */
+
+
+.node-whole * {
+    stroke:black;
+    filter:grayscale(100%);
+    opacity:0.5;
+}
+
+
+
+.selected * { 
+    filter: none; /* full colour */
+    opacity: 1;
+    stroke-width: 1.5;
+}
+
+
+
+.shift-down g.region-whole {
+    cursor: zoom-out;
+}
+
+.shift-down g.node-whole {
+    cursor: zoom-in;
+}
+
+g.empty * {
+    stroke: none;
+    cursor:auto;
+
+}
+
+g:hover * {
+    stroke:black;
+    stroke-dasharray: 2,2;
+}
+
+</style>
+
+<!----------------------------------------------------------------------------------->
+
+<svg class="shift-down" width="600" height="600">
+
+<defs>
+    <clipPath id="cropCircle">
+        <circle cx="150" cy="150" r="150"/>
+    </clipPath>
+</defs>
+
+
+<!----------------------------------------------------------------------------------->
+
+<g class='region-whole selected' transform="translate(80,180)">
+
+    <rect class="region-rect" width="300" height="300" />
+
+    <foreignObject class="fob-banner" x="40" width="260" height="40"  >
+        <div:xhtml>The quick <b>brown</b> fox jumps over the lazy dog.</div:xhtml>
+    </foreignObject>
+
+    <foreignObject class="fob-body scrollable" x="40" y="40" width="259" height="252"  >
+        <div:xhtml >
+
+            - The foreignObject defines a fixed rectangular viewport for the HTML.
+- Inside that viewport, CSS behaves exactly like normal HTML.
+- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed).
+            
+The foreignObject defines a fixed rectangular viewport for the HTML.
+- Inside that viewport, CSS behaves exactly like normal HTML.
+- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed). -->
+            - The foreignObject defines a fixed rectangular viewport for the HTML.
+- Inside that viewport, CSS behaves exactly like normal HTML.
+- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed).
+            
+            - The foreignObject defines a fixed rectangular viewport for the HTML.
+- Inside that viewport, CSS behaves exactly like normal HTML.
+- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed). -->
+
+
+        </div:xhtml>
+    </foreignObject>
+
+    <foreignObject class="fob-stub" width="260" height="40" >
+        <div:xhtml class="div-stub">
+        XYZ # WER-W32  
+    </div:xhtml>
+    </foreignObject>
+
+    <g class="image-clipped" clip-path="url(#cropCircle)"
+        transform="translate(5,5) scale(0.12)">
+
+        <image class="image-raw" width="300" height="300" 
+            href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
+            transform="translate(25,25) scale(0.8)" />
+        
+    </g>
+
+
+
+</image>
+
+</g>
+
+<!----------------------------------------------------------------------------------->
+
+
+<g class='node-whole selected'  transform="translate(430,480)">
+
+    <circle class="node-circle" r="32" cx="-16" cy="-16" fill="lightcoral" />
+
+    <g class="image-clipped" clip-path="url(#cropCircle)"
+        transform=" translate(-32,-32) scale(0.12)">
+
+        <image class="image-raw"
+            href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
+            width="300" height="300" 
+            transform="translate(25,25) scale(0.8)"
+        </image>
+
+    </g>
+
+
+</g>
+
+<!----------------------------------------------------------------------------------->
+
+
+<g class='node-whole empty selected'  transform="translate(530,480)">
+
+    <circle class="node-circle" r="32" cx="-16" cy="-16" fill="lightblue" />
+
+    <g class="image-clipped" clip-path="url(#cropCircle)"
+        transform=" translate(-32,-32) scale(0.12)">
+
+        <image class="image-raw"
+            href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
+            width="300" height="300" 
+            transform="translate(25,25) scale(0.8)"
+        </image>
+
+    </g>
+
+
+</g>
+
+
+
+
+
+
+</svg>
