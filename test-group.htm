@@ -10,17 +10,9 @@ svg {
     background-color: lightgray;
     }
 
-/* these 7 lines finally work but not sure why I have to be so delicate  ...*/
 .cloaked * { visibility: hidden; }
-/* I think it's because there are nested g groups, so have to be specific */
-g.node.whole * { filter: grayscale(100%); opacity: 0.5; }
-g.node.whole.selected * { visibility: visible; filter: none; opacity: 1; }
-
-g.region.whole * { filter: grayscale(100%); opacity: 0.5; }
-g.region.whole.selected * { visibility: visible; filter: none; opacity: 1; }
-
-g.edge.whole * { filter: grayscale(100%); opacity: 0.5; }
-g.edge.whole.selected * { visibility: visible; filter: none; opacity: 1; }
+g.whole * { filter: grayscale(100%); opacity: 0.5; }
+g.whole.selected * { visibility: visible; filter: none; opacity: 1; }
 
 
 .region.rect { 
@@ -101,7 +93,7 @@ g.empty * {
 
 /* g:hover fires for the whole bounding box, and eveything in the group, even if not visible */
 
-g.edge.whole:hover * {
+g.whole:hover * {
     stroke:black;
     stroke-dasharray: 2,2;
 }
