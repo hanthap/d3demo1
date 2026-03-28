@@ -10,6 +10,8 @@ svg {
     background-color: lightgray;
     }
 
+/* selected shapes are always foreground; others are grey (or invisible if 'all' container is cloaked) */
+
 .cloaked * { visibility: hidden; }
 g.whole * { filter: grayscale(100%); opacity: 0.5; }
 g.whole.selected * { visibility: visible; filter: none; opacity: 1; }
@@ -23,9 +25,9 @@ g.whole.selected * { visibility: visible; filter: none; opacity: 1; }
     ry: 16;
 }
 
-.locked * { 
+.region.locked * { 
     stroke:red;
-    rx: 0;
+    rx: 0; /* square corners, for rect */
     ry: 0;
 }
 
@@ -48,18 +50,19 @@ foreignObject {
 .fob.stub {
     display: flex;
     text-align: center;
-    vertical-align: center;  /* has no visible effect */
     transform-origin: top left;
     transform: translate(0, 300px) rotate(270deg);
 }
 
 .div.stub {
     padding: 6;
+    color: blue;
 }
 
+/* enable mouse wheel vertical scrolling of rendered html within card's body area */
 .scrollable {
   max-height: 100%;
-  overflow-y: auto;    /* enable vertical scrolling */
+  overflow-y: auto;    
   overflow-x: hidden; 
   scroll-behavior: smooth;
   scrollbar-width: none;
@@ -71,11 +74,6 @@ foreignObject {
     stroke: black;
 }
 
-
-
-
-
-
 .shift-down g.region.whole {
     cursor: zoom-out;
 }
@@ -84,9 +82,9 @@ foreignObject {
     cursor: zoom-in;
 }
 
-g.empty * {
+g.empty * { /* leaf node, nothing to see inside */
     stroke: none;
-    cursor: auto;
+    cursor: auto; /* no zoom in */
 
 }
 
@@ -98,13 +96,21 @@ g.whole:hover * {
     stroke-dasharray: 2,2;
 }
 
+/* :active = the drag START object, which then stays active until mouse up event */
+g.whole:active * {
+    stroke:red;
+    cursor:move;
+    stroke-width: 2;
+    stroke-dasharray: 3,1;
+}
+
+
 g.edge.whole * {
-    pointer-events: stroke; /* avoids fill, but does include invisible zone stroke */
+    pointer-events: stroke; /* ignore events in fill area, but does include invisible zone stroke */
 }
 
 polyline.edge.line {
     fill: none;
-    stroke: red;
 
 }
 
@@ -144,7 +150,7 @@ g.edge.whole.ctrl-down * {
         <div:xhtml>The quick <b>brown</b> fox jumps over the lazy dog.</div:xhtml>
     </foreignObject>
 
-    <foreignObject class="fob body scrollable" x="40" y="40" width="259" height="252"  >
+    <foreignObject class="fob body scrollable" x="40" y="40" width="259" height="252" >
         <div:xhtml >
 
             - The foreignObject defines a fixed rectangular viewport for the HTML.
@@ -192,11 +198,11 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 </g>
 <!----------------------------------------------------------------------------------->
 
-<g class="all nodes cloaked">
+<g class="all nodes">
 
-<g class='node whole selected'  transform="translate(430,480)">
+<g class='node whole selected locked'   transform="translate(430,480)">
 
-    <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightcoral" />
+    <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightcoral"  />
 
     <g class="image clipped" clip-path="url(#cropCircle)"
         transform=" translate(-32,-32) scale(0.12)">
@@ -215,7 +221,7 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 <!----------------------------------------------------------------------------------->
 
 
-<g class='node whole empty selected'  transform="translate(530,480)">
+<g class='node whole empty selected'   transform="translate(530,480)">
 
     <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightblue" />
 
@@ -242,13 +248,13 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 <g class="all edges cloaked">
 
     <g class="edge whole selected" transform="translate(380,300)">
-        <polyline class="edge line" points="0,0 30,70 80,20" />
+        <polyline class="edge line" points="0,0 30,70 80,20" stroke="blue" />
         <polyline class="edge zone" points="0,0 30,70 80,20" />
         <path d="M 0 0 Q 60 140, 80 20" stroke="green" fill="transparent" />
     </g> 
 
     <g class="edge whole" transform="translate(380,200)">
-        <polyline class="edge line" points="0,0 30,70 80,20" />
+        <polyline class="edge line" points="0,0 30,70 80,20" stroke="orange" />
         <polyline class="edge zone" points="0,0 30,70 80,20" />
         <path d="M 0 0 Q 60 140, 80 20" stroke="green" fill="transparent" />
     </g> 
