@@ -13,17 +13,17 @@ svg {
 /* these 7 lines finally work but not sure why I have to be so delicate  ...*/
 .cloaked * { visibility: hidden; }
 /* I think it's because there are nested g groups, so have to be specific */
-g.node-whole * { filter: grayscale(100%); opacity: 0.5; }
-g.node-whole.selected * { visibility: visible; filter: none; opacity: 1; }
+g.node.whole * { filter: grayscale(100%); opacity: 0.5; }
+g.node.whole.selected * { visibility: visible; filter: none; opacity: 1; }
 
-g.region-whole * { filter: grayscale(100%); opacity: 0.5; }
-g.region-whole.selected * { visibility: visible; filter: none; opacity: 1; }
+g.region.whole * { filter: grayscale(100%); opacity: 0.5; }
+g.region.whole.selected * { visibility: visible; filter: none; opacity: 1; }
 
-g.edge-whole * { filter: grayscale(100%); opacity: 0.5; }
-g.edge-whole.selected * { visibility: visible; filter: none; opacity: 1; }
+g.edge.whole * { filter: grayscale(100%); opacity: 0.5; }
+g.edge.whole.selected * { visibility: visible; filter: none; opacity: 1; }
 
 
-.region-rect { 
+.region.rect { 
     fill:aquamarine;
     fill-opacity: 0.4;
     stroke:black; /* the "contour" */
@@ -44,16 +44,16 @@ foreignObject {
     pointer-events: none; /* let mouse events pass through  */
 }
 
-.fob-banner {
+.fob.banner {
     padding: 5;
 }
 
-.fob-body {
+.fob.body {
     font-size: smaller;
     padding: 5;
 }
 
-.fob-stub {
+.fob.stub {
     display: flex;
     text-align: center;
     vertical-align: center;  /* has no visible effect */
@@ -61,7 +61,7 @@ foreignObject {
     transform: translate(0, 300px) rotate(270deg);
 }
 
-.div-stub {
+.div.stub {
     padding: 6;
 }
 
@@ -75,7 +75,7 @@ foreignObject {
 
 }
 
-.node-whole * {
+.node.whole * {
     stroke: black;
 }
 
@@ -84,11 +84,11 @@ foreignObject {
 
 
 
-.shift-down g.region-whole {
+.shift-down g.region.whole {
     cursor: zoom-out;
 }
 
-.shift-down g.node-whole {
+.shift-down g.node.whole {
     cursor: zoom-in;
 }
 
@@ -101,22 +101,22 @@ g.empty * {
 
 /* g:hover fires for the whole bounding box, and eveything in the group, even if not visible */
 
-g.edge-whole:hover * {
+g.edge.whole:hover * {
     stroke:black;
     stroke-dasharray: 2,2;
 }
 
-g.edge-whole * {
+g.edge.whole * {
     pointer-events: stroke; /* avoids fill, but does include invisible zone stroke */
 }
 
-polyline.edge-line {
+polyline.edge.line {
     fill: none;
     stroke: red;
 
 }
 
-polyline.edge-zone {
+polyline.edge.zone {
     fill: none;
     stroke-width: 10;
     stroke: transparent; 
@@ -124,7 +124,7 @@ polyline.edge-zone {
 
 }
 
-g.edge-whole.ctrl-down * {
+g.edge.whole.ctrl-down * {
     cursor:grab;
 }
 
@@ -143,16 +143,16 @@ g.edge-whole.ctrl-down * {
 
 
 <!----------------------------------------------------------------------------------->
-<g class="all-regions cloaked">
-<g class='region-whole selected' transform="translate(80,180)">
+<g class="all regions cloaked">
+<g class='region whole selected' transform="translate(80,180)">
 
-    <rect class="region-rect" width="300" height="300" />
+    <rect class="region rect" width="300" height="300" />
 
-    <foreignObject class="fob-banner" x="40" width="260" height="40"  >
+    <foreignObject class="fob banner" x="40" width="260" height="40"  >
         <div:xhtml>The quick <b>brown</b> fox jumps over the lazy dog.</div:xhtml>
     </foreignObject>
 
-    <foreignObject class="fob-body scrollable" x="40" y="40" width="259" height="252"  >
+    <foreignObject class="fob body scrollable" x="40" y="40" width="259" height="252"  >
         <div:xhtml >
 
             - The foreignObject defines a fixed rectangular viewport for the HTML.
@@ -178,16 +178,16 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
         </div:xhtml>
     </foreignObject>
 
-    <foreignObject class="fob-stub" width="260" height="40" >
-        <div:xhtml class="div-stub">
+    <foreignObject class="fob stub" width="260" height="40" >
+        <div:xhtml class="div stub">
         XYZ # WER-W32  
     </div:xhtml>
     </foreignObject>
 
-    <g class="image-clipped" clip-path="url(#cropCircle)"
+    <g class="image clipped" clip-path="url(#cropCircle)"
         transform="translate(5,5) scale(0.12)">
 
-        <image class="image-raw" width="300" height="300" 
+        <image class="image raw" width="300" height="300" 
             href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
             transform="translate(25,25) scale(0.8)" />
         
@@ -200,16 +200,16 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 </g>
 <!----------------------------------------------------------------------------------->
 
-<g class="all-nodes cloaked">
+<g class="all nodes cloaked">
 
-<g class='node-whole selected'  transform="translate(430,480)">
+<g class='node whole selected'  transform="translate(430,480)">
 
-    <circle class="node-circle" r="32" cx="-16" cy="-16" fill="lightcoral" />
+    <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightcoral" />
 
-    <g class="image-clipped" clip-path="url(#cropCircle)"
+    <g class="image clipped" clip-path="url(#cropCircle)"
         transform=" translate(-32,-32) scale(0.12)">
 
-        <image class="image-raw"
+        <image class="image raw"
             href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
             width="300" height="300" 
             transform="translate(25,25) scale(0.8)"
@@ -223,14 +223,14 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 <!----------------------------------------------------------------------------------->
 
 
-<g class='node-whole empty selected'  transform="translate(530,480)">
+<g class='node whole empty selected'  transform="translate(530,480)">
 
-    <circle class="node-circle" r="32" cx="-16" cy="-16" fill="lightblue" />
+    <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightblue" />
 
-    <g class="image-clipped" clip-path="url(#cropCircle)"
+    <g class="image clipped" clip-path="url(#cropCircle)"
         transform="translate(-32,-32) scale(0.12)">
 
-        <image class="image-raw"
+        <image class="image raw"
             href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
             width="300" height="300" 
             transform="translate(25,25) scale(0.8)"
@@ -247,17 +247,17 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 <!----------------------------------------------------------------------------------->
 
 
-<g class="all-edges cloaked">
+<g class="all edges cloaked">
 
-    <g class="edge-whole selected" transform="translate(380,300)">
-        <polyline class="edge-line" points="0,0 30,70 80,20" />
-        <polyline class="edge-zone" points="0,0 30,70 80,20" />
+    <g class="edge whole selected" transform="translate(380,300)">
+        <polyline class="edge line" points="0,0 30,70 80,20" />
+        <polyline class="edge zone" points="0,0 30,70 80,20" />
         <path d="M 0 0 Q 60 140, 80 20" stroke="green" fill="transparent" />
     </g> 
 
-    <g class="edge-whole" transform="translate(380,200)">
-        <polyline class="edge-line" points="0,0 30,70 80,20" />
-        <polyline class="edge-zone" points="0,0 30,70 80,20" />
+    <g class="edge whole" transform="translate(380,200)">
+        <polyline class="edge line" points="0,0 30,70 80,20" />
+        <polyline class="edge zone" points="0,0 30,70 80,20" />
         <path d="M 0 0 Q 60 140, 80 20" stroke="green" fill="transparent" />
     </g> 
 
