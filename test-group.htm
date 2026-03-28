@@ -2,6 +2,7 @@
 
 * {
     font-family: Arial, Helvetica, sans-serif;
+
     }
 
 svg {
@@ -32,6 +33,7 @@ foreignObject {
     background-color: transparent;
     -webkit-user-select: none;
     user-select: none;
+    pointer-events: none; /* let mouse events pass through  */
 }
 
 .fob-banner {
@@ -61,28 +63,14 @@ foreignObject {
   overflow-x: hidden; 
   scroll-behavior: smooth;
   scrollbar-width: none;
+  pointer-events: all;
 
 }
-
-/* 
-.scrollable::-webkit-scrollbar {
-  width: 8px;
-}
-
-.scrollable::-webkit-scrollbar-thumb {
-  background: #666;
-  border-radius: 4px;
-}
-
-.scrollable::-webkit-scrollbar-track {
-  background: #ddd;
-} */
-
 
 .node-whole * {
-    stroke:black;
-    filter:grayscale(100%);
-    opacity:0.5;
+    stroke: black;
+    filter: grayscale(100%);
+    opacity: 0.5;
 }
 
 
@@ -105,14 +93,36 @@ foreignObject {
 
 g.empty * {
     stroke: none;
-    cursor:auto;
+    cursor: auto;
 
 }
+
+
+/* g:hover fires for the whole bounding box, and eveything in the group, even if not visible */
 
 g:hover * {
     stroke:black;
     stroke-dasharray: 2,2;
 }
+
+g.edge-whole * {
+      pointer-events:stroke; /* avoids fill, but does include invisible zone stroke */
+}
+
+polyline.edge-line {
+    fill: none;
+    stroke: black;
+
+}
+
+polyline.edge-zone {
+    fill: none;
+    stroke-width: 10;
+    stroke: transparent; 
+    stroke-dasharray: none;
+
+}
+
 
 </style>
 
@@ -213,7 +223,7 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
     <circle class="node-circle" r="32" cx="-16" cy="-16" fill="lightblue" />
 
     <g class="image-clipped" clip-path="url(#cropCircle)"
-        transform=" translate(-32,-32) scale(0.12)">
+        transform="translate(-32,-32) scale(0.12)">
 
         <image class="image-raw"
             href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
@@ -227,7 +237,13 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 </g>
 
 
+<g class="edge-whole selected" transform="translate(0,0)">
+<polyline class="edge-line" points="0,0 30,70 80,20" />
+<polyline class="edge-zone" points="0,0 30,70 80,20" />
+<path d="M 0 0 Q 60 140, 80 20" stroke="green" fill="transparent" />
 
+
+</g> 
 
 
 
