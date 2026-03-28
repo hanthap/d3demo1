@@ -10,10 +10,18 @@ svg {
     background-color: lightgray;
     }
 
-.region-whole * { 
-    filter:grayscale(100%);
-    opacity:0.5;
-}
+/* these 7 lines finally work but not sure why I have to be so delicate  ...*/
+.cloaked * { visibility: hidden; }
+/* I think it's because there are nested g groups, so have to be specific */
+g.node-whole * { filter: grayscale(100%); opacity: 0.5; }
+g.node-whole.selected * { visibility: visible; filter: none; opacity: 1; }
+
+g.region-whole * { filter: grayscale(100%); opacity: 0.5; }
+g.region-whole.selected * { visibility: visible; filter: none; opacity: 1; }
+
+g.edge-whole * { filter: grayscale(100%); opacity: 0.5; }
+g.edge-whole.selected * { visibility: visible; filter: none; opacity: 1; }
+
 
 .region-rect { 
     fill:aquamarine;
@@ -69,17 +77,10 @@ foreignObject {
 
 .node-whole * {
     stroke: black;
-    filter: grayscale(100%);
-    opacity: 0.5;
 }
 
 
 
-.selected * { 
-    filter: none; /* full colour */
-    opacity: 1;
-    stroke-width: 1.5;
-}
 
 
 
@@ -100,18 +101,18 @@ g.empty * {
 
 /* g:hover fires for the whole bounding box, and eveything in the group, even if not visible */
 
-g:hover * {
+g.edge-whole:hover * {
     stroke:black;
     stroke-dasharray: 2,2;
 }
 
 g.edge-whole * {
-      pointer-events:stroke; /* avoids fill, but does include invisible zone stroke */
+    pointer-events: stroke; /* avoids fill, but does include invisible zone stroke */
 }
 
 polyline.edge-line {
     fill: none;
-    stroke: black;
+    stroke: red;
 
 }
 
@@ -123,12 +124,16 @@ polyline.edge-zone {
 
 }
 
+g.edge-whole.ctrl-down * {
+    cursor:grab;
+}
+
 
 </style>
 
 <!----------------------------------------------------------------------------------->
 
-<svg class="shift-down" width="600" height="600">
+<svg class="ctrl-down" width="600" height="600">
 
 <defs>
     <clipPath id="cropCircle">
@@ -138,7 +143,7 @@ polyline.edge-zone {
 
 
 <!----------------------------------------------------------------------------------->
-
+<g class="all-regions cloaked">
 <g class='region-whole selected' transform="translate(80,180)">
 
     <rect class="region-rect" width="300" height="300" />
@@ -191,11 +196,11 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 
 
 </image>
-
 </g>
-
+</g>
 <!----------------------------------------------------------------------------------->
 
+<g class="all-nodes cloaked">
 
 <g class='node-whole selected'  transform="translate(430,480)">
 
@@ -236,15 +241,28 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 
 </g>
 
+</g>
 
-<g class="edge-whole selected" transform="translate(0,0)">
-<polyline class="edge-line" points="0,0 30,70 80,20" />
-<polyline class="edge-zone" points="0,0 30,70 80,20" />
-<path d="M 0 0 Q 60 140, 80 20" stroke="green" fill="transparent" />
-
-
-</g> 
+<!----------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------->
 
 
+<g class="all-edges cloaked">
+
+    <g class="edge-whole selected" transform="translate(380,300)">
+        <polyline class="edge-line" points="0,0 30,70 80,20" />
+        <polyline class="edge-zone" points="0,0 30,70 80,20" />
+        <path d="M 0 0 Q 60 140, 80 20" stroke="green" fill="transparent" />
+    </g> 
+
+    <g class="edge-whole" transform="translate(380,200)">
+        <polyline class="edge-line" points="0,0 30,70 80,20" />
+        <polyline class="edge-zone" points="0,0 30,70 80,20" />
+        <path d="M 0 0 Q 60 140, 80 20" stroke="green" fill="transparent" />
+    </g> 
+
+
+
+</g>
 
 </svg>
