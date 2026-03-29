@@ -10,6 +10,24 @@ svg {
     background-color: lightgray;
     }
 
+svg.zoomable {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;      /* hide content when panned */
+  touch-action: none;    /* allow custom pinch/drag handling */
+  cursor: grab;          /* visual hint for panning */
+}
+
+svg.zoomable:active {
+  cursor: grabbing;
+}
+
+/* Optional: the inner group that you transform for zoom/pan */
+svg.zoomable g.viewport {
+  transform-origin: 0 0; /* makes math simpler when using viewBox-like transforms */
+  ;
+}
+
 /* selected shapes are always foreground; others are grey (or invisible if 'all' container is cloaked) */
 
 .cloaked * { visibility: hidden; }
@@ -52,6 +70,10 @@ foreignObject {
     text-align: center;
     transform-origin: top left;
     transform: translate(0, 300px) rotate(270deg);
+}
+
+.fob.tag * {
+    color: orange;
 }
 
 .div.stub {
@@ -129,9 +151,12 @@ g.edge.whole.ctrl-down * {
 
 </style>
 
+
 <!----------------------------------------------------------------------------------->
 
-<svg class="ctrl-down" width="600" height="600">
+<!-- <svg class="ctrl-down" width="600" height="600"> -->
+
+<svg class="zoomable ctrl-down" viewBox="0 0 800 600">
 
 <defs>
     <clipPath id="cropCircle">
@@ -139,9 +164,10 @@ g.edge.whole.ctrl-down * {
     </clipPath>
 </defs>
 
+<g class="viewport" transform="translate(-10,60) scale(1)">
 
 <!----------------------------------------------------------------------------------->
-<g class="all regions cloaked">
+<g class="all regions">
 <g class='region whole selected' transform="translate(80,180)">
 
     <rect class="region rect" width="300" height="300" />
@@ -200,7 +226,7 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 
 <g class="all nodes">
 
-<g class='node whole selected locked'   transform="translate(430,480)">
+<g class='node whole selected locked' transform="translate(430,480)">
 
     <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightcoral"  />
 
@@ -215,13 +241,17 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 
     </g>
 
+    <foreignObject class="fob tag" x="-45" y="20" width="60" height="40"  >
+        <div:xhtml>Citibank</div:xhtml>
+    </foreignObject>    
+
 
 </g>
 
 <!----------------------------------------------------------------------------------->
 
 
-<g class='node whole empty selected'   transform="translate(530,480)">
+<g class='node whole empty selected'   transform="translate(16,16)">
 
     <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightblue" />
 
@@ -260,7 +290,66 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
     </g> 
 
 
+</g>
 
 </g>
 
 </svg>
+
+<script>
+const svg = document.querySelector("svg.zoomable");
+const vp  = svg.querySelector("g.viewport");
+
+let scale = 1;
+let panX = 0;
+let panY = 0;
+
+let isPanning = false;
+let startX = 0;
+let startY = 0;
+
+// --- Wheel zoom ---
+svg.addEventListener("wheel", e => {
+  e.preventDefault();
+
+  const zoomFactor = 1.1;
+  const direction = e.deltaY < 0 ? 1 : -1;
+  const newScale = scale * (direction > 0 ? zoomFactor : 1 / zoomFactor);
+
+  // Zoom around mouse position
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX;
+  pt.y = e.clientY;
+  const cursor = pt.matrixTransform(vp.getScreenCTM().inverse());
+
+  panX = cursor.x - (cursor.x - panX) * (newScale / scale);
+  panY = cursor.y - (cursor.y - panY) * (newScale / scale);
+
+  scale = newScale;
+  update();
+}, { passive: false });
+
+// --- Drag pan ---
+svg.addEventListener("mousedown", e => {
+  isPanning = true;
+  startX = e.clientX - panX;
+  startY = e.clientY - panY;
+});
+
+window.addEventListener("mousemove", e => {
+  if (!isPanning) return;
+  panX = e.clientX - startX;
+  panY = e.clientY - startY;
+  update();
+});
+
+window.addEventListener("mouseup", () => {
+  isPanning = false;
+});
+
+// --- Apply transform ---
+function update() {
+  vp.setAttribute("transform", `translate(${panX},${panY}) scale(${scale})`);
+}
+
+</script>
