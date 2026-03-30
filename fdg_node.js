@@ -380,9 +380,9 @@ static Create( {x,y,width,height}, selNodes=null) {
 //debugger;
 
     const d = Node.AppendDatum({ node_id : 'N' + Math.round( Math.random() * 1000000 ) });
-    if (x) { d.x = x; d.y = y; }
+    if (x) { d.cogX = d.x = x; d.cogY = d.y = y; }
     if (width) { d.width = width; d.Height = height };
-
+    d.selected = 1; 
 
     nodes.push(d);
     mapNodes.set(d.node_id, d);
@@ -777,13 +777,13 @@ static OnDragEnd(e,d) {
 //-------------------------------------------------------------------------------
 
 static Activate( data ) {
-
-if ( data && data.length ) {
-    d3.selectAll('.circle-whole, .frame-whole')
-    .filter( d => data.includes(d) )
-    .classed('selected',true)
-    .classed('disabled',false) // TODO want to eliminate the need for 'disabled' as a class
-    ;
+    data.forEach( d => d.selected = 1); 
+    if ( data && data.length ) {
+        d3.selectAll('.circle-whole, .frame-whole')
+        .filter( d => data.includes(d) )
+        .classed('selected',true)
+        .classed('disabled',false) // TODO want to eliminate the need for 'disabled' as a class
+        ;
 
 }
 

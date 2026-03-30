@@ -274,86 +274,41 @@ function IsActiveLink(d) {
     return true;
 }
 
-//-------------------------------------------------------------------------------
-
-function AppendLines_OK() {
-
-    gLinkZone.selectAll('line') 
-        .data(Cache.VisibleLines(),Link.UniqueId)
-        .join('line')
-        .attr('id', Link.UniqueId)
-        .on('click',LinkZone.OnClick)
-        .on('mouseover',LinkZone.OnMouseOver)
-        .on('mouseout',LinkZone.OnMouseOut)
-        .on('mousedown',ViewBox.OnMouseDown)
-        .on('mouseup',ViewBox.OnMouseUp)
-        .on('contextmenu',LinkZone.OnContextMenu)
-    //    .style('stroke-width',LinkZone.StrokeWidth) // TBC - maybe leave it to CSS
-        .call(d3.drag()
-            .on('start',LinkZone.OnDragStart)
-            .on('drag',LinkZone.OnDrag)
-            .on('end',LinkZone.OnDragEnd)  
-            ) 
-        // .append('title').text(Link.TitleText)
-        ;
-
-    gLink.selectAll('polyline') 
-        .data(Cache.VisibleLines(),Link.UniqueId)
-        .attr('id', Link.UniqueId)
-        .join('polyline') 
-        .classed('arrow',true)
-        .style('stroke',Link.StrokeColour)
-        .style('stroke-width',Link.StrokeWidth)
-        .style('fill', Link.FillColour ); // for the arrowhead
-        ;
-
-}
-
 //=====================================================================================================================
 
 function AppendLines() {
 
-    /*
-        <g class="edge whole"">
-        <polyline class="edge line" points="0,0 30,70 80,20" stroke="blue" />
-        <polyline class="edge zone" points="0,0 30,70 80,20" />
-    </g> 
-*/
-const gWholeEdges =
+const selWholeEdges =
     gAllEdges.selectAll('.whole') 
         .data(Cache.VisibleLines(),Link.UniqueId)
         .join("g")
-        .attr('id', Link.UniqueId)
+        .attr('id',Link.UniqueId)
         .classed("edge whole",true)
+        .classed("selected",d => d.selected)
         .on('click',LinkZone.OnClick)
         .on('mouseover',LinkZone.OnMouseOver)
         .on('mouseout',LinkZone.OnMouseOut)
         .on('mousedown',ViewBox.OnMouseDown)
         .on('mouseup',ViewBox.OnMouseUp)
         .on('contextmenu',LinkZone.OnContextMenu)
-    //    .style('stroke-width',LinkZone.StrokeWidth) // TBC - maybe leave it to CSS
         .call(d3.drag()
             .on('start',LinkZone.OnDragStart)
             .on('drag',LinkZone.OnDrag)
             .on('end',LinkZone.OnDragEnd)  
             ) 
-        // .append('title').text(Link.TitleText)
         ;
 
-const gNewEdges = gWholeEdges.filter( function() { return this.children.length === 0 } ) ;
+const selNewEdges = selWholeEdges.filter( function() { return this.children.length === 0 } ) ;
 
-gNewEdges.append('polyline')
-        .attr('id',Link.UniqueId)
+selNewEdges.append('polyline')
         .classed("edge line arrow",true)         
-        .style('stroke',Link.StrokeColour)
         .style('stroke-width',Link.StrokeWidth)
-        .style('fill', Link.FillColour ); // for the arrowhead
+        .style('stroke',Link.StrokeColour)
+        .style('fill',Link.FillColour); // for the arrowhead
 
-gNewEdges.append('polyline')
-        .attr('id',Link.UniqueId)
-        .classed("edge zone",true)         
-        ; // I think CSS handles everything
-
+// edge zone ensures a clickable width of at least n pixels as defined in CSS
+selNewEdges.append('polyline')
+        .classed("edge zone",true); // CSS handles everything
 
 }
 
@@ -434,15 +389,7 @@ static OnClick(e,d) {
                 // TODO: set classed(selected,true) for source & target elements, (circles AND frames)
             }
 
-            // so space-bar doesn't hide the selected links - 
-            // TODO more work needed in CSS for this...
-
-            // DEPRECATED
-            gLink.selectAll('*').filter(lnk => lnk === d).classed('selected',d.selected); 
-
-            // NEW version
             gAllEdges.selectAll('.whole').filter(lnk => lnk === d).classed('selected',d.selected); 
-
             break;
 
     }
@@ -486,7 +433,6 @@ static Hover( d, bHovering ) {
 
     if ( Node.DragStartPos ) return; // don't react if user is dragging a circle
  
- //    gLink.selectAll('polyline') // deprecated
     gAllEdges.selectAll('.line') //  TODO change to single select()
         .filter( p => p == d ) // bound to the same datum 
         .classed( 'xhover', bHovering ) // for CSS dash-array
@@ -659,7 +605,6 @@ static OnDragEnd(e) {
         if ( mouseover_datum && "node_id" in mouseover_datum ) { // over valid node => update original link
             lnk.target = lnk.true_target = mouseover_datum;
             }
-        // DEBUG: "from_node_id" does not exist in newly added link objects
         if ( mouseover_datum && "source" in mouseover_datum ) { // over valid link => split that link and insert a new node
             // create a new node
             // TODO: add the new intermediate node as a child of any frames containing at the pointer location
@@ -672,7 +617,7 @@ static OnDragEnd(e) {
 
         else if ( mouseover_datum == null ) { // over empty space => create a new node & link to it
             lnk.target = lnk.true_target = Node.Create({x,y,width:20,height:20});
-            lnk.target.selected = 1; // why does this help?
+         //   lnk.target.selected = 1; // why does this help?
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
         }
 
@@ -688,6 +633,8 @@ static OnDragEnd(e) {
         else { // save the new link and refresh cache
             links.push(lnk);
         }
+        // make sure both ends are selected
+        Node.Activate([lnk.source,lnk.target]); 
         Cache.RefreshNodeInOutLinks();
         AppendLines();
         RefreshSimData();

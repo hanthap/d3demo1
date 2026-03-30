@@ -343,10 +343,9 @@ static OnDragEnd(e,d) {
 
 
 static HitTestSelection(e) { // used to determine the "minterm" at the given coords
-//console.log('ViewBox.HitTestSelection(e)',e);
    // const [x, y] = d3.pointer(e); // must use screen space, not SVG space
     const [x, y] = [e.sourceEvent.clientX ,e.sourceEvent.clientY]; 
-//console.log('ViewBox.HitTestSelection: d3.pointer(e)',x,y);
+//console.log('ViewBox.HitTestSelection: d3.pointer(e)',e,x,y);
     
     const svgElements = document.elementsFromPoint(x, y)
         .filter(el => el instanceof SVGElement);
@@ -357,24 +356,15 @@ static HitTestSelection(e) { // used to determine the "minterm" at the given coo
 
 }
 
+//-------------------------------------------------------------------------------
 
 
 }
 
 
 body = d3.select('body')
-//.on('mousedown', ViewBox.OnMouseDown)
-//.on('mouseup', ViewBox.OnMouseUp)
-.classed('wait',true)
+    .classed('wait',true)
 ;
-
-
-//   .call(d3.drag()
-//             .on('start', Pointer.OnDragStart)
-//             .on('drag', Pointer.OnDrag)
-//             .on('end', Pointer.OnDragEnd)  
-//         );
-  ;
 
 const svg = body.append('svg')
     .attr('width',window.innerWidth)
@@ -394,12 +384,7 @@ const svg = body.append('svg')
         ;
 
 
-
-// static frames (eg swimlanes) stay in place, enforce strict boundary for floating nodes
-// const gStatic = svg.append('g')    .classed( 'static', true );
-
-
-// group frames are passive shapes in the background
+// group frames aka Euler regions & contours are passive shapes in the background
 const gGroup = svg.append('g')
     .classed( 'all-frames', true )
     ;
@@ -407,35 +392,22 @@ const gGroup = svg.append('g')
 const gNode = svg.append('g') // circles = floating nodes
     .classed( 'all_circles', true );
 
-// links are rendered in front of circles. 
-
-// next the polyline edge arrows 
-const gLink = svg.append('g')
-    .classed( 'all-links', true )
-    ;
-// overlay the invisible click zones
-const gLinkZone = svg.append('g')
-    .classed( 'all-linkzones', true )
-
-// new improved 
+// edges are rendered in front of vertex nodes. 
 const gAllEdges = svg.append('g')
-    .classed( 'all edges', true );
+    .classed('all edges',true);
 
     // a foreground layer eg for drag-select rect, pop-up annotations
 const gForeground = svg.append('g')
     .classed( 'foreground', true )
     ;
 
-
-
 const defs = svg.append("defs");
 
-
-
-const context_menu = d3.select('body').append('div')
-    .attr("id","context-menu") ; // let CSS do the rest
-
-
+const context_menu = body
+    // hide the context menu when anything else is clicked
+    .on("click", () => { menu.style("display", "none"); })
+    .append('div')
+        .attr("id","context-menu") ; // let CSS do the rest
 
 
 //-------------------------------------------------------------------------------
@@ -466,7 +438,3 @@ menu.on("click", function(event) {
   console.log("Menu item Clicked:", action);
 });
 
-// hide the context menu when anything else is clicked
-d3.select("body").on("click", () => {
-  menu.style("display", "none");
-});
