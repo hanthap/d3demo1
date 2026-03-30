@@ -417,6 +417,9 @@ const gLink = svg.append('g')
 const gLinkZone = svg.append('g')
     .classed( 'all-linkzones', true )
 
+// new improved 
+const gAllEdges = svg.append('g')
+    .classed( 'all edges', true );
 
     // a foreground layer eg for drag-select rect, pop-up annotations
 const gForeground = svg.append('g')

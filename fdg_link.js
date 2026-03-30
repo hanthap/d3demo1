@@ -133,10 +133,16 @@ static Distance(d) { // callback for d3.forceLink()
 //-------------------------------------------------------------------------------
 // d3selection.each(f) invokes f(d) for each DOM element (accessed via 'this') with d = its bound datum
 
-static OnTick() {
+static OnTick_OK() {
    gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); 
    gLink.selectAll('polyline').each( Link.SetAttributes ); 
 }
+
+static OnTick() {
+   gAllEdges.selectAll('polyline').each( Link.SetAttributes ); 
+}
+
+
 
 //-------------------------------------------------------------------------------
 // Repeated per link, per tick, via selectAll('polyline').each(Link.SetAttributes) 
@@ -270,10 +276,10 @@ function IsActiveLink(d) {
 
 //-------------------------------------------------------------------------------
 
-function AppendLines() {
+function AppendLines_OK() {
 
     gLinkZone.selectAll('line') 
-        .data(links.filter(Link.VisibleLine),Link.UniqueId)
+        .data(Cache.VisibleLines(),Link.UniqueId)
         .join('line')
         .attr('id', Link.UniqueId)
         .on('click',LinkZone.OnClick)
@@ -292,7 +298,7 @@ function AppendLines() {
         ;
 
     gLink.selectAll('polyline') 
-        .data(links.filter(Link.VisibleLine),Link.UniqueId)
+        .data(Cache.VisibleLines(),Link.UniqueId)
         .attr('id', Link.UniqueId)
         .join('polyline') 
         .classed('arrow',true)
@@ -300,6 +306,54 @@ function AppendLines() {
         .style('stroke-width',Link.StrokeWidth)
         .style('fill', Link.FillColour ); // for the arrowhead
         ;
+
+}
+
+//=====================================================================================================================
+
+function AppendLines() {
+
+    /*
+        <g class="edge whole"">
+        <polyline class="edge line" points="0,0 30,70 80,20" stroke="blue" />
+        <polyline class="edge zone" points="0,0 30,70 80,20" />
+    </g> 
+*/
+const gWholeEdges =
+    gAllEdges.selectAll('.whole') 
+        .data(Cache.VisibleLines(),Link.UniqueId)
+        .join("g")
+        .attr('id', Link.UniqueId)
+        .classed("edge whole",true)
+        .on('click',LinkZone.OnClick)
+        .on('mouseover',LinkZone.OnMouseOver)
+        .on('mouseout',LinkZone.OnMouseOut)
+        .on('mousedown',ViewBox.OnMouseDown)
+        .on('mouseup',ViewBox.OnMouseUp)
+        .on('contextmenu',LinkZone.OnContextMenu)
+    //    .style('stroke-width',LinkZone.StrokeWidth) // TBC - maybe leave it to CSS
+        .call(d3.drag()
+            .on('start',LinkZone.OnDragStart)
+            .on('drag',LinkZone.OnDrag)
+            .on('end',LinkZone.OnDragEnd)  
+            ) 
+        // .append('title').text(Link.TitleText)
+        ;
+
+const gNewEdges = gWholeEdges.filter( function() { return this.children.length === 0 } ) ;
+
+gNewEdges.append('polyline')
+        .attr('id',Link.UniqueId)
+        .classed("edge line arrow",true)         
+        .style('stroke',Link.StrokeColour)
+        .style('stroke-width',Link.StrokeWidth)
+        .style('fill', Link.FillColour ); // for the arrowhead
+
+gNewEdges.append('polyline')
+        .attr('id',Link.UniqueId)
+        .classed("edge zone",true)         
+        ; // I think CSS handles everything
+
 
 }
 
@@ -382,7 +436,12 @@ static OnClick(e,d) {
 
             // so space-bar doesn't hide the selected links - 
             // TODO more work needed in CSS for this...
+
+            // DEPRECATED
             gLink.selectAll('*').filter(lnk => lnk === d).classed('selected',d.selected); 
+
+            // NEW version
+            gAllEdges.selectAll('.whole').filter(lnk => lnk === d).classed('selected',d.selected); 
 
             break;
 
@@ -427,9 +486,11 @@ static Hover( d, bHovering ) {
 
     if ( Node.DragStartPos ) return; // don't react if user is dragging a circle
  
-    gLink.selectAll('polyline')
+ //    gLink.selectAll('polyline') // deprecated
+    gAllEdges.selectAll('.line') //  TODO change to single select()
         .filter( p => p == d ) // bound to the same datum 
         .classed( 'xhover', bHovering ) // for CSS dash-array
+        // TODO surely there's a clearer way to set mouseover_datum = d
         .each(d => { mouseover_datum = bHovering ? d : null })
         .style('stroke', Link.StrokeColour )  
         .style('fill', Link.FillColour );  // for arrowhead

@@ -19,6 +19,16 @@ class Cache {
         this.edges = new Map();
     }
 
+
+//-------------------------------------------------------------------------------
+
+static VisibleLines() {
+return links.filter(Link.VisibleLine);
+}
+
+
+//-------------------------------------------------------------------------------
+
 static RefreshAllDescendants() {
 // for each node, find all its descendants and save as list in node datum
 // useful eg for efficient collision detection where subsets may be nested

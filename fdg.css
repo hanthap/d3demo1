@@ -435,3 +435,29 @@ view-source
 pointer-events: none; 
 }
 
+.cloaked * { visibility: hidden; }
+g.whole * { filter: grayscale(100%); opacity: 0.5; }
+g.whole.selected * { visibility: visible; filter: none; opacity: 1; }
+
+g.whole:hover * {
+    stroke:black;
+    stroke-dasharray: 2,2;
+}
+
+
+g.edge.whole * {
+    pointer-events: stroke; /* ignore events in fill area, but does include invisible zone stroke */
+}
+
+polyline.edge.line {
+    fill: none;
+
+}
+
+polyline.edge.zone {
+    fill: none;
+    stroke-width: 10;
+    stroke: transparent;
+    stroke-dasharray: none;
+
+}
