@@ -461,3 +461,51 @@ polyline.edge.zone {
     stroke-dasharray: none;
 
 }
+
+.region.locked * { 
+    stroke:red;
+    rx: 0; /* square corners, for rect */
+    ry: 0;
+}
+
+foreignObject {
+    background-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: none; /* let mouse events pass through  */
+}
+
+.fob.banner {
+    padding: 5;
+}
+
+.fob.body * {
+    font-size: x-small;
+    padding: 5;
+}
+
+.fob.stub {
+    display: flex;
+    text-align: center;
+    transform-origin: top left;
+}
+
+.fob.tag * {
+    color: orange;
+}
+
+.div.stub {
+    padding: 6;
+    color: blue;
+}
+
+/* enable mouse wheel vertical scrolling of rendered html within card's body area */
+.scrollable {
+  max-height: 100%;
+  overflow-y: auto;    
+  overflow-x: hidden; 
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  pointer-events: all;
+
+}

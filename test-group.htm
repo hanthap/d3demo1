@@ -69,7 +69,7 @@ foreignObject {
     display: flex;
     text-align: center;
     transform-origin: top left;
-    transform: translate(0, 300px) rotate(270deg);
+    /* transform: translate(0, 300px) rotate(270deg); */
 }
 
 .fob.tag * {
@@ -202,7 +202,9 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
         </div:xhtml>
     </foreignObject>
 
-    <foreignObject class="fob stub" width="260" height="40" >
+    <foreignObject class="fob stub" width="260" height="40"
+    transform="translate(0,300) rotate(270)" 
+         >
         <div:xhtml class="div stub">
         XYZ # WER-W32  
     </div:xhtml>

@@ -51,13 +51,13 @@ static ExclusionBuffer(d) {
 //-------------------------------------------------------------------------------
 // reserved space for banner heading at top of frame
 static BannerHeight(d) {
-    return 20;
+    return 30;
 }
 
 //-------------------------------------------------------------------------------
 // reserved space for rotated heading at left of frame
 static StubWidth(d) {
-    return 20;
+    return 30;
 }
 //-------------------------------------------------------------------------------
 // default buffer for non-heading sides
@@ -210,11 +210,17 @@ static DescendantShapesSVG(d) {
             AllDescendantsOf(d).forEach( c => {
                 c.selected = d.selected;
                 } );
-            gGroup.selectAll('.frame-whole')
+/*            gGroup.selectAll('.frame-whole')
                 .filter(f => d.descendants.includes(f)) // or .has(f) ??
                 .classed('selected', d => d.selected)  
                 .classed('disabled', d => !d.selected)
                 ;
+*/
+            gAllRegions.selectAll('.whole')
+                .filter(f => d.descendants.includes(f)) // or .has(f) ??
+                .classed('selected', d => d.selected) ;
+
+
             break;
     }
 
@@ -273,9 +279,11 @@ static DescendantShapesSVG(d) {
  
     static Width(d) { return d.width + 2*Frame.Margin(d) } ;
     static WidthOuter(d) { return d.width } ;
+    static WidthInner(d) { return d.width - Frame.StubWidth(d) } ;
 
     static Height(d) { return d.height + 2*Frame.Margin(d) } ;
     static HeightOuter(d) { return d.height } ;
+    static HeightInner(d) { return d.height - Frame.BannerHeight(d) } ;
 
     // static HalfWidth(d)  { return d.width/2 + Frame.Margin(d) };
        static HalfWidth(d)  { return d.width/2 };
@@ -289,58 +297,15 @@ static DescendantShapesSVG(d) {
 
     static TransformWhole(d) { return `translate(${d.x},${d.y})`; }
 
+    static TransformStub(d) { return `translate(0,${d.height}) rotate(270)`; }
 
-//-------------------------------------------------------------------------------
-// called at each tick(), for each frame
-
-/* static TransformGroupElement_XX(d) { 
-        // resize with cicle's radius
-        const 
-            r = d.width, 
-            scale = r / CROP_CIRCLE_RADIUS, 
-            offset = -r;
-        return `translate(${offset}, ${offset}) scale(${scale})`;
-
-}
- */
+    
 //-------------------------------------------------------------------------------
 // final adjustment for the clipped thumbnail image
 // x,y offset from top left corner of the whole g element (which is determined by its rect)
     static TransformClippedImage(d) {
         return "translate(5,3) scale(0.08)";
     }
-
-//-------------------------------------------------------------------------------
-// DEPRECATED
-
-/*     static TransformGroupElement(d) { 
-
-        
-            const 
-                xoffset = Frame.LeftOuter(d), 
-                yoffset = Frame.TopOuter(d);
-            return `translate(${xoffset}, ${yoffset})`;
-
-    }
- *///-------------------------------------------------------------------------------
-
-/* DEPRECATED
-
-static OnTick_OK() {
-        gGroup.selectAll('.frame-rect')
-        // don't exclude locked frame just in case its being dragged
-        .classed('drag_selected', ViewBox.DragRectIncludes )
-        .attr('x', Frame.LeftOuter ) 
-        .attr('y', Frame.TopOuter )
-        .attr('height', Frame.HeightOuter )
-        .attr('width', Frame.WidthOuter );
-
-     gGroup.selectAll('.frame-header')
-        // keep header at top left of its frame
-       .attr('transform',Frame.TransformGroupElement) 
- ;     
-}
- */
 
 //-------------------------------------------------------------------------------
 
@@ -356,7 +321,6 @@ static OnTick() {
 }
 
 //-------------------------------------------------------------------------------
-
 
 // called by active_exclusion force
 
@@ -416,14 +380,13 @@ if ( d.locked ) {
     // that involves creating a polyline, temporarily! Then deleting it as soon as we don't need it any more?
     // or is it better to create all polylines that only participate in sim & tick while they are visible?
     // just like other situations where Euler-diagram mode is disabled or unsupported
-    // basically whenever there are 2+ parent nodes with Venn mode preferred, but perimeters not able to intersect
+    // basically whenever there are 2+ parent nodes with Euler mode preferred, but contours/regions not able to intersect
     // also for each visible parent NOT in Euler mode, we treat the child-to-parent 'H' connection as a directed line instead.
     
 } 
 
-
 // regardless, we also induce all descendants to move en masse, by setting their COG
-// (If d is unlocked then its frame moves with them...)
+// (If d is unlocked then its frame contour moves with them...)
 
 d.descendants.forEach(d => { d.cogX = x, d.cogY = y } );
 
@@ -449,12 +412,54 @@ static OnDragEnd(e,d) {
 
     Frame.DraggedD3Selection.classed("dragging", false); 
     Frame.DraggedD3Selection = null;
+    Frame.ReformatAllLabels();
 
     ticked();
 
 }
 
 //-------------------------------------------------------------------------------
+
+static HtmlNotes() {
+    return`
+                - The foreignObject defines a fixed rectangular viewport for the HTML.
+- Inside that viewport, CSS behaves exactly like normal HTML.
+- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed).
+            
+The foreignObject defines a fixed rectangular viewport for the HTML.
+- Inside that viewport, CSS behaves exactly like normal HTML.
+- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed). -->
+            - The foreignObject defines a fixed rectangular viewport for the HTML.
+- Inside that viewport, CSS behaves exactly like normal HTML.
+- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed).
+            
+            - The foreignObject defines a fixed rectangular viewport for the HTML.
+- Inside that viewport, CSS behaves exactly like normal HTML.
+- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed). -->
+
+    `;
+}
+
+//-------------------------------------------------------------------------------
+
+static ReformatAllLabels() {
+// called after mouse click or drag end
+gAllRegions.selectAll('.banner')
+    .attr('width',Frame.WidthInner);
+
+gAllRegions.selectAll('.stub')
+    .attr('width',Frame.HeightInner)
+    .attr('transform',Frame.TransformStub);
+
+gAllRegions.selectAll('.body')
+    .attr('width',Frame.WidthInner)
+    .attr('height',Frame.HeightInner);
+
+}
 
 }
 
@@ -496,115 +501,6 @@ function AllAncestorsOf(start, visited = new Set(), result = []) {
 
 //-------------------------------------------------------------------------------
 
-function AppendFrameShapes_OK() {
-
-gGroup.selectAll('g').remove();
-
-const gTop = 
-    gGroup.selectAll('rect') 
-      .data(sorted_nodes
-        .filter(Node.ShowAsFrame), 
-        Node.UniqueId) 
-    .join('g')  // top-level container for all elements of the frame (rect, image, HTML content) 
-        .attr('id', Node.UniqueId)
-        .classed('frame-whole',true)
-        ;
-
-gTop
-    .append('rect')
-        .classed('frame-rect',true)
-        .classed('locked',d=>d.locked)
-        .attr('id', Node.UniqueId) 
-        .attr('rx', Frame.CornerRadius)
-        .attr('ry', Frame.CornerRadius)
-        .attr('fill',Node.FillColour) 
-// pointer events should go to (rounded) rect shape, not its parent g
-        .on('click', Frame.OnClick)
-        .on('dblclick', Frame.OnDblClick)
-        .on('mouseover', Frame.OnMouseOver) 
-        .on('mouseout', Frame.OnMouseOut)
-        .on("contextmenu", Frame.OnContextMenu)
-        .call(d3.drag()
-            .on('start', Frame.OnDragStart)
-            .on('drag', Frame.OnDrag)
-            .on('end', Frame.OnDragEnd)  
-            )
-        ;
-
-const gHeader = gTop
-    .filter(d => d.img_src > "" )
-    .append('g')
-    .classed('frame-header',true) // this is the element that is transformed every tick
-    ;
-// TODO: cater for rotated frame-stub on left edge, not just frame-header
-
-gHeader 
-    .append('g') // extra level of grouping seems to help
-        .classed("frame-image-whole",true) 
-        .attr('transform','translate(3,3) scale(0.08)') 
-        .append('g')
-            .classed("frame-image-clipped",true) 
-            .attr('transform',Frame.TransformGroupElement)  
-            .attr('clip-path','url(#cropCircle)')
-            .append('image') 
-                .attr('href',d => d.img_src)
-                .attr('width',CROP_CIRCLE_DIAMETER)
-                .attr('height',CROP_CIRCLE_DIAMETER)
-                .attr('transform', Frame.TransformImageElement)
-                ;
-
-gHeader
-    .append('foreignObject')
-        .classed('frame-foreignObject',true)
-        .attr('x', d => Frame.StubWidth(d)+5)
-        .attr('y', 4)
-        .attr("width", Frame.WidthOuter) // should be inner
-        .attr('height',d => Frame.BannerHeight(d)+5)
-        .append('xhtml:div')
-            .classed('frame-div',true)
-            .html(Label.HtmlText) ;
-
-}
-
-
-//-------------------------------------------------------------------------------
-
-/*
-<g class='region whole' transform="translate(80,180)">
-
-    <rect class="region rect" width="300" height="300" />
-
-    <g class="image clipped" clip-path="url(#cropCircle)"
-        transform="translate(5,5) scale(0.12)">
-
-        <image class="image raw" 
-            width="300" height="300" 
-            href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
-            transform="translate(25,25) scale(0.8)" />
-        
-    </g>
-
-    <foreignObject class="fob banner" x="40" width="260" height="40"  >
-        <div:xhtml>
-            Banner text here
-        </div:xhtml>
-    </foreignObject>
-
-    <foreignObject class="fob stub" width="260" height="40" >
-        <div:xhtml class="div stub">
-            Stub text here
-    </div:xhtml>
-    </foreignObject>
-
-    <foreignObject class="fob body scrollable" x="40" y="40" width="259" height="252" >
-        <div:xhtml >
-            Body text here
-       </div:xhtml>
-    </foreignObject>
-
-</g>        
-*/
-
 function AppendFrameShapes() {
 
 gAllRegions.selectAll('g').remove();
@@ -614,28 +510,26 @@ const selWholeRegions =
       .data(sorted_nodes.filter(Node.ShowAsFrame), 
         Node.UniqueId) 
     .join('g')  // top-level container
-        .attr('id', Node.UniqueId)
+        .attr('id',Node.UniqueId)
         .classed('region whole',true)
         .classed('locked',d=>d.locked)
-// ok for pointer events to go here?
-        .on('click', Frame.OnClick)
-        .on('dblclick', Frame.OnDblClick)
-        .on('mouseover', Frame.OnMouseOver) 
-        .on('mouseout', Frame.OnMouseOut)
-        .on("contextmenu", Frame.OnContextMenu)
+        .on('click',Frame.OnClick)
+        .on('dblclick',Frame.OnDblClick)
+        .on('mouseover',Frame.OnMouseOver) 
+        .on('mouseout',Frame.OnMouseOut)
+        .on("contextmenu",Frame.OnContextMenu)
         .call(d3.drag()
-            .on('start', Frame.OnDragStart)
-            .on('drag', Frame.OnDrag)
-            .on('end', Frame.OnDragEnd)  
+            .on('start',Frame.OnDragStart)
+            .on('drag',Frame.OnDrag)
+            .on('end',Frame.OnDragEnd)  
             )
         ;
 
 selWholeRegions
     .append('rect')
         .classed('region rect',true)
-//        .attr('id', Node.UniqueId) 
-        .attr('rx', Frame.CornerRadius)
-        .attr('ry', Frame.CornerRadius)
+        .attr('rx',Frame.CornerRadius)
+        .attr('ry',Frame.CornerRadius)
         .attr('fill',Node.FillColour) 
 
 const selThumbnails = selWholeRegions
@@ -652,24 +546,40 @@ const selThumbnails = selWholeRegions
                 .attr('transform', Frame.TransformImageElement) // same as for Node unclipped 
                 ;
 
-/*
-    <foreignObject class="fob banner" x="40" width="260" height="40"  >
-        <div:xhtml>
-            Banner text here
-        </div:xhtml>
-    </foreignObject>
-*/
 
 const selBanners = selWholeRegions
-    .filter(d => d.descriptor > "" )
+    .filter(d => d.descriptor > "")
     .append('foreignObject')
         .classed('fob banner',true)
-        .attr('x', Frame.StubWidth)
-//        .attr('y', 0)
-        .attr("width", Frame.WidthInner) 
+        .attr('x',Frame.StubWidth)
+        .attr("width",Frame.WidthInner) 
         .attr('height',Frame.BannerHeight)
         .append('xhtml:div')
             .html(d => d.descriptor) ;
+
+const selStubs = selWholeRegions
+    .filter(d => d.tag > "")
+    .append('foreignObject')
+        .classed('fob stub',true)
+        .attr('height',Frame.StubWidth)
+        .attr('width',Frame.HeightInner) 
+        .attr('transform',Frame.TransformStub)
+        .append('xhtml:div')
+            .html(d => d.tag) ;
+
+const selNotes = selWholeRegions
+    .filter(d => d.descriptor > "")
+    .append('foreignObject')
+        .classed('fob body scrollable',true)
+        .attr('x',Frame.StubWidth)
+        .attr('y',Frame.BannerHeight)
+        .attr("width",Frame.WidthInner) 
+        .attr('height',Frame.HeightInner)
+        .append('xhtml:div')
+            .html(Frame.HtmlNotes) ;
+
+
+
 
 }
 //---------------------------------------------------------------------------------
