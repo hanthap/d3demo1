@@ -389,6 +389,12 @@ const gGroup = svg.append('g')
     .classed( 'all-frames', true )
     ;
 
+// new improved
+const gAllRegions = svg.append('g')
+    .classed('all regions', true)
+    ;
+
+
 const gNode = svg.append('g') // circles = floating nodes
     .classed( 'all_circles', true );
 

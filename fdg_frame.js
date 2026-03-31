@@ -286,12 +286,14 @@ static DescendantShapesSVG(d) {
     static CornerRadius(d) {  return d.locked ? 0 : 1.5 * radius ;};
    
     static TransformImageElement(d) { return `${d.img_transform}` ; }
-//    static TransformImageElement(d) { return `${d.img_transform}` ; }
+
+    static TransformWhole(d) { return `translate(${d.x},${d.y})`; }
+
 
 //-------------------------------------------------------------------------------
 // called at each tick(), for each frame
 
-static TransformGroupElement_XX(d) { 
+/* static TransformGroupElement_XX(d) { 
         // resize with cicle's radius
         const 
             r = d.width, 
@@ -300,18 +302,63 @@ static TransformGroupElement_XX(d) {
         return `translate(${offset}, ${offset}) scale(${scale})`;
 
 }
+ */
+//-------------------------------------------------------------------------------
+// final adjustment for the clipped thumbnail image
+// x,y offset from top left corner of the whole g element (which is determined by its rect)
+    static TransformClippedImage(d) {
+        return "translate(5,3) scale(0.08)";
+    }
 
+//-------------------------------------------------------------------------------
+// DEPRECATED
 
-    static TransformGroupElement(d) { 
+/*     static TransformGroupElement(d) { 
+
+        
             const 
                 xoffset = Frame.LeftOuter(d), 
                 yoffset = Frame.TopOuter(d);
             return `translate(${xoffset}, ${yoffset})`;
 
     }
+ *///-------------------------------------------------------------------------------
+
+/* DEPRECATED
+
+static OnTick_OK() {
+        gGroup.selectAll('.frame-rect')
+        // don't exclude locked frame just in case its being dragged
+        .classed('drag_selected', ViewBox.DragRectIncludes )
+        .attr('x', Frame.LeftOuter ) 
+        .attr('y', Frame.TopOuter )
+        .attr('height', Frame.HeightOuter )
+        .attr('width', Frame.WidthOuter );
+
+     gGroup.selectAll('.frame-header')
+        // keep header at top left of its frame
+       .attr('transform',Frame.TransformGroupElement) 
+ ;     
+}
+ */
+
 //-------------------------------------------------------------------------------
 
-// called by Frame.OnTick()
+static OnTick() {
+    gAllRegions.selectAll('.whole')
+        // don't exclude locked frame just in case its being dragged
+        .classed('drag_selected',ViewBox.DragRectIncludes)
+        .attr('transform',Frame.TransformWhole);
+
+    gAllRegions.selectAll('.rect')
+        .attr('height',Frame.HeightOuter)
+        .attr('width',Frame.WidthOuter);
+}
+
+//-------------------------------------------------------------------------------
+
+
+// called by active_exclusion force
 
 static Resize(d) {
 
@@ -449,7 +496,7 @@ function AllAncestorsOf(start, visited = new Set(), result = []) {
 
 //-------------------------------------------------------------------------------
 
-function AppendFrameShapes() {
+function AppendFrameShapes_OK() {
 
 gGroup.selectAll('g').remove();
 
@@ -519,6 +566,112 @@ gHeader
 
 }
 
+
+//-------------------------------------------------------------------------------
+
+/*
+<g class='region whole' transform="translate(80,180)">
+
+    <rect class="region rect" width="300" height="300" />
+
+    <g class="image clipped" clip-path="url(#cropCircle)"
+        transform="translate(5,5) scale(0.12)">
+
+        <image class="image raw" 
+            width="300" height="300" 
+            href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
+            transform="translate(25,25) scale(0.8)" />
+        
+    </g>
+
+    <foreignObject class="fob banner" x="40" width="260" height="40"  >
+        <div:xhtml>
+            Banner text here
+        </div:xhtml>
+    </foreignObject>
+
+    <foreignObject class="fob stub" width="260" height="40" >
+        <div:xhtml class="div stub">
+            Stub text here
+    </div:xhtml>
+    </foreignObject>
+
+    <foreignObject class="fob body scrollable" x="40" y="40" width="259" height="252" >
+        <div:xhtml >
+            Body text here
+       </div:xhtml>
+    </foreignObject>
+
+</g>        
+*/
+
+function AppendFrameShapes() {
+
+gAllRegions.selectAll('g').remove();
+
+const selWholeRegions = 
+    gAllRegions.selectAll('g') 
+      .data(sorted_nodes.filter(Node.ShowAsFrame), 
+        Node.UniqueId) 
+    .join('g')  // top-level container
+        .attr('id', Node.UniqueId)
+        .classed('region whole',true)
+        .classed('locked',d=>d.locked)
+// ok for pointer events to go here?
+        .on('click', Frame.OnClick)
+        .on('dblclick', Frame.OnDblClick)
+        .on('mouseover', Frame.OnMouseOver) 
+        .on('mouseout', Frame.OnMouseOut)
+        .on("contextmenu", Frame.OnContextMenu)
+        .call(d3.drag()
+            .on('start', Frame.OnDragStart)
+            .on('drag', Frame.OnDrag)
+            .on('end', Frame.OnDragEnd)  
+            )
+        ;
+
+selWholeRegions
+    .append('rect')
+        .classed('region rect',true)
+//        .attr('id', Node.UniqueId) 
+        .attr('rx', Frame.CornerRadius)
+        .attr('ry', Frame.CornerRadius)
+        .attr('fill',Node.FillColour) 
+
+const selThumbnails = selWholeRegions
+    .filter(d => d.img_src > "" )
+    .append('g')
+        .classed('image clipped',true) 
+        .attr('clip-path',"url(#cropCircle)")
+        .attr('transform',Frame.TransformClippedImage)  
+            .append('image') 
+                .classed('image raw',true) 
+                .attr('href',d => d.img_src)
+                .attr('width',CROP_CIRCLE_DIAMETER)
+                .attr('height',CROP_CIRCLE_DIAMETER)
+                .attr('transform', Frame.TransformImageElement) // same as for Node unclipped 
+                ;
+
+/*
+    <foreignObject class="fob banner" x="40" width="260" height="40"  >
+        <div:xhtml>
+            Banner text here
+        </div:xhtml>
+    </foreignObject>
+*/
+
+const selBanners = selWholeRegions
+    .filter(d => d.descriptor > "" )
+    .append('foreignObject')
+        .classed('fob banner',true)
+        .attr('x', Frame.StubWidth)
+//        .attr('y', 0)
+        .attr("width", Frame.WidthInner) 
+        .attr('height',Frame.BannerHeight)
+        .append('xhtml:div')
+            .html(d => d.descriptor) ;
+
+}
 //---------------------------------------------------------------------------------
 function GetCombinedBBox( sel ) {
     const boundingBoxes = sel.nodes().map(shape => shape.getBBox());

@@ -83,10 +83,10 @@ function RunSim() {
 
 function ticked() { // invoked just before each 'repaint' so we can decide exactly how to render
 
-  // propagate latest coordinates to each bound DOM element  
- //   Frame.OnTick(); // TODO: might be better to invoke this during active_exclusion
+  // propagate latest finalized coordinates to each bound DOM element  
     Link.OnTick(); 
     Label.OnTick();
+    Frame.OnTick(); 
 
     gNode.selectAll('circle,g') // TODO this is a bit hacky, but it means we can apply the same classes to both circles and their nested image groups, without having to duplicate the code for each type of element
         // TODO: could exclude locked circles (but for the drag selection logic)
@@ -98,20 +98,6 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         .classed('disabled', d => !d.selected)  
         ;
 
-    gGroup.selectAll('.frame-rect')
-        // don't exclude locked frame just in case its being dragged
-        .classed('drag_selected', ViewBox.DragRectIncludes )
-
-//        .classed('disabled', d => !d.selected)          
-        .attr('x', Frame.LeftOuter ) 
-        .attr('y', Frame.TopOuter )
-        .attr('height', Frame.HeightOuter )
-        .attr('width', Frame.WidthOuter );
-
-     gGroup.selectAll('.frame-header')
-        // keep header at top left of its frame
-       .attr('transform',Frame.TransformGroupElement) 
- ;     
 
 };
 
