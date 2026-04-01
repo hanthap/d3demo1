@@ -94,7 +94,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
         .attr('cy',Node.BoundedY)
         .classed('drag_selected',ViewBox.DragRectIncludes)
         // TODO DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
-      //  .classed('selected',d => d.selected)  
+       // .classed('selected',d => d.selected)  
         // .classed('disabled', d => !d.selected)  
         ;
 

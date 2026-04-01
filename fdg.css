@@ -170,12 +170,6 @@ rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover {
         fill:orange;
 }
 
-circle.drag_selected {
-    stroke:purple;
-    stroke-dasharray: 2,2;
-    stroke-opacity: 1;
-}
-
 
 .dragging * {
     stroke:red;
@@ -437,7 +431,15 @@ pointer-events: none;
 
 .cloaked * { visibility: hidden; pointer-events: none;  }
 g.whole * { filter: grayscale(100%); opacity: 0.5; }
-g.whole.selected * { visibility: visible; filter: none; opacity: 1; }
+g.selected * { visibility: visible; display: inline; filter: none; opacity: 1; } 
+
+g.drag_selected *
+{
+    stroke:purple;
+    stroke-dasharray: 2,2;
+    stroke-opacity: 1;
+}
+
 
 g.whole:hover * {
     stroke:black;

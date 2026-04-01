@@ -52,7 +52,7 @@ static OnWheel(e,d) {
     .each( d => d.r *= ( 1 + e.wheelDelta / 1200 ) )
     .attr( 'r', d => d.r );
 
-    gAllNodes.selectAll('.whole') // nested g elements with a non-empty image tag
+    gAllNodes.selectAll('.image.clipped') // nested g elements with a non-empty image tag
         .filter(d => d.selected )
         .attr('transform',Label.TransformGroupElement) // the nested g and its image
     ;
