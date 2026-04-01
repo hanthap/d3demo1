@@ -83,19 +83,19 @@ function RunSim() {
 
 function ticked() { // invoked just before each 'repaint' so we can decide exactly how to render
 
-  // propagate latest finalized coordinates to each bound DOM element  
+  // propagate/apply latest calculations to each bound DOM element  
     Link.OnTick(); 
     Label.OnTick();
     Frame.OnTick(); 
 
-    gNode.selectAll('circle,g') // TODO this is a bit hacky, but it means we can apply the same classes to both circles and their nested image groups, without having to duplicate the code for each type of element
+    gAllNodes.selectAll('g') 
         // TODO: could exclude locked circles (but for the drag selection logic)
-         .attr('cx', Node.BoundedX ) 
-         .attr('cy', Node.BoundedY )
-        .classed('drag_selected', ViewBox.DragRectIncludes )
+        .attr('cx',Node.BoundedX) 
+        .attr('cy',Node.BoundedY)
+        .classed('drag_selected',ViewBox.DragRectIncludes)
         // TODO DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
-        .classed('selected', d => d.selected)  
-        .classed('disabled', d => !d.selected)  
+      //  .classed('selected',d => d.selected)  
+        // .classed('disabled', d => !d.selected)  
         ;
 
 
@@ -135,12 +135,12 @@ for(i=0; i < nIterations; i++) {
     Cache.CircleSet.forEach( m => { // inner loop
     if ( f.descendants.includes(m) ) { // circle m is a descendant of frame n 
         if ( f.locked ) { // all descendants must stay inside a locked frame
-        // if m is not fully inside rect n then put it back, by changing its midpoint coords
-          if ( Node.Right(m) > Frame.Right(f) ) m.x = Frame.Right(f) - Node.HalfWidth(m);
-          if ( Node.Bottom(m) > Frame.Bottom(f) ) m.y = Frame.Bottom(f) - Node.HalfHeight(m);
-          // calc top & left boundaries last so the header isn't covered
-          if ( Node.Left(m) < Frame.LeftInner(f) ) m.x = Frame.LeftInner(f) + Node.HalfWidth(m);
-          if ( Node.Top(m) < Frame.Top(f) + Frame.BannerHeight(f) ) m.y = Frame.Top(f) + Frame.BannerHeight(f) + Node.HalfHeight(m);
+        // if m is not fully inside rect n then snap it back, by changing its midpoint coords
+          if ( Node.RightOuter(m) > Frame.RightInner(f) ) m.cogX = m.x = Frame.RightInner(f) - Node.HalfWidth(m);
+          if ( Node.BottomOuter(m) > Frame.BottomInner(f) ) m.cogY = m.y = Frame.BottomInner(f) - Node.HalfHeight(m);
+          // calc top & left boundaries last so at least the header isn't partly covered
+          if ( Node.LeftOuter(m) < Frame.LeftInner(f) ) m.cogX = m.x = Frame.LeftInner(f) + Node.HalfWidth(m);
+          if ( Node.TopOuter(m) < Frame.TopInner(f) ) m.cogY = m.y = Frame.TopInner(f) + Node.HalfHeight(m);
         }
     }
     else { // circle m is NOT a descendant of frame f, so gently nudge it outside

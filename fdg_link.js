@@ -441,11 +441,11 @@ static Hover( d, bHovering ) {
         .style('stroke', Link.StrokeColour )  
         .style('fill', Link.FillColour );  // for arrowhead
 
-    gNode.selectAll("circle")
+    gAllNodes.selectAll(".whole.node")
         .filter( c => c == d.source || c == d.target )
         .classed( 'xhover', bHovering );
 
-    gGroup.selectAll("rect") // frame
+    gAllRegions.selectAll(".whole.region") 
         .filter( r => r == d.source || r == d.target )
         .classed( 'xhover', bHovering );
         // TODO : apply to all nested frames and circles

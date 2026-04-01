@@ -97,7 +97,7 @@ static OnContextMenu(e,d) {
         .filter( e => d.descendants.includes(e) ) 
         .classed( 'xhover', bHovering ) ;
 
-d3.selectAll('.frameinfo') 
+d3.selectAll('.region.whole') 
         .filter( e => d == e ) // not subsets
         .classed( 'xhover', bHovering ) ;
 
@@ -147,8 +147,7 @@ static ToCircle(d, bExploded, cXcY) {
                 .filter( c => c != d ) 
                 .filter( c => c.collapsed_into_node == null ) // no need to touch if already collapsed
                 .forEach( c => { // for each descendant except self
-                  //  c.soft_hide = 1;  // DEPRECATED
-                    // TODO: Do NOT collapse until/unless ALL visible parents are now circles, not nodes
+                    // TODO: Do NOT collapse until/unless ALL visible parents are now circles, not frames
                     c.collapsed_into_node = d;
                     console.log(c);
                     // for all in and out links, set this node d as the virtual/effective end point
@@ -191,13 +190,7 @@ static DescendantShapesSVG(d) {
 
    static OnClick(e,d) {
 
-    // TODO: debug - sometimes, just clicking a frame triggers Node.Create() - but why?
-
-
-        console.log('Frame.OnClick',e,d,this);
-        //    const bb = GetCombinedBBox(Frame.DescendantShapesSVG(d));
-        //    console.log('GetCombinedBBox()',bb);
-        //    console.log(Frame.Coordinates(d));
+    console.log('Frame.OnClick',e,d,this);
 
    const cursor = window.getComputedStyle(this).cursor;
 
@@ -210,16 +203,10 @@ static DescendantShapesSVG(d) {
             AllDescendantsOf(d).forEach( c => {
                 c.selected = d.selected;
                 } );
-/*            gGroup.selectAll('.frame-whole')
-                .filter(f => d.descendants.includes(f)) // or .has(f) ??
-                .classed('selected', d => d.selected)  
-                .classed('disabled', d => !d.selected)
-                ;
-*/
+
             gAllRegions.selectAll('.whole')
                 .filter(f => d.descendants.includes(f)) // or .has(f) ??
                 .classed('selected', d => d.selected) ;
-
 
             break;
     }
@@ -233,8 +220,8 @@ static DescendantShapesSVG(d) {
     static SetLocked(d,element,status=null) {
         d.locked = status == null ? d.locked ^ 1 : status & 1 ;
         d3.select(element)
-            .attr('rx', Frame.CornerRadius)
-            .attr('ry', Frame.CornerRadius)
+            .attr('rx',Frame.CornerRadius)
+            .attr('ry',Frame.CornerRadius)
             .classed('locked',d.locked)
         ;
       }
@@ -261,35 +248,34 @@ static DescendantShapesSVG(d) {
 
     static Centre(d) { return { x: d.x + d.width/2, y: d.y + d.height/2 }    }
 
-    static Left(d) { return d.x - Frame.Margin(d) }; 
     static LeftInner(d) { return d.x + Frame.StubWidth(d) }; 
     static LeftOuter(d) { return d.x }; 
 
-   static Top(d) { return d.y - Frame.Margin(d) };
     static TopOuter(d) { return d.y };
 
 //  TODO avoid unwanted side effects when used by Frame.ContactPoint()
 // Frames must clearly distinguish between 'inner' and 'outer' boundaries. 
- 
-    static Right(d) { return d.x + d.width + Frame.Margin(d) }; 
-    static RightOuter(d) { return d.x + d.width }; 
 
+/*
+    static Top(d) { return d.y - Frame.Margin(d) };
+    static Left(d) { return d.x - Frame.Margin(d) }; 
+    static Right(d) { return d.x + d.width + Frame.Margin(d) }; 
     static Bottom(d) { return d.y + d.height + Frame.Margin(d) };
+    static Width(d) { return d.width + 2*Frame.Margin(d) } ;
+    static Height(d) { return d.height + 2*Frame.Margin(d) } ;
+    static HalfWidth(d)  { return d.width/2 };
+    static HalfHeight(d) { return d.height/2 };
+ */
+
+    static RightOuter(d) { return d.x + d.width }; 
     static BottomOuter(d) { return d.y + d.height };
  
-    static Width(d) { return d.width + 2*Frame.Margin(d) } ;
     static WidthOuter(d) { return d.width } ;
     static WidthInner(d) { return d.width - Frame.StubWidth(d) } ;
 
-    static Height(d) { return d.height + 2*Frame.Margin(d) } ;
     static HeightOuter(d) { return d.height } ;
     static HeightInner(d) { return d.height - Frame.BannerHeight(d) } ;
 
-    // static HalfWidth(d)  { return d.width/2 + Frame.Margin(d) };
-       static HalfWidth(d)  { return d.width/2 };
-
-//    static HalfHeight(d) { return d.height/2 + Frame.Margin(d) };
-    static HalfHeight(d) { return d.height/2 };
 
     static CornerRadius(d) {  return d.locked ? 0 : 1.5 * radius ;};
    
@@ -301,7 +287,7 @@ static DescendantShapesSVG(d) {
 
     
 //-------------------------------------------------------------------------------
-// final adjustment for the clipped thumbnail image
+// final one-time adjustment for the clipped thumbnail image
 // x,y offset from top left corner of the whole g element (which is determined by its rect)
     static TransformClippedImage(d) {
         return "translate(5,3) scale(0.08)";
@@ -323,7 +309,6 @@ static OnTick() {
 //-------------------------------------------------------------------------------
 
 // called by active_exclusion force
-
 static Resize(d) {
 
 //    DO NOT use VisibleDescendantsOf(d) here
@@ -371,12 +356,12 @@ const [x,y] = d3.pointer(e,svg.node());
 
 
 if ( d.locked ) {
-    // move the rect 
+    // move the frame
             d.x = x - Frame.DraggedFromInfo.dx ; 
             d.y = y - Frame.DraggedFromInfo.dy ;
 
     // TODO: How to treat 'shared custody' child elements 'left behind' inside another locked rect?
-    // Aautomatically show the 'problem' link as a line instead (with the left-behind node staying in its non-dragged container)
+    // Automatically show the 'problem' link as a line instead (with the left-behind node staying in its non-dragged container)
     // that involves creating a polyline, temporarily! Then deleting it as soon as we don't need it any more?
     // or is it better to create all polylines that only participate in sim & tick while they are visible?
     // just like other situations where Euler-diagram mode is disabled or unsupported
@@ -422,25 +407,28 @@ static OnDragEnd(e,d) {
 
 static HtmlNotes() {
     return`
-                - The foreignObject defines a fixed rectangular viewport for the HTML.
-- Inside that viewport, CSS behaves exactly like normal HTML.
-- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
-- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed).
-            
+                The foreignObject defines a fixed rectangular viewport for the HTML.
+<ul>
+<li> Inside that viewport, CSS behaves exactly like normal HTML.
+<li>No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+<li>If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed).
+</ul>            
 The foreignObject defines a fixed rectangular viewport for the HTML.
-- Inside that viewport, CSS behaves exactly like normal HTML.
-- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
-- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed). -->
+<ol>
+<li> Inside that viewport, CSS behaves exactly like normal HTML.
+<li>No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+<li>If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed). -->
             - The foreignObject defines a fixed rectangular viewport for the HTML.
-- Inside that viewport, CSS behaves exactly like normal HTML.
-- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
-- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed).
-            
+<li>Inside that viewport, CSS behaves exactly like normal HTML.
+<li>No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+<li>If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed).
+</ol>            
             - The foreignObject defines a fixed rectangular viewport for the HTML.
-- Inside that viewport, CSS behaves exactly like normal HTML.
-- No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
-- If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed). -->
-
+<ul>
+<li>Inside that viewport, CSS behaves exactly like normal HTML.
+<li>No special SVG rules apply — flexbox, grid, absolute positioning all work as expected.
+<li>If you rotate the foreignObject, the centring still works, but the visual result depends on the transform order (which I can help you tune if needed). -->
+</ul>
     `;
 }
 

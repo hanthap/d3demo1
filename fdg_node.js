@@ -83,8 +83,24 @@ class Node {
 // but is this the right place to do that?
 // this is so that nested frames allow the appropriate space for heading bar
 
+/*
 static Top(d) {
     return (Node.Centre(d).y - Node.HalfHeight(d));
+}
+static Left(d) {
+    return (Node.Centre(d).x - Node.HalfWidth(d));
+}
+static Bottom(d) {
+    return (Node.Centre(d).y + Node.HalfHeight(d));
+}
+static Right(d) {
+    return (Node.Centre(d).x + Node.HalfWidth(d));
+}
+*/
+
+static TopInner(d) {
+    if ( Node.ShowAsFrame(d) ) return d.y + Frame.BannerHeight(d); 
+    else return (Node.Centre(d).x - Node.HalfWidth(d));
 }
 
 static TopOuter(d) {
@@ -92,8 +108,9 @@ static TopOuter(d) {
     else  return (Node.Centre(d).y - Node.HalfHeight(d));
 }
 
-static Left(d) {
-    return (Node.Centre(d).x - Node.HalfWidth(d));
+static LeftInner(d) {
+    if ( Node.ShowAsFrame(d) ) return d.x + Frame.StubWidth(d); 
+    else return (Node.Centre(d).x - Node.HalfWidth(d));
 }
 
 static LeftOuter(d) {
@@ -101,9 +118,9 @@ static LeftOuter(d) {
     else return (Node.Centre(d).x - Node.HalfWidth(d));
 }
 
-
-static Bottom(d) {
-    return (Node.Centre(d).y + Node.HalfHeight(d));
+static BottomInner(d) {
+    if ( Node.ShowAsFrame(d) ) return d.y + d.height; 
+    else return (Node.Centre(d).y + Node.HalfHeight(d));
 }
 
 static BottomOuter(d) {
@@ -111,8 +128,9 @@ static BottomOuter(d) {
     else return (Node.Centre(d).y + Node.HalfHeight(d));
 }
 
-static Right(d) {
-    return (Node.Centre(d).x + Node.HalfWidth(d));
+static RightInner(d) {
+    if ( Node.ShowAsFrame(d) ) return d.x + d.width; 
+    else return (Node.Centre(d).x + Node.HalfWidth(d));
 }
 
 static RightOuter(d) {
@@ -255,9 +273,9 @@ static OnContextMenu(e,d) {
 
             default: // toggle foreground/selected status
                 d.selected ^= 1;
-                clicked_d3selection
+                clicked_d3selection // should be the 'whole' <g>
                     .classed('selected', d => d.selected)
-                    .classed('disabled', d => !d.selected) // for grayscaling unselected nodes
+                 //   .classed('disabled', d => !d.selected) // for grayscaling unselected nodes
                 break;
             }
      
@@ -779,10 +797,10 @@ static OnDragEnd(e,d) {
 static Activate( data ) {
     data.forEach( d => d.selected = 1); 
     if ( data && data.length ) {
-        d3.selectAll('.circle-whole, .frame-whole')
+        d3.selectAll('.node.whole, .region.whole')
         .filter( d => data.includes(d) )
         .classed('selected',true)
-        .classed('disabled',false) // TODO want to eliminate the need for 'disabled' as a class
+//        .classed('disabled',false) // TODO want to eliminate the need for 'disabled' as a class
         ;
 
 }

@@ -47,12 +47,12 @@ static WatchZoom() {
 
 static OnWheel(e,d) {
  //   console.log('Node.OnWheel(e,d)',e,d);
-    gNode.selectAll('circle')
+    gAllNodes.selectAll('circle')
     .filter(d => d.selected )
     .each( d => d.r *= ( 1 + e.wheelDelta / 1200 ) )
     .attr( 'r', d => d.r );
 
-    gNode.selectAll('.image-group') // nested g elements with a non-empty image tag
+    gAllNodes.selectAll('.whole') // nested g elements with a non-empty image tag
         .filter(d => d.selected )
         .attr('transform',Label.TransformGroupElement) // the nested g and its image
     ;
@@ -107,15 +107,15 @@ static OnKeyDown(e) {
         // clear all highlights by removing the 'selected' class
         nodes.forEach( d => d.selected = 0 );
         links.forEach( d => d.selected = 0 );
-        svg.selectAll('*').classed('selected',false) // not enough for polylines
-        gLink.selectAll('polyline') // line colours are resistant to class-driven CSS grey filter
-            .style('stroke', Link.StrokeColour )  
-            .style('fill', Link.FillColour ); 
+        svg.selectAll('*').classed('selected',false) // even polylines go grey/transparent
+        // gAllEdges.selectAll('polyline') // line colours are resistant to class-driven CSS grey filter
+        //     .style('stroke', Link.StrokeColour )  
+        //     .style('fill', Link.FillColour ); 
        // svg.classed('disabled',true);
 
-        gGroup.selectAll('.frame-whole')
-          //  .classed('selected', false)  
-            .classed('disabled', true)
+        // gAllRegions.selectAll('.whole')
+        //   //  .classed('selected', false)  
+        //     .classed('disabled', true)
             ;
 
         break;
@@ -160,7 +160,7 @@ static OnKeyDown(e) {
 
         // TODO Shift+Cmd+. shows hidden folders in MacOS. Maybe use the same for showing hidden nodes?
     case ' ' :
-        svg.classed("space-bar",!svg.classed("space-bar"));
+        svg.classed("cloaked",!svg.classed("cloaked"));
         // TODO: toggle visibility of unselected lines & nodes
         // shift+space add/remove them from the simulation as well
         break;
@@ -177,7 +177,7 @@ static OnKeyDown(e) {
         // if hovering inside a frame => create child node
         // if hovering over a line => splice a new node
         // else if 2 or more nodes are selected, encapsulate them in a new frame
-        const selNodes = gNode.selectAll('circle').filter(d => d.selected);
+        const selNodes = gAllNodes.selectAll('.whole').filter(d => d.selected);
         Node.Create([0,0,20,20],selNodes);
         break;
 
@@ -202,7 +202,7 @@ switch (e.key) {
 
     case 'Shift':
         if (!capslock) {
-            svg.classed("shift-down",false);
+            svg.classed("cloaked",false);
             if (!frozen) UnfreezeSim();
         }
 
@@ -310,7 +310,7 @@ static OnDragEnd(e,d) {
         // create a new Frame using ViewBox.SelectRect
 
         const 
-            selNodes = gNode.selectAll('circle')
+            selNodes = gAllNodes.selectAll('.whole')
                 .filter(ViewBox.DragRectIncludes)
                 .filter(Node.HasShape),
             f = Node.Create(ViewBox.DragRectDims,selNodes)           
@@ -319,7 +319,7 @@ static OnDragEnd(e,d) {
     }
 
     // TODO These selections are not visible until simulation unfreezes
-    gNode.selectAll('circle.drag_selected')
+    gAllNodes.selectAll('.drag_selected')
         .classed('drag_selected',false)
         .each( d => { d.selected ^= 1 } ) // toggle selected flag
           ;
@@ -385,18 +385,14 @@ const svg = body.append('svg')
 
 
 // group frames aka Euler regions & contours are passive shapes in the background
-const gGroup = svg.append('g')
-    .classed( 'all-frames', true )
-    ;
-
-// new improved
 const gAllRegions = svg.append('g')
     .classed('all regions', true)
     ;
+// const gNode = svg.append('g') // circles = floating nodes
+//     .classed( 'all_circles', true );
 
-
-const gNode = svg.append('g') // circles = floating nodes
-    .classed( 'all_circles', true );
+const gAllNodes =svg.append('g') // circles = floating nodes
+    .classed('all nodes',true);
 
 // edges are rendered in front of vertex nodes. 
 const gAllEdges = svg.append('g')
@@ -404,7 +400,7 @@ const gAllEdges = svg.append('g')
 
     // a foreground layer eg for drag-select rect, pop-up annotations
 const gForeground = svg.append('g')
-    .classed( 'foreground', true )
+    .classed('foreground',true)
     ;
 
 const defs = svg.append("defs");

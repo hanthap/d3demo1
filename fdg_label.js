@@ -17,7 +17,7 @@ class Label extends Node {
        this.setAttribute('transform',`translate(${Node.Centre(d).x},${Node.Centre(d).y})`);
        }
     static OnTick() { 
-            gNode.selectAll('.label').each(Label.SetAttributes)
+            gAllNodes.selectAll('.whole').each(Label.SetAttributes)
             ;
             }
     static TransformImageElement(d) { return d.img_transform; }
@@ -37,7 +37,7 @@ class Label extends Node {
 
 //----------------------------------------------------------------
 
-function AppendLabels() {
+function AppendLabels_OK() {
 
 // This has superseded the AppendNodes function. Will need to change names later to reflect this.
 
@@ -51,8 +51,8 @@ const gTop = gNode.selectAll('g')
           ,Label.UniqueId)  
     .join('g')  // all elements of the label (circle, image, HTML content) 
         .attr('id', Label.UniqueId)
-        .classed('circle-whole',true)
-        .classed('disabled',true)
+        .classed('circle-whole whole',true)
+//        .classed('disabled',true)
         ;
 
 gTop
@@ -116,6 +116,80 @@ labels
             .style('color',Label.FontColour)
         //       .style('font-size',Label.FontSize)  
         //       .html(Label.HtmlText) 
+            ;
+
+}
+
+function AppendLabels() {
+
+
+gAllNodes.selectAll('g').remove(); // otherwise we get duplicates on data refresh
+// which seems odd, i thought join('g') would handle all that
+
+/*
+<g class='node whole selected locked' transform="translate(430,480)">
+
+    <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightcoral"  />
+
+    <g class="image clipped" clip-path="url(#cropCircle)"
+        transform=" translate(-32,-32) scale(0.12)">
+
+        <image class="image raw"
+            href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
+            width="300" height="300" 
+            transform="translate(25,25) scale(0.8)"
+        </image>
+
+    </g>
+*/
+    
+const selWholeNodes = gAllNodes.selectAll('g') 
+    .data( nodes
+            .filter(Node.ShowAsCircle) 
+            .filter(Node.IsVisible) // to be improved using d.collapsed_into_node
+          ,Label.UniqueId)  
+    .join('g')  // all elements of the label (circle, image, HTML content) 
+        .attr('id', Label.UniqueId)
+        .classed('node whole',true)
+        ;
+
+selWholeNodes
+    .classed('empty',Node.IsEmpty)
+    .classed('selected',true)
+
+    .classed('locked',d => d.locked)
+    .on('mouseover',Node.OnMouseOver) 
+    .on('mouseout',Node.OnMouseOut) 
+    .on('click',Node.OnClick)
+    .on('dblclick',Node.OnDblClick)
+    .on('contextmenu',Node.OnContextMenu)
+    .call(d3.drag()
+        .on('start', Node.OnDragStart)
+        .on('drag', Node.OnDrag)
+        .on('end', Node.OnDragEnd)  
+        )
+        ;
+    ;
+
+selWholeNodes
+    .append('circle')
+        //.attr('id',Node.UniqueId) 
+        .attr('r',Node.Radius)
+        .attr('fill',Node.FillColour)
+
+selWholeNodes
+    .filter(d => d.img_src > "" )
+    .append('g') 
+        .classed('image clipped',true)
+        // transform=" translate(-32,-32) scale(0.12)"> // controlled with mousewheel
+        .attr('transform',Label.TransformGroupElement) // scale changes with every mouse wheel event
+        .attr('clip-path','url(#cropCircle)')
+        .append('image') 
+            .classed('image raw',true)
+            .attr('href',d => d.img_src)
+            .attr('width',CROP_CIRCLE_DIAMETER)
+            .attr('height',CROP_CIRCLE_DIAMETER)
+            .attr('transform', Label.TransformImageElement)  // one-time, position and scale the image relative to its crop circle
             ;
 
 }

@@ -435,7 +435,7 @@ view-source
 pointer-events: none; 
 }
 
-.cloaked * { visibility: hidden; }
+.cloaked * { visibility: hidden; pointer-events: none;  }
 g.whole * { filter: grayscale(100%); opacity: 0.5; }
 g.whole.selected * { visibility: visible; filter: none; opacity: 1; }
 
@@ -482,7 +482,14 @@ foreignObject {
 .fob.body * {
     font-size: x-small;
     padding: 5;
+    visibility: hidden;
 }
+
+.fob.body.locked * {
+    visibility: visible;
+}
+
+
 
 .fob.stub {
     display: flex;
