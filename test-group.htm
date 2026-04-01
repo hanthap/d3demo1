@@ -30,10 +30,9 @@ svg.zoomable g.viewport {
 
 /* selected shapes are always foreground; others are grey (or invisible if 'all' container is cloaked) */
 
-.cloaked * { visibility: hidden; }
+.cloaked g { visibility: hidden; } /* this is the only variant I've found that works as expected with node images */
 g.whole * { filter: grayscale(100%); opacity: 0.5; }
 g.whole.selected * { visibility: visible; filter: none; opacity: 1; }
-
 
 .region.rect { 
     fill:aquamarine;
@@ -156,7 +155,7 @@ g.edge.whole.ctrl-down * {
 
 <!-- <svg class="ctrl-down" width="600" height="600"> -->
 
-<svg class="zoomable ctrl-down" viewBox="0 0 800 600">
+<svg class="zoomable cloaked" viewBox="0 0 800 600">
 
 <defs>
     <clipPath id="cropCircle">
@@ -228,7 +227,7 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 
 <g class="all nodes">
 
-<g class='node whole selected locked' transform="translate(430,480)">
+<g class='node whole selected' transform="translate(430,480)">
 
     <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightcoral"  />
 

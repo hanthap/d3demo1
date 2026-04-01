@@ -429,7 +429,7 @@ view-source
 pointer-events: none; 
 }
 
-.cloaked * { visibility: hidden; pointer-events: none;  }
+.cloaked g { visibility: hidden; pointer-events: none;  } /* this is the only variant I've found that works as expected with node images */
 g.whole * { filter: grayscale(100%); opacity: 0.5; }
 g.selected * { visibility: visible; display: inline; filter: none; opacity: 1; } 
 
