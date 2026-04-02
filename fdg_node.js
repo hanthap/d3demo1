@@ -273,7 +273,7 @@ static OnContextMenu(e,d) {
 
     }
 
-   //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 
 static OnMouseDown(e,d) {
     // this is bypassed by OnDragStart() 
@@ -282,13 +282,19 @@ static OnMouseDown(e,d) {
 //      console.log('Exit Node.OnMouseDown');
 }
 
+//-------------------------------------------------------------------------------
+
     static OnTick() { 
         gAllNodes
             .selectAll('.whole')
             .attr('transform',d => `translate(${d.x},${d.y})`);
         }
 
+//-------------------------------------------------------------------------------
+
     static TransformImageElement(d) { return d.img_transform; }
+
+//-------------------------------------------------------------------------------
 
     static TransformClippedImage(d) { 
         // resize in sync with cicle's radius
@@ -300,7 +306,7 @@ static OnMouseDown(e,d) {
         return `translate(${offset}, ${offset}) scale(${scale})`;
 }
 
-   //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 // TODO:  handle case where node d is an element of the intersection A 
 //      and more than one of those supersets is collapsed to an apparent circle
    
@@ -316,12 +322,9 @@ static ApparentCircle(d) {
 
 }
 
-   //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 
 // zoom in (expand, unpack) a collapsed node so it appears as a frame with visible child nodes
-
-// TODO DEBUG: any nested node should reappear just as it was when its parent frame d was last collapsed 
-// TODO DEBUG: after collapsing & expanding a locked frame, the child circles have large positive y coordinates (off screen)
 
 static ToFrame(d) {
 
@@ -330,12 +333,11 @@ static ToFrame(d) {
     if ( Node.HasMembers(d) || d.locked ) {
         d.is_group = 1;
         d.has_shape = 1; 
-        d.descendants // TODO: should be all descendants that were visible just before last collapse event - but how can we tell?
+        d.descendants 
             .filter(c => c != d ) 
             // TODO: c.collapsed_into_node should be ALL the apparent circles that include node c ?
             .filter( c => c.collapsed_into_node == d ) // only unpack these ones, NOT every descendant
             .forEach( c => { 
-             //   console.log(c);
                 c.collapsed_into_node = null; 
                 // ask both 'true' end nodes for their lowest VISIBLE ancestor
                 c.inLinks.forEach( lnk => { lnk.target = Node.ApparentCircle(lnk.true_target); } );

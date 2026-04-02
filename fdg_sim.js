@@ -43,11 +43,9 @@ function RunSim() {
           .theta(0.8) //  lower value => smoother, more accurate (but more costly)
         )
 
-       .force('center', d3.forceCenter()
-        .strength(0.05) 
+        .force('center', d3.forceCenter()
+          .strength(0.05) 
       ) 
-
-        // ViewBox.OnClick now sets attractor centroid (d.cogX, d.cogY) (given SHIFT+CTRL+CLICK) 
 
         .force( 'cogX', d3.forceX( Node.COGX )
             .strength( Node.ForceX ) )
@@ -62,7 +60,6 @@ function RunSim() {
             .strength(Link.Strength) 
             .iterations(1) // per tick. More => stronger effect, more repulsion?
             )
-
 
         .alphaTarget(0.3) // freeze if/when alpha drops below this threshold
         .alphaDecay(0.1)  // zero => never freeze, keep responding to drag events
@@ -81,28 +78,24 @@ function RunSim() {
 
 //-------------------------------------------------------------------------------
 
-function ticked() { // invoked just before each 'repaint' so we can decide exactly how to render
+function ticked() { // invoked by simulation just before each screen refresh
 
-  // propagate/apply latest calculations to each bound DOM element  
+  // propagate updated attributes to each bound DOM element  
     Link.OnTick(); 
     Node.OnTick();
     Frame.OnTick(); 
 
-    gAllNodes.selectAll('g') 
-        // TODO: could exclude locked circles (but for the drag selection logic)
-        .attr('cx',Node.BoundedX) 
-        .attr('cy',Node.BoundedY)
+    gAllNodes.selectAll('.whole') 
+        // // TODO: could exclude locked circles (but for the drag selection logic)
+        // .attr('cx',Node.BoundedX) 
+        // .attr('cy',Node.BoundedY)
         .classed('drag_selected',ViewBox.DragRectIncludes)
-        // TODO DEBUG: why is this still necessary, given we only need to toggle selected class after a user click?
-       // .classed('selected',d => d.selected)  
-        // .classed('disabled', d => !d.selected)  
         ;
 
 
 };
 
 //----------------------------------------------------------------
-// TODO: maybe nudge circles towards the centre of their parent frames too?
 
 // TODO: do NOT exclude a collapsed circle IF it has any "descendants in common" with thie frame
 // instead, try to position it so it straddles the boundary, suggesting a non-empty intersection. 
@@ -118,17 +111,12 @@ function active_exclusion(alpha) {
 // result: the visual gap is smaller that expected, most notably toward the ends of an elongated frame rect
 // and circles seem to drift away from the 'obvious' spot. 
 
-// TODO : for performance these could be static, only refreshed after a data change
-// const frame_set = new Set(sorted_nodes.filter(Frame.IsExclusive).reverse());
-// const circle_set = new Set(sorted_nodes.filter(Node.IsExclusive));
 
 const nIterations = 3; // per tick
 
  Cache.FrameSet.forEach(Frame.Resize);
 
 for(i=0; i < nIterations; i++) {
-
-
 
  Cache.FrameSet.forEach( f => { // outer loop 
     const c0 = Frame.Centre(f); 

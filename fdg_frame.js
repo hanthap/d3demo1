@@ -139,6 +139,7 @@ d3.selectAll('.region.whole')
 static ToCircle(d, bExploded, cXcY) {
     // replace the frame with a circle at cXcY, refresh attributes
     [d.cogX, d.cogY] = [d.x, d.y] = cXcY;
+    if (d.locked) [d.fx, d.fy] = cXcY;
     d.is_group = 0; // render as circle
 
     if ( ! bExploded ) {  // default: 'implode' = soft-hide all contents & transplant connected links so they point to this container node
@@ -187,14 +188,15 @@ static DescendantShapesSVG(d) {
    //-------------------------------------------------------------------------------
 
    static OnClick(e,f) {
+    
+   const cursor = window.getComputedStyle(this).cursor,
+         cXcY = d3.pointer(e,svg.node());
 
-    console.log('Frame.OnClick',e,f,this);
-
-   const cursor = window.getComputedStyle(this).cursor;
+    console.log('Frame.OnClick(e,f),this,cxcY',e,f,this,cXcY);
 
     switch ( cursor ) {
         case 'zoom-out' : // switch to a circle either collapsed, or (if ctrl key) 'exploded';
-            Frame.ToCircle(f, e.ctrlKey, d3.pointer(e,svg.node())); 
+            Frame.ToCircle(f,e.ctrlKey,cXcY); 
             break;
         default: // toggle selected status, then cascade to all descendants
             f.selected ^= 1;
@@ -215,11 +217,16 @@ static DescendantShapesSVG(d) {
 
     //-------------------------------------------------------------------------------
 
-    static SetCentroid(d,[x,y],brute=false) {
+    static SetCentroid(f,[x,y],burst=false) {
 
-        d.descendants.forEach(d => { d.cogX = x, d.cogY = y });
-        if (brute) { // no smooth dragging motion, but useful for Node.ToFrame() - causes a 'mini-explosion' effect
-            d.descendants.forEach(d => { d.x = x, d.y = y });
+        f.descendants.forEach(n => { n.cogX = x, n.cogY = y });
+        if (burst) { // start from a 'singularity', repulsion forces will create the desired effect
+            f.descendants.forEach(n => { n.x = x, n.y = y });
+        }
+
+        if (f.locked) { // move the frame box fx,fy so its centre is at x,y
+            f.fx = f.x = x - f.width/2;
+            f.fy = f.y = y - f.height/2;
         }
 
         // TODO: if we don't explicitly recreate forceX & forceY while dragging, the children 
@@ -265,20 +272,7 @@ static DescendantShapesSVG(d) {
     static LeftOuter(d) { return d.x }; 
 
     static TopOuter(d) { return d.y };
-
-//  TODO avoid unwanted side effects when used by Frame.ContactPoint()
-// Frames must clearly distinguish between 'inner' and 'outer' boundaries. 
-
-/*
-    static Top(d) { return d.y - Frame.Margin(d) };
-    static Left(d) { return d.x - Frame.Margin(d) }; 
-    static Right(d) { return d.x + d.width + Frame.Margin(d) }; 
-    static Bottom(d) { return d.y + d.height + Frame.Margin(d) };
-    static Width(d) { return d.width + 2*Frame.Margin(d) } ;
-    static Height(d) { return d.height + 2*Frame.Margin(d) } ;
-    static HalfWidth(d)  { return d.width/2 };
-    static HalfHeight(d) { return d.height/2 };
- */
+    static TopInner(d) { return d.y + Frame.BannerHeight(d) }; 
 
     static RightOuter(d) { return d.x + d.width }; 
     static BottomOuter(d) { return d.y + d.height };

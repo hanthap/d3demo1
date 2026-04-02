@@ -54,7 +54,7 @@ static OnWheel(e,d) {
 
     gAllNodes.selectAll('.image.clipped') // nested g elements with a non-empty image tag
         .filter(d => d.selected )
-        .attr('transform',Node.TransformGroupElement) // the nested g and its image
+        .attr('transform',Node.TransformClippedImage) // the nested g and its image
     ;
     // update the collision force directly. This actually works!
    simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));
@@ -193,7 +193,7 @@ switch (e.key) {
 
     case 'Shift':
         if (!capslock) {
-            svg.classed("cloaked",false);
+            svg.classed("shift-down",false);
             if (!frozen) UnfreezeSim();
         }
         break;
