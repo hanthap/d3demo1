@@ -137,45 +137,46 @@ d3.selectAll('.region.whole')
    //-------------------------------------------------------------------------------
 // TODO: Save every descendant so we can restore expand-collapse config exactly as it was.
 static ToCircle(d, bExploded, cXcY) {
-        // replace the frame with a circle at cXcY, refresh attributes
-        [d.x, d.y] = cXcY;
+    // replace the frame with a circle at cXcY, refresh attributes
+    [d.cogX, d.cogY] = [d.x, d.y] = cXcY;
+    
 
-        d.is_group = 0; // render as circle
+    d.is_group = 0; // render as circle
 
-        if ( ! bExploded ) {  // default: 'implode' = soft-hide all contents & transplant connected links so they point to this container node
-            d.descendants
-                .filter( c => c != d ) 
-                .filter( c => c.collapsed_into_node == null ) // no need to touch if already collapsed
-                .forEach( c => { // for each descendant except self
-                    // TODO: Do NOT collapse until/unless ALL visible parents are now circles, not frames
-                    c.collapsed_into_node = d;
-                    console.log(c);
-                    // for all in and out links, set this node d as the virtual/effective end point
-                    c.inLinks
-                        //.filter(Link.ShowAsLine) //not sure if we need to exclude any?
-                        .forEach( lnk => { lnk.target = d; } );
-                    c.outLinks
-                        //.filter(Link.ShowAsLine)
-                        .forEach( lnk => { lnk.source = d } );
+    if ( ! bExploded ) {  // default: 'implode' = soft-hide all contents & transplant connected links so they point to this container node
+        d.descendants
+            .filter( c => c != d ) 
+            .filter( c => c.collapsed_into_node == null ) // no need to touch if already collapsed
+            .forEach( c => { // for each descendant except self
+                // TODO: Do NOT collapse until/unless ALL visible parents are now circles, not frames
+                c.collapsed_into_node = d;
+                console.log(c);
+                // for all in and out links, set this node d as the virtual/effective end point
+                c.inLinks
+                    //.filter(Link.ShowAsLine) //not sure if we need to exclude any?
+                    .forEach( lnk => { lnk.target = d; } );
+                c.outLinks
+                    //.filter(Link.ShowAsLine)
+                    .forEach( lnk => { lnk.source = d } );
 
-                    } );
-            // TODO: recalculate and cache the 'effective' node-pair for links that reference a leaf node that is now hidden (as a descendant node)
-            // if both ends now point to d then the link should not be rendered 
-            // likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
+                } );
+        // TODO: recalculate and cache the 'effective' node-pair for links that reference a leaf node that is now hidden (as a descendant node)
+        // if both ends now point to d then the link should not be rendered 
+        // likewise, roll up the leaf-node mass values and change the 'effective' mass of this newly collapsed container
 
 
-            }
-        AppendFrameShapes();
-        AppendLines();
-        AppendNodes(); // now includes circles 
+        }
+    AppendFrameShapes();
+    AppendLines();
+    AppendNodes(); // now includes circles 
 
 
         // these might not be necessary
-Cache.RefreshAllDescendants();
-Cache.RefreshSortedNodes();
-Cache.ApplyFrameOrder();
+    Cache.RefreshAllDescendants();
+    Cache.RefreshSortedNodes();
+    Cache.ApplyFrameOrder();
 
-        RefreshSimData(); 
+    RefreshSimData(); 
 
 }
 
@@ -188,25 +189,25 @@ static DescendantShapesSVG(d) {
 
    //-------------------------------------------------------------------------------
 
-   static OnClick(e,d) {
+   static OnClick(e,f) {
 
-    console.log('Frame.OnClick',e,d,this);
+    console.log('Frame.OnClick',e,f,this);
 
    const cursor = window.getComputedStyle(this).cursor;
 
     switch ( cursor ) {
         case 'zoom-out' : // switch to a circle either collapsed, or (if ctrl key) 'exploded';
-            Frame.ToCircle(d, e.ctrlKey, d3.pointer(e,svg.node())); 
+            Frame.ToCircle(f, e.ctrlKey, d3.pointer(e,svg.node())); 
             break;
         default: // toggle selected status, then cascade to all descendants
-            d.selected ^= 1;
-            AllDescendantsOf(d).forEach( c => {
-                c.selected = d.selected;
+            f.selected ^= 1;
+            AllDescendantsOf(f).forEach( c => {
+                c.selected = f.selected;
                 } );
 
-            gAllRegions.selectAll('.whole')
-                .filter(f => d.descendants.includes(f)) // or .has(f) ??
-                .classed('selected', d => d.selected) ;
+            d3.selectAll('.whole')
+                .filter(n => f.descendants.includes(n)) // or .has(f) ??
+                .classed('selected',f.selected) ;
 
             break;
     }
@@ -214,6 +215,26 @@ static DescendantShapesSVG(d) {
     ticked();
 
     }
+
+    //-------------------------------------------------------------------------------
+
+    static SetCentroid(d,[x,y],brute=false) {
+
+        d.descendants.forEach(d => { d.cogX = x, d.cogY = y });
+        if (brute) { // no smooth motion - useful for Node.ToFrame() - creates the ideal 'mini-explosion' 
+            d.descendants.forEach(d => { d.x = x, d.y = y });
+        }
+
+        // TODO: if we don't explicitly recreate forceX & forceY while dragging, the children 
+        // don't move and neither does the floating parent frame?
+        simulation
+            .force( 'cogX', d3.forceX( Node.COGX )
+                .strength( Node.ForceX ) )
+            .force( 'cogY', d3.forceY( Node.COGY )
+                .strength( Node.ForceY ) );
+
+    }
+
 
     //-------------------------------------------------------------------------------
 
@@ -229,14 +250,14 @@ static DescendantShapesSVG(d) {
     //-------------------------------------------------------------------------------
 
     // because smartphone doesn't have a shift key
-   static OnDblClick(e,d) { //  show as a circle , hiding children
+   static OnDblClick(e,d) { //  show as a circle, hiding children
         if ( e.ctrlKey ) 
             Frame.SetLocked(d,this);
         else  
             Frame.ToCircle(d, false, d3.pointer(e,svg.node())); // true => implode
-        
-        d.selected = 1;
-        d.descendants.forEach(c => c.selected = 1);
+        Node.Activate(d.descendants);
+        // d.selected = 1;
+        // d.descendants.forEach(c => c.selected = 1);
 
 
 
@@ -373,15 +394,8 @@ if ( d.locked ) {
 // regardless, we also induce all descendants to move en masse, by setting their COG
 // (If d is unlocked then its frame contour moves with them...)
 
-d.descendants.forEach(d => { d.cogX = x, d.cogY = y } );
+Frame.SetCentroid(d,[x,y]);
 
-// TODO: if we don't explicitly recreate forceX & forceY while dragging, the children 
-// don't move and neither does the floating parent frame?
-simulation
-    .force( 'cogX', d3.forceX( Node.COGX )
-        .strength( Node.ForceX ) )
-    .force( 'cogY', d3.forceY( Node.COGY )
-        .strength( Node.ForceY ) );
 
 
  ticked();

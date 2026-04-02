@@ -130,13 +130,7 @@ polygon.arrowhead {
 }
 
 
-/* polyline.selected {
-    stroke-dasharray: none; / appear as solid colour 
 
-polyline.xhover { 
-    stroke-dasharray: 2,2;
-}
-} */
 
 .dragging line { 
     stroke-dasharray: 2,2;
@@ -273,9 +267,6 @@ view-source
 pointer-events: none; 
 }
 
-.cloaked g { visibility: hidden; pointer-events: none;  } /* this is the only variant I've found that works as expected with node images */
-g.whole * { filter: grayscale(100%); opacity: 0.5; }
-g.selected * { visibility: visible; display: inline; filter: none; opacity: 1; } 
 
 g.drag_selected *
 {
@@ -283,6 +274,13 @@ g.drag_selected *
     stroke-dasharray: 2,2;
     stroke-opacity: 1;
 }
+
+.cloaked g { visibility: hidden; pointer-events: none;  } /* this is the only variant I've found that works as expected with node images */
+
+g.whole * { filter: grayscale(100%); opacity: 0.3; pointer-events: all; }
+g.selected * { visibility: visible; filter: none; opacity: 1; } 
+rect.region { fill-opacity: 0.2; stroke-opacity: 1;  }
+
 
 
 g.whole:hover * {

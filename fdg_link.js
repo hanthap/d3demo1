@@ -9,22 +9,14 @@ class Link {
 //-------------------------------------------------------------------------------
 
 static AppendDatum(d,i) {
-
-try { 
-    // bind Link to its live vertex objects
-    d.source = Node.GetFromID( d.from_node_id );
-    d.target = Node.GetFromID( d.to_node_id );
-    d.distance = 20 * Math.random();
-    d.strength = 0.4 * Math.random();
-    d.opacity = Math.random();
-    d.id = 'L' + i; // unique identifier
-   // console.log(d);
+    d.source = Node.GetFromID(d.from_node_id);
+    d.target = Node.GetFromID(d.to_node_id);
+    d.distance = 20; // * Math.random();
+    d.strength = 0.4; // * Math.random();
+    d.opacity = (2 + Math.random()) / 3 ;
+    d.id = 'L' + Math.round( Math.random() * 1000000 ); // unique identifier
     return d; // only if we didn't throw an error eg 'no such node'
-} catch ( e ) {
-        console.log(e)
-    }
 }
-
 
 //-------------------------------------------------------------------------------
 
@@ -106,7 +98,7 @@ static Opacity(d) {
 //-------------------------------------------------------------------------------
 
 static StrokeWidth(d) { // stroke-width of visible polyline
-      return d.link_mass ? d.link_mass / 20 : 1.2; // TODO: need a better formula for link mass => stroke width
+      return d.link_mass ? d.link_mass / 20 : 1; // TODO: need a better formula for link mass => stroke width
 }
 
 //-------------------------------------------------------------------------------

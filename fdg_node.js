@@ -250,14 +250,15 @@ static OnContextMenu(e,d) {
 
             case 'zoom-in' : // implies we know there are child nodes i.e. Node.HasMembers(d)
                 Node.ToFrame(d);
+                Frame.SetCentroid(d,d3.pointer(k,svg.node()),true);
+                Node.Activate([d]);
                 break;
 
             default: // toggle foreground/selected status
                 d.selected ^= 1;
                 clicked_d3selection // should be the 'whole' <g>
                     .classed('selected', d => d.selected)
-                 //   .classed('disabled', d => !d.selected) // for grayscaling unselected nodes
-                break;
+                  break;
             }
      
         // optionally, cascade the selected status to all direct links and their bound nodes
@@ -281,12 +282,12 @@ static OnMouseDown(e,d) {
 //      console.log('Exit Node.OnMouseDown');
 }
 
-
     static OnTick() { 
-            gAllNodes.selectAll('.whole')
-                .attr('transform',d => `translate(${d.x},${d.y})`);
-            ;
-            }
+        gAllNodes
+            .selectAll('.whole')
+            .attr('transform',d => `translate(${d.x},${d.y})`);
+        }
+
     static TransformImageElement(d) { return d.img_transform; }
 
     static TransformClippedImage(d) { 
@@ -297,14 +298,12 @@ static OnMouseDown(e,d) {
             scale = r / CROP_CIRCLE_RADIUS, 
             offset = -r;
         return `translate(${offset}, ${offset}) scale(${scale})`;
-
 }
-
 
    //-------------------------------------------------------------------------------
 // TODO:  handle case where node d is an element of the intersection A 
 //      and more than one of those supersets is collapsed to an apparent circle
-//   
+   
 static ApparentCircle(d) {
     // find the currently visible circle that encapsulates this node d, and return its datum
     // working up through all ancestors, stop at the first one that is visible and not a frame
@@ -322,7 +321,6 @@ static ApparentCircle(d) {
 // zoom in (expand, unpack) a collapsed node so it appears as a frame with visible child nodes
 
 // TODO DEBUG: any nested node should reappear just as it was when its parent frame d was last collapsed 
-// Instead, it is displayed in "exploded" configuration, as a circle linked to its children. => is_group was clobbered with a 0?
 // TODO DEBUG: after collapsing & expanding a locked frame, the child circles have large positive y coordinates (off screen)
 
 static ToFrame(d) {
@@ -337,16 +335,16 @@ static ToFrame(d) {
             // TODO: c.collapsed_into_node should be ALL the apparent circles that include node c ?
             .filter( c => c.collapsed_into_node == d ) // only unpack these ones, NOT every descendant
             .forEach( c => { 
-                console.log(c);
+             //   console.log(c);
                 c.collapsed_into_node = null; 
                 // ask both 'true' end nodes for their lowest VISIBLE ancestor
                 c.inLinks.forEach( lnk => { lnk.target = Node.ApparentCircle(lnk.true_target); } );
                 c.outLinks.forEach( lnk => {lnk.source = Node.ApparentCircle(lnk.true_source); } );
                 });
 
-    Cache.RefreshAllDescendants();
-    Cache.RefreshSortedNodes(); 
-    Cache.ApplyFrameOrder();                
+        Cache.RefreshAllDescendants();
+        Cache.RefreshSortedNodes(); 
+        Cache.ApplyFrameOrder();                
 
         AppendFrameShapes();
         AppendNodes();
@@ -360,6 +358,8 @@ static ToFrame(d) {
 
 static OnDblClick(e,d) {
     Node.ToFrame(d);
+    Frame.SetCentroid(d,d3.pointer(e,svg.node()),true);
+    Node.Activate([d]);
     ticked();
 }
 
@@ -399,7 +399,7 @@ static Create( {x,y,width,height}, selNodes=null) {
     const d = Node.AppendDatum({ node_id : 'N' + Math.round( Math.random() * 1000000 ) });
     if (x) { d.cogX = d.x = x; d.cogY = d.y = y; }
     if (width) { d.width = width; d.Height = height };
-    d.selected = 1; 
+    Node.Activate([d]); 
 
     nodes.push(d);
     mapNodes.set(d.node_id, d);
@@ -409,8 +409,9 @@ static Create( {x,y,width,height}, selNodes=null) {
     // TODO    .filter( n is not a descendant of any other selected node ) // prevent extra links to nested children
     if ( selNodes ) { 
         d.is_group = 1;
-        selNodes.data().forEach( n => Link.Create(n,d) ); // each node n is added as child/part of the new node d
+        selNodes.data().forEach(n => Link.Create(n,d)); // each node n is added as child/part of the new node d
         Node.ToFrame(d);
+        Node.Activate([d]);
     }
 else { // new empty node
 Cache.RefreshAllDescendants();    // descendants & ancestors, per node - seems to work now
@@ -443,9 +444,9 @@ static GetD3Selection( d, types="circle, rect" ) {
 
 //-------------------------------------------------------------------------------
 
-static BringToFront( d ) {
+static BringToFront(d) {
   //  console.debug('Node.BringToFront');
-     Node.GetD3Selection( d ).raise(); 
+     Node.GetD3Selection(d).raise(); 
 }
 
 //-------------------------------------------------------------------------------
@@ -531,7 +532,6 @@ static OnMouseOut(e,d) {
     
 static IsExclusive(d) {
     // to decide whether this node's circle is in scope of active_exclusion force
-    // return ( d.has_shape && !HasVisibleChild(d)  ); 
     return d.has_shape && Node.ShowAsCircle(d);
     }
 
@@ -620,7 +620,7 @@ static IsVisible(d) {
 
 static OnDragStart(e,d) {
     const selHits = ViewBox.HitTestSelection(e);
- //   console.log('Node.OnDragStart',e,d,this,selHits);
+   console.log('Node.OnDragStart',e,d,this,selHits);
 
     d.fx = e.x; // fix the node position.. 
     d.fy = e.y;     
@@ -635,9 +635,9 @@ static OnDragStart(e,d) {
    else {
         Node.DraggedFromD3Selection = selHits;
         Node.DraggedFromParentFrames = Node.DraggedFromD3Selection
-                .filter(Node.ShowAsFrame)
-                .filter(f => ChildrenOf(f).includes(d))
-                .data();
+            .filter(Node.ShowAsFrame)
+            .filter(f => ChildrenOf(f).includes(d))
+            .data();
         Node.DraggedD3Selection = selThisNode.classed("dragging", true); 
    //     console.log('OnDragStart: Node.DraggedFromD3Selection',selHits, Node.DraggedFromD3Selection, Node.DraggedFromParentFrames );
         Node.BringToFront(Node.DraggedD3Selection);
@@ -696,8 +696,8 @@ static OnDragEnd(e,d) {
         // TODO exclude 'grandparent' recipients with a descendant in selHits
 
   console.log('Node.OnDragEnd(e,d) selHits,f,d',selHits,valid_recipients,d);
-    // TODO: drop node d into the intersection of multiple overlapping frames
-    // BUT EXCLUDING any superset frames
+    // TODO: drop node d into the intersection of multiple overlapping Euler regions
+    // BUT EXCLUDING any superset regions
 
 // set the dropped node's COG to current pointer x,y
     const [x,y] = d3.pointer(e,svg.node());
@@ -720,7 +720,7 @@ static OnDragEnd(e,d) {
             if ( e.sourceEvent.shiftKey ) { //shiftkey 'feels right' here
                 
                 if ( Node.DraggedFromParentFrames ) { // remove old links
-                    // Step 1: disconnect from parent frames we captured at start of drag
+                    // Step 1: disconnect node from any parent frames captured at start of drag
                     const deleting_links = links
                         .filter(Link.IsHier)
                         .filter(e => e.source === d) 
@@ -799,16 +799,13 @@ static Activate( data ) {
         d3.selectAll('.node.whole, .region.whole')
         .filter( d => data.includes(d) )
         .classed('selected',true)
-//        .classed('disabled',false) // TODO want to eliminate the need for 'disabled' as a class
         ;
+        }
+    }
+
+//-------------------------------------------------------------------------------
 
 }
-
-
-}
-
-}
-
 
 //-------------------------------------------------------------------------------
 
