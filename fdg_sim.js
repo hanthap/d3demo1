@@ -85,7 +85,7 @@ function ticked() { // invoked just before each 'repaint' so we can decide exact
 
   // propagate/apply latest calculations to each bound DOM element  
     Link.OnTick(); 
-    Label.OnTick();
+    Node.OnTick();
     Frame.OnTick(); 
 
     gAllNodes.selectAll('g') 

@@ -78,25 +78,6 @@ class Node {
     }
 
     //-------------------------------------------------------------------------------
-    
-// TODO : (Frame) Top & Left need to adjust for Frame.BannerHeight and Frame.StubWidth.
-// but is this the right place to do that?
-// this is so that nested frames allow the appropriate space for heading bar
-
-/*
-static Top(d) {
-    return (Node.Centre(d).y - Node.HalfHeight(d));
-}
-static Left(d) {
-    return (Node.Centre(d).x - Node.HalfWidth(d));
-}
-static Bottom(d) {
-    return (Node.Centre(d).y + Node.HalfHeight(d));
-}
-static Right(d) {
-    return (Node.Centre(d).x + Node.HalfWidth(d));
-}
-*/
 
 static TopInner(d) {
     if ( Node.ShowAsFrame(d) ) return d.y + Frame.BannerHeight(d); 
@@ -259,7 +240,7 @@ static OnContextMenu(e,d) {
         console.log('Node.OnClick',k,d,this);
 
         let clicked_d3selection = d3.select(this);  
-            // DEBUG: if the element is already in foreground , the whole event happens twice 
+            // DEBUG: if the element is already in foreground, the whole event happens twice 
             // appearance is the toggle doesn't happen 
             // EndDrag event happens AND the OnClick ) 
 
@@ -300,6 +281,26 @@ static OnMouseDown(e,d) {
 //      console.log('Exit Node.OnMouseDown');
 }
 
+
+    static OnTick() { 
+            gAllNodes.selectAll('.whole')
+                .attr('transform',d => `translate(${d.x},${d.y})`);
+            ;
+            }
+    static TransformImageElement(d) { return d.img_transform; }
+
+    static TransformClippedImage(d) { 
+        // resize in sync with cicle's radius
+        const 
+            w = Node.Width(d), h = Node.Height(d), // cater for rectangular frames as well as circular nodes
+            r = h < w ? h/2 : w/2, // scale to fit inside smaller dimension of the label
+            scale = r / CROP_CIRCLE_RADIUS, 
+            offset = -r;
+        return `translate(${offset}, ${offset}) scale(${scale})`;
+
+}
+
+
    //-------------------------------------------------------------------------------
 // TODO:  handle case where node d is an element of the intersection A 
 //      and more than one of those supersets is collapsed to an apparent circle
@@ -332,14 +333,12 @@ static ToFrame(d) {
         d.is_group = 1;
         d.has_shape = 1; 
         d.descendants // TODO: should be all descendants that were visible just before last collapse event - but how can we tell?
-
             .filter(c => c != d ) 
-            // TODO: c.collapsed_into_node should be ALL the apparent circles that include node c
+            // TODO: c.collapsed_into_node should be ALL the apparent circles that include node c ?
             .filter( c => c.collapsed_into_node == d ) // only unpack these ones, NOT every descendant
             .forEach( c => { 
                 console.log(c);
-           //   c.soft_hide = 0;
-              c.collapsed_into_node = null; 
+                c.collapsed_into_node = null; 
                 // ask both 'true' end nodes for their lowest VISIBLE ancestor
                 c.inLinks.forEach( lnk => { lnk.target = Node.ApparentCircle(lnk.true_target); } );
                 c.outLinks.forEach( lnk => {lnk.source = Node.ApparentCircle(lnk.true_source); } );
@@ -350,7 +349,7 @@ static ToFrame(d) {
     Cache.ApplyFrameOrder();                
 
         AppendFrameShapes();
-        AppendLabels();
+        AppendNodes();
         AppendLines(); 
         RefreshSimData();
         if (!frozen) UnfreezeSim();
@@ -404,7 +403,7 @@ static Create( {x,y,width,height}, selNodes=null) {
 
     nodes.push(d);
     mapNodes.set(d.node_id, d);
-    AppendLabels();
+    AppendNodes();
    
     // TODO    .filter( n is not in d.ancestors ) // prevent circular nesting
     // TODO    .filter( n is not a descendant of any other selected node ) // prevent extra links to nested children
@@ -420,7 +419,7 @@ Cache.ApplyFrameOrder();
 
     //    AppendFrameShapes();
     //     AppendLines(); 
-    //     AppendLabels();
+    //     AppendNodes();
        RefreshSimData();
     //     if (!frozen) UnfreezeSim();
 
@@ -860,4 +859,75 @@ function VisibleDescendantsOf(d) {
    return d.descendants.filter( Node.IsVisible ); 
 }
 
+//----------------------------------------------------------------
 
+function AppendNodes() {
+
+gAllNodes.selectAll('g').remove(); // otherwise we get duplicates on data refresh
+// which seems odd, i thought join('g') would handle all that
+
+const selWholeNodes = gAllNodes.selectAll('g') 
+    .data( nodes
+            .filter(Node.ShowAsCircle) 
+            .filter(Node.IsVisible) // to be improved using d.collapsed_into_node
+          ,Node.UniqueId)  
+    .join('g')  // all elements of the label (circle, image, HTML content) 
+        .attr('id',Node.UniqueId)
+        .classed('node whole',true)
+        ;
+
+selWholeNodes
+    .classed('empty',Node.IsLeaf)
+    .classed('selected',true)
+    .classed('locked',d => d.locked)
+    .on('mouseover',Node.OnMouseOver) 
+    .on('mouseout',Node.OnMouseOut) 
+    .on('click',Node.OnClick)
+    .on('dblclick',Node.OnDblClick)
+    .on('contextmenu',Node.OnContextMenu)
+    .call(d3.drag()
+        .on('start', Node.OnDragStart)
+        .on('drag', Node.OnDrag)
+        .on('end', Node.OnDragEnd)  
+        )
+        ;
+
+selWholeNodes
+    .append('circle')
+        .attr('r',Node.Radius)
+        .attr('fill',Node.FillColour);
+
+selWholeNodes
+    .filter(d => d.img_src > "" )
+    .append('g') 
+        .classed('image clipped',true)
+        .attr('transform',Node.TransformClippedImage) // scale changes with every mouse wheel event
+        .attr('clip-path','url(#cropCircle)')
+        .append('image') 
+            .classed('image raw',true)
+            .attr('href',d => d.img_src)
+            .attr('width',CROP_CIRCLE_DIAMETER)
+            .attr('height',CROP_CIRCLE_DIAMETER)
+            .attr('transform', Node.TransformImageElement)  // one-time, position and scale the image relative to its crop circle
+            ;
+
+}
+
+//----------------------------------------------------------------
+
+// generic clip path for jpg/svg inside node circles, before dynamic re-sizing
+// 
+
+const CROP_CIRCLE_CX = 150, CROP_CIRCLE_R = 150;
+
+const 
+    CROP_CIRCLE_RADIUS = 150, 
+    CROP_CIRCLE_DIAMETER = CROP_CIRCLE_RADIUS * 2,
+    cropCircle = defs
+        .append("clipPath")
+            .attr("id","cropCircle") 
+            .append("circle")
+                .attr("cx",CROP_CIRCLE_RADIUS) 
+                .attr("cy",CROP_CIRCLE_RADIUS)
+                .attr("r",CROP_CIRCLE_RADIUS)
+    ;

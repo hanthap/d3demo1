@@ -20,13 +20,6 @@ svg {
     background-color: lightgray;
 }
 
-.all_circles * {
-    fill-opacity: 0.1;
-    stroke:black;
-    stroke-opacity: 0.1;
-    stroke-width: 1;
-    cursor: grab; 
-}
 
 .left-mouse-down *  { /* TODO cursors don't cascade reliably in Chromium browsers */
      cursor: grabbing; 
@@ -37,49 +30,11 @@ svg {
 }
 
 
-/*  foreignObject child <div> styling */
-div.circleinfo {
-    font-size: 8px;
-    color: blue;
-    justify-content: center;
-    display: flex;
-    height: 100%;
-    width: 100%;
-    align-items: center;
-    /* font-family: Helvetica; */
-    mix-blend-mode: difference; /* why does this not work? */
-
-}
-
-div.has_members {
-    font-size: 9px;
-    /* color: black; */
-    font-weight: bold;
-    justify-content: center;
-    display: flex;
-    height: 100%;
-    width: 100%;
-    align-items: center; /* vertical */
-    text-shadow:
-        /* 1px 1px 0 #fff, */
-        2px 2px 4px rgba(0,0,0,0.4);
-}
-
 foreignObject {
   -webkit-user-select: none;
   user-select: none;
 }
 
-div.frameinfo {
-    font-size: 12px;
-    justify-content: center;
-    display: flex;
-    height: 100%;
-    width: 100%;
-    align-items: center;
-    opacity: 0.5;
-
-}
 
 div.frameinfo.xhover {
     transition: 0.2s ease;
@@ -100,18 +55,11 @@ circle.selected {
     stroke-opacity: 1;
 }
 
-/* .class name first => we only need to set class on the 'g' container. (CSS selectors cascade to all descendants) */
+/* .class name first => we only need to set class on the 'g' container.  */
 .shift-down circle.has_members {
     cursor: zoom-in;
 }
 
-.blink_me {
-    animation: blinker 0.5s cubic-bezier(1,1) infinite alternate;
-}
-
-@keyframes blinker {
-    50% { opacity: 0 ;}
-}
 
 rect.drag_selector {
     stroke:red;
@@ -121,13 +69,6 @@ rect.drag_selector {
     cursor: crosshair;
 }
 
-rect.frame {
-    stroke:black;
-    stroke-width: 1;
-    stroke-opacity: 0.1;
-    fill-opacity: 0.1;
-
-    }
 
 .shift-down rect.frame {
     cursor: zoom-out;
@@ -142,33 +83,17 @@ rect.shift-down.frame-rect    {
     cursor: crosshair;
 }
 
-.frame-whole  * {
-    fill-opacity: 0.5;
-}
 
-.frame-image  * {
-    opacity: 0.6;
-}
-
-rect.frame.selected {
-    stroke-opacity: 1;
-    fill-opacity: 0.3;
-}
-
-rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover { 
+.whole.xhover, whole:hover { 
     stroke:black;
     stroke-dasharray: 2,2;
     stroke-opacity: 1;
 }
 
-.frame-whole.shift-down {
+.region.whole.shift-down {
     cursor: zoom-out;
 }
 
-.frame-banner {
-        fill-opacity: 0.8;
-        fill:orange;
-}
 
 
 .dragging * {
@@ -178,22 +103,8 @@ rect.frame.xhover, rect.frame:hover, circle:hover, circle.xhover {
     cursor: grabbing; 
 }
 
-.shift-down.ctrl-down circle {
-    cursor:cell; /* drop here (inside a frame) */
-}
-
-.shift-down line.all-linkzones  { 
-     cursor: grab;  
- }
-
-.ctrl-down line.all-linkzones  { 
-     cursor: copy;  /* arrow with plus superscript "click to insert here" */
- }
 
 
-.shift-down.left-mouse-down line.all-linkzones  { 
-     cursor: grabbing;  
- }
 
 
 circle.drafting {
@@ -203,43 +114,8 @@ circle.drafting {
     cursor: no-drop;
 }
 
-g.all-links, div.label, foreignObject, xhtml:div {
-    pointer-events: none; /* let mouse events pass through  */
-}
-
- 
-.frame-header * {
-    pointer-events: none; /* let mouse events pass through  */
-}
-
 g.foreground * {
     pointer-events: none; /* let mouse events pass through  */
-}
-
-.all-linkzones * { 
-    stroke-width:  10;
-    stroke: yellow; /* can't be none, otherwise not clickable */
-    stroke-opacity: 0;
-}
-
-line.bullet {
-    fill: context-fill; 
-    stroke: none; 
-}
-
-line.all-linkzones.fixed-source { 
-    stroke-width:  1.4;
-    stroke: green; 
-    stroke-opacity: 1;
-    marker-start: url(#bullet);
-}
-
-line.all-linkzones.fixed-target { 
-    stroke-width:  1.4;
-    stroke: blue;
-    stroke-opacity: 1;
-    marker-end: url(#bullet);
-
 }
 
 polyline.arrow { /* directed line, with arrow */
@@ -248,36 +124,19 @@ polyline.arrow { /* directed line, with arrow */
 
 }
 
-
-
 polygon.arrowhead {
     fill: context-fill; /* inherit polyline's RGBA fill colour INCLUDING opacity (alpha) */
     stroke: none; 
 }
-/* 
-circle.bullet {
-    fill-opacity: 1;
-    fill: context-fill;
-    stroke: none; 
-} */
 
 
-
-
-polyline.space-bar.selected {
-    visibility:visible;
-}
-
-
-/* , g.all-circles, g.all-frames */
-
-polyline.selected {
-    stroke-dasharray: none; /* appear as solid colour */
-}
+/* polyline.selected {
+    stroke-dasharray: none; / appear as solid colour 
 
 polyline.xhover { 
     stroke-dasharray: 2,2;
 }
+} */
 
 .dragging line { 
     stroke-dasharray: 2,2;
@@ -358,24 +217,9 @@ rect.valid_target {
     cursor:wait; /* spinning circle, no arrow */
 }
 
-.disabled * {
-   filter: grayscale(100%);
-   opacity: 0.5;
-
-}
 
 
-.locked.frame-rect  {
-    stroke:red;
-    cursor: grab;
 
-}
-
-.locked.circle-whole * {
-    stroke:red;
-    cursor: grab;
-
-}
 
 .locked.left-mouse-down * {
     cursor:move;
@@ -516,5 +360,24 @@ foreignObject {
   scroll-behavior: smooth;
   scrollbar-width: none;
   pointer-events: all;
+
+}
+
+
+.node.whole * {
+    stroke: black;
+}
+
+.shift-down g.region.whole {
+    cursor: zoom-out;
+}
+
+.shift-down g.node.whole {
+    cursor: zoom-in;
+}
+
+g.node.empty * { /* leaf node, nothing to see inside */
+    stroke: none;
+    cursor: auto; /* no zoom in */
 
 }

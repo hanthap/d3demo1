@@ -171,7 +171,7 @@ links.forEach( d => {
     Cache.RefreshSortedNodes();       // z-order of nested frames
     AppendFrameShapes(); 
     AppendLines();
-    AppendLabels();
+    AppendNodes();
     body.classed('wait',false);
    RunSim(); 
  //  FreezeSim();

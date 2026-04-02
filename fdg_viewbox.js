@@ -97,7 +97,7 @@ static OnKeyDown(e) {
             .forEach(d=>d.bg_fill = randomHex24());
 
         }
-        AppendLabels();
+        AppendNodes();
         AppendFrames();
         
         break;

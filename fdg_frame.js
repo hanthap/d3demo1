@@ -167,7 +167,7 @@ static ToCircle(d, bExploded, cXcY) {
             }
         AppendFrameShapes();
         AppendLines();
-        AppendLabels(); // now includes circles 
+        AppendNodes(); // now includes circles 
 
 
         // these might not be necessary
