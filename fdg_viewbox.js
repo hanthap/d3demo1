@@ -54,7 +54,7 @@ static OnWheel(e,d) {
 
     gAllNodes.selectAll('.image.clipped') // nested g elements with a non-empty image tag
         .filter(d => d.selected )
-        .attr('transform',Label.TransformGroupElement) // the nested g and its image
+        .attr('transform',Node.TransformGroupElement) // the nested g and its image
     ;
     // update the collision force directly. This actually works!
    simulation.force('collide', d3.forceCollide().radius(Node.CollideRadius));
@@ -107,17 +107,7 @@ static OnKeyDown(e) {
         // clear all highlights by removing the 'selected' class
         nodes.forEach( d => d.selected = 0 );
         links.forEach( d => d.selected = 0 );
-        svg.selectAll('*').classed('selected',false) // even polylines go grey/transparent
-        // gAllEdges.selectAll('polyline') // line colours are resistant to class-driven CSS grey filter
-        //     .style('stroke', Link.StrokeColour )  
-        //     .style('fill', Link.FillColour ); 
-       // svg.classed('disabled',true);
-
-        // gAllRegions.selectAll('.whole')
-        //   //  .classed('selected', false)  
-        //     .classed('disabled', true)
-            ;
-
+        svg.selectAll('*').classed('selected',false);
         break;
 
     case 'End': // release any 'pegged' circles
@@ -196,18 +186,19 @@ static OnKeyUp(e) {
  const capslock = e.getModifierState("CapsLock");
 
 switch (e.key) {
-    // case 'Meta':
-    //     svg.classed("meta-down",false);
-    //     break;
+
+    case 'Meta':
+        svg.classed("meta-down",false);
+        break;
 
     case 'Shift':
         if (!capslock) {
             svg.classed("cloaked",false);
             if (!frozen) UnfreezeSim();
         }
-
         break;
-    case 'Control':
+
+        case 'Control':
         svg.classed("ctrl-down",false);
         break;
 
@@ -228,7 +219,7 @@ static OnMouseDown(e,d) {
 static OnClick(e,d) {
     console.log('ViewBox.OnClick',e,d,this);
     svg.classed('left-mouse-down',false);
-        body.classed('crosshair',false);
+    body.classed('crosshair',false);
 
 if ( e.ctrlKey && e.shiftKey ) {
     // set centre of gravity here, for all unlocked & visible & selected circle nodes
@@ -298,7 +289,6 @@ static OnDrag(e,d) {
 }
 
 //-------------------------------------------------------------------------------
-
 
 static OnDragEnd(e,d) {
 
@@ -386,10 +376,7 @@ const svg = body.append('svg')
 
 // group frames aka Euler regions & contours are passive shapes in the background
 const gAllRegions = svg.append('g')
-    .classed('all regions', true)
-    ;
-// const gNode = svg.append('g') // circles = floating nodes
-//     .classed( 'all_circles', true );
+    .classed('all regions', true);
 
 const gAllNodes =svg.append('g') // circles = floating nodes
     .classed('all nodes',true);

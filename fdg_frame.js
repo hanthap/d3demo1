@@ -139,8 +139,6 @@ d3.selectAll('.region.whole')
 static ToCircle(d, bExploded, cXcY) {
     // replace the frame with a circle at cXcY, refresh attributes
     [d.cogX, d.cogY] = [d.x, d.y] = cXcY;
-    
-
     d.is_group = 0; // render as circle
 
     if ( ! bExploded ) {  // default: 'implode' = soft-hide all contents & transplant connected links so they point to this container node
@@ -150,7 +148,7 @@ static ToCircle(d, bExploded, cXcY) {
             .forEach( c => { // for each descendant except self
                 // TODO: Do NOT collapse until/unless ALL visible parents are now circles, not frames
                 c.collapsed_into_node = d;
-                console.log(c);
+                // console.log(c);
                 // for all in and out links, set this node d as the virtual/effective end point
                 c.inLinks
                     //.filter(Link.ShowAsLine) //not sure if we need to exclude any?
@@ -168,8 +166,7 @@ static ToCircle(d, bExploded, cXcY) {
         }
     AppendFrameShapes();
     AppendLines();
-    AppendNodes(); // now includes circles 
-
+    AppendNodes(); 
 
         // these might not be necessary
     Cache.RefreshAllDescendants();
@@ -221,7 +218,7 @@ static DescendantShapesSVG(d) {
     static SetCentroid(d,[x,y],brute=false) {
 
         d.descendants.forEach(d => { d.cogX = x, d.cogY = y });
-        if (brute) { // no smooth motion - useful for Node.ToFrame() - creates the ideal 'mini-explosion' 
+        if (brute) { // no smooth dragging motion, but useful for Node.ToFrame() - causes a 'mini-explosion' effect
             d.descendants.forEach(d => { d.x = x, d.y = y });
         }
 
@@ -256,11 +253,6 @@ static DescendantShapesSVG(d) {
         else  
             Frame.ToCircle(d, false, d3.pointer(e,svg.node())); // true => implode
         Node.Activate(d.descendants);
-        // d.selected = 1;
-        // d.descendants.forEach(c => c.selected = 1);
-
-
-
         ticked();
 
    }

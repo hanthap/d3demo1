@@ -875,7 +875,7 @@ const selWholeNodes = gAllNodes.selectAll('g')
 
 selWholeNodes
     .classed('empty',Node.IsLeaf)
-    .classed('selected',true)
+    .classed('selected',d => d.selected)
     .classed('locked',d => d.locked)
     .on('mouseover',Node.OnMouseOver) 
     .on('mouseout',Node.OnMouseOut) 
