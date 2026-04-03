@@ -603,7 +603,7 @@ static IsVisible(d) {
 //-------------------------------------------------------------------------------
 
     static IsActive(d) { // participates in force simulations
-        return Node.ShowAsCircle(d);
+        return Node.ShowAsCircle(d) && ( d.selected || Simulation.IncludeCloakedElements );
     }
 
     static HasMembers(d) { // typically, a circle that represents a collapsed (non-empty) set

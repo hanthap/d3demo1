@@ -268,12 +268,6 @@ pointer-events: none;
 }
 
 
-g.drag_selected *
-{
-    stroke:purple;
-    stroke-dasharray: 2,2;
-    stroke-opacity: 1;
-}
 
 .cloaked g { visibility: hidden; pointer-events: none;  } /* this is the only variant I've found that works as expected with node images */
 
@@ -378,4 +372,12 @@ g.node.empty * { /* leaf node, nothing to see inside */
     stroke: none;
     cursor: auto; /* no zoom in */
 
+}
+
+g.whole.drag_selected *
+{
+    stroke:purple;
+    stroke-dasharray: 2,2;
+    stroke-opacity: 1;
+    stroke-width: 1;
 }

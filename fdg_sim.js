@@ -1,8 +1,91 @@
+class Simulation {
+
+    static IncludeCloakedElements = 1;
+
+
+//----------------------------------------------------------------
+
+// TODO: do NOT exclude a collapsed circle IF it has any "descendants in common" with thie frame
+// instead, try to position it so it straddles the boundary, suggesting a non-empty intersection. 
+// This bit could be tricky!
+// likewise, can we adjust the collision force for when multiple ancestors are collapsed circles
+// Maybe set collision radius to zero, just for collapsed sets that are known to have 'hybrid' descendants
+// and then handle it with this custom force...?
+
+// Custom force to expel non-member circle nodes
+static forceEuler(alpha) {
+// this gives a smooth,'organic' feel - BUT the 'true' perpendicular distance is not being optimised.
+// Instead, it uses the trigonometric distance between a pair of contact points (on a line between centres)
+// result: the visual gap is smaller that expected, most notably toward the ends of an elongated frame rect
+// and circles seem to drift away from the 'obvious' spot. 
+
+
+const nIterations = 3; // per tick
+
+// TODO filter on Node.IsActive()
+
+Cache.FrameSet.forEach(Frame.Resize);
+
+for(var i=0; i < nIterations; i++) {
+
+ Cache.FrameSet.forEach( f => { // outer loop 
+    const c0 = Frame.Centre(f); 
+    Cache.CircleSet.forEach( m => { // inner loop
+    if ( f.descendants.includes(m) ) { // circle m is a descendant of frame n 
+        if ( f.locked ) { // all descendants must stay inside a locked frame
+        // if m is not fully inside rect n then snap it back, by changing its midpoint coords
+          if ( Node.RightOuter(m) > Frame.RightInner(f) ) m.cogX = m.x = Frame.RightInner(f) - Node.HalfWidth(m);
+          if ( Node.BottomOuter(m) > Frame.BottomInner(f) ) m.cogY = m.y = Frame.BottomInner(f) - Node.HalfHeight(m);
+          // calc top & left boundaries last so at least the header isn't partly covered
+          if ( Node.LeftOuter(m) < Frame.LeftInner(f) ) m.cogX = m.x = Frame.LeftInner(f) + Node.HalfWidth(m);
+          if ( Node.TopOuter(m) < Frame.TopInner(f) ) m.cogY = m.y = Frame.TopInner(f) + Node.HalfHeight(m);
+        }
+    }
+    else { // circle m is NOT a descendant of frame f, so gently nudge it outside
+        const 
+          c1 = Node.Centre(m),
+          dx = c1.x - c0.x,
+          dy = c1.y - c0.y,
+          theta_out = Math.atan2( dy,  dx),
+          theta_in =  Math.atan2(-dy, -dx),
+          p0 = Frame.ContactPoint(f,theta_out),
+          p1 = Node.ContactPoint(m,theta_in),  
+
+          // TODO: efficient but doesn't push far enough for oblique angles eg where the frame is an elongated rect
+          // maybe some extra trigonometry can adjust for that?
+          h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ) + Frame.ExclusionBuffer(f), // frame centre to frame edge
+          h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) - Node.CollideRadius(m); // frame centre to circle edge
+        ;
+          if ( h0 > h1 ) { // overlapping shapes
+            // hardcoded 0.5 by experimentation
+            const 
+              nudge_factor = 0.5 * (h0 - h1) * alpha; // for smooth animation
+              m.x += Math.cos( theta_out ) * nudge_factor;
+              m.y += Math.sin( theta_out ) * nudge_factor;
+            };
+
+          };
+        }
+      );
+    }
+  );
+
+};
+
+  return Simulation.forceEuler; // return self, enabling a chain of forces
+
+}
+
+//-------------------------------------------------------------------------------
+
+} // END CLASS Simulation
+
+//-------------------------------------------------------------------------------
 
 // no need to drop and recreate the simulation. Just feed it latest data
 
 function RefreshSimData() {
-  simulation.nodes(nodes.filter(Node.ShowAsCircle));
+  simulation.nodes(Cache.ActiveNodes());
   simulation.force('link').links(links.filter(Link.ShowAsLine));
 }
 
@@ -27,16 +110,15 @@ function RunSim() {
     // first kill any previous sims
     FreezeSim();
 
-    simulation = d3.forceSimulation(nodes.filter(Node.IsActive))
+    simulation = d3.forceSimulation(Cache.ActiveNodes())
         
       // putting this first =>  better exclusion but less likely to settle
-        .force("active_exclusion", active_exclusion) 
-
+        .force('Euler',Simulation.forceEuler) 
         
-        .force('collide', d3.forceCollide().radius(Node.CollideRadius))
+        .force('collide',d3.forceCollide().radius(Node.CollideRadius))
     
         // electrostatic forces attract/repel based on charge 
-       .force('electrostatic', d3.forceManyBody()
+       .force('electrostatic',d3.forceManyBody()
           .strength(4) // negative => repulsive
           .distanceMin(20) // minimum distance at which force applies
           .distanceMax(50)  // maximum distance at which force applies
@@ -95,78 +177,6 @@ function ticked() { // invoked by simulation just before each screen refresh
 
 };
 
-//----------------------------------------------------------------
-
-// TODO: do NOT exclude a collapsed circle IF it has any "descendants in common" with thie frame
-// instead, try to position it so it straddles the boundary, suggesting a non-empty intersection. 
-// This bit could be tricky!
-// likewise, can we adjust the collision force for when multiple ancestors are collapsed circles
-// Maybe set collision radius to zero, just for collapsed sets that are known to have 'hybrid' descendants
-// and then handle it with this custom force...?
-
-// Custom force to expel non-member circle nodes
-function active_exclusion(alpha) {
-// this gives a smooth,'organic' feel - BUT the 'true' perpendicular distance is not being optimised.
-// Instead, it uses the trigonometric distance between a pair of contact points (on a line between centres)
-// result: the visual gap is smaller that expected, most notably toward the ends of an elongated frame rect
-// and circles seem to drift away from the 'obvious' spot. 
-
-
-const nIterations = 3; // per tick
-
- Cache.FrameSet.forEach(Frame.Resize);
-
-for(i=0; i < nIterations; i++) {
-
- Cache.FrameSet.forEach( f => { // outer loop 
-    const c0 = Frame.Centre(f); 
-    Cache.CircleSet.forEach( m => { // inner loop
-    if ( f.descendants.includes(m) ) { // circle m is a descendant of frame n 
-        if ( f.locked ) { // all descendants must stay inside a locked frame
-        // if m is not fully inside rect n then snap it back, by changing its midpoint coords
-          if ( Node.RightOuter(m) > Frame.RightInner(f) ) m.cogX = m.x = Frame.RightInner(f) - Node.HalfWidth(m);
-          if ( Node.BottomOuter(m) > Frame.BottomInner(f) ) m.cogY = m.y = Frame.BottomInner(f) - Node.HalfHeight(m);
-          // calc top & left boundaries last so at least the header isn't partly covered
-          if ( Node.LeftOuter(m) < Frame.LeftInner(f) ) m.cogX = m.x = Frame.LeftInner(f) + Node.HalfWidth(m);
-          if ( Node.TopOuter(m) < Frame.TopInner(f) ) m.cogY = m.y = Frame.TopInner(f) + Node.HalfHeight(m);
-        }
-    }
-    else { // circle m is NOT a descendant of frame f, so gently nudge it outside
-        const 
-          c1 = Node.Centre(m),
-          dx = c1.x - c0.x,
-          dy = c1.y - c0.y,
-          theta_out = Math.atan2( dy,  dx),
-          theta_in =  Math.atan2(-dy, -dx),
-          p0 = Frame.ContactPoint(f,theta_out),
-          p1 = Node.ContactPoint(m,theta_in),  
-
-          // TODO: efficient but doesn't push far enough for oblique angles eg where the frame is an elongated rect
-          // maybe some extra trigonometry can adjust for that?
-          h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ) + Frame.ExclusionBuffer(f), // frame centre to frame edge
-          h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) - Node.CollideRadius(m); // frame centre to circle edge
-        ;
-          if ( h0 > h1 ) { // overlapping shapes
-            // hardcoded 0.5 by experimentation
-            const 
-              nudge_factor = 0.5 * (h0 - h1) * alpha; // for smooth animation
-              m.x += Math.cos( theta_out ) * nudge_factor;
-              m.y += Math.sin( theta_out ) * nudge_factor;
-            };
-
-          };
-        }
-      );
-    }
-  );
-
-
-
-};
-
-  return active_exclusion; // return self, enabling a chain of forces if needed
-
-}
 
 //----------------------------------------------------------------
 // THIS ALMOST WORKS, using perpendicular escape vectors 

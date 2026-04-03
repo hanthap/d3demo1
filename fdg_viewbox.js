@@ -72,7 +72,7 @@ static OnKeyDown(e) {
    switch (e.key) {
     case 'a' :
     case 'A' :
-        if ( e.ctrlKey) { // Ctrl+A => Select All
+        if (e.ctrlKey) { // Ctrl+A => Select All
         nodes.forEach( d => d.selected = 1 );
         links.forEach( d => d.selected = 1 );
         }
@@ -86,7 +86,7 @@ static OnKeyDown(e) {
 // except where the source image is a brand logo
     case 'b' : 
     case 'B' :
-        if ( e.ctrlKey) { 
+        if (e.ctrlKey) { 
             function randomHex24() {
                 const n = Math.floor(Math.random() * (1 << 24)); // 0 to 2^24 - 1
                 return "#" + n.toString(16).padStart(6, "0");
@@ -150,9 +150,15 @@ static OnKeyDown(e) {
 
         // TODO Shift+Cmd+. shows hidden folders in MacOS. Maybe use the same for showing hidden nodes?
     case ' ' :
-        svg.classed("cloaked",!svg.classed("cloaked"));
-        // TODO: toggle visibility of unselected lines & nodes
-        // shift+space add/remove them from the simulation as well
+        if (e.shiftKey) { // drop/add cloaked elements in the force model 
+            Simulation.IncludeCloakedElements ^= 1;
+
+            // clear fx fy? 
+            RefreshSimData();
+            }
+        else { // toggle status
+            svg.classed("cloaked",!svg.classed("cloaked"));
+        }
         break;
 
 
@@ -238,8 +244,7 @@ if ( e.ctrlKey && e.shiftKey ) {
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
-    body.classed('crosshair',true);
-    svg.classed('left-mouse-down', true);
+    svg.classed('crosshair left-mouse-down',true);
     console.log('ViewBox.OnDragStart',e,d,this);
     const p = d3.pointer(e,svg.node());
     ViewBox.DragStartPos = p;
@@ -292,9 +297,9 @@ static OnDrag(e,d) {
 
 static OnDragEnd(e,d) {
 
-        svg.classed('left-mouse-down',false);
-                body.classed('crosshair',false);
-        if ( ViewBox.DragRectDims == null ) return; // click is treated as drag start
+    svg.classed('crosshair left-mouse-down',false);
+
+    if ( ViewBox.DragRectDims == null ) return; // click is treated as drag start
 
     if ( svg.classed("ctrl-down") ) {
         // create a new Frame using ViewBox.SelectRect
@@ -309,9 +314,9 @@ static OnDragEnd(e,d) {
     }
 
     // TODO These selections are not visible until simulation unfreezes
-    gAllNodes.selectAll('.drag_selected')
+    d3.selectAll('.whole.drag_selected')
         .classed('drag_selected',false)
-        .each( d => { d.selected ^= 1 } ) // toggle selected flag
+        .classed('selected',d => (d.selected ^= 1)) // toggle selected flag
           ;
 
 

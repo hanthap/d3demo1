@@ -20,13 +20,19 @@ class Cache {
     }
 
 
+
 //-------------------------------------------------------------------------------
 
 static VisibleLines() {
 return links.filter(Link.VisibleLine);
 }
 
+//-------------------------------------------------------------------------------
 
+// called eg by simulation
+static ActiveNodes() {
+    return nodes.filter(Node.IsActive);
+    }
 //-------------------------------------------------------------------------------
 
 static RefreshAllDescendants() {
