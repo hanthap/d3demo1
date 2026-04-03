@@ -257,8 +257,14 @@ static OnContextMenu(e,d) {
             default: // toggle foreground/selected status
                 d.selected ^= 1;
                 clicked_d3selection // should be the 'whole' <g>
-                    .classed('selected', d => d.selected)
-                  break;
+                    .classed('selected', d => d.selected);
+                if (!d.selected) { // deselection always propagates to all links
+                    Link.Activate(d.inLinks,0);
+                    Link.Activate(d.outLinks,0);
+                }
+
+
+                break;
             }
      
         // optionally, cascade the selected status to all direct links and their bound nodes

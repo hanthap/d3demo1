@@ -71,6 +71,7 @@ static PolyLinePointString( d ) {
 //-------------------------------------------------------------------------------
 
 static StrokeColour(d) { 
+    return `rgb(${sourcePalette(d.hue_id)})`;
 
    let rgb = ( d.selected ) ? sourcePalette( d.hue_id ) :
         d == mouseover_datum ? '0,0,0' : '192,192,192'; // black or grey if not selected
@@ -123,23 +124,10 @@ static Distance(d) { // callback for d3.forceLink()
 }
 
 //-------------------------------------------------------------------------------
-// d3selection.each(f) invokes f(d) for each DOM element (accessed via 'this') with d = its bound datum
-
-static OnTick_OK() {
-   gLinkZone.selectAll('line').each( LinkZone.SetAttributes ); 
-   gLink.selectAll('polyline').each( Link.SetAttributes ); 
-}
 
 static OnTick() {
-   gAllEdges.selectAll('polyline').each( Link.SetAttributes ); 
-}
-
-
-
-//-------------------------------------------------------------------------------
-// Repeated per link, per tick, via selectAll('polyline').each(Link.SetAttributes) 
-static SetAttributes(d)   {
-    this.setAttribute('points', Link.PolyLinePointString(d) ); 
+   gAllEdges.selectAll('polyline')
+       .attr('points',Link.PolyLinePointString); 
 }
 
  //-------------------------------------------------------------------------------
@@ -258,6 +246,18 @@ static InsertNode(lnk,node) {
 
     }
 
+//-------------------------------------------------------------------------------
+
+static Activate(arr, status=1) {
+
+    gAllEdges
+        .selectAll('.whole')
+        .filter(lnk => arr.includes(lnk))
+        .classed('selected',status)
+        .each(lnk => lnk.selected = status)
+        ; 
+
+}
 
 }
 //-------------------------------------------------------------------------------
@@ -275,8 +275,8 @@ const selWholeEdges =
         .data(Cache.VisibleLines(),Link.UniqueId)
         .join("g")
         .attr('id',Link.UniqueId)
-        .classed("edge whole",true)
-        .classed("selected",d => d.selected)
+        .classed('edge whole',true)
+        .classed('selected',d => d.selected)
         .on('click',LinkZone.OnClick)
         .on('mouseover',LinkZone.OnMouseOver)
         .on('mouseout',LinkZone.OnMouseOut)
@@ -309,15 +309,15 @@ selNewEdges.append('polyline')
 
 class LinkZone extends Link {
 
-static SetAttributes(d)   {
+// static SetAttributes(d)   {
     
-    let t = Link.PolyLinePointTuple(d);
-    this.setAttribute('x1',t.start.x);
-    this.setAttribute('y1',t.start.y);
-    this.setAttribute('x2',t.end.x);
-    this.setAttribute('y2',t.end.y);
+//     let t = Link.PolyLinePointTuple(d);
+//     this.setAttribute('x1',t.start.x);
+//     this.setAttribute('y1',t.start.y);
+//     this.setAttribute('x2',t.end.x);
+//     this.setAttribute('y2',t.end.y);
 
-}
+// }
 
 //-------------------------------------------------------------------------------
 
@@ -357,6 +357,8 @@ console.log([x,y],cp,h0,h1);
 }
 
 
+
+
 //-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
@@ -377,11 +379,8 @@ static OnClick(e,d) {
             if ( d.selected ^= 1 ) {
                 d.source.selected = d.target.selected = 1;
                 Node.Activate([d.source,d.target]);
-                
-                // TODO: set classed(selected,true) for source & target elements, (circles AND frames)
-            }
-
-            gAllEdges.selectAll('.whole').filter(lnk => lnk === d).classed('selected',d.selected); 
+                }
+            Link.Activate([d],d.selected);
             break;
 
     }

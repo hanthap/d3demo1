@@ -20,9 +20,9 @@ class Frame extends Node {
 static ContactPoint(d,theta) { 
 
 const
-        t = theta * (180 / Math.PI),  // just for clarity      
-        crit_rad = Math.atan2( Frame.Height(d), Frame.Width(d) ), // allow for outer margin
-        c = crit_rad * (180 / Math.PI), // range [0,90]
+        t = theta * (180/Math.PI),  // just for clarity      
+        crit_rad = Math.atan2(d.height,d.width), 
+        c = crit_rad * (180/Math.PI), // range [0,90]
 
         v =   t < c -180 ?  { side: 'left',   dim: 'x', k: Frame.LeftOuter(d),   a: -theta } :
               t < 0-c ?     { side: 'top',    dim: 'y', k: Frame.TopOuter(d),    a: theta-Math.PI/2 } :
@@ -31,8 +31,8 @@ const
                             { side: 'left',   dim: 'x', k: Frame.LeftOuter(d),   a: -theta },
 
 
-        point = v.dim == 'x' ? { x: v.k, y: Frame.Centre(d).y + ( Frame.HalfWidth(d)  * Math.tan(v.a) ) } :
-                               { y: v.k, x: Frame.Centre(d).x + ( Frame.HalfHeight(d) * Math.tan(v.a) ) } ;
+        point = v.dim == 'x' ? { x: v.k, y: Frame.Centre(d).y + ( d.width/2  * Math.tan(v.a) ) } :
+                               { y: v.k, x: Frame.Centre(d).x + ( d.height/2 * Math.tan(v.a) ) } ;
 
   // TODO : what if the point falls at a rounded corner (within Frame.CornerRadius of that corner)
   // maybe a clip path can help? Except it would have to change with every tick
@@ -61,7 +61,7 @@ static StubWidth(d) {
 }
 //-------------------------------------------------------------------------------
 // default buffer for non-heading sides
-    static Margin(d) { return 0 }; 
+    static Margin(d) { return 6 }; 
 
 //-------------------------------------------------------------------------------
 
@@ -268,20 +268,23 @@ static DescendantShapesSVG(d) {
 
     static Centre(d) { return { x: d.x + d.width/2, y: d.y + d.height/2 }    }
 
-    static LeftInner(d) { return d.x + Frame.StubWidth(d) }; 
     static LeftOuter(d) { return d.x }; 
+    static LeftInner(d) { return d.x + Frame.StubWidth(d) }; 
 
     static TopOuter(d) { return d.y };
     static TopInner(d) { return d.y + Frame.BannerHeight(d) }; 
 
     static RightOuter(d) { return d.x + d.width }; 
+    static RightInner(d) { return d.x + d.width - Frame.Margin(d) }; 
+    
     static BottomOuter(d) { return d.y + d.height };
+    static BottomInner(d) { return d.y + d.height - Frame.Margin(d) }; 
  
     static WidthOuter(d) { return d.width } ;
-    static WidthInner(d) { return d.width - Frame.StubWidth(d) } ;
+    static WidthInner(d) { return d.width - Frame.StubWidth(d) - Frame.Margin(d) } ;
 
     static HeightOuter(d) { return d.height } ;
-    static HeightInner(d) { return d.height - Frame.BannerHeight(d) } ;
+    static HeightInner(d) { return d.height - Frame.BannerHeight(d) - Frame.Margin(d) } ;
 
 
     static CornerRadius(d) {  return d.locked ? 0 : 1.5 * radius ;};
