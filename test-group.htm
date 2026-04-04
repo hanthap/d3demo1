@@ -148,6 +148,19 @@ g.edge.whole.ctrl-down * {
 }
 
 
+:root {
+  --clip-scale: 0.5; /* 0 = nothing, 1 = full height */
+}
+
+
+rect.contour {
+    rx: 8;
+    ry: 8;
+    stroke-width: 1;
+
+}
+
+
 </style>
 
 
@@ -160,10 +173,86 @@ g.edge.whole.ctrl-down * {
 <defs>
     <clipPath id="cropCircle">
         <circle cx="150" cy="150" r="150"/>
+
+
     </clipPath>
+
+    <clipPath id="cropBox">
+        <rect width="300" height="300"/>
+    </clipPath>
+
+
+    <clipPath id="cropContour">
+        <rect class="contour"
+            width="400" height="300"
+        />
+    </clipPath>
+
+
 </defs>
 
 <g class="viewport" transform="translate(-10,60) scale(1)">
+
+<g class="all nodes">
+
+<!==========================================================================================>
+
+<g class='node whole locked selected' 
+    transform="translate(50,100)">
+    <!-- only MOVE the whole node, don't scale here otherwise the border will change thickness -->
+
+    <rect class="node contour" 
+    width=80 height=60 fill="#366abb" />
+     <!-- change contour width & height only, for interactive zoom. Apply same ratio to scale in image -->
+    
+    <g  class="image clipped" 
+        clip-path="url(#cropContour)" 
+        transform="scale(0.2)" > 
+     <!-- keep scale in sync with contour width,height, in response to mousewheel zoom  -->
+
+        <image class="image raw"
+            href="https://upload.wikimedia.org/wikipedia/commons/6/6a/Supranational_European_Bodies.svg" 
+            width="300" height="300"  
+            transform="translate(17,-33) scale(1.21)"
+        </image>
+         <!-- set-up initial align for best fit in 3:4 rectangle. (May differ from circle) -->
+
+
+            <!-- href="https://upload.wikimedia.org/wikipedia/commons/6/6a/Supranational_European_Bodies.svg"  -->
+            <!-- href="https://images.ctfassets.net/nkjam526qvcs/2lwDnQV5TUAx15z7Z2FYWw/9a1777893ec920558d13baa95a576072/Cadbury_GlobalNavigation_BrandLogo_Desktop.svg" -->
+
+    </g>
+
+
+</g>
+
+<g class='node whole selected' transform="translate(430,480)">
+
+    <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightcoral"  />
+
+    <g class="image clipped" clip-path="url(#cropCircle)"
+        transform=" translate(-32,-32) scale(0.12)">
+
+        <image class="image raw"
+            href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
+            width="300" height="300" 
+            transform="translate(25,25) scale(0.8)"
+        </image>
+
+    </g>
+
+    <foreignObject class="fob tag" x="-45" y="20" width="60" height="40"  >
+        <div:xhtml>Citibank</div:xhtml>
+    </foreignObject>    
+
+
+</g>
+
+
+
+</g>
+
+
 
 <!----------------------------------------------------------------------------------->
 <g class="all regions">
@@ -225,52 +314,6 @@ The foreignObject defines a fixed rectangular viewport for the HTML.
 </g>
 <!----------------------------------------------------------------------------------->
 
-<g class="all nodes">
-
-<g class='node whole selected' transform="translate(430,480)">
-
-    <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightcoral"  />
-
-    <g class="image clipped" clip-path="url(#cropCircle)"
-        transform=" translate(-32,-32) scale(0.12)">
-
-        <image class="image raw"
-            href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
-            width="300" height="300" 
-            transform="translate(25,25) scale(0.8)"
-        </image>
-
-    </g>
-
-    <foreignObject class="fob tag" x="-45" y="20" width="60" height="40"  >
-        <div:xhtml>Citibank</div:xhtml>
-    </foreignObject>    
-
-
-</g>
-
-<!----------------------------------------------------------------------------------->
-
-
-<g class='node whole empty selected'   transform="translate(16,16)">
-
-    <circle class="node circle" r="32" cx="-16" cy="-16" fill="lightblue" />
-
-    <g class="image clipped" clip-path="url(#cropCircle)"
-        transform="translate(-32,-32) scale(0.12)">
-
-        <image class="image raw"
-            href="https://cdn.worldvectorlogo.com/logos/citi-2.svg" 
-            width="300" height="300" 
-            transform="translate(25,25) scale(0.8)"
-        </image>
-
-    </g>
-
-
-</g>
-
-</g>
 
 <!----------------------------------------------------------------------------------->
 <!----------------------------------------------------------------------------------->

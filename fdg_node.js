@@ -898,7 +898,17 @@ selWholeNodes
         ;
 
 selWholeNodes
+    .filter(Node.HasMembers)
+    .append('rect')
+        .classed('contour',true)
+        .attr('width',64)
+        .attr('height',48)
+        .attr('fill',Node.FillColour);
+
+selWholeNodes
+    .filter(Node.IsLeaf)
     .append('circle')
+        .classed('circle',true)
         .attr('r',Node.Radius)
         .attr('fill',Node.FillColour);
 
@@ -906,8 +916,8 @@ selWholeNodes
     .filter(d => d.img_src > "" )
     .append('g') 
         .classed('image clipped',true)
-        .attr('transform',Node.TransformClippedImage) // scale changes with every mouse wheel event
-        .attr('clip-path','url(#cropCircle)')
+        .attr('transform',d => Node.HasMembers(d) ? 'scale(0.2)' : Node.TransformClippedImage(d)) // scale changes with every mouse wheel event
+        .attr('clip-path',d => Node.HasMembers(d) ? 'url(#cropContour)' : 'url(#cropCircle)')
         .append('image') 
             .classed('image raw',true)
             .attr('href',d => d.img_src)
@@ -916,6 +926,30 @@ selWholeNodes
             .attr('transform', Node.TransformImageElement)  // one-time, position and scale the image relative to its crop circle
             ;
 
+
+
+
+
+
+// selWholeNodes
+//     .append('circle')
+//         .attr('r',Node.Radius)
+//         .attr('fill',Node.FillColour);
+
+// selWholeNodes
+//     .filter(d => d.img_src > "" )
+//     .append('g') 
+//         .classed('image clipped',true)
+//         .attr('transform',Node.TransformClippedImage) // scale changes with every mouse wheel event
+//         .attr('clip-path','url(#cropCircle)')
+//         .append('image') 
+//             .classed('image raw',true)
+//             .attr('href',d => d.img_src)
+//             .attr('width',CROP_CIRCLE_DIAMETER)
+//             .attr('height',CROP_CIRCLE_DIAMETER)
+//             .attr('transform', Node.TransformImageElement)  // one-time, position and scale the image relative to its crop circle
+//             ;
+
 }
 
 //----------------------------------------------------------------
@@ -923,7 +957,7 @@ selWholeNodes
 // generic clip path for jpg/svg inside node circles, before dynamic re-sizing
 // 
 
-const CROP_CIRCLE_CX = 150, CROP_CIRCLE_R = 150;
+//const CROP_CIRCLE_CX = 150, CROP_CIRCLE_R = 150;
 
 const 
     CROP_CIRCLE_RADIUS = 150, 
@@ -934,5 +968,12 @@ const
             .append("circle")
                 .attr("cx",CROP_CIRCLE_RADIUS) 
                 .attr("cy",CROP_CIRCLE_RADIUS)
-                .attr("r",CROP_CIRCLE_RADIUS)
+                .attr("r",CROP_CIRCLE_RADIUS),
+    cropContour = defs
+        .append("clipPath")
+            .attr("id","cropContour") 
+            .append("rect")
+                .attr("width",CROP_CIRCLE_DIAMETER) 
+                .attr("height",CROP_CIRCLE_DIAMETER*0.75)
+                   
     ;

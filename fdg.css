@@ -381,3 +381,11 @@ g.whole.drag_selected *
     stroke-opacity: 1;
     stroke-width: 1;
 }
+
+
+rect.contour {
+    rx: 8;
+    ry: 8;
+    stroke-width: 1;
+
+}
