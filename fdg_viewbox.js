@@ -172,9 +172,10 @@ static OnKeyDown(e) {
         // if hovering over space => create node
         // if hovering inside a frame => create child node
         // if hovering over a line => splice a new node
-        // else if 2 or more nodes are selected, encapsulate them in a new frame
-        const selNodes = gAllNodes.selectAll('.whole').filter(d => d.selected);
-        Node.Create([0,0,20,20],selNodes);
+        // else if 2 or more nodes are selected, encapsulate them in a new Euler contour/frame
+        const 
+            selNodes = gAllNodes.selectAll('.whole').filter(d => d.selected),
+            f = Node.Create([0,0,20,20],selNodes);
         break;
 
     default:

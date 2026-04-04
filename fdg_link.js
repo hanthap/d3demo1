@@ -36,7 +36,8 @@ static AppendDatum(d,i) {
         strength: 0.4 * Math.random(),
         id: 'L' + Math.round( Math.random() * 1000000 ),
         descriptor: `New link: ${child.node_id} ∈ ${parent.node_id}`,
-        opacity: 1
+        opacity: 1,
+        tag: 'belongs to'
     };
     links.push(newLink);
     child.outLinks.push(newLink);
@@ -309,15 +310,6 @@ selNewEdges.append('polyline')
 
 class LinkZone extends Link {
 
-// static SetAttributes(d)   {
-    
-//     let t = Link.PolyLinePointTuple(d);
-//     this.setAttribute('x1',t.start.x);
-//     this.setAttribute('y1',t.start.y);
-//     this.setAttribute('x2',t.end.x);
-//     this.setAttribute('y2',t.end.y);
-
-// }
 
 //-------------------------------------------------------------------------------
 
@@ -398,19 +390,19 @@ static OnMenuItemClick(e,d) {
 
 //-------------------------------------------------------------------------------
 
-static OnContextMenu(e,d) {
+static OnContextMenu(event,d) {
 
-    e.preventDefault();
+    event.preventDefault();
 
     const a = Link.Matches(d);
 
-    const sub = a.map( e => `<div class="item">${e.true_source.tag} ${e.tag} ${e.true_target.tag}: ${e.descriptor}</div>`).join("\n");
+    const sub = a.map( lnk => `<div class="item">${lnk.true_source.tag} ${lnk.tag} ${lnk.true_target.tag}: ${lnk.descriptor}</div>`).join("\n");
 
 
     menu
       .style("display", "block")
-      .style("left", e.pageX + "px")
-      .style("top", e.pageY + "px")
+      .style("left", event.pageX + "px")
+      .style("top", event.pageY + "px")
       .html(`
         <div class="item"><b>Link: ${d.source.tag} ↔ ${d.target.tag}</b> (${a.length})</div>${sub}`)
       .on('click',LinkZone.OnMenuItemClick)
@@ -468,7 +460,7 @@ static OnDragStart(e,d) {
             const ends = LinkZone.ChooseEnds(d,p);
             const selFixedNode = d3.select('circle,rect').filter(n => n == ends.far.node );
             DraftLink.OnDragStart(e, ends.far.node, selFixedNode, d );
-            // TODO temporarily hide the current link and its linkzone
+            // TODO temporarily hide the existing 'link whole' 
             break;
 
     }
@@ -508,9 +500,9 @@ static OrigLinkDatum; // the link we will be updating at the end, if all goes we
 static EndPoints(from_node,to_point) {
 
     const 
-    c = Node.Centre(from_node), 
-    t = Link.Theta(c,to_point),
-    from_cp = Node.ContactPoint(from_node,t.theta_out)
+        c = Node.Centre(from_node), 
+        t = Link.Theta(c,to_point),
+        from_cp = Node.ContactPoint(from_node,t.theta_out);
     return { p0: from_cp, p1: to_point };
     }
 
@@ -597,9 +589,11 @@ static OnDragEnd(e) {
             lnk.target = lnk.true_target = mouseover_datum;
             }
         if ( mouseover_datum && "source" in mouseover_datum ) { // over valid link => split that link and insert a new node
-            // create a new node
-            // TODO: add the new intermediate node as a child of any frames containing at the pointer location
-            lnk.target = lnk.true_target = Node.Create({x,y,width:20,height:20});
+            // create a new intermediate node
+            // TODO: add the new intermediate node as a child of any visible euler regions intersecting with the pointer location
+            lnk.target = lnk.true_target = Node.Create({x,y,width:8,height:8});
+            lnk.target.fx = x; lnk.target.fy = y; // user expects the node to stay where it's put
+            lnk.img_src = null; // TODO give it a suitable icon, e.g. 'AND' gate?
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
             // also, splice the new node into the existing (mouseover) link
             Link.InsertNode(mouseover_datum,lnk.target);

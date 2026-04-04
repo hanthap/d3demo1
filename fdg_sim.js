@@ -5,6 +5,7 @@ class Simulation {
 
 //----------------------------------------------------------------
 
+
 // TODO: do NOT exclude a collapsed circle IF it has any "descendants in common" with thie frame
 // instead, try to position it so it straddles the boundary, suggesting a non-empty intersection. 
 // This bit could be tricky!
@@ -14,7 +15,7 @@ class Simulation {
 
 // Custom force to expel non-member circle nodes
 static forceEuler(alpha) {
-// this gives a smooth,'organic' feel - BUT the 'true' perpendicular distance is not being optimised.
+// this gives a smooth,'fluid' feel - BUT the 'true' perpendicular distance is not being optimised.
 // Instead, it uses the trigonometric distance between a pair of contact points (on a line between centres)
 // result: the visual gap is smaller that expected, most notably toward the ends of an elongated frame rect
 // and circles seem to drift away from the 'obvious' spot. 

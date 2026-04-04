@@ -406,7 +406,7 @@ static Create( {x,y,width,height}, selNodes=null) {
 
     const d = Node.AppendDatum({ node_id : 'N' + Math.round( Math.random() * 1000000 ) });
     if (x) { d.cogX = d.x = x; d.cogY = d.y = y; }
-    if (width) { d.width = width; d.Height = height };
+    if (width) { d.width = width; d.Height = height; d.r = width/2; };
     Node.Activate([d]); 
 
     nodes.push(d);
@@ -830,25 +830,25 @@ function HasVisibleChild(d) {
 
 //-------------------------------------------------------------------------------
 
-function IsVisibleNode(d) {
-    p = ParentOf(d);
-    return ( (!p.stacked) || d == LeadingChildOf(p) );
-}
+// function IsVisibleNode(d) {
+//     p = ParentOf(d);
+//     return ( (!p.stacked) || d == LeadingChildOf(p) );
+// }
 
 
 //-------------------------------------------------------------------------------
 
 function ChildrenOf(d) {
-    if ( d.inLinks ) {
-            return ( d.inLinks.filter( Link.IsHier ).map( e => e.true_source ) )
+    if (d.inLinks) {
+            return (d.inLinks.filter(Link.IsHier).map(e => e.true_source))
     } else return [];
 
 }
 //-------------------------------------------------------------------------------
 
 function ParentsOf(d) {
-    if ( d.ourLinks ) {
-            return ( d.outLinks.filter( Link.IsHier ).map( e => e.true_target ) )
+    if (d.ourLinks) {
+            return (d.outLinks.filter(Link.IsHier).map(e => e.true_target))
     } else return [];
 
 }
@@ -861,7 +861,7 @@ function VisibleChildrenOf(d) {
 //-------------------------------------------------------------------------------
 
 function VisibleDescendantsOf(d) {
-   return d.descendants.filter( Node.IsVisible ); 
+   return d.descendants.filter(c => c != d).filter(Node.IsVisible); 
 }
 
 //----------------------------------------------------------------
@@ -876,7 +876,7 @@ const selWholeNodes = gAllNodes.selectAll('g')
             .filter(Node.ShowAsCircle) 
             .filter(Node.IsVisible) // to be improved using d.collapsed_into_node
           ,Node.UniqueId)  
-    .join('g')  // all elements of the label (circle, image, HTML content) 
+    .join('g') 
         .attr('id',Node.UniqueId)
         .classed('node whole',true)
         ;
