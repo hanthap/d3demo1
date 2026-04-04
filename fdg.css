@@ -389,3 +389,8 @@ rect.contour {
     stroke-width: 1;
 
 }
+
+.locked.contour rect {
+    rx: 0;
+    ry: 0;
+}

@@ -901,8 +901,10 @@ selWholeNodes
     .filter(Node.HasMembers)
     .append('rect')
         .classed('contour',true)
-        .attr('width',64)
-        .attr('height',48)
+        .attr('x',-24)
+        .attr('y',-18)
+        .attr('width',48)
+        .attr('height',36)
         .attr('fill',Node.FillColour);
 
 selWholeNodes
@@ -916,7 +918,7 @@ selWholeNodes
     .filter(d => d.img_src > "" )
     .append('g') 
         .classed('image clipped',true)
-        .attr('transform',d => Node.HasMembers(d) ? 'scale(0.2)' : Node.TransformClippedImage(d)) // scale changes with every mouse wheel event
+        .attr('transform',d => Node.HasMembers(d) ? 'translate(-24,-20) scale(0.15)' : Node.TransformClippedImage(d)) // scale changes with every mouse wheel event
         .attr('clip-path',d => Node.HasMembers(d) ? 'url(#cropContour)' : 'url(#cropCircle)')
         .append('image') 
             .classed('image raw',true)
