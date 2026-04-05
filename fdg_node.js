@@ -141,22 +141,22 @@ static RightOuter(d) {
     //-------------------------------------------------------------------------------
 
     static HalfWidth(d)  {  // horizontal distance from centre to left/right edge
-        return d.r ;
+        return d.width/2 ;
     }
 
     //-------------------------------------------------------------------------------
 
     static HalfHeight(d)  {  
-        return d.r ;
+        return d.height/2 ;
     }
 
    //-------------------------------------------------------------------------------
 
     static ContactPoint(d,theta) {  
-        if ( Node.ShowAsFrame(d) ) { //  DIY polymorphism 
-            return Frame.ContactPoint(d,theta);
-        }
-        else {
+
+        if ( Node.HasMembers(d) ) { 
+            return RectNode.ContactPoint(d,theta);
+        } else {
             // where does the ray intersect the circle?
             return {
                 // TODO: adjust for stroke width

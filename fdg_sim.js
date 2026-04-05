@@ -175,8 +175,6 @@ function ticked() { // invoked by simulation just before each screen refresh
 
     gAllNodes.selectAll('.whole') 
         // // TODO: could exclude locked circles (but for the drag selection logic)
-        // .attr('cx',Node.BoundedX) 
-        // .attr('cy',Node.BoundedY)
         .classed('drag_selected',ViewBox.DragRectIncludes)
         ;
 

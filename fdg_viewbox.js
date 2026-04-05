@@ -52,14 +52,16 @@ static OnWheel(e,d) {
     .each( d => d.r *= ( 1 + e.wheelDelta / 1200 ) )
     .attr( 'r', d => d.r );
 
-// PROBLEM: d.width & d/height are affected by forceEuler...
+// We're getting there.. this resizes and centres a collapsed node rect, but only after its first expand/collapse
 
-    // gAllNodes.selectAll('rect')
-    // .filter(d => d.selected )
-    // .each( d => d.width *= ( 1 + e.wheelDelta / 1200 ) )
-    // .each( d => d.height *= ( 1 + e.wheelDelta / 1200 ) )
-    // .attr( 'width', d => d.width )
-    // .attr( 'height', d => d.height );
+    gAllNodes.selectAll('rect')
+    .filter(d => d.selected )
+    .each( d => d.width *= ( 1 + e.wheelDelta / 1200 ) )
+    .each( d => d.height *= ( 1 + e.wheelDelta / 1200 ) )
+    .attr( 'x', d => -d.width/2 )
+    .attr( 'y', d => -d.height/2 )
+    .attr( 'width', d => d.width )
+    .attr( 'height', d => d.height );
 
 
     gAllNodes.selectAll('.image.clipped') // nested g elements with a non-empty image tag
