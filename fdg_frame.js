@@ -142,6 +142,11 @@ static ToCircle(d, bExploded, cXcY) {
     if (d.locked) [d.fx, d.fy] = cXcY;
     d.is_group = 0; // not frame
 
+    // Pragma override the height & width previously set by Simulation.forceEuler() calling Frame.Resize()
+    d.height = 36; // hoping these will help with calculating Node.ContactPoint() 
+    d.width = 48;
+    d.r = 24; // pragma for collision forces, frame perimeter logic
+
     if ( ! bExploded ) {  // default: 'implode' = soft-hide all contents & transplant connected links so they point to this container node
         d.descendants
             .filter( c => c != d ) // because d.descendants includes self

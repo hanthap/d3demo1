@@ -303,7 +303,10 @@ static OnMouseDown(e,d) {
 //-------------------------------------------------------------------------------
 
     static TransformClippedImage(d) { 
-        // resize in sync with cicle's radius
+        // resize in sync with cicle's radius (or rect size)
+
+// Node.HasMembers(d) ? 'translate(-24,-20) scale(0.15)'
+
         const 
             w = Node.Width(d), h = Node.Height(d), // cater for rectangular frames as well as circular nodes
             r = h < w ? h/2 : w/2, // scale to fit inside smaller dimension of the label
@@ -830,14 +833,6 @@ function HasVisibleChild(d) {
 
 //-------------------------------------------------------------------------------
 
-// function IsVisibleNode(d) {
-//     p = ParentOf(d);
-//     return ( (!p.stacked) || d == LeadingChildOf(p) );
-// }
-
-
-//-------------------------------------------------------------------------------
-
 function ChildrenOf(d) {
     if (d.inLinks) {
             return (d.inLinks.filter(Link.IsHier).map(e => e.true_source))
@@ -918,7 +913,7 @@ selWholeNodes
     .filter(d => d.img_src > "" )
     .append('g') 
         .classed('image clipped',true)
-        .attr('transform',d => Node.HasMembers(d) ? 'translate(-24,-20) scale(0.15)' : Node.TransformClippedImage(d)) // scale changes with every mouse wheel event
+        .attr('transform',Node.TransformClippedImage) // scale changes with every mouse wheel event
         .attr('clip-path',d => Node.HasMembers(d) ? 'url(#cropContour)' : 'url(#cropCircle)')
         .append('image') 
             .classed('image raw',true)
