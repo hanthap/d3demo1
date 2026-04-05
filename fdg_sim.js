@@ -21,6 +21,11 @@ static forceEuler(alpha) {
 // and circles seem to drift away from the 'obvious' spot. 
 
 
+// TODO: d.width & d.height are still being calculated by forceEuler
+// this is unnecessary AND creates problems 
+// for collapsed frames, width & height should be fixed based on user mousewheel 
+// collapsing a frame => should modify Cache.FrameSet & Cache.CircleSet
+
 const nIterations = 3; // per tick
 
 // TODO filter on Node.IsActive()

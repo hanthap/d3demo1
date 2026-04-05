@@ -20,7 +20,7 @@ class Frame extends Node {
 static ContactPoint(d,theta) { 
 
 const
-        t = theta * (180/Math.PI),  // just for clarity      
+        t = theta * (180/Math.PI),  // use degrees, just for clarity      
         crit_rad = Math.atan2(d.height,d.width), 
         c = crit_rad * (180/Math.PI), // range [0,90]
 
@@ -135,19 +135,19 @@ d3.selectAll('.region.whole')
    }
 
    //-------------------------------------------------------------------------------
-// TODO: Save every descendant so we can restore expand-collapse config exactly as it was.
+
 static ToCircle(d, bExploded, cXcY) {
-    // replace the frame with a circle at cXcY, refresh attributes
+    // collapse the expanded contour into a single rect centred at cXcY, refresh attributes
     [d.cogX, d.cogY] = [d.x, d.y] = cXcY;
     if (d.locked) [d.fx, d.fy] = cXcY;
-    d.is_group = 0; // render as circle
+    d.is_group = 0; // not frame
 
     if ( ! bExploded ) {  // default: 'implode' = soft-hide all contents & transplant connected links so they point to this container node
         d.descendants
-            .filter( c => c != d ) 
+            .filter( c => c != d ) // because d.descendants includes self
             .filter( c => c.collapsed_into_node == null ) // no need to touch if already collapsed
-            .forEach( c => { // for each descendant except self
-                // TODO: Do NOT collapse until/unless ALL visible parents are now circles, not frames
+            .forEach( c => { 
+                // TODO: Do NOT collapse c until/unless ALL its visible parents are now collapsed ?
                 c.collapsed_into_node = d;
                 // console.log(c);
                 // for all in and out links, set this node d as the virtual/effective end point
@@ -195,7 +195,7 @@ static DescendantShapesSVG(d) {
     console.log('Frame.OnClick(e,f),this,cxcY',e,f,this,cXcY);
 
     switch ( cursor ) {
-        case 'zoom-out' : // switch to a circle either collapsed, or (if ctrl key) 'exploded';
+        case 'zoom-out' : // switch to a single shape either collapsed (rect), or (if ctrl key) 'exploded' circle;
             Frame.ToCircle(f,e.ctrlKey,cXcY); 
             break;
         default: // toggle selected status, then cascade to all descendants
@@ -318,7 +318,8 @@ static OnTick() {
 
 //-------------------------------------------------------------------------------
 
-// called by active_exclusion force
+// called by Simulation.forceEuler()
+
 static Resize(d) {
 
     const scope = VisibleDescendantsOf(d); // other than self
@@ -408,7 +409,7 @@ static OnDragEnd(e,d) {
 //-------------------------------------------------------------------------------
 
 static HtmlNotes() {
-    return`
+    return `
                 The foreignObject defines a fixed rectangular viewport for the HTML.
 <ul>
 <li> Inside that viewport, CSS behaves exactly like normal HTML.
