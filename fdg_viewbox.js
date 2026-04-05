@@ -46,22 +46,19 @@ static WatchZoom() {
 //-------------------------------------------------------------------------------
 
 static OnWheel(e,d) {
- //   console.log('Node.OnWheel(e,d)',e,d);
-    gAllNodes.selectAll('circle')
-    .filter(d => d.selected )
-    .each( d => d.r *= ( 1 + e.wheelDelta / 1200 ) )
-    .attr( 'r', d => d.r );
 
-// We're getting there.. this resizes and centres a collapsed node rect, but only after its first expand/collapse
+// Nearly there.. this resizes and centres a collapsed node rect, but only after its first expand/collapse
 
-    gAllNodes.selectAll('rect')
-    .filter(d => d.selected )
-    .each( d => d.width *= ( 1 + e.wheelDelta / 1200 ) )
-    .each( d => d.height *= ( 1 + e.wheelDelta / 1200 ) )
-    .attr( 'x', d => -d.width/2 )
-    .attr( 'y', d => -d.height/2 )
-    .attr( 'width', d => d.width )
-    .attr( 'height', d => d.height );
+    gAllNodes.selectAll('rect,circle')
+        .filter(d => d.selected )
+        .each( d => d.r *= ( 1 + e.wheelDelta / 1200 ) )
+        .each( d => d.width *= ( 1 + e.wheelDelta / 1200 ) )
+        .each( d => d.height *= ( 1 + e.wheelDelta / 1200 ) )
+        .attr( 'r', d => d.r )
+        .attr( 'x', d => -d.width/2 )
+        .attr( 'y', d => -d.height/2 )
+        .attr( 'width', d => d.width )
+        .attr( 'height', d => d.height );
 
 
     gAllNodes.selectAll('.image.clipped') // nested g elements with a non-empty image tag

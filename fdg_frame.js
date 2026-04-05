@@ -143,9 +143,9 @@ static ToCircle(d, bExploded, cXcY) {
     d.is_group = 0; // not frame
 
     // Pragma override the height & width previously set by Simulation.forceEuler() calling Frame.Resize()
-    d.height = 36; // hoping these will help with calculating Node.ContactPoint() 
-    d.width = 48;
-    d.r = 24; // pragma for collision forces, frame perimeter logic
+    // d.r was last updated by mousewheel - can use that to restore width & height of the rect
+    d.width = d.r * 2; 
+    d.height =d.width * 0.75; 
 
     if ( ! bExploded ) {  // default: 'implode' = soft-hide all contents & transplant connected links so they point to this container node
         d.descendants
@@ -389,10 +389,7 @@ if ( d.locked ) {
 // (If d is unlocked then its frame contour moves with them...)
 
 Frame.SetCentroid(d,[x,y]);
-
-
-
- ticked();
+ticked();
 }
 
 //-------------------------------------------------------------------------------

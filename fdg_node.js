@@ -214,7 +214,7 @@ static OnContextMenu(e,d) {
       .style("left", e.pageX + "px")
       .style("top", e.pageY + "px")
       .html(`
-        <div class="item"><b>Node: ${d.node_id}</b></div>
+        <div class="item"><b>${d.tag}</b></div>
         <div class="item">${d.descriptor}</div>
       `)
         .append('div').classed('item',true)
@@ -303,9 +303,7 @@ static OnMouseDown(e,d) {
 //-------------------------------------------------------------------------------
 
     static TransformClippedImage(d) { 
-        // resize in sync with cicle's radius (or rect size)
-
-// Node.HasMembers(d) ? 'translate(-24,-20) scale(0.15)'
+        // resize in sync with radius, even for rect nodes
 
         const 
             w = Node.Width(d), h = Node.Height(d), // cater for rectangular frames as well as circular nodes
@@ -896,10 +894,10 @@ selWholeNodes
     .filter(Node.HasMembers)
     .append('rect')
         .classed('contour',true)
-        .attr('x',-24)
-        .attr('y',-18)
-        .attr('width',48)
-        .attr('height',36)
+        .attr('x',d => -d.r)
+        .attr('y',d => -d.r * 0.75)
+        .attr('width',d => d.r * 2)
+        .attr('height',d => d.r * 1.5)
         .attr('fill',Node.FillColour);
 
 selWholeNodes
@@ -923,29 +921,6 @@ selWholeNodes
             .attr('transform', Node.TransformImageElement)  // one-time, position and scale the image relative to its crop circle
             ;
 
-
-
-
-
-
-// selWholeNodes
-//     .append('circle')
-//         .attr('r',Node.Radius)
-//         .attr('fill',Node.FillColour);
-
-// selWholeNodes
-//     .filter(d => d.img_src > "" )
-//     .append('g') 
-//         .classed('image clipped',true)
-//         .attr('transform',Node.TransformClippedImage) // scale changes with every mouse wheel event
-//         .attr('clip-path','url(#cropCircle)')
-//         .append('image') 
-//             .classed('image raw',true)
-//             .attr('href',d => d.img_src)
-//             .attr('width',CROP_CIRCLE_DIAMETER)
-//             .attr('height',CROP_CIRCLE_DIAMETER)
-//             .attr('transform', Node.TransformImageElement)  // one-time, position and scale the image relative to its crop circle
-//             ;
 
 }
 
