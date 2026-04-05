@@ -69,12 +69,12 @@ class Node {
     //-------------------------------------------------------------------------------
 
     static Width(d) {
-        return 2*d.r; 
+        return d.width; 
     }
     //-------------------------------------------------------------------------------
 
     static Height(d) {
-        return 2*d.r; 
+        return d.height; 
     }
 
     //-------------------------------------------------------------------------------
@@ -381,8 +381,8 @@ static AppendDatum(d) {
     d.weight = 0.2;
     //  d.r = Math.sqrt(d.mass) * radius / 10; // size proportional to weight
     d.r = 16; 
+    d.width = 2 * d.r;
     d.height = 2 * d.r;
-    d.width = d.r;
     d.selected = 0;
     d.show_label = 1; // default to showing labels
     d.has_shape = 1; // 1 <=> node should be bound to a DOM element (visible or not) 
@@ -407,7 +407,7 @@ static Create( {x,y,width,height}, selNodes=null) {
 
     const d = Node.AppendDatum({ node_id : 'N' + Math.round( Math.random() * 1000000 ) });
     if (x) { d.cogX = d.x = x; d.cogY = d.y = y; }
-    if (width) { d.width = width; d.Height = height; d.r = width/2; };
+    if (width) { d.width = width; d.height = height; d.r = width/2; };
     Node.Activate([d]); 
 
     nodes.push(d);
@@ -567,9 +567,7 @@ static IsNotNested(d) {
 
 static HasShape(d) {
     // TODO: exclude all descendants of a collapsed group/set i.e if any visible ancestor has Node.ShowAsFrame(d) == False
-    try {
     return d.has_shape;
-    } catch { debugger }
 }
 
 
@@ -720,35 +718,31 @@ static OnDragEnd(e,d) {
         .force( 'cogY', d3.forceY( Node.COGY )
             .strength( Node.ForceY ) );
 
-
-
     switch ( cursor ) {
 
        // case 'cell' : 
         default:
-            if ( e.sourceEvent.shiftKey ) { //shiftkey 'feels right' here
+            if (e.sourceEvent.shiftKey) { //shiftkey 'feels right' here
                 
-                if ( Node.DraggedFromParentFrames ) { // remove old links
-                    // Step 1: disconnect node from any parent frames captured at start of drag
-                    const deleting_links = links
+                if (Node.DraggedFromParentFrames) { // remove old links
+                    // disconnect node from any parent frames captured at start of drag
+                    const links_to_be_deleted = links
                         .filter(Link.IsHier)
-                        .filter(e => e.source === d) 
-                        .filter(e => Node.DraggedFromParentFrames.includes(e.target));
-                    const deleting_set = new Set(deleting_links);
-                  //  console.log('Node.OnDragEnd(e,d) deleting_set',deleting_set,links);
-                    links = links.filter(obj => !deleting_set.has(obj));
-                    // create new hierarchical links 
+                        .filter(lnk => lnk.source === d) 
+                        .filter(lnk => Node.DraggedFromParentFrames.includes(lnk.target));
+                    Cache.DeleteLinks(links_to_be_deleted);
                 } 
 
-                valid_recipients.forEach( f => Link.Create(d,f) );
-                    // TODO: make this more efficient
-                    Cache.RefreshNodeInOutLinks(); // important!
-                    Cache.RefreshAllDescendants();    // descendants, per node
-                    Cache.RefreshSortedNodes(); 
-                    Cache.ApplyFrameOrder();
-                    AppendLines();
+                // create new hierarchical links 
+                valid_recipients.forEach(f => Link.Create(d,f));
+                // TODO: make this more efficient
+                Cache.RefreshNodeInOutLinks(); // important!
+                Cache.RefreshAllDescendants();    // descendants, per node
+                Cache.RefreshSortedNodes(); 
+                Cache.ApplyFrameOrder();
+                AppendLines();
 
-                    RefreshSimData();
+                RefreshSimData();
             }
         break;
 

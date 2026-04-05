@@ -301,8 +301,13 @@ document.getElementById("fileInput").addEventListener("change", function() {
 )}
 ;
 
+//-------------------------------------------------------------------------------
 
-
+static DeleteLinks(deleting_links) {
+    const deleting_set = new Set(deleting_links);
+    links = links.filter(lnk => !deleting_set.has(lnk)); 
+    return links;
+}
 
 //-------------------------------------------------------------------------------
 

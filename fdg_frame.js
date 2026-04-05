@@ -329,17 +329,17 @@ static Resize(d) {
 
     const scope = VisibleDescendantsOf(d); // other than self
 
-    if ( !d.locked && scope.length ) { 
+    if (!d.locked && scope.length) { 
 
         const
-            xMax = Math.max( ...scope.map( Node.RightOuter ) ) + Frame.Margin(d),
-            xMin = Math.min( ...scope.map( Node.LeftOuter) ) - Frame.StubWidth(d),
-            yMax = Math.max( ...scope.map( Node.BottomOuter ) ) + Frame.Margin(d),
-            yMin = Math.min( ...scope.map( Node.TopOuter ) )  - Frame.BannerHeight(d);
+            xMax = Math.max(...scope.map(Node.RightOuter)) + Frame.Margin(d),
+            xMin = Math.min(...scope.map(Node.LeftOuter)) - Frame.StubWidth(d),
+            yMax = Math.max(...scope.map(Node.BottomOuter)) + Frame.Margin(d),
+            yMin = Math.min(...scope.map(Node.TopOuter))  - Frame.BannerHeight(d);
         d.x = xMin,
-        d.y = yMin ,
+        d.y = yMin,
         d.width = xMax - xMin,
-        d.height =yMax - yMin ;
+        d.height =yMax - yMin;
     } };
 
  //------------------------------------------------------------

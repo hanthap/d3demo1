@@ -8,7 +8,7 @@ html, body {
 }
 
 * {
-    font-size: 12px;
+    font-size: 10px;
     font-family: Helvetica;
 }
 
@@ -390,7 +390,7 @@ rect.contour {
 
 }
 
-.locked.contour rect {
+.locked rect {
     rx: 0;
     ry: 0;
 }
