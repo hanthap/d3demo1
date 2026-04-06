@@ -240,7 +240,7 @@ static OnClick(e,d) {
 
 if ( e.ctrlKey && e.shiftKey ) {
     // set centre of gravity here, for all unlocked & visible & selected circle nodes
-    const [x,y] = d3.pointer(e,svg.node());
+    const [x,y] = d3.pointer(e,selViewport.node());
     const a = nodes.filter(Node.ShowAsCircle).filter(d=>d.selected && !d.locked);
     console.log('ViewBox.OnClick a',a);
     a.forEach(d => { d.cogX = x; d.cogY = y; } )
@@ -257,7 +257,7 @@ if ( e.ctrlKey && e.shiftKey ) {
 static OnDragStart(e,d) {
     svg.classed('crosshair left-mouse-down',true);
     console.log('ViewBox.OnDragStart',e,d,this);
-    const p = d3.pointer(e,svg.node());
+    const p = d3.pointer(e,selViewport.node());
     ViewBox.DragStartPos = p;
     ViewBox.SelectRect = gForeground
         .append('rect')
@@ -286,7 +286,7 @@ static DragRectIncludes(d) {
 
 static OnDrag(e,d) {
 
-    const [x1,y1] = d3.pointer(e,svg.node());
+    const [x1,y1] = d3.pointer(e,selViewport.node());
     const [x0,y0] = ViewBox.DragStartPos;
     const x = x0 < x1 ? x0 : x1;
     const y = y0 < y1 ? y0 : y1;

@@ -197,7 +197,7 @@ static DescendantShapesSVG(d) {
    static OnClick(e,f) {
     
    const cursor = window.getComputedStyle(this).cursor,
-         cXcY = d3.pointer(e,svg.node());
+         cXcY = d3.pointer(e,selViewport.node());
 
     console.log('Frame.OnClick(e,f),this,cxcY',e,f,this,cXcY);
 
@@ -270,7 +270,7 @@ static DescendantShapesSVG(d) {
         if ( e.ctrlKey ) 
             Frame.SetLocked(d,this);
         else  
-            Frame.ToCircle(d, false, d3.pointer(e,svg.node())); // true => implode
+            Frame.ToCircle(d, false, d3.pointer(e,selViewport.node())); // true => implode
         Node.Activate(d.descendants);
         ticked();
 
@@ -353,7 +353,7 @@ static OnDragStart(e,d) {
 //   const selHits = ViewBox.HitTestSelection(e);
    svg.classed('left-mouse-down',true);
 
-   const [x,y] = d3.pointer(e,svg.node());
+   const [x,y] = d3.pointer(e,selViewport.node());
 
     console.log('Frame.OnDragStart',e,d,this,selThisNode);
     Frame.DraggedFromInfo = 
@@ -371,7 +371,7 @@ static OnDragStart(e,d) {
 
 static OnDrag(e,d) {
 
-const [x,y] = d3.pointer(e,svg.node());
+const [x,y] = d3.pointer(e,selViewport.node());
 
 
 if ( d.locked ) {

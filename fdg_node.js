@@ -250,7 +250,7 @@ static OnContextMenu(e,d) {
 
             case 'zoom-in' : // implies we know there are child nodes i.e. Node.HasMembers(d)
                 Node.ToFrame(d);
-                Frame.SetCentroid(d,d3.pointer(k,svg.node()),true);
+                Frame.SetCentroid(d,d3.pointer(k,selViewport.node()),true);
                 Node.Activate([d]);
                 break;
 
@@ -370,7 +370,7 @@ static ToFrame(d) {
 
 static OnDblClick(e,d) {
     Node.ToFrame(d);
-    Frame.SetCentroid(d,d3.pointer(e,svg.node()),true);
+    Frame.SetCentroid(d,d3.pointer(e,selViewport.node()),true);
     Node.Activate([d]);
     ticked();
 }
@@ -710,7 +710,7 @@ static OnDragEnd(e,d) {
     // BUT EXCLUDING any superset regions
 
 // set the dropped node's COG to current pointer x,y
-    const [x,y] = d3.pointer(e,svg.node());
+    const [x,y] = d3.pointer(e,selViewport.node());
 
     d.cogX = x ; 
     d.cogY = y ;

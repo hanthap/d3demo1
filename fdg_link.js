@@ -356,7 +356,7 @@ console.log([x,y],cp,h0,h1);
 static OnClick(e,d) {
     
    const style = window.getComputedStyle(this);
-   const p = d3.pointer(e,svg.node());
+   const p = d3.pointer(e,selViewport.node());
    const sel = d3.select(this);
 
     switch ( style.cursor ) {
@@ -451,7 +451,7 @@ static OnMouseOut(e,d) {
 static OnDragStart(e,d) { 
 
   const style = window.getComputedStyle(this);
-  const p = d3.pointer(e,svg.node());
+  const p = d3.pointer(e,selViewport.node());
 
     switch ( style.cursor ) {
 
@@ -561,7 +561,7 @@ static OnDragEnd(e) {
     // then clear all temp classes
     console.log('DraftLink.OnDragEnd(e)',e);
 
-    const [x,y] = d3.pointer(e,svg.node());
+    const [x,y] = d3.pointer(e,selViewport.node());
 
     if ( e.sourceEvent.shiftKey ) { // bypass confirmation prompt, go ahead & commit
 
