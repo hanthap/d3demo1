@@ -258,9 +258,9 @@ static OnContextMenu(e,d) {
                 d.selected ^= 1;
                 clicked_d3selection // should be the 'whole' <g>
                     .classed('selected', d => d.selected);
-                if (!d.selected) { // deselection always propagates to all links
-                    Link.Activate(d.inLinks,0);
-                    Link.Activate(d.outLinks,0);
+                if (!d.selected) { // deselection always propagates to all links, even collapsed nodes
+                    const links_to_be_deselected = links.filter(lnk => { return ( lnk.source === d || lnk.target === d ) } );
+                    Link.Activate(links_to_be_deselected,0);
                 }
 
 

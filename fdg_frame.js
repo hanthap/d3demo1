@@ -213,6 +213,11 @@ static DescendantShapesSVG(d) {
                 .filter(n => f.descendants.includes(n)) // or .has(f) ??
                 .classed('selected',f.selected) ;
 
+                if (!f.selected) { // deselection always propagates to all links, including rolled up links
+                    const links_to_be_deselected = links.filter(lnk => { return ( lnk.source === d || lnk.target === d ) } );
+                    Link.Activate(links_to_be_deselected,0);
+                }
+
             break;
     }
 
@@ -250,8 +255,8 @@ static DescendantShapesSVG(d) {
     static SetLocked(d,element,status=null) {
         d.locked = status == null ? d.locked ^ 1 : status & 1 ;
         d3.select(element)
-            .attr('rx',Frame.CornerRadius)
-            .attr('ry',Frame.CornerRadius)
+            // .attr('rx',Frame.CornerRadius)
+            // .attr('ry',Frame.CornerRadius)
             .classed('locked',d.locked)
         ;
       }
@@ -290,9 +295,6 @@ static DescendantShapesSVG(d) {
 
     static HeightOuter(d) { return d.height } ;
     static HeightInner(d) { return d.height - Frame.BannerHeight(d) - Frame.Margin(d) } ;
-
-
-    static CornerRadius(d) {  return d.locked ? 0 : 1.5 * radius ;};
    
     static TransformImageElement(d) { return `${d.img_transform}` ; }
 
@@ -521,8 +523,6 @@ const selWholeRegions =
 selWholeRegions
     .append('rect')
         .classed('region rect',true)
-        .attr('rx',Frame.CornerRadius)
-        .attr('ry',Frame.CornerRadius)
         .attr('fill',Node.FillColour) 
 
 const selThumbnails = selWholeRegions

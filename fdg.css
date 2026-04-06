@@ -273,7 +273,7 @@ pointer-events: none;
 
 g.whole * { filter: grayscale(100%); opacity: 0.3; pointer-events: all; }
 g.selected * { visibility: visible; filter: none; opacity: 1; } 
-rect.region { fill-opacity: 0.2; stroke-opacity: 1;  }
+rect.region { fill-opacity: 0.2; stroke-opacity: 1; rx: 10; } /* ry defaults to rx */
 
 
 
