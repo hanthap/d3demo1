@@ -144,6 +144,8 @@ static ToCircle(d, bExploded, cXcY) {
 
     // Pragma override the height & width previously set by Simulation.forceEuler() calling Frame.Resize()
     // d.r was last updated by mousewheel - can use that to restore width & height of the rect
+    d.savedWidth = d.width;
+    d.savedHeight = d.height;
     d.width = d.r * 2; 
     d.height =d.width * 0.75; 
 

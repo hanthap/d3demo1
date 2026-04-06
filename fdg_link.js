@@ -540,7 +540,7 @@ static OnDrag(e) {
             var cp = Link.ContactPoints(draft_link) ;
         } 
     else { // not hovering over a node => redraw semi-detached line to end at pointer position
-            const [x,y] = d3.pointer(e,svg.node()),
+            const [x,y] = d3.pointer(e,selViewport.node()),
             p = {x,y};
             var cp = DraftLink.EndPoints(DraftLink.FromDatum,p); 
         }

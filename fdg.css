@@ -21,6 +21,24 @@ svg {
 }
 
 
+svg.zoomable {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;      /* hide content when panned */
+  touch-action: none;    /* allow custom pinch/drag handling */
+  cursor: grab;          /* visual hint for panning */
+}
+
+svg.zoomable:active {
+  cursor: grabbing;
+}
+
+/* Optional: the inner group that you transform for zoom/pan */
+svg.zoomable g.viewport {
+  transform-origin: 0 0; /* makes math simpler when using viewBox-like transforms */
+  ;
+}
+
 .left-mouse-down *  { /* TODO cursors don't cascade reliably in Chromium browsers */
      cursor: grabbing; 
 }
@@ -318,12 +336,12 @@ foreignObject {
 }
 
 .fob.body * {
-    font-size: x-small;
+    /* font-size: x-small; */
     padding: 5;
     visibility: hidden;
 }
 
-.fob.body.locked * {
+.fob.body.locked div {
     visibility: visible;
 }
 

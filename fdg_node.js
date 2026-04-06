@@ -340,6 +340,9 @@ static ToFrame(d) {
     if ( Node.HasMembers(d) || d.locked ) {
         d.is_group = 1;
         d.has_shape = 1; 
+        d.width = d.savedWidth;
+        d.height = d.savedHeight;
+
         d.descendants 
             .filter(c => c != d ) 
             // TODO: c.collapsed_into_node should be ALL the apparent circles that include node c ?

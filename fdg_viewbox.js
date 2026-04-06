@@ -179,9 +179,10 @@ static OnKeyDown(e) {
     case 'Insert' : 
         // TODO: sticky insert/overtype mode?
         // if hovering over space => create node
-        // if hovering inside a frame => create child node
-        // if hovering over a line => splice a new node
-        // else if 2 or more nodes are selected, encapsulate them in a new Euler contour/frame
+        // if hovering inside a contour frame => create child node in this intersection zone
+        // if hovering over a line => splice a new node (add elbow connector)
+        // if exactly 2 nodes are selected = create a new line between them?
+        // else if more than 2 nodes are selected, enclose them in a new Euler contour/frame
         const 
             selNodes = gAllNodes.selectAll('.whole').filter(d => d.selected),
             f = Node.Create([0,0,20,20],selNodes);
@@ -347,8 +348,8 @@ static OnDragEnd(e,d) {
 // https://en.wikipedia.org/wiki/Canonical_normal_form#Minterm
 
 
-static HitTestSelection(e) { // used to determine the "minterm" at the given coords
-   // const [x, y] = d3.pointer(e); // must use screen space, not SVG space
+static HitTestSelection(e) { // used to determine the "minterm" (zone) at the given coords
+   // must use screen space, not SVG space
     const [x, y] = [e.sourceEvent.clientX ,e.sourceEvent.clientY]; 
 //console.log('ViewBox.HitTestSelection: d3.pointer(e)',e,x,y);
     
@@ -371,7 +372,10 @@ body = d3.select('body')
     .classed('wait',true)
 ;
 
+
+
 const svg = body.append('svg')
+    .classed('zoomable',true)
     .attr('width',window.innerWidth)
     .attr('height', window.innerHeight)
     // set origin to centre of svg
@@ -381,27 +385,27 @@ const svg = body.append('svg')
     .on('click',ViewBox.OnClick)
         .on('wheel',ViewBox.OnWheel)
 
-    .call(d3.drag()
-            .on('start', ViewBox.OnDragStart)
-            .on('drag', ViewBox.OnDrag)
-            .on('end', ViewBox.OnDragEnd)  
-        )
+    // .call(d3.drag()
+    //         .on('start', ViewBox.OnDragStart)
+    //         .on('drag', ViewBox.OnDrag)
+    //         .on('end', ViewBox.OnDragEnd)  
+    //     )
         ;
-
+const selViewport = svg.append('g').classed('viewport',true);
 
 // group frames aka Euler regions & contours are passive shapes in the background
-const gAllRegions = svg.append('g')
+const gAllRegions = selViewport.append('g')
     .classed('all regions', true);
 
-const gAllNodes =svg.append('g') // circles = floating nodes
+const gAllNodes =selViewport.append('g') // circles = floating nodes
     .classed('all nodes',true);
 
 // edges are rendered in front of vertex nodes. 
-const gAllEdges = svg.append('g')
+const gAllEdges = selViewport.append('g')
     .classed('all edges',true);
 
     // a foreground layer eg for drag-select rect, pop-up annotations
-const gForeground = svg.append('g')
+const gForeground = selViewport.append('g')
     .classed('foreground',true)
     ;
 
@@ -442,3 +446,58 @@ menu.on("click", function(event) {
   console.log("Menu item Clicked:", action);
 });
 
+//-------------------------------------------------------------------------------
+const svg_obj = document.querySelector("svg.zoomable");
+const vp = svg_obj.querySelector("g.viewport");
+
+let scale = 1;
+let panX = 0;
+let panY = 0;
+
+let isPanning = false;
+let startX = 0;
+let startY = 0;
+
+// --- Wheel zoom ---
+svg_obj.addEventListener("wheel", e => {
+  e.preventDefault();
+
+  const zoomFactor = 1.1;
+  const direction = e.deltaY < 0 ? 1 : -1;
+  const newScale = scale * (direction > 0 ? zoomFactor : 1 / zoomFactor);
+
+  // Zoom around mouse position
+  const pt = svg_obj.createSVGPoint();
+  pt.x = e.clientX;
+  pt.y = e.clientY;
+  const cursor = pt.matrixTransform(vp.getScreenCTM().inverse());
+
+  panX = cursor.x - (cursor.x - panX) * (newScale / scale);
+  panY = cursor.y - (cursor.y - panY) * (newScale / scale);
+
+  scale = newScale;
+  update();
+}, { passive: false });
+
+// --- Drag pan ---
+svg_obj.addEventListener("mousedown", e => {
+  isPanning = true;
+  startX = e.clientX - panX;
+  startY = e.clientY - panY;
+});
+
+window.addEventListener("mousemove", e => {
+  if (!isPanning) return;
+  panX = e.clientX - startX;
+  panY = e.clientY - startY;
+  update();
+});
+
+window.addEventListener("mouseup", () => {
+  isPanning = false;
+});
+
+// --- Apply transform ---
+function update() {
+  vp.setAttribute("transform", `translate(${panX},${panY}) scale(${scale})`);
+}
