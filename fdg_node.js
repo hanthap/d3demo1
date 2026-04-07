@@ -1,10 +1,4 @@
 var radius = 8;
-var nodes = [];
-
-var mapNodes; // key,value lookup dict
-var active_frames = []; // frames in scope of active exclusion
-var active_circles = []; // circles in scope of active exclusion
-var sorted_nodes = []; // flat array determines the z-order, especially of nested frame rects
 
 // Lookup Node.Colour using SRCE_CDE
 var sourcePalette = d3.scaleOrdinal()
@@ -118,25 +112,6 @@ static RightOuter(d) {
     if ( Node.ShowAsFrame(d) ) return d.x + d.width; 
     else return (Node.Centre(d).x + Node.HalfWidth(d));
 }
-
-    //-------------------------------------------------------------------------------
-    // prevent the shape from crossing the perimeter of the SVG viewport
-    static BoundedX(d) {
-        // bounded node centre needs to consider node's radius as well as the static viewport width, adjusted for corner radius of rounded frame
-
-
-
-     //   d.x = bounded(d.x, d.r - width/2 - 2*radius, width/2-3*radius); 
-        return d.x;
-    }
-
-    //-------------------------------------------------------------------------------
-
-    static BoundedY(d) {
-        // bounded node centre needs to consider node's radius as well as the static viewport height, adjusted for corner radius of rounded frame
-      //  d.y = bounded(d.y, d.r - height/2 - 2*radius, height/2-3*radius); 
-        return d.y;
-    }
 
     //-------------------------------------------------------------------------------
 
@@ -472,7 +447,7 @@ static Centre(d) {
 
 static CollideRadius(d) { // called by d3.forceCollide().radius(...)
     //return d.r + 20; // +3 = extra to allow for stroke-width of circle element 
-    return d.r  + 10;
+    return d.r  + 4;
 }
 
 //-------------------------------------------------------------------------------
@@ -695,7 +670,7 @@ static OnDragEnd(e,d) {
 
     console.log('Node.OnDragEnd',e,d,this);
     svg.classed('left-mouse-down',false);  // because OnDragEnd() blocks mouseup
-   const cursor = window.getComputedStyle(this).cursor;
+    const cursor = window.getComputedStyle(this).cursor;
 
     const 
         selHits = ViewBox.HitTestSelection(e)
@@ -716,12 +691,12 @@ static OnDragEnd(e,d) {
     d.cogY = y ;
 
     simulation
-        .force( 'cogX', d3.forceX( Node.COGX )
-            .strength( Node.ForceX ) )
-        .force( 'cogY', d3.forceY( Node.COGY )
-            .strength( Node.ForceY ) );
+        .force('cogX',d3.forceX(Node.COGX)
+            .strength(Node.ForceX))
+        .force('cogY',d3.forceY(Node.COGY)
+            .strength(Node.ForceY));
 
-    switch ( cursor ) {
+    switch (cursor) {
 
        // case 'cell' : 
         default:

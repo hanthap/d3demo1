@@ -11,31 +11,31 @@ class Link {
 static AppendDatum(d,i) {
     d.source = Node.GetFromID(d.from_node_id);
     d.target = Node.GetFromID(d.to_node_id);
-    d.distance = 20; // * Math.random();
-    d.strength = 0.4; // * Math.random();
+    d.distance = 20; 
+    d.strength = 0; 
     d.opacity = (2 + Math.random()) / 3 ;
     d.id = 'L' + Math.round( Math.random() * 1000000 ); // unique identifier
-    return d; // only if we didn't throw an error eg 'no such node'
+    return d;
 }
 
 //-------------------------------------------------------------------------------
 
     static Create(child, parent) {
         console.log('Link.Create(child, parent)',child,parent)
-    // create a new hierarchical link from child to parent
+    // create a new hierarchical link from child 'belongs to' parent
     // TODO:  skip if child is already a member of parent, or if parent is already an ancestor of child (to prevent circular nesting)
     const newLink = {
         source: child,
         target: parent, 
-        true_source: child, // store the true source and target for when we need to restore them after a collapse/expand operation
+        true_source: child, 
         true_target: parent,
         to_node_id: parent.node_id,
         from_node_id: child.node_id,
         type_cde: "H",
-        distance: 20 * Math.random(),
-        strength: 0.4 * Math.random(),
+        distance: 20,
+        strength: 0, 
         id: 'L' + Math.round( Math.random() * 1000000 ),
-        descriptor: `New link: ${child.node_id} ∈ ${parent.node_id}`,
+        descriptor: null,
         opacity: 1,
         tag: 'belongs to'
     };
@@ -208,13 +208,14 @@ static ContactPoints(d) {
 
 
 //-------------------------------------------------------------------------------
-
+// list all links that connect the same pair of nodes, in either direction
 
 static Matches(d) {
-return links.filter( e => ( e.source == d.source && e.target == d.target ) || 
-( e.source == d.target && e.target == d.source)
- )
 
+    return links.filter( e => 
+    (e.source == d.source && e.target == d.target) || 
+    (e.source == d.target && e.target == d.source)
+ )
 
 }
 
@@ -230,7 +231,7 @@ static SwapEnds(d) {
 }
 
 //-------------------------------------------------------------------------------
-// force link Y to "take a detour" via node X
+// force link Y to "take a detour" via node X (e.g. when X is a new elbow connector)
 
 static InsertNode(lnk,node) {
     console.log('Link.InsertNode(lnk,node)',lnk,node);
@@ -253,10 +254,11 @@ static Activate(arr, status=1) {
 
     gAllEdges
         .selectAll('.whole')
-        .filter(lnk => arr.includes(lnk))
+        .filter(lnk => { return arr.includes(lnk) } )
         .classed('selected',status)
         .each(lnk => lnk.selected = status)
         ; 
+    return status;
 
 }
 
@@ -343,13 +345,10 @@ static ChooseEnds(d,[x,y]) {
         class: 'fixed-target',
         end: 'target' }
         ;
-console.log([x,y],cp,h0,h1);
+//console.log([x,y],cp,h0,h1);
     return ( h0 > h1 ) ? { far: s, near: t } : { far: t, near: s };
 
 }
-
-
-
 
 //-------------------------------------------------------------------------------
 
@@ -360,19 +359,18 @@ static OnClick(e,d) {
    const sel = d3.select(this);
 
     switch ( style.cursor ) {
-        case 'grab' : 
-            break;
 
         case 'copy' : 
             break;
 
+        case 'grab' : // go to default (kludge workaround for .scrollable selViewPort)
         default : 
             // Selection propagates, but de-selection does not
-            if ( d.selected ^= 1 ) {
+            if (Link.Activate([d],d.selected ^= 1)) {
                 d.source.selected = d.target.selected = 1;
                 Node.Activate([d.source,d.target]);
                 }
-            Link.Activate([d],d.selected);
+            ;
             break;
 
     }
@@ -474,6 +472,8 @@ static OnDrag(e,d) {
 //---------------------------------------------------------------------------
 static OnDragEnd(e,d) {
     DraftLink.OnDragEnd(e);
+    Link.Activate([d]); 
+    Node.Activate([d.source,d.target]);
     // finally change the variable end node (source or target) of the original link datum
     // remove the draft line and delete its objects
     ticked();

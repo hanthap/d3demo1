@@ -11,6 +11,12 @@ const supabaseClient = supabase.createClient(
     APP_CONFIG.supabaseAnonKey
 );
 
+var nodes = [];
+
+var mapNodes; // key,value lookup dict
+var active_frames = []; // frames in scope of active exclusion
+var active_circles = []; // circles in scope of active exclusion
+var sorted_nodes = []; // flat array determines the z-order, especially of nested frame rects
 
 class Cache {
 
@@ -31,8 +37,18 @@ return links.filter(Link.VisibleLine);
 
 // called eg by simulation
 static ActiveNodes() {
-    return nodes.filter(Node.IsActive);
+    return nodes
+        .filter(Node.IsActive);
     }
+
+ //-------------------------------------------------------------------------------
+
+static ActiveLinks() {
+    return links
+        .filter(Link.VisibleLine);
+    }
+
+
 //-------------------------------------------------------------------------------
 
 static RefreshAllDescendants() {

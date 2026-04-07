@@ -71,22 +71,6 @@ static OnMenuItemClick(e,d) {
 
 //-------------------------------------------------------------------------------
 
-static OnContextMenu(e,d) {
-
-    e.preventDefault();
-
-    menu
-      .style("display", "block") 
-      .style("left", e.pageX + "px")
-      .style("top", e.pageY + "px")
-      .html(`
-        <div class="item"><b>Set: ${d.node_id}</b></div>
-        <div class="item">${d.descriptor}</div>
-      `)
-      .on('click',Frame.OnMenuItemClick)
-      ;
-
-}
 
    //-------------------------------------------------------------------------------
     // set or unset the 'xhover' class for node d plus all its descendants
@@ -515,7 +499,7 @@ const selWholeRegions =
         .on('dblclick',Frame.OnDblClick)
         .on('mouseover',Frame.OnMouseOver) 
         .on('mouseout',Frame.OnMouseOut)
-        .on("contextmenu",Frame.OnContextMenu)
+        .on("contextmenu",Node.OnContextMenu)
         .call(d3.drag()
             .on('start',Frame.OnDragStart)
             .on('drag',Frame.OnDrag)

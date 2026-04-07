@@ -39,12 +39,14 @@ for(var i=0; i < nIterations; i++) {
     Cache.CircleSet.forEach( m => { // inner loop
     if ( f.descendants.includes(m) ) { // circle m is a descendant of frame n 
         if ( f.locked ) { // all descendants must stay inside a locked frame
-        // if m is not fully inside rect n then snap it back, by changing its midpoint coords
-          if ( Node.RightOuter(m) > Frame.RightInner(f) ) m.cogX = m.x = Frame.RightInner(f) - Node.HalfWidth(m);
-          if ( Node.BottomOuter(m) > Frame.BottomInner(f) ) m.cogY = m.y = Frame.BottomInner(f) - Node.HalfHeight(m);
+        // if m is not fully within frame interior then snap it back, by changing its midpoint coords
+          if ( Node.RightOuter(m) > Frame.RightInner(f) ) m.x = Frame.RightInner(f) - Node.HalfWidth(m);
+          if ( Node.BottomOuter(m) > Frame.BottomInner(f) ) m.y = Frame.BottomInner(f) - Node.HalfHeight(m);
           // calc top & left boundaries last so at least the header isn't partly covered
-          if ( Node.LeftOuter(m) < Frame.LeftInner(f) ) m.cogX = m.x = Frame.LeftInner(f) + Node.HalfWidth(m);
-          if ( Node.TopOuter(m) < Frame.TopInner(f) ) m.cogY = m.y = Frame.TopInner(f) + Node.HalfHeight(m);
+          if ( Node.LeftOuter(m) < Frame.LeftInner(f) ) m.x = Frame.LeftInner(f) + Node.HalfWidth(m);
+          if ( Node.TopOuter(m) < Frame.TopInner(f) ) m.y = Frame.TopInner(f) + Node.HalfHeight(m);
+          m.cogX = f.cogX;
+          m.cogY = f.cogY;
         }
     }
     else { // circle m is NOT a descendant of frame f, so gently nudge it outside
@@ -78,7 +80,7 @@ for(var i=0; i < nIterations; i++) {
 
 };
 
-  return Simulation.forceEuler; // return self, enabling a chain of forces
+return Simulation.forceEuler; // return self, enabling a chain of forces
 
 }
 
@@ -92,7 +94,7 @@ for(var i=0; i < nIterations; i++) {
 
 function RefreshSimData() {
   simulation.nodes(Cache.ActiveNodes());
-  simulation.force('link').links(links.filter(Link.ShowAsLine));
+  simulation.force('link').links(Cache.ActiveLinks());
 }
 
 //-------------------------------------------------------------------------------
@@ -123,27 +125,27 @@ function RunSim() {
         
         .force('collide',d3.forceCollide().radius(Node.CollideRadius))
     
-        // electrostatic forces attract/repel based on charge 
-       .force('electrostatic',d3.forceManyBody()
-          .strength(4) // negative => repulsive
-          .distanceMin(20) // minimum distance at which force applies
-          .distanceMax(50)  // maximum distance at which force applies
-          .theta(0.8) //  lower value => smoother, more accurate (but more costly)
-        )
+      //   // electrostatic forces attract/repel based on charge 
+      //  .force('electrostatic',d3.forceManyBody()
+      //     .strength(4) // negative => repulsive
+      //     .distanceMin(20) // minimum distance at which force applies
+      //     .distanceMax(50)  // maximum distance at which force applies
+      //     .theta(0.8) //  lower value => smoother, more accurate (but more costly)
+      //   )
 
         .force('center', d3.forceCenter()
           .strength(0.05) 
       ) 
 
-        .force( 'cogX', d3.forceX( Node.COGX )
-            .strength( Node.ForceX ) )
-        .force( 'cogY', d3.forceY( Node.COGY )
-            .strength( Node.ForceY ) )
+        .force('cogX',d3.forceX(Node.COGX)
+            .strength(Node.ForceX))
+        .force('cogY',d3.forceY(Node.COGY)
+            .strength(Node.ForceY) )
 
         // each edge link can act as a spring between 2 specific nodes (like a covalent bond)
   
-        .force('link', d3.forceLink()
-            .links(links.filter(Link.ShowAsLine)) 
+        .force('link',d3.forceLink()
+            .links(Cache.ActiveLinks()) 
             .distance(Link.Distance)
             .strength(Link.Strength) 
             .iterations(1) // per tick. More => stronger effect, more repulsion?
