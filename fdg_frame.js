@@ -211,14 +211,14 @@ static DescendantShapesSVG(d) {
                 c.selected = f.selected;
                 } );
 
-            d3.selectAll('.whole')
+            selViewport.selectAll('.whole')
                 .filter(n => f.descendants.includes(n)) // or .has(f) ??
-                .classed('selected',f.selected) ;
+                .classed('selected',f.selected);
 
-                if (!f.selected) { // deselection always propagates to all links, including rolled up links
-                    const links_to_be_deselected = links.filter(lnk => { return ( lnk.source === d || lnk.target === d ) } );
-                    Link.Activate(links_to_be_deselected,0);
-                }
+            if (!f.selected) { // deselection always propagates to all links, including rolled up links
+                const links_to_be_deselected = links.filter(lnk => { return ( lnk.source === d || lnk.target === d ) } );
+                Link.Activate(links_to_be_deselected,0);
+            }
 
             break;
     }
@@ -510,6 +510,7 @@ const selWholeRegions =
         .attr('id',Node.UniqueId)
         .classed('region whole',true)
         .classed('locked',d=>d.locked)
+        .classed('selected',d=>d.selected)
         .on('click',Frame.OnClick)
         .on('dblclick',Frame.OnDblClick)
         .on('mouseover',Frame.OnMouseOver) 
