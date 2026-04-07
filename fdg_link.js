@@ -274,7 +274,7 @@ function AppendLines() {
 const selWholeEdges =
     gAllEdges.selectAll('.whole') 
         .data(Cache.VisibleLines(),Link.UniqueId)
-        .join("g")
+        .join('g')
         .attr('id',Link.UniqueId)
         .classed('edge whole',true)
         .classed('selected',d => d.selected)
@@ -294,14 +294,14 @@ const selWholeEdges =
 const selNewEdges = selWholeEdges.filter( function() { return this.children.length === 0 } ) ;
 
 selNewEdges.append('polyline')
-        .classed("edge line arrow",true)         
+        .classed('edge line arrow',true)         
         .style('stroke-width',Link.StrokeWidth)
         .style('stroke',Link.StrokeColour)
         .style('fill',Link.FillColour); // for the arrowhead
 
 // edge zone ensures a clickable width of at least n pixels as defined in CSS
 selNewEdges.append('polyline')
-        .classed("edge zone",true); // CSS handles everything
+        .classed('edge zone',true); // CSS handles everything
 
 }
 
@@ -424,11 +424,11 @@ static Hover( d, bHovering ) {
         .style('stroke', Link.StrokeColour )  
         .style('fill', Link.FillColour );  // for arrowhead
 
-    gAllNodes.selectAll(".whole.node")
+    gAllNodes.selectAll('.whole.node')
         .filter( c => c == d.source || c == d.target )
         .classed( 'xhover', bHovering );
 
-    gAllRegions.selectAll(".whole.region") 
+    gAllRegions.selectAll('.whole.region') 
         .filter( r => r == d.source || r == d.target )
         .classed( 'xhover', bHovering );
         // TODO : apply to all nested frames and circles
@@ -458,6 +458,7 @@ static OnDragStart(e,d) {
         case 'grabbing' : 
             // un-hitch whichever end is nearer the mouseclick
             const ends = LinkZone.ChooseEnds(d,p);
+            // TODO: replace 'circle,rect' with '.whole' ?
             const selFixedNode = d3.select('circle,rect').filter(n => n == ends.far.node );
             DraftLink.OnDragStart(e, ends.far.node, selFixedNode, d );
             // TODO temporarily hide the existing 'link whole' 
@@ -589,8 +590,8 @@ static OnDragEnd(e) {
             lnk.target = lnk.true_target = mouseover_datum;
             }
         if ( mouseover_datum && "source" in mouseover_datum ) { // over valid link => split that link and insert a new node
-            // create a new intermediate node
-            // TODO: add the new intermediate node as a child of any visible euler regions intersecting with the pointer location
+            // create a new 'elbow' connector node
+            // TODO: add the new node as a child of any visible euler regions intersecting with the pointer location
             lnk.target = lnk.true_target = Node.Create({x,y,width:8,height:8});
             lnk.target.fx = x; lnk.target.fy = y; // user expects the node to stay where it's put
             lnk.img_src = null; // TODO give it a suitable icon, e.g. 'AND' gate?
@@ -602,7 +603,6 @@ static OnDragEnd(e) {
 
         else if ( mouseover_datum == null ) { // over empty space => create a new node & link to it
             lnk.target = lnk.true_target = Node.Create({x,y,width:20,height:20});
-         //   lnk.target.selected = 1; // why does this help?
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
         }
 
@@ -615,12 +615,14 @@ static OnDragEnd(e) {
                 DraftLink.OrigLinkDatum.true_target = DraftLink.OrigLinkDatum.target = lnk.target;    
 
         }
-        else { // save the new link and refresh cache
+        else { // save the new link
             links.push(lnk);
         }
-        // make sure both ends are selected
+        // make sure the link and both ends are selected
+        Link.Activate([lnk],1); // TODO: why doesn't this do anything?
         Node.Activate([lnk.source,lnk.target]); 
-        Cache.RefreshNodeInOutLinks();
+        Cache.RefreshNodeInOutLinks(); 
+        // TODO: Also refresh hierarchies, only required if Link.IsHier(lnk)
         AppendLines();
         RefreshSimData();
         console.log(lnk);

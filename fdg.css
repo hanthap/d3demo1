@@ -92,9 +92,6 @@ rect.drag_selector {
     cursor: zoom-out;
 }
 
-rect.shift-down.frame-rect    {
-    cursor: zoom-out;
-}
 
 .ctrl-down.shift-down g {
     fill-opacity: 1;
@@ -272,7 +269,7 @@ view-source
 
 */
 
-
+/* 
 .space-bar polyline {
     visibility: hidden;
 }
@@ -283,7 +280,7 @@ view-source
 
 .space-bar line {
 pointer-events: none; 
-}
+} */
 
 
 
@@ -293,14 +290,20 @@ g.whole * { filter: grayscale(100%); opacity: 0.3; pointer-events: all; }
 g.selected * { visibility: visible; filter: none; opacity: 1; } 
 rect.region { fill-opacity: 0.2; stroke-opacity: 1; rx: 10; } /* ry defaults to rx */
 
-
+g.node.empty * { /* leaf node, nothing to see inside */
+    stroke: none;
+    cursor: auto; /* no zoom in */
+}
 
 g.whole:hover * {
     stroke:black;
     stroke-dasharray: 2,2;
 }
 
-
+g.whole.xhover * {
+    stroke:black;
+    stroke-dasharray: 2,2;
+}
 g.edge.whole * {
     pointer-events: stroke; /* ignore events in fill area, but does include invisible zone stroke */
 }
@@ -386,11 +389,7 @@ foreignObject {
     cursor: zoom-in;
 }
 
-g.node.empty * { /* leaf node, nothing to see inside */
-    stroke: none;
-    cursor: auto; /* no zoom in */
 
-}
 
 g.whole.drag_selected *
 {
