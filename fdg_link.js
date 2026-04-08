@@ -251,7 +251,6 @@ static InsertNode(lnk,node) {
 //-------------------------------------------------------------------------------
 
 static Activate(arr, status=1) {
-
     gAllEdges
         .selectAll('.whole')
         .filter(lnk => { return arr.includes(lnk) } )
@@ -261,6 +260,8 @@ static Activate(arr, status=1) {
     return status;
 
 }
+
+//-------------------------------------------------------------------------------
 
 }
 //-------------------------------------------------------------------------------
@@ -353,29 +354,18 @@ static ChooseEnds(d,[x,y]) {
 //-------------------------------------------------------------------------------
 
 static OnClick(e,d) {
-    
-   const style = window.getComputedStyle(this);
-   const p = d3.pointer(e,selViewport.node());
-   const sel = d3.select(this);
 
-    switch ( style.cursor ) {
+    // CAVEAT this event is ONLY AND ALWAYS fired after OnDragEnd, even if there was no actual drag movement.
+    // Therefore we put most of the logic into OnDragEnd() 
 
-        case 'copy' : 
-            break;
+    d.selected ^= 1;
+    Link.Activate([d],d.selected);
 
-        case 'grab' : // go to default (kludge workaround for .scrollable selViewPort)
-        default : 
-            // Selection propagates, but de-selection does not
-            if (Link.Activate([d],d.selected ^= 1)) {
-                d.source.selected = d.target.selected = 1;
-                Node.Activate([d.source,d.target]);
-                }
-            ;
-            break;
+    // Selection propagates, but de-selection does not
+    if (d.selected || Link.dragged)
+        Node.Activate([d.source,d.target]);
 
-    }
-    
-    console.log('LinkZone.OnClick',e,d,this,Link.Matches(d));
+    Link.dragged = false;
 
     ticked();
 }
@@ -447,7 +437,7 @@ static OnMouseOut(e,d) {
 //---------------------------------------------------------------------------
 
 static OnDragStart(e,d) { 
-
+  Link.dragged = false;
   const style = window.getComputedStyle(this);
   const p = d3.pointer(e,selViewport.node());
 
@@ -467,15 +457,13 @@ static OnDragStart(e,d) {
 }
 //---------------------------------------------------------------------------
 static OnDrag(e,d) {
+    Link.dragged = true; // it moved
     DraftLink.OnDrag(e);
 }
 //---------------------------------------------------------------------------
 static OnDragEnd(e,d) {
     DraftLink.OnDragEnd(e);
-    Link.Activate([d]); 
     Node.Activate([d.source,d.target]);
-    // finally change the variable end node (source or target) of the original link datum
-    // remove the draft line and delete its objects
     ticked();
 
 }
