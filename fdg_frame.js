@@ -315,7 +315,9 @@ static OnTick() {
 
 static Resize(d) {
 
-    const scope = VisibleDescendantsOf(d); // other than self
+    if (d.selected || Simulation.IncludeCloakedElements) {
+
+    const scope = VisibleDescendantsOf(d); // other than self - // TODO includes cloaked unless exempt
 
     if (!d.locked && scope.length) { 
 
@@ -328,7 +330,10 @@ static Resize(d) {
         d.y = yMin,
         d.width = xMax - xMin,
         d.height =yMax - yMin;
-    } };
+        } 
+    }
+}
+
 
  //------------------------------------------------------------
 

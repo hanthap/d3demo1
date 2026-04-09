@@ -119,8 +119,9 @@ static OnKeyDown(e) {
         svg.selectAll('*').classed('selected',false);
         break;
 
-    case 'End': // release any 'pegged' circles
-        nodes.forEach( d => { d.fx = d.fy = null }  );
+    case 'End': // unhitch all pegs (hard and soft), let forces rip
+        nodes.forEach(d => {d.fx = d.fy = d.cogX = d.cogY = null});
+        RefreshSimData();
         break;
 
     case 'Shift':
@@ -159,9 +160,8 @@ static OnKeyDown(e) {
 
         // TODO Shift+Cmd+. shows hidden folders in MacOS. Maybe use the same for showing hidden nodes?
     case ' ' :
-        if (e.shiftKey) { // drop/add cloaked elements in the force model 
+        if (e.shiftKey) { // toggle whether cloaked items are also 'neutrinos', exempted from the laws of physics
             Simulation.IncludeCloakedElements ^= 1;
-
             // clear fx fy? 
             RefreshSimData();
             }

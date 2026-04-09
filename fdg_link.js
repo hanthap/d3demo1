@@ -257,6 +257,10 @@ static Activate(arr, status=1) {
         .classed('selected',status)
         .each(lnk => lnk.selected = status)
         ; 
+
+    if (status) // selection ALWAYS propagates to both ends of each link
+        arr.forEach(lnk => Node.Activate([lnk.source,lnk.target]));
+
     return status;
 
 }
@@ -361,12 +365,6 @@ static OnClick(e,d) {
     d.selected ^= 1;
     Link.Activate([d],d.selected);
 
-    // Selection propagates, but de-selection does not
-    if (d.selected || Link.dragged)
-        Node.Activate([d.source,d.target]);
-
-    Link.dragged = false;
-
     ticked();
 }
 
@@ -463,7 +461,6 @@ static OnDrag(e,d) {
 //---------------------------------------------------------------------------
 static OnDragEnd(e,d) {
     DraftLink.OnDragEnd(e);
-    Node.Activate([d.source,d.target]);
     ticked();
 
 }
@@ -561,7 +558,7 @@ static OnDragEnd(e) {
             descriptor: null,
             hue_id: 'B',
             type_cde: 1,
-            mass: 50,
+            mass: 0,
             strength: 0,
             selected: 1,
             opacity: 1,
@@ -584,7 +581,7 @@ static OnDragEnd(e) {
             lnk.target.fx = x; lnk.target.fy = y; // user expects the node to stay where it's put
             lnk.img_src = null; // TODO give it a suitable icon, e.g. 'AND' gate?
             lnk.descriptor = `New link from ${Node.Tag(lnk.true_source)} to ${Node.Tag(lnk.true_target)}`
-            // also, splice the new node into the existing (mouseover) link
+            // also, 'splice in' the new elbow connector into the existing (mouseover) link
             Link.InsertNode(mouseover_datum,lnk.target);
             }
 
@@ -596,19 +593,16 @@ static OnDragEnd(e) {
 
         if ( DraftLink.OrigLinkDatum ) { // we started by dragging an existing link 
             const reverse = DraftLink.OrigLinkDatum.true_target == DraftLink.FromDatum ;
-            if ( reverse ) {
+            if (reverse)
                 DraftLink.OrigLinkDatum.true_source = DraftLink.OrigLinkDatum.source = lnk.target;    
-            }
             else
                 DraftLink.OrigLinkDatum.true_target = DraftLink.OrigLinkDatum.target = lnk.target;    
-
+            Link.Activate([DraftLink.OrigLinkDatum],1); 
         }
-        else { // save the new link
+        else { // save & activate the new link + both its end nodes
             links.push(lnk);
-        }
-        // make sure the link and both ends are selected
-        Link.Activate([lnk],1); // TODO: why doesn't this do anything?
-        Node.Activate([lnk.source,lnk.target]); 
+            Link.Activate([lnk],1); 
+            }
         Cache.RefreshNodeInOutLinks(); 
         // TODO: Also refresh hierarchies, only required if Link.IsHier(lnk)
         AppendLines();
