@@ -298,17 +298,18 @@ const selWholeEdges =
             ) 
         ;
 
+//  prepare to update the edges we've just created
 const selNewEdges = selWholeEdges.filter( function() { return this.children.length === 0 } ) ;
 
 selNewEdges.append('polyline')
-        .classed('edge line arrow',true)         
-        .style('stroke-width',Link.StrokeWidth)
-        .style('stroke',Link.StrokeColour)
-        .style('fill',Link.FillColour); // for the arrowhead
+    .classed('edge line arrow',true)         
+    .style('stroke-width',Link.StrokeWidth)
+    .style('stroke',Link.StrokeColour)
+    .style('fill',Link.FillColour); // for the arrowhead
 
 // edge zone ensures a clickable width of at least n pixels as defined in CSS
 selNewEdges.append('polyline')
-        .classed('edge zone',true); // CSS handles everything
+    .classed('edge zone',true); // CSS handles everything
 
 }
 
@@ -398,38 +399,38 @@ static OnContextMenu(event,d) {
 
 //-------------------------------------------------------------------------------
 
-static Hover( d, bHovering ) {
+static Hover(d, bHovering) {
 
-    if ( Node.DragStartPos ) return; // don't react if user is dragging a circle
+    if (Node.DragStartPos) return; // don't react if user is dragging a circle
  
     gAllEdges.selectAll('.line') //  TODO change to single select()
-        .filter( p => p == d ) // bound to the same datum 
-        .classed( 'xhover', bHovering ) // for CSS dash-array
+        .filter(p => p == d) // bound to the same datum 
+        .classed('xhover',bHovering) // for CSS dash-array
         // TODO surely there's a clearer way to set mouseover_datum = d
         .each(d => { mouseover_datum = bHovering ? d : null })
-        .style('stroke', Link.StrokeColour )  
-        .style('fill', Link.FillColour );  // for arrowhead
+        .style('stroke',Link.StrokeColour)  
+        .style('fill',Link.FillColour);  // for arrowhead
 
     gAllNodes.selectAll('.whole.node')
-        .filter( c => c == d.source || c == d.target )
-        .classed( 'xhover', bHovering );
+        .filter(c => c == d.source || c == d.target)
+        .classed('xhover', bHovering);
 
     gAllRegions.selectAll('.whole.region') 
-        .filter( r => r == d.source || r == d.target )
-        .classed( 'xhover', bHovering );
+        .filter(r => r == d.source || r == d.target)
+        .classed('xhover', bHovering);
         // TODO : apply to all nested frames and circles
 }
 
 //-------------------------------------------------------------------------------
 
 static OnMouseOver(e,d) {
-    LinkZone.Hover( d, true );
+    LinkZone.Hover(d,true);
 }
 
 //-------------------------------------------------------------------------------
 
 static OnMouseOut(e,d) {
-    LinkZone.Hover( d, false );
+    LinkZone.Hover(d,false);
 }
 
 //---------------------------------------------------------------------------
@@ -439,14 +440,14 @@ static OnDragStart(e,d) {
   const style = window.getComputedStyle(this);
   const p = d3.pointer(e,selViewport.node());
 
-    switch ( style.cursor ) {
+    switch (style.cursor) {
 
         case 'grabbing' : 
             // un-hitch whichever end is nearer the mouseclick
             const ends = LinkZone.ChooseEnds(d,p);
             // TODO: replace 'circle,rect' with '.whole' ?
-            const selFixedNode = d3.select('circle,rect').filter(n => n == ends.far.node );
-            DraftLink.OnDragStart(e, ends.far.node, selFixedNode, d );
+            const selFixedNode = d3.select('circle,rect').filter(n => n == ends.far.node);
+            DraftLink.OnDragStart(e,ends.far.node,selFixedNode,d);
             // TODO temporarily hide the existing 'link whole' 
             break;
 
@@ -498,7 +499,7 @@ static OnDragStart(e,dFromNode,selFromNode,dOrigLink=null) {
 
     // TODO: set CSS classes (and cursor shapes) for all layers, according to whether drop is allowable
     console.log('DraftLink.OnDragStart',e,dFromNode,selFromNode);
-    DraftLink.FromD3Selection = selFromNode.classed("drafting", true); 
+    DraftLink.FromD3Selection = selFromNode.classed('drafting',true); 
     DraftLink.FromDatum = dFromNode;
     DraftLink.OrigLinkDatum = dOrigLink;
     const p = Node.Centre(dFromNode);

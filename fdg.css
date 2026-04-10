@@ -158,6 +158,7 @@ polygon.arrowhead {
 line.drafting {
     stroke-dasharray: 2,2;
         stroke:purple;
+    visibility: visible;
 }
 
 
@@ -269,20 +270,9 @@ view-source
 
 */
 
-/* 
-.space-bar polyline {
-    visibility: hidden;
-}
-
-.space-bar.selected polyline  {
-        visibility:visible;
-}
-
-.space-bar line {
-pointer-events: none; 
-} */
-
-
+/* FINALLY, this works: when cloaked, elements are not clickable UNLESS selected (visible) */
+svg.cloaked g.whole * { pointer-events: none; }
+svg.cloaked g.whole.selected * { pointer-events: all; }
 
 .cloaked g { visibility: hidden; pointer-events: none;  } /* this is the only variant I've found that works as expected with node images */
 
@@ -304,9 +294,14 @@ g.whole.xhover * {
     stroke:black;
     stroke-dasharray: 2,2;
 }
+
+
 g.edge.whole * {
     pointer-events: stroke; /* ignore events in fill area, but does include invisible zone stroke */
 }
+
+
+
 
 polyline.edge.line {
     fill: none;
@@ -411,3 +406,4 @@ rect.contour {
     rx: 0;
     ry: 0;
 }
+
