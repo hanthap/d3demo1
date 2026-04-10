@@ -317,11 +317,10 @@ static Resize(d) {
 
     if (d.selected || Simulation.IncludeCloakedElements) {
 
-    const scope = VisibleDescendantsOf(d) // other than self 
-        .filter(n => n.selected || Simulation.IncludeCloakedElements)
-    ; - // include cloaked (unless neutrino)
+        const scope = VisibleDescendantsOf(d)
+            .filter(n => n.selected || Simulation.IncludeCloakedElements);
 
-    if (!d.locked && scope.length) { 
+        if (!d.locked && scope.length) { 
 
         const
             xMax = Math.max(...scope.map(Node.RightOuter)) + Frame.Margin(d),
