@@ -317,7 +317,9 @@ static Resize(d) {
 
     if (d.selected || Simulation.IncludeCloakedElements) {
 
-    const scope = VisibleDescendantsOf(d); // other than self - // TODO includes cloaked unless exempt
+    const scope = VisibleDescendantsOf(d) // other than self 
+        .filter(n => n.selected || Simulation.IncludeCloakedElements)
+    ; - // include cloaked (unless neutrino)
 
     if (!d.locked && scope.length) { 
 

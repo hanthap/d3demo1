@@ -231,6 +231,7 @@ static OnContextMenu(e,d) {
 
             default: // toggle foreground/selected status
                 d.selected ^= 1;
+                Node.Activate([d],d.selected);
                 clicked_d3selection // should be the 'whole' <g>
                     .classed('selected', d => d.selected);
                 if (!d.selected) { // deselection always propagates to all links, even collapsed nodes
@@ -518,7 +519,7 @@ static OnMouseOut(e,d) {
 //-------------------------------------------------------------------------------
     
 static IsExclusive(d) {
-    // to decide whether this node's circle is in scope of active_exclusion force
+    // to decide whether this node's circle is in scope of Simulation.forceEuler()
     return d.has_shape && Node.ShowAsCircle(d);
     }
 
@@ -553,7 +554,7 @@ static HasShape(d) {
 
 // see also Frame.ToCircle()
 // TODO: DO NOT soft-hide a node until/unless ALL its parents are circles, not Frames
-// if one of its parents is collapsed, that H-link will become visible just as for an exploded view
+// if some of its parents are collapsed, those H-links will become visible just as for an exploded view
 
 static IsVisible(d) {
     return ( Node.HasShape(d) && d.collapsed_into_node == null);
@@ -774,11 +775,11 @@ static OnDragEnd(e,d) {
 
 //-------------------------------------------------------------------------------
 
-static Activate( data ) {
-    data.forEach( d => d.selected = 1); 
-    if ( data && data.length ) {
+static Activate(arr,status=1) {
+    arr.forEach(n => n.selected = status); 
+    if (arr && arr.length) {
         d3.selectAll('.node.whole, .region.whole')
-        .filter( d => data.includes(d) )
+        .filter(n => arr.includes(n))
         .classed('selected',true)
         ;
         }

@@ -6,7 +6,7 @@ class Simulation {
 //----------------------------------------------------------------
 
 
-// TODO: do NOT exclude a collapsed circle IF it has any "descendants in common" with thie frame
+// TODO: do NOT exclude a collapsed circle IF it has any "descendants in common" with this frame
 // instead, try to position it so it straddles the boundary, suggesting a non-empty intersection. 
 // This bit could be tricky!
 // likewise, can we adjust the collision force for when multiple ancestors are collapsed circles
