@@ -686,16 +686,20 @@ static OnDragEnd(e,d) {
     // BUT EXCLUDING any superset regions
 
 // set the dropped node's COG to current pointer x,y
+//UNLESS we've been dragging a new link.. 
+ if (!DraftLink.LineElement) {
     const [x,y] = d3.pointer(e,selViewport.node());
 
-    d.cogX = x ; 
-    d.cogY = y ;
+    d.cogX = x; 
+    d.cogY = y;
 
     simulation
         .force('cogX',d3.forceX(Node.COGX)
             .strength(Node.ForceX))
         .force('cogY',d3.forceY(Node.COGY)
             .strength(Node.ForceY));
+ }
+
 
     switch (cursor) {
 
@@ -730,7 +734,7 @@ static OnDragEnd(e,d) {
     }
 
 // TODO : clean up these lines...
-    if ( Node.DraggedD3Selection ) {  
+    if (Node.DraggedD3Selection) {  
         console.log('OnDragEnd: Node.DraggedFromD3Selection, Node.DraggedFromParentFrames',Node.DraggedFromD3Selection, Node.DraggedFromParentFrames );
         Node.DraggedD3Selection.classed("dragging", false);
         Node.DraggedD3Selection = null;
@@ -738,7 +742,7 @@ static OnDragEnd(e,d) {
         Node.DraggedFromParentFrames = null; 
         }
 
-    if ( DraftLink.LineElement ) DraftLink.OnDragEnd(e);
+    if (DraftLink.LineElement) DraftLink.OnDragEnd(e);
 
     if ( ! ( e.sourceEvent.ctrlKey || d.locked ) ) {
             d.fx = d.fy = null; // locked or Crtl key => node 'stays put'

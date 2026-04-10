@@ -125,13 +125,13 @@ function RunSim() {
         
         .force('collide',d3.forceCollide().radius(Node.CollideRadius))
     
-      //   // electrostatic forces attract/repel based on charge 
-      //  .force('electrostatic',d3.forceManyBody()
-      //     .strength(4) // negative => repulsive
-      //     .distanceMin(20) // minimum distance at which force applies
-      //     .distanceMax(50)  // maximum distance at which force applies
-      //     .theta(0.8) //  lower value => smoother, more accurate (but more costly)
-      //   )
+        // electrostatic forces attract/repel based on charge 
+       .force('electrostatic',d3.forceManyBody()
+          .strength(4) // negative => repulsive
+          .distanceMin(20) // minimum distance at which force applies
+          .distanceMax(50)  // maximum distance at which force applies
+          .theta(0.8) //  lower value => smoother, more accurate (but more costly)
+        )
 
         .force('center', d3.forceCenter()
           .strength(0.05) 

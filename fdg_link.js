@@ -11,10 +11,10 @@ class Link {
 static AppendDatum(d,i) {
     d.source = Node.GetFromID(d.from_node_id);
     d.target = Node.GetFromID(d.to_node_id);
-    d.distance = 20; 
+    d.distance = 100; 
     d.strength = 0; 
-    d.opacity = (2 + Math.random()) / 3 ;
-    d.id = 'L' + Math.round( Math.random() * 1000000 ); // unique identifier
+    d.opacity = (4 + Math.random()) / 5 ;
+    d.id = 'L' + Math.round(Math.random()*1000000); // unique identifier
     return d;
 }
 
@@ -32,9 +32,9 @@ static AppendDatum(d,i) {
         to_node_id: parent.node_id,
         from_node_id: child.node_id,
         type_cde: "H",
-        distance: 20,
+        distance: 100,
         strength: 0, 
-        id: 'L' + Math.round( Math.random() * 1000000 ),
+        id: 'L' + Math.round(Math.random()*1000000),
         descriptor: null,
         opacity: 1,
         tag: 'belongs to'
@@ -49,13 +49,13 @@ static AppendDatum(d,i) {
 // Given a link datum, get the coordinates of both endpoints, plus the visual midpoint
 // various uses eg to populate attributes for a line or polyline shape
 
-static PolyLinePointTuple( d ) {
+static PolyLinePointTuple(d) {
 
     const 
         cp = Link.ContactPoints(d),
         // visual midpoint = half-way along the visible line segment
-        xMid = ( cp.p0.x + cp.p1.x ) / 2,
-        yMid = ( cp.p0.y + cp.p1.y ) / 2;
+        xMid = (cp.p0.x + cp.p1.x) / 2,
+        yMid = (cp.p0.y + cp.p1.y) / 2;
 
     return { 'start': { 'x': cp.p0.x , 'y': cp.p0.y },
              'mid' :  { 'x': xMid,     'y': yMid },
@@ -64,7 +64,7 @@ static PolyLinePointTuple( d ) {
 }
 //-------------------------------------------------------------------------------
 // generate a string in the required format for SVG "polyline"
-static PolyLinePointString( d ) {
+static PolyLinePointString(d) {
     const t = Link.PolyLinePointTuple(d);
     return `${t.start.x},${t.start.y} ${t.mid.x},${t.mid.y} ${t.end.x},${t.end.y}`
 }
@@ -121,7 +121,7 @@ static Strength(d) {  // callback for d3.forceLink()
 //-------------------------------------------------------------------------------
 
 static Distance(d) { // callback for d3.forceLink()
-    return 0; //d.distance;
+    return 500; //d.distance;
 }
 
 //-------------------------------------------------------------------------------
@@ -134,15 +134,15 @@ static OnTick() {
  //-------------------------------------------------------------------------------
 
  static IsHier(d) {
-    return ( 'H' == d.type_cde );
+    return ('H' == d.type_cde);
 }
 
 //-------------------------------------------------------------------------------
 // TODO: are there any non-hierarchical "circle-within-frame" links that should be hidden?
 static ShowAsLine(d) {
 // only non-hierarchical links are visible when current target is a frame
-    if ( Node.ShowAsFrame(d.target) && Link.IsHier(d) ) return false;
-    else return ( Node.IsVisible(d.source) && Node.IsVisible(d.target) );
+    if (Node.ShowAsFrame(d.target) && Link.IsHier(d)) return false;
+    else return (Node.IsVisible(d.source) && Node.IsVisible(d.target));
 }
 //-------------------------------------------------------------------------------
 // Exclude self-self links (eg a collapsed frame linking to itself)
@@ -151,8 +151,8 @@ static ShowAsLine(d) {
 // TODO: DO NOT soft-hide a node until/unless ALL its parents are circles, not Frames
 
 static VisibleLine(d) {
-    if ( Link.IsHier(d) && Node.ShowAsFrame(d.target) ) return false;
-    return ( Link.ShowAsLine(d) && ( d.target != d.source ));
+    if (Link.IsHier(d) && Node.ShowAsFrame(d.target)) return false;
+    return (Link.ShowAsLine(d) && (d.target != d.source));
 
 }
 //-------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ static SwapEnds(d) {
 static InsertNode(lnk,node) {
     console.log('Link.InsertNode(lnk,node)',lnk,node);
     const new_lnk = { ...lnk };
-    new_lnk.id =  'L' + 100000 + Math.round( 100000 * Math.random() );
+    new_lnk.id =  'L' + 100000 + Math.round(100000*Math.random());
 
     console.log('Bind new_link.source & true_source to node');
     new_lnk.source = new_lnk.true_source = node;
@@ -251,6 +251,7 @@ static InsertNode(lnk,node) {
 //-------------------------------------------------------------------------------
 
 static Activate(arr, status=1) {
+
     gAllEdges
         .selectAll('.whole')
         .filter(lnk => { return arr.includes(lnk) } )
@@ -299,10 +300,10 @@ const selWholeEdges =
         ;
 
 //  prepare to update the edges we've just created
-const selNewEdges = selWholeEdges.filter( function() { return this.children.length === 0 } ) ;
+const selNewEdges = selWholeEdges.filter( function() { return this.children.length == 0 } ) ;
 
 selNewEdges.append('polyline')
-    .classed('edge line arrow',true)         
+    .classed('edge line arrow',true)
     .style('stroke-width',Link.StrokeWidth)
     .style('stroke',Link.StrokeColour)
     .style('fill',Link.FillColour); // for the arrowhead
@@ -312,7 +313,6 @@ selNewEdges.append('polyline')
     .classed('edge zone',true); // CSS handles everything
 
 }
-
 
 //=====================================================================================================================
 
@@ -436,7 +436,7 @@ static OnMouseOut(e,d) {
 //---------------------------------------------------------------------------
 
 static OnDragStart(e,d) { 
-  Link.dragged = false;
+  // Link.dragged = false;
   const style = window.getComputedStyle(this);
   const p = d3.pointer(e,selViewport.node());
 
@@ -456,7 +456,7 @@ static OnDragStart(e,d) {
 }
 //---------------------------------------------------------------------------
 static OnDrag(e,d) {
-    Link.dragged = true; // it moved
+ //   Link.dragged = true; // it moved
     DraftLink.OnDrag(e);
 }
 //---------------------------------------------------------------------------
@@ -550,7 +550,7 @@ static OnDragEnd(e) {
 
     const [x,y] = d3.pointer(e,selViewport.node());
 
-    if ( e.sourceEvent.shiftKey ) { // bypass confirmation prompt, go ahead & commit
+    if (e.sourceEvent.shiftKey) { // bypass confirmation prompt, go ahead & commit
 
         const lnk = {
             true_source: DraftLink.FromDatum,
@@ -561,6 +561,7 @@ static OnDragEnd(e) {
             type_cde: 1,
             mass: 0,
             strength: 0,
+            distance: 50,
             selected: 1,
             opacity: 1,
             type_cde: '1', // not 'H' 
@@ -577,7 +578,7 @@ static OnDragEnd(e) {
             }
         if ( mouseover_datum && "source" in mouseover_datum ) { // over valid link => split that link and insert a new node
             // create a new 'elbow' connector node
-            // TODO: add the new node as a child of any visible euler regions intersecting with the pointer location
+            // TODO: add the new node as a child of any visible Euler regions intersecting with the pointer location
             lnk.target = lnk.true_target = Node.Create({x,y,width:8,height:8});
             lnk.target.fx = x; lnk.target.fy = y; // user expects the node to stay where it's put
             lnk.img_src = null; // TODO give it a suitable icon, e.g. 'AND' gate?
@@ -598,11 +599,11 @@ static OnDragEnd(e) {
                 DraftLink.OrigLinkDatum.true_source = DraftLink.OrigLinkDatum.source = lnk.target;    
             else
                 DraftLink.OrigLinkDatum.true_target = DraftLink.OrigLinkDatum.target = lnk.target;    
-            Link.Activate([DraftLink.OrigLinkDatum],1); 
+            Link.Activate([DraftLink.OrigLinkDatum]); 
         }
         else { // save & activate the new link + both its end nodes
             links.push(lnk);
-            Link.Activate([lnk],1); 
+            Link.Activate([lnk]); 
             }
         Cache.RefreshNodeInOutLinks(); 
         // TODO: Also refresh hierarchies, only required if Link.IsHier(lnk)
@@ -612,7 +613,7 @@ static OnDragEnd(e) {
         }
 
     if (DraftLink.LineElement) DraftLink.LineElement.remove();
-    if (DraftLink.FromD3Selection) DraftLink.FromD3Selection.classed("drafting", false);
+    if (DraftLink.FromD3Selection) DraftLink.FromD3Selection.classed('drafting', false);
     svg.classed('left-mouse-down',false); // because OnDragEnd() blocks mouseup?
     DraftLink.FromD3Selection = null;
     DraftLink.FromDatum = null;
