@@ -350,7 +350,7 @@ static OnDragStart(e,d) {
         {   x: d.x, y: d.y, 
             w: d.width, h: d.height, 
             cx: d.x+d.width/2, cy: d.y+d.height/2,
-            dx: x - d.x, dy: y - d.y
+            dx: x - d.x, dy: y - d.y,
         };
     Frame.DraggedD3Selection = selThisNode.classed("dragging", true); 
     Node.BringToFront(Frame.DraggedD3Selection);
@@ -363,11 +363,12 @@ static OnDrag(e,d) {
 
 const [x,y] = d3.pointer(e,selViewport.node());
 
-
 if ( d.locked ) {
-    // move the frame
-            d.x = x - Frame.DraggedFromInfo.dx ; 
-            d.y = y - Frame.DraggedFromInfo.dy ;
+    // move the frame and induce all descendants to move en masse, by setting their COG
+    const 
+        cx = x - Frame.DraggedFromInfo.dx + d.width/2,
+        cy = y - Frame.DraggedFromInfo.dy + d.height/2;
+    Frame.SetCentroid(d,[cx,cy]);                
 
     // TODO: How to treat 'shared custody' child elements 'left behind' inside another locked rect?
     // Automatically show the 'problem' link as a line instead (with the left-behind node staying in its non-dragged container)
@@ -379,10 +380,10 @@ if ( d.locked ) {
     
 } 
 
-// regardless, we also induce all descendants to move en masse, by setting their COG
+else
 // (If d is unlocked then its frame contour moves with them...)
+    Frame.SetCentroid(d,[x,y]);
 
-Frame.SetCentroid(d,[x,y]);
 ticked();
 }
 
