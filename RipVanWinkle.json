@@ -1,0 +1,183 @@
+{
+  "ontology": {
+    "classes": [
+      "Person",
+      "Place",
+      "Event",
+      "TimePeriod",
+      "Object",
+      "Theme"
+    ],
+    "relations": [
+      "livesIn",
+      "marriedTo",
+      "parentOf",
+      "friendOf",
+      "encounters",
+      "participatesIn",
+      "transformedBy",
+      "occursDuring",
+      "associatedWith",
+      "represents"
+    ]
+  },
+  "entities": {
+    "RipVanWinkle": {
+      "type": "Person",
+      "labels": ["Rip Van Winkle"],
+      "properties": {
+        "traits": ["kind", "idle", "avoidsWork"],
+        "role": "protagonist"
+      }
+    },
+    "DameVanWinkle": {
+      "type": "Person",
+      "labels": ["Dame Van Winkle"],
+      "properties": {
+        "traits": ["sharpTongued", "nagging"],
+        "role": "wife"
+      }
+    },
+    "RipChildren": {
+      "type": "Person",
+      "labels": ["Rip's children"],
+      "properties": {
+        "traits": ["grownByReturn"]
+      }
+    },
+    "Village": {
+      "type": "Place",
+      "labels": ["Dutch village", "Catskill village"],
+      "properties": {
+        "region": "Catskill Mountains"
+      }
+    },
+    "CatskillMountains": {
+      "type": "Place",
+      "labels": ["Catskill Mountains"]
+    },
+    "MysteriousMen": {
+      "type": "Person",
+      "labels": ["mysterious men", "ninepins players"],
+      "properties": {
+        "traits": ["silent", "oldFashioned"]
+      }
+    },
+    "Liquor": {
+      "type": "Object",
+      "labels": ["liquor"]
+    },
+    "PreRevolutionPeriod": {
+      "type": "TimePeriod",
+      "labels": ["before American Revolution"]
+    },
+    "PostRevolutionPeriod": {
+      "type": "TimePeriod",
+      "labels": ["after American Revolution"]
+    },
+    "AmericanRevolution": {
+      "type": "Event",
+      "labels": ["American Revolution"]
+    },
+    "RipSleepEvent": {
+      "type": "Event",
+      "labels": ["Rip's enchanted sleep"],
+      "properties": {
+        "durationYears": 20
+      }
+    },
+    "PoliticalChange": {
+      "type": "Theme",
+      "labels": ["political change"]
+    },
+    "DomesticConflict": {
+      "type": "Theme",
+      "labels": ["domestic conflict"]
+    },
+    "FolkloreMagic": {
+      "type": "Theme",
+      "labels": ["folklore", "magic sleep"]
+    },
+    "StorytellerRole": {
+      "type": "Theme",
+      "labels": ["storytelling", "oral tradition"]
+    }
+  },
+  "relations": [
+    {
+      "subject": "RipVanWinkle",
+      "predicate": "livesIn",
+      "object": "Village"
+    },
+    {
+      "subject": "Village",
+      "predicate": "associatedWith",
+      "object": "CatskillMountains"
+    },
+    {
+      "subject": "RipVanWinkle",
+      "predicate": "marriedTo",
+      "object": "DameVanWinkle"
+    },
+    {
+      "subject": "RipVanWinkle",
+      "predicate": "parentOf",
+      "object": "RipChildren"
+    },
+    {
+      "subject": "RipVanWinkle",
+      "predicate": "occursDuring",
+      "object": "PreRevolutionPeriod"
+    },
+    {
+      "subject": "RipSleepEvent",
+      "predicate": "occursDuring",
+      "object": "PreRevolutionPeriod"
+    },
+    {
+      "subject": "RipSleepEvent",
+      "predicate": "transformedBy",
+      "object": "AmericanRevolution"
+    },
+    {
+      "subject": "RipSleepEvent",
+      "predicate": "associatedWith",
+      "object": "MysteriousMen"
+    },
+    {
+      "subject": "RipSleepEvent",
+      "predicate": "associatedWith",
+      "object": "Liquor"
+    },
+    {
+      "subject": "RipVanWinkle",
+      "predicate": "participatesIn",
+      "object": "RipSleepEvent"
+    },
+    {
+      "subject": "AmericanRevolution",
+      "predicate": "occursDuring",
+      "object": "PostRevolutionPeriod"
+    },
+    {
+      "subject": "RipVanWinkle",
+      "predicate": "associatedWith",
+      "object": "PoliticalChange"
+    },
+    {
+      "subject": "RipVanWinkle",
+      "predicate": "associatedWith",
+      "object": "DomesticConflict"
+    },
+    {
+      "subject": "RipSleepEvent",
+      "predicate": "associatedWith",
+      "object": "FolkloreMagic"
+    },
+    {
+      "subject": "RipVanWinkle",
+      "predicate": "represents",
+      "object": "StorytellerRole"
+    }
+  ]
+}
