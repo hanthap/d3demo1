@@ -12,7 +12,7 @@ const supabaseClient = supabase.createClient(
 );
 
 var nodes = [];
-
+var links = [];
 var mapNodes; // key,value lookup dict
 var active_frames = []; // frames in scope of active exclusion
 var active_circles = []; // circles in scope of active exclusion
@@ -45,7 +45,7 @@ static ActiveNodes() {
 
 static ActiveLinks() {
     return links
-        .filter(Link.VisibleLine);
+         .filter(Link.VisibleLine); // All links are potentially visible. We only hide H links if/when the 2 shapes overlap.
     }
 
 

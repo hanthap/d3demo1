@@ -146,10 +146,8 @@ static ToCircle(d, bExploded, cXcY) {
                 // console.log(c);
                 // for all in and out links, set this node d as the virtual/effective end point
                 c.inLinks
-                    //.filter(Link.ShowAsLine) //not sure if we need to exclude any?
                     .forEach( lnk => { lnk.target = d; } );
                 c.outLinks
-                    //.filter(Link.ShowAsLine)
                     .forEach( lnk => { lnk.source = d } );
 
                 } );

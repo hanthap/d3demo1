@@ -1,4 +1,4 @@
-var links = [];
+
 class Link {
 
 
@@ -137,17 +137,31 @@ static OnTick() {
     return ('H' == d.type_cde);
 }
 
+ //-------------------------------------------------------------------------------
+// is the source (child) node's shape currently overlapping the target (parent) frame contour? 
+// If yes then we'll hide the polyline
+static ShapesOverlap(d) {
+    const 
+        c = Node.OuterRect(d.source),
+        p = Node.OuterRect(d.target);
+    return  c.right > p.left && c.bottom > p.top && 
+            c.left < r.right && c.top < r.bottom;
+}
+
+
 //-------------------------------------------------------------------------------
 // TODO: are there any non-hierarchical "circle-within-frame" links that should be hidden?
 static ShowAsLine(d) {
-// only non-hierarchical links are visible when current target is a frame
-    if (Node.ShowAsFrame(d.target) && Link.IsHier(d)) return false;
+// non-hierarchical links will always be lines (if both end nodes are visible)
+// hierarchical links are also lines UNLESS source is positioned INSIDE current target's contour 
+
+    if (Node.ShowAsFrame(d.target) && Link.IsHier(d) && Link.ShapesOverlap(d)) return false; // No need to test for Link.IsHier(d)  ?
     else return (Node.IsVisible(d.source) && Node.IsVisible(d.target));
 }
 //-------------------------------------------------------------------------------
 // Exclude self-self links (eg a collapsed frame linking to itself)
 
-// Render a line from source to target UNLESS it's a 'H' link and target is showing as a frame rect.
+// Render a line from source to target UNLESS the two shapes currently overlap 
 // TODO: DO NOT soft-hide a node until/unless ALL its parents are circles, not Frames
 
 static VisibleLine(d) {

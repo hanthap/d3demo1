@@ -73,6 +73,38 @@ class Node {
 
     //-------------------------------------------------------------------------------
 
+static InnerRect(d) {
+    if (Node.ShowAsFrame(d)) return { 
+            left: d.x + Frame.StubWidth(d), 
+            top: d.y + Frame.BannerHeight(d),
+            right: d.x + d.width - Frame.Margin(d),
+            bottom: d.y + d.height - Frame.Margin(d)
+    }
+    else return OuterRect(d);
+
+}
+
+    //-------------------------------------------------------------------------------
+
+static OuterRect(d) {
+    if (Node.ShowAsFrame(d)) return { 
+            left: d.x, 
+            top: d.y,
+            right: d.x + d.width,
+            bottom: d.y + d.height
+    } 
+    else return {
+            left: Node.LeftOuter(d),
+            top: Node.TopOuter(d),
+            right: Node.RightOuter(d),
+            bottom: Node.BottomOuter(d)
+
+    }
+}
+
+    //-------------------------------------------------------------------------------
+
+
 static TopInner(d) {
     if ( Node.ShowAsFrame(d) ) return d.y + Frame.BannerHeight(d); 
     else return (Node.Centre(d).x - Node.HalfWidth(d));
@@ -94,7 +126,7 @@ static LeftOuter(d) {
 }
 
 static BottomInner(d) {
-    if ( Node.ShowAsFrame(d) ) return d.y + d.height; 
+    if ( Node.ShowAsFrame(d) ) return d.y + d.height - Frame.Margin(d); 
     else return (Node.Centre(d).y + Node.HalfHeight(d));
 }
 
@@ -104,7 +136,7 @@ static BottomOuter(d) {
 }
 
 static RightInner(d) {
-    if ( Node.ShowAsFrame(d) ) return d.x + d.width; 
+    if ( Node.ShowAsFrame(d) ) return d.x + d.width - Frame.Margin(d); 
     else return (Node.Centre(d).x + Node.HalfWidth(d));
 }
 
