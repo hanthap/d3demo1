@@ -120,6 +120,9 @@ d3.selectAll('.region.whole')
 
    //-------------------------------------------------------------------------------
 
+   // TODO: hide ONLY the immediate children that have NO OTHER expanded parent Euler contour (visible or cloaked)
+
+
 static ToCircle(d, bExploded, cXcY) {
     // collapse the expanded contour into a single rect centred at cXcY, refresh attributes
     [d.cogX, d.cogY] = [d.x, d.y] = cXcY;

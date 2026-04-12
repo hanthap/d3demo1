@@ -34,22 +34,24 @@ Cache.FrameSet.forEach(Frame.Resize);
 
 for(var i=0; i < nIterations; i++) {
 
- Cache.FrameSet.forEach( f => { // outer loop 
+ Cache.FrameSet.forEach(f => { // outer loop 
     const c0 = Frame.Centre(f); 
-    Cache.CircleSet.forEach( m => { // inner loop
-    if ( f.descendants.includes(m) ) { // circle m is a descendant of frame n 
-        if ( f.locked ) { // all descendants must stay inside a locked frame
+    Cache.CircleSet.forEach(m => { // inner loop
+    if (f.descendants.includes(m)) { // circle m is a descendant of frame n 
+        if (f.locked) { // all descendants must stay inside a locked frame
         // if m is not fully within frame interior then snap it back, by changing its midpoint coords
-          if ( Node.RightOuter(m) > Frame.RightInner(f) ) m.x = Frame.RightInner(f) - Node.HalfWidth(m);
-          if ( Node.BottomOuter(m) > Frame.BottomInner(f) ) m.y = Frame.BottomInner(f) - Node.HalfHeight(m);
+          if (Node.RightOuter(m) > Frame.RightInner(f)) m.x = Frame.RightInner(f) - Node.HalfWidth(m);
+          if (Node.BottomOuter(m) > Frame.BottomInner(f)) m.y = Frame.BottomInner(f) - Node.HalfHeight(m);
           // calc top & left boundaries last so at least the header isn't partly covered
-          if ( Node.LeftOuter(m) < Frame.LeftInner(f) ) m.x = Frame.LeftInner(f) + Node.HalfWidth(m);
-          if ( Node.TopOuter(m) < Frame.TopInner(f) ) m.y = Frame.TopInner(f) + Node.HalfHeight(m);
+          if (Node.LeftOuter(m) < Frame.LeftInner(f)) m.x = Frame.LeftInner(f) + Node.HalfWidth(m);
+          if (Node.TopOuter(m) < Frame.TopInner(f)) m.y = Frame.TopInner(f) + Node.HalfHeight(m);
           m.cogX = f.cogX;
           m.cogY = f.cogY;
         }
     }
-    else { // circle m is NOT a descendant of frame f, so gently nudge it outside
+    else // circle m is NOT a descendant of frame f so gently nudge it outside
+        if (!m.locked) // a collapsed rect can encroach into Euler regions where it doesn't belong!
+           { 
         const 
           c1 = Node.Centre(m),
           dx = c1.x - c0.x,
@@ -61,15 +63,15 @@ for(var i=0; i < nIterations; i++) {
 
           // TODO: efficient but doesn't push far enough for oblique angles eg where the frame is an elongated rect
           // maybe some extra trigonometry can adjust for that?
-          h0 = Math.hypot( p0.x - c0.x, p0.y - c0.y ) + Frame.ExclusionBuffer(f), // frame centre to frame edge
-          h1 = Math.hypot( p1.x - c0.x, p1.y - c0.y ) - Node.CollideRadius(m); // frame centre to circle edge
+          h0 = Math.hypot(p0.x-c0.x,p0.y-c0.y) + Frame.ExclusionBuffer(f), // frame centre to frame edge
+          h1 = Math.hypot(p1.x-c0.x,p1.y-c0.y) - Node.CollideRadius(m); // frame centre to circle edge
         ;
-          if ( h0 > h1 ) { // overlapping shapes
+          if (h0 > h1) { // overlapping shapes
             // hardcoded 0.5 by experimentation
             const 
               nudge_factor = 0.5 * (h0 - h1) * alpha; // for smooth animation
-              m.x += Math.cos( theta_out ) * nudge_factor;
-              m.y += Math.sin( theta_out ) * nudge_factor;
+              m.x += Math.cos(theta_out) * nudge_factor;
+              m.y += Math.sin(theta_out) * nudge_factor;
             };
 
           };

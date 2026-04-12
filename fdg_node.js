@@ -309,6 +309,13 @@ static ApparentCircle(d) {
 
 // zoom in (expand, unpack) a collapsed node so it appears as a frame with visible child nodes
 
+// TODO: unhide ALL immediate children in their current state (collapsed or expanded)
+// (Frame.ToCircle() will hide ONLY the immediate children that have NO OTHER expanded parent Euler contour (visible or cloaked)
+
+// TODO: for a locked+collapsed rect, do NOT rely on its position on screen when deciding whether it's a child subframe.
+// its location is fixed/arbitrary and does not IMPLY membership of that 'containing' zone/contour
+// (however, it MAY be a member that DOES influence the floating contour. All depends on data )
+
 static ToFrame(d) {
 
     console.log('Node.ToFrame(d)',d);
@@ -659,13 +666,17 @@ if ( f )
 
     if ( DraftLink.LineElement ) DraftLink.OnDrag(e);
     else { 
-        d.x = d.fx = Math.round(e.x*1000)/1000; // update the x, y as well, so the circle moves even if the simulation is frozen
+        // update the x, y as well, so the circle moves even if the simulation is frozen
+        d.x = d.fx = Math.round(e.x*1000)/1000; 
         d.y = d.fy = Math.round(e.y*1000)/1000;
     }
     ticked();
 }
 
 //-------------------------------------------------------------------------------
+// TODO: for a locked+collapsed rect, do NOT rely on its position on screen when deciding whether it's a child.
+// its location is fixed/arbitrary and does not IMPLY membership of that 'containing' zone/contour
+// (however, it MAY be a member that DOES influence the floating contour. All depends on data)
 
 static OnDragEnd(e,d) {
 
@@ -750,31 +761,6 @@ static OnDragEnd(e,d) {
 
     ticked();
 
-
- /*
- const p = Node.DragStartPos;
- Node.DragStartPos = null; 
- console.debug('Node.OnDragEnd');
-
-  const dx = e.x - p[0];
-  const dy = e.y - p[1];
-  const dist = Math.hypot(dx, dy);
-  const CLICK_THRESHOLD = 3; // pixels
-
-  if (dist < CLICK_THRESHOLD) {
-        console.debug('Manually calling Node.OnClick');
-        Node.OnClick(e,d);
-        // TODO : if the target circle is in foreground it now receives the original click event. We need to prevent that somehow.
-        e.sourceEvent.stopImmediatePropagation(); // seems to have no effect
-
-    }
-
- else if ( !frozen ) {
-    UnfreezeSim();
-    }
-
-  console.debug('Exit Node.OnDragEnd');
-*/
 }
 
 //-------------------------------------------------------------------------------
