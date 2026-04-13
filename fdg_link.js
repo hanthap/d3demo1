@@ -160,6 +160,28 @@ static ShapesApart(d) {
     return  !( c.right > p.left && c.bottom > p.top && 
                c.left < p.right && c.top < p.bottom );
 }
+
+
+ //-------------------------------------------------------------------------------
+// RECOMMEND adjusted centre coordinates x,y for d.source so it would stay entirely inside d.target's inner rect
+
+static BoundedCentroid(d) {
+
+    const 
+        c = Node.OuterRect(d.source),
+        p = Node.InnerRect(d.target),
+        left =  c.left < p.left ? p.left : 
+                c.right > p.right ? p.right - Node.OuterWidth(d.source) :
+                c.left,
+        top =   c.top < p.top ? p.top :
+                c.bottom > p.bottom ? p.bottom - Node.OuterHeight(d.source) :
+                c.top,
+        x = left + Node.HalfWidth(d.source),
+        y = top + Node.HalfHeight(d.source);
+
+    return { x, y };
+}
+
 //-------------------------------------------------------------------------------
 // TODO: are there any non-hierarchical "circle-within-frame" links that should be hidden?
 static ShowAsLine(d) {

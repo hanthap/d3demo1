@@ -696,7 +696,7 @@ if ( f )
         Node.DraggedD3Selection.classed("no-drop", !Node.WouldAcceptAsChild(f,d) );
 }
 
-    if ( DraftLink.LineElement ) DraftLink.OnDrag(e);
+    if (DraftLink.LineElement) DraftLink.OnDrag(e);
     else { 
         // update the x, y as well, so the circle moves even if the simulation is frozen
         d.x = d.fx = Math.round(e.x*1000)/1000; 
@@ -732,6 +732,9 @@ static OnDragEnd(e,d) {
 //UNLESS we've been dragging a new link.. 
  if (!DraftLink.LineElement) {
     const [x,y] = d3.pointer(e,selViewport.node());
+// TODO take care NOT to set COG (x,y) outside the innermost locked frame, if any
+// if (Node.DraggedFromParentFrames includes a locked frame )...\
+// TODO: {x,y} = Link.BoundedCentroid(lnk) - how to find the innermost?
 
     d.cogX = x; 
     d.cogY = y;
@@ -771,9 +774,6 @@ static OnDragEnd(e,d) {
                 RefreshSimData();
             }
         break;
-
-        // default:
-        //     break;
     }
 
 // TODO : clean up these lines...
