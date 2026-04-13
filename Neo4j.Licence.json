@@ -1,0 +1,190 @@
+{
+  "classes": [
+    "Agreement",
+    "Party",
+    "License",
+    "Restriction",
+    "UsageLimit",
+    "DataType",
+    "Obligation",
+    "Right",
+    "TerminationCondition",
+    "LiabilityRule",
+    "ConfidentialityRule",
+    "GoverningLaw"
+  ],
+  "entities": {
+    "Neo4jDesktopAgreement": {
+      "type": "Agreement",
+      "properties": {
+        "effectiveDate": "Upon acceptance",
+        "lastUpdated": "2025-06-10"
+      }
+    },
+    "Neo4j": {
+      "type": "Party",
+      "properties": {
+        "role": "Licensor"
+      }
+    },
+    "Customer": {
+      "type": "Party",
+      "properties": {
+        "role": "Licensee"
+      }
+    },
+    "InternalDevLicense": {
+      "type": "License",
+      "properties": {
+        "exclusive": false,
+        "revocable": true,
+        "transferable": false,
+        "sublicensable": false,
+        "scope": "Internal development use only",
+        "namedUserOnly": true
+      }
+    },
+    "GeneralRestrictions": {
+      "type": "Restriction",
+      "properties": {
+        "noDistribution": true,
+        "noReverseEngineering": true,
+        "noDerivativeWorks": true,
+        "noProductionUse": true
+      }
+    },
+    "GraphUsageLimit": {
+      "type": "UsageLimit",
+      "properties": {
+        "maxNodes": 1000000000,
+        "maxRelationships": 5000000000
+      }
+    },
+    "SoftwareUsageData": {
+      "type": "DataType",
+      "properties": {
+        "includes": [
+          "softwareVersion",
+          "edition",
+          "processorCount",
+          "memory",
+          "nodeCount",
+          "relationshipCount",
+          "labels",
+          "properties"
+        ]
+      }
+    },
+    "CustomerObligations": {
+      "type": "Obligation",
+      "properties": {
+        "complyWithLaw": true,
+        "maintainBackups": true,
+        "provideUsageCertification": true
+      }
+    },
+    "Neo4jRights": {
+      "type": "Right",
+      "properties": {
+        "collectUsageData": true,
+        "useFeedbackFreely": true
+      }
+    },
+    "TerminationRules": {
+      "type": "TerminationCondition",
+      "properties": {
+        "customerMayTerminateByStoppingUse": true,
+        "neo4jMayTerminateWithNoticeDays": 30
+      }
+    },
+    "LiabilityCap": {
+      "type": "LiabilityRule",
+      "properties": {
+        "generalCapUSD": 500,
+        "exceptions": [
+          "fraud",
+          "willfulMisconduct",
+          "confidentialityBreach",
+          "licenseBreach",
+          "paymentObligations"
+        ]
+      }
+    },
+    "Confidentiality": {
+      "type": "ConfidentialityRule",
+      "properties": {
+        "standardOfCare": "reasonableCare",
+        "mutual": true
+      }
+    },
+    "CaliforniaLaw": {
+      "type": "GoverningLaw",
+      "properties": {
+        "jurisdiction": "California",
+        "venue": "Santa Clara County"
+      }
+    }
+  },
+  "relations": [
+    {
+      "subject": "Neo4jDesktopAgreement",
+      "predicate": "involvesParty",
+      "object": "Neo4j"
+    },
+    {
+      "subject": "Neo4jDesktopAgreement",
+      "predicate": "involvesParty",
+      "object": "Customer"
+    },
+    {
+      "subject": "Neo4jDesktopAgreement",
+      "predicate": "grants",
+      "object": "InternalDevLicense"
+    },
+    {
+      "subject": "InternalDevLicense",
+      "predicate": "subjectTo",
+      "object": "GeneralRestrictions"
+    },
+    {
+      "subject": "InternalDevLicense",
+      "predicate": "subjectTo",
+      "object": "GraphUsageLimit"
+    },
+    {
+      "subject": "Neo4jDesktopAgreement",
+      "predicate": "definesDataType",
+      "object": "SoftwareUsageData"
+    },
+    {
+      "subject": "Customer",
+      "predicate": "hasObligation",
+      "object": "CustomerObligations"
+    },
+    {
+      "subject": "Neo4j",
+      "predicate": "hasRight",
+      "object": "Neo4jRights"
+    },
+    {
+      "subject": "Neo4jDesktopAgreement",
+      "predicate": "includes",
+      "object": "TerminationRules"
+    },
+    {
+      "subject": "Neo4jDesktopAgreement",
+      "predicate": "includes",
+      "object": "LiabilityCap"
+    },
+    {
+      "subject": "Neo4jDesktopAgreement",
+      "predicate": "includes",
+      "object": "Confidentiality"
+    },
+    {
+      "subject": "Neo4jDesktopAgreement",
+      "predicate": "governedBy",
+      "object": "CaliforniaLaw"
+    }
+  ]
+}
