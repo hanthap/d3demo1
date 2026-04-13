@@ -275,6 +275,7 @@ svg.cloaked g.whole * { pointer-events: none; }
 svg.cloaked g.whole.selected * { pointer-events: all; }
 
 .cloaked g { visibility: hidden; pointer-events: none;  } /* this is the only variant I've found that works as expected with node images */
+g.edge.whole.selected.cloaked * { visibility: hidden; pointer-events: none;  } /* hides selected H-links if Link.ShapesOverlap */
 
 g.whole * { filter: grayscale(100%); opacity: 0.3; pointer-events: all; }
 g.selected * { visibility: visible; filter: none; opacity: 1; } 

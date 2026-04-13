@@ -127,8 +127,11 @@ static Distance(d) { // callback for d3.forceLink()
 //-------------------------------------------------------------------------------
 
 static OnTick() {
-   gAllEdges.selectAll('polyline')
-       .attr('points',Link.PolyLinePointString); 
+    gAllEdges.selectAll('polyline')
+       .attr('points',Link.PolyLinePointString);
+    gAllEdges.selectAll('.whole')
+       .filter(Link.IsHier)
+       .classed('cloaked',Link.ShapesOverlap); 
 }
 
  //-------------------------------------------------------------------------------
@@ -148,7 +151,15 @@ static ShapesOverlap(d) {
             c.left < p.right && c.top < p.bottom;
 }
 
-
+ //-------------------------------------------------------------------------------
+// inverse of ShapesOverlap(): ShapesApart => H-type link should become visible
+static ShapesApart(d) {
+    const 
+        c = Node.OuterRect(d.source),
+        p = Node.OuterRect(d.target);
+    return  !( c.right > p.left && c.bottom > p.top && 
+               c.left < p.right && c.top < p.bottom );
+}
 //-------------------------------------------------------------------------------
 // TODO: are there any non-hierarchical "circle-within-frame" links that should be hidden?
 static ShowAsLine(d) {
