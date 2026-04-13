@@ -145,7 +145,7 @@ static ShapesOverlap(d) {
         c = Node.OuterRect(d.source),
         p = Node.OuterRect(d.target);
     return  c.right > p.left && c.bottom > p.top && 
-            c.left < r.right && c.top < r.bottom;
+            c.left < p.right && c.top < p.bottom;
 }
 
 
@@ -155,7 +155,7 @@ static ShowAsLine(d) {
 // non-hierarchical links will always be lines (if both end nodes are visible)
 // hierarchical links are also lines UNLESS source is positioned INSIDE current target's contour 
 
-    if (Node.ShowAsFrame(d.target) && Link.IsHier(d) && Link.ShapesOverlap(d)) return false; // No need to test for Link.IsHier(d)  ?
+    if (Node.ShowAsFrame(d.target) && Link.IsHier(d) && Link.ShapesOverlap(d)) return false; // Shouldn't need to test for Link.IsHier(d)  ?
     else return (Node.IsVisible(d.source) && Node.IsVisible(d.target));
 }
 //-------------------------------------------------------------------------------
@@ -165,7 +165,7 @@ static ShowAsLine(d) {
 // TODO: DO NOT soft-hide a node until/unless ALL its parents are circles, not Frames
 
 static VisibleLine(d) {
-    if (Link.IsHier(d) && Node.ShowAsFrame(d.target)) return false;
+    if (Link.IsHier(d) && Link.ShapesOverlap(d) && Node.ShowAsFrame(d.target)) return false;
     return (Link.ShowAsLine(d) && (d.target != d.source));
 
 }
