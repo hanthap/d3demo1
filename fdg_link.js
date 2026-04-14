@@ -70,7 +70,7 @@ static PolyLinePointString(d) {
 }
 
 //-------------------------------------------------------------------------------
-
+// TODO: colour & style should indicate the predicate class. 
 static StrokeColour(d) { 
     return `rgb(${sourcePalette(d.hue_id)})`;
 
@@ -135,7 +135,7 @@ static OnTick() {
 }
 
  //-------------------------------------------------------------------------------
-
+// TODO: each child's 'nestability'  will depend on the target node's current list of 'nestable predicates'
  static IsHier(d) {
     return ('H' == d.type_cde);
 }
@@ -163,7 +163,7 @@ static ShapesApart(d) {
 
 
  //-------------------------------------------------------------------------------
-// RECOMMEND adjusted centre coordinates x,y for d.source so it would stay entirely inside d.target's inner rect
+// RECOMMEND adjusted centre coordinates for d.source so it would stay entirely inside d.target's inner rect
 
 static BoundedCentroid(d) {
 

@@ -565,8 +565,22 @@ static IsExclusive(d) {
 //-------------------------------------------------------------------------------
 
 static ParentsOf(d) {
-    return d.outLinks.filter(n => n.type_cde == 'H' ).map(e => e.target);
+    return d.outLinks
+        .filter(Link.IsHier)
+        .map(e => e.target);
 }
+
+//-------------------------------------------------------------------------------
+
+static LockedParentFramesOf(d) {
+    return d.outLinks
+        .filter(Link.IsHier)
+        .map(e => e.target)
+        .filter(f => f.is_group) // not collapsed
+        .filter(f => f.locked) 
+        ;
+}
+
 
 //-------------------------------------------------------------------------------
 
@@ -635,12 +649,65 @@ static IsVisible(d) {
     static WouldAcceptAsChild(n,c) { 
         // TODO : check that n is not a descendant of c (circular)
         // TODO : check that c is not already a child of n (avoid duplicates)
+        // TODO : what kind of predicate will we be creating? 
         // IGNORE if n == c OR n.children contains c
         // if new parent is a descendant of old parent or vice versa, then REPLACE the target node
         // else, ADD a new 'H' link
         return true;
     }
 
+//-------------------------------------------------------------------------------
+
+    static PreferredZone(d) {
+        // return the coords of a rect that represents the intersection of INNER rects for 
+        // node d's parent frames (if any) that are locked and material/real
+        // if there's no such overlap then drop constraints one by one until a candidate is found.
+        return null;    
+    const 
+        lpf = Node.LockedParentFramesOf(d),
+        //rlist = lpf.forEach(f => )
+
+     //   Node.InnerRect(d.target),
+
+        p = Node.InnerRect(d.target),
+        left =  c.left < p.left ? p.left : 
+                c.right > p.right ? p.right - Node.OuterWidth(d.source) :
+                c.left,
+        top =   c.top < p.top ? p.top :
+                c.bottom > p.bottom ? p.bottom - Node.OuterHeight(d.source) :
+                c.top,
+        x = left + Node.HalfWidth(d.source),
+        y = top + Node.HalfHeight(d.source);
+
+    return { x, y };
+    }
+
+//-------------------------------------------------------------------------------
+
+    static PreferredCentroid(n) {
+        // given its current location, what's the nearest centroid for node n within Node.PreferredZone(n)
+        // adjusting for the size & shape of n so that n would appear fully inside that zone
+        // or at least not crossing the zone's top & left boundaries (in case they're banner & stub edges) 
+
+        const pz = Node.PreferredZone(n);
+        if (pz) {
+            const 
+                c = Node.OuterRect(n),
+                left = c.left < pz.left ? pz.left : 
+                    c.right > pz.right ? pz.right - Node.OuterWidth(n) :
+                    c.left,
+                top = c.top < pz.top ? pz.top :
+                    c.bottom > pz.bottom ? pz.bottom - Node.OuterHeight(n) :
+                    c.top,
+                x = left + Node.HalfWidth(n),
+                y = top + Node.HalfHeight(n);
+            return {x,y};
+        } 
+        else // no preferred zone 
+            return Node.Centre(n);
+
+
+    }
 //-------------------------------------------------------------------------------
 
 static OnDragStart(e,d) {
@@ -731,11 +798,8 @@ static OnDragEnd(e,d) {
 // set the dropped node's COG to current pointer x,y
 //UNLESS we've been dragging a new link.. 
  if (!DraftLink.LineElement) {
-    const [x,y] = d3.pointer(e,selViewport.node());
-// TODO take care NOT to set COG (x,y) outside the innermost locked frame, if any
-// if (Node.DraggedFromParentFrames includes a locked frame )...\
-// TODO: {x,y} = Link.BoundedCentroid(lnk) - how to find the innermost?
-
+    //const [x,y] = d3.pointer(e,selViewport.node());
+    const {x,y} = Node.PreferredCentroid(d);  // in case there are locked frames to consider
     d.cogX = x; 
     d.cogY = y;
 
@@ -761,8 +825,8 @@ static OnDragEnd(e,d) {
                         .filter(lnk => Node.DraggedFromParentFrames.includes(lnk.target));
                     Cache.DeleteLinks(links_to_be_deleted);
                 } 
-
-                // create new hierarchical links 
+// TODO: DEBUG - is this where new duplicated links are sometimes created?
+                // create new hierarchical links - use the default 'nestable predicate' of each f
                 valid_recipients.forEach(f => Link.Create(d,f));
                 // TODO: make this more efficient
                 Cache.RefreshNodeInOutLinks(); // important!
