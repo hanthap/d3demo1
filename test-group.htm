@@ -352,10 +352,13 @@ input.addEventListener("change", () => {
     const text = reader.result;
     const data = JSON.parse(text);
     console.log("Structured data:", data);
+    load_ontology(data);
   };
 
   reader.readAsText(file);
 });
+
+
 
 
 
@@ -414,8 +417,41 @@ function update() {
   vp.setAttribute("transform", `translate(${panX},${panY}) scale(${scale})`);
 }
 
+entities = []; // dict of key-value pairs : each value is an object with members: 'labels' (array of string); 'type' (string, FK to class); 'properties' (dict of any)
+relations = []; // array of dicts with string keys not yet bound.  subject (->entity) predicate (->predicate) object (->entity)
+classes = []; // array of strings, to be expanded with eg URL of logo, bg_fill
+predicates = []; // array of strings, to be expanded eg with colour, 'nestability'
 
-function test_load_ontology() {
+
+function load_ontology(src) {
+// Copilot doesn't always spit out the same JSON structure...
+    entities = src.entities;
+    relations = src.relations;
+    classes = src.ontology?.classes;
+    if (classes == undefined) classes = src.classes;
+    predicates = src.ontology?.relations;
+    if (predicates == undefined) predicates = [...new Set(relations.map(r => r.predicate))]; // deduped
+
+// now convert classes, predicates from simple arrays to dict of objects
+
+classes = Object.fromEntries(classes.map(key => [key, {id: key}])); // each {} is a new object
+predicates = Object.fromEntries(predicates.map(key => [key, { id: key }]));
+
+x = classes.Person;
+x.Age = 30;
+
+y = classes['Place']
+y.country = "Australia";
+
+
+for (const r of Object.values(relations)) {
+    r.true_source = entities[r.subject];
+    r.true_target = entities[r.object];
+    r.pred_type = predicates[r.predicate];
+} 
+
+
+    console.log("entities,relations,classes,predicates",entities,relations,classes,predicates);
 
 
 
