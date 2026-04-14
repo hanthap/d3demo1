@@ -61,13 +61,20 @@ class Node {
     }
 
     //-------------------------------------------------------------------------------
+ static OuterWidth(d) {
+        return d.width; 
+    }
 
-    static Width(d) {
+    static Width(d) { // DEPRECATED
         return d.width; 
     }
     //-------------------------------------------------------------------------------
 
-    static Height(d) {
+    static OuterHeight(d) {
+        return d.height; 
+    }
+
+    static Height(d) { // DEPRECATED
         return d.height; 
     }
 
@@ -662,24 +669,25 @@ static IsVisible(d) {
         // return the coords of a rect that represents the intersection of INNER rects for 
         // node d's parent frames (if any) that are locked and material/real
         // if there's no such overlap then drop constraints one by one until a candidate is found.
-        return null;    
-    const 
-        lpf = Node.LockedParentFramesOf(d),
-        //rlist = lpf.forEach(f => )
 
-     //   Node.InnerRect(d.target),
-
-        p = Node.InnerRect(d.target),
-        left =  c.left < p.left ? p.left : 
-                c.right > p.right ? p.right - Node.OuterWidth(d.source) :
-                c.left,
-        top =   c.top < p.top ? p.top :
-                c.bottom > p.bottom ? p.bottom - Node.OuterHeight(d.source) :
-                c.top,
-        x = left + Node.HalfWidth(d.source),
-        y = top + Node.HalfHeight(d.source);
-
-    return { x, y };
+        // CAVEAT: this logic assumes the zone is a simple rect where 2 or more parents overlap
+        // It doesn't consider NON-parent locked frames i.e. any subzone that is OUT OF BOUNDS. 
+        // Never mind, we can simply leave that exclusion adjustment to forceEuler.
+        
+        const lpf = Node.LockedParentFramesOf(d); // just the immediate parents
+        if (lpf.length == 0) return null;
+        const scope = lpf.map(Node.InnerRect);
+        console.log('Node.PreferredZone(d),lpf,scope',d,lpf,scope);
+        if (scope.length == 1) return scope[0];
+        const
+            left = Math.max(...scope.map(r => r.left)),
+            top = Math.max(...scope.map(r => r.top)),
+            right = Math.min(...scope.map(r => r.right)),
+            bottom = Math.min(...scope.map(r => r.bottom)),
+            ok = left < right && top < bottom,
+            zone = ok ? {left,top,right,bottom} : scope[0]
+        ;
+        return zone;
     }
 
 //-------------------------------------------------------------------------------
@@ -690,6 +698,8 @@ static IsVisible(d) {
         // or at least not crossing the zone's top & left boundaries (in case they're banner & stub edges) 
 
         const pz = Node.PreferredZone(n);
+        console.log('Node.PreferredZone(n) returned zone',pz);
+
         if (pz) {
             const 
                 c = Node.OuterRect(n),
@@ -726,6 +736,7 @@ static OnDragStart(e,d) {
 
    else {
         Node.DraggedFromD3Selection = selHits;
+        // TODO: DEBUG - why do we get duplicate nodes in Node.DraggedFromParentFrames ??
         Node.DraggedFromParentFrames = Node.DraggedFromD3Selection
             .filter(Node.ShowAsFrame)
             .filter(f => ChildrenOf(f).includes(d))

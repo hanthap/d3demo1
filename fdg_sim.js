@@ -39,6 +39,7 @@ for(var i=0; i < nIterations; i++) {
     Cache.CircleSet.forEach(m => { // inner loop
     if (f.descendants.includes(m)) { // circle m is a descendant of frame n 
         if (f.locked) { // all descendants must stay inside a locked frame
+          // TODO: replace with a call to Node.PreferredCentroid(m) 
         // if m is not fully within frame interior then snap it back, by changing its midpoint coords
           if (Node.RightOuter(m) > Frame.RightInner(f)) m.x = Frame.RightInner(f) - Node.HalfWidth(m);
           if (Node.BottomOuter(m) > Frame.BottomInner(f)) m.y = Frame.BottomInner(f) - Node.HalfHeight(m);

@@ -201,7 +201,7 @@ static DescendantShapesSVG(d) {
                 .classed('selected',f.selected);
 
             if (!f.selected) { // deselection always propagates to all links, including rolled up links
-                const links_to_be_deselected = links.filter(lnk => { return ( lnk.source === d || lnk.target === d ) } );
+                const links_to_be_deselected = links.filter(lnk => { return ( lnk.source === f || lnk.target === f ) } );
                 Link.Activate(links_to_be_deselected,0);
             }
 
