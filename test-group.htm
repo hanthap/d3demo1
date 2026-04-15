@@ -417,6 +417,57 @@ function update() {
   vp.setAttribute("transform", `translate(${panX},${panY}) scale(${scale})`);
 }
 
+class Predicate {
+  constructor(str) { this.id = str; }
+
+ foobar() {
+    return `{$this.id}`;
+ }
+
+}
+
+class EntityType {
+  constructor(str) { this.id = str; }
+}
+
+
+class Entity {
+  constructor(obj,key) { 
+    Object.assign(this, obj); 
+    this.id = key;
+  }
+}
+
+class Relation  {
+  constructor(obj,key) {
+    Object.assign(this, obj);
+    this.id = key;
+  }
+}
+
+class NodeDatum { // 
+ constructor(obj) {
+    this.base = obj; 
+    this.x = Math.random(); // same Entity can appear across many views each with its own NodeDatum (x,y,fx,fy,width etc.)
+ }
+
+ foobar() {
+    return `{$this.entity.id}`;
+ }
+
+
+}
+
+
+class LinkDatum { // 
+ constructor(obj) {
+    this.base = obj; // Relation
+    this.y = Math.random(); // same Relation can appear across many views each with its own LinkDatum (x,y,fx,fy,width etc.)
+ }
+}
+
+
+
 entities = []; // dict of key-value pairs : each value is an object with members: 'labels' (array of string); 'type' (string, FK to class); 'properties' (dict of any)
 relations = []; // array of dicts with string keys not yet bound.  subject (->entity) predicate (->predicate) object (->entity)
 classes = []; // array of strings, to be expanded with eg URL of logo, bg_fill
@@ -425,33 +476,51 @@ predicates = []; // array of strings, to be expanded eg with colour, 'nestabilit
 
 function load_ontology(src) {
 // Copilot doesn't always spit out the same JSON structure...
-    entities = src.entities;
-    relations = src.relations;
+    entities = Object.entries(src.entities);
+    relations = Object.entries(src.relations);
     classes = src.ontology?.classes;
     if (classes == undefined) classes = src.classes;
     predicates = src.ontology?.relations;
-    if (predicates == undefined) predicates = [...new Set(relations.map(r => r.predicate))]; // deduped
+    if (predicates == undefined) predicates = [...new Set(src.relations.map(r => r.predicate))]; // deduped
 
-// now convert classes, predicates from simple arrays to dict of objects
+// now convert each table to a dict of custom objects, then bind (replacing id string with object ref)
 
-classes = Object.fromEntries(classes.map(key => [key, {id: key}])); // each {} is a new object
-predicates = Object.fromEntries(predicates.map(key => [key, { id: key }]));
+function RandomId(prefix) {
+    return prefix + 1000000 + Math.round(1000800*Math.random());
+}
+
+classes = Object.fromEntries(classes.map(str => [str, new EntityType(str)]));
+predicates = Object.fromEntries(predicates.map(str => [str, new Predicate(str)]));
+entities = Object.fromEntries(entities.map(([key, obj]) => [key, new Entity(obj,key)]));
+relations = Object.fromEntries(relations.map(([key, obj]) => [key, new Relation(obj,key)]));
+node_data = Object.entries(entities).map(([key, obj]) => new NodeDatum(obj));
+subset = node_data.filter(d => d.x > 0.5);
+link_data = Object.entries(relations).map(([key, obj]) => new LinkDatum(obj));
 
 x = classes.Person;
-x.Age = 30;
+if (x) x.Age = 30;
 
-y = classes['Place']
-y.country = "Australia";
+y = classes['Place'];
+if (y) y.country = "Australia";
+
+z = Object.values(entities)[3];
+
 
 
 for (const r of Object.values(relations)) {
-    r.true_source = entities[r.subject];
-    r.true_target = entities[r.object];
-    r.pred_type = predicates[r.predicate];
+    r.subject = entities[r.subject];
+    r.object = entities[r.object];
+   r.predicate = predicates[r.predicate];
 } 
 
 
-    console.log("entities,relations,classes,predicates",entities,relations,classes,predicates);
+for (const e of Object.values(entities)) {
+    e.type = classes[e.type];
+}
+
+
+
+    console.log("entities,relations,classes,predicates,node_data,subset,link_data",entities,relations,classes,predicates,node_data,subset,link_data);
 
 
 
