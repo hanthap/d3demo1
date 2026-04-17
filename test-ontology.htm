@@ -5,41 +5,86 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
 <script>
-var graph, ont;
+var graph, ont, selPara;
 
-const input = document.getElementById("fileInput");
 
-input.addEventListener("change", () => {
-  const file = input.files[0];
-  const reader = new FileReader();
 
-  reader.onload = () => {
+
+//----------------------------------------------------------
+
+function OnChange() {
+  // nested helper function, so reader is in scope
+  function OnLoad() { 
     const text = reader.result;
     json_data = JSON.parse(text);
     console.log("json_data", json_data);
-    
-  ont = load_ontology(json_data);
-  ont = bind_ontology(ont);
-  graph = create_graph(ont);
+      
+    ont = load_ontology(json_data);
+    ont = bind_ontology(ont);
+    graph = create_graph(ont);
+    start();
+    }
 
-
-  };
-
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = OnLoad;
   reader.readAsText(file);
-});
+}
+
+const input = document.getElementById("fileInput");
+input.addEventListener("change", OnChange);
+
+//----------------------------------------------------------
+
+
+//----------------------------------------------------------
+
+function start() {
+
+  const body = d3.select('body');
+
+  selPara = body.selectAll('p')
+    .data(Object.values(graph.nodes),d=>d.uniqueId())
+    .join('p')
+    .attr('id',d=>d.uniqueId())
+    .text(d=>d.toString())
+    ;
+
+  console.log(selPara);
+
+}
+//----------------------------------------------------------
+
+class NodeDatum { 
+ constructor(obj) {
+    this.base = obj; // Entity
+    this.x = Math.random(); // same Entity can appear across many views each with its own NodeDatum (x,y,fx,fy,width etc.)
+ }
+uniqueId() { return this.base.uniqueId() }
+toString() { return this.base.toString() }
+
+ }
+
+//----------------------------------------------------------
 
 
 class RelationType {
   constructor(str) { this.id = str; }
   keyId() { return this.id }
+  toString() { return this.id }
 
 }
+
+//----------------------------------------------------------
 
 class EntityType {
   constructor(str) { this.id = str; }
-  keyId() { return this.id }
+  keyId() { return this.id } // for binding
+//  uniqueId() { return this.id } // TODO: qualify to avoid name collisions
+  toString() { return this.id }
 
 }
+//----------------------------------------------------------
 
 class Entity {
   constructor(obj,key=null) { 
@@ -47,14 +92,15 @@ class Entity {
     this.id = key ?? obj.name ?? RandomId('E');
   }
   typeId() { return this.type ?? 'Entity'; }
-  keyId() { return this.id }
-  bind(t) { 
-    this.objType = t[this.typeId()];
-  }
-
+  keyId() { return this.id } // fort binding
+  uniqueId() { return this.id } // TODO: qualify to avoid name collisions
+  bind(types) { this.objType = types[this.typeId()]; }
+  toString() { return `${this.objType.toString()}: ${this.id}: [${this.labels  ?? this.description ?? Object.entries(this.properties)}]`    }
 
 
 }
+
+//----------------------------------------------------------
 
 class Relation  {
   constructor(obj) {
@@ -62,45 +108,41 @@ class Relation  {
     this.id = obj.key ?? RandomId('R');
   }
   keyId() { return this.id }
+  uniqueId() { return this.id } // TODO: qualify to avoid name collisions
   typeId() { return this.predicate ?? this.cardinality ?? 'Relation'; }
   fromId() { return this.subject ?? this.sourceEntity; }
   toId() { return this.object ?? this.targetEntity; }
-  bind(e,r) { 
-    this.baseFrom = e[this.fromId()];
-    this.baseTo = e[this.toId()];
-    this.baseType = r[this.typeId()];
+  bind(entities,relations) { 
+    this.baseFrom = entities[this.fromId()];
+    this.baseTo = entities[this.toId()];
+    this.baseType = relations[this.typeId()];
   }
 
 }
-class NodeDatum { 
- constructor(obj) {
-    this.base = obj; // Entity
-    this.x = Math.random(); // same Entity can appear across many views each with its own NodeDatum (x,y,fx,fy,width etc.)
- }
-}
+
+//----------------------------------------------------------
+
+// same Relation can appear across many views each with its own LinkDatum (x,y,fx,fy,width etc.)
 
 class LinkDatum {  
  constructor(obj) {
     this.base = obj; // Relation
-    this.y = Math.random(); // same Relation can appear across many views each with its own LinkDatum (x,y,fx,fy,width etc.)
+    this.y = Math.random(); 
  }
-  bind(nodes_dict) { 
-    this.datumFrom = nodes_dict[this.base.baseFrom.id];
-    this.datumTo = nodes_dict[this.base.baseTo.id];
+  bind(nodes) { 
+    this.datumFrom = nodes[this.base.baseFrom.uniqueId()];
+    this.datumTo = nodes[this.base.baseTo.uniqueId()];
   }
 }
-
-
-entities = undefined; // dict of key-value pairs : each value is an object with members: 'labels' (array of string); 'type' (string, FK to class); 'properties' (dict of any)
-relations = undefined; // array of dicts with string keys not yet bound.  subject (->entity) predicate (->predicate) object (->entity)
-classes = undefined; // array of strings, to be expanded with eg URL of logo, bg_fill
-predicates = undefined; // array of strings, to be expanded eg with colour, 'nestability'
+//----------------------------------------------------------
 
 
 function RandomId(prefix) {
     return prefix + (1000000 + Math.round(1000800*Math.random()));
 }
 
+//----------------------------------------------------------
+// align & conform raw JSON structure ready for binding 
 function load_ontology(src) {
 
 entities = undefined; 
@@ -108,7 +150,7 @@ relations = undefined;
 classes = undefined; 
 predicates = undefined;
 
-// Copilot doesn't always spit out the same JSON structure...
+// LLMs don't always spit out the same JSON structure & naming convention... Here we cater for just some of the variants
     if (src.entities) entities = src.entities;
     if (src.relations) relations = src.relations;
     if (src.classes) classes = src.classes;
@@ -118,16 +160,22 @@ predicates = undefined;
         if (src.ontology.relationships) relations = src.ontology.relationships;
         if (src.ontology.relations) predicates = src.ontology.relations;
     }
-// Raw JSON may include dict of objects.  We want to cast those objects into custom classes
-// It helps to convert them to array of [key,obj] entries
 
 return {entities, relations, classes, predicates} ;
 
   }
 
+//----------------------------------------------------------
+// given a clean ontology structure, add local object bindings based on lookup keys
+
 function bind_ontology(ont) {
 
-//----------------------------------------------------------
+// Raw JSON may include dict of objects.  We want to cast those objects into custom classes
+// It helps to convert them to array of [key,obj] entries
+
+
+  //----------------------------------------------------------
+
 if (Array.isArray(ont.entities)) ont.entities = ont.entities.map(obj => new Entity(obj)); // assumes list of objects, not key-value pairs
 else { // assume dict of Objects
   ont.entities = Object.entries(ont.entities); // convert dict to array of [key,obj] pairs
@@ -162,12 +210,12 @@ return ont;
 }
 
 //----------------------------------------------------------
-
-
+// given a bound ontology, generate a fresh set of datum objects that D3 can manipulate wihtout impacting others
+// TODO: support multiple graphs/views, each referencing multiple ontologies while avoiding name collisions
 function create_graph(bound_ont) {
 
 nodes = Object.values(bound_ont.entities).map(obj => [obj.keyId(),new NodeDatum(obj)]); 
-nodes = Object.fromEntries(nodes); // convert to hashtable
+nodes = Object.fromEntries(nodes); // convert to dict object
 
 links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj));
 links.forEach(obj => obj.bind(nodes));
@@ -177,5 +225,15 @@ console.log("nodes,links",nodes,links);
 return { nodes, links };
 
 }
+
+//----------------------------------------------------------
+
+
+
+
+
+
+
+
 
 </script>
