@@ -1,0 +1,238 @@
+{
+  "ontology": {
+    "version": "1.0",
+    "domain": "Banking",
+    "entities": [
+      {
+        "name": "Customer",
+        "displayName": "Customer",
+        "description": "A person or organisation that holds accounts or performs transactions.",
+        "primaryKey": "customerId",
+        "fields": [
+          {
+            "name": "customerId",
+            "type": "string",
+            "required": true,
+            "description": "Stable unique identifier for the customer.",
+            "lineage": {
+              "sources": [
+                {
+                  "system": "CRM",
+                  "field": "crm_customer_id",
+                  "confidence": 0.9
+                },
+                {
+                  "system": "KYC",
+                  "field": "kyc_party_id",
+                  "confidence": 0.7
+                }
+              ]
+            }
+          },
+          {
+            "name": "fullName",
+            "type": "string",
+            "description": "Customer legal name.",
+            "lineage": {
+              "sources": [
+                {
+                  "system": "CRM",
+                  "field": "full_name"
+                }
+              ]
+            }
+          },
+          {
+            "name": "riskRating",
+            "type": "integer",
+            "description": "KYC/AML risk score.",
+            "lineage": {
+              "sources": [
+                {
+                  "system": "KYC",
+                  "field": "risk_score"
+                }
+              ]
+            }
+          }
+        ],
+        "relationships": [
+          {
+            "name": "ownsAccounts",
+            "type": "CustomerOwnsAccount",
+            "direction": "outbound",
+            "targetEntity": "Account",
+            "cardinality": "one-to-many"
+          }
+        ],
+        "stateModel": {
+          "states": ["raw", "verified", "enriched", "active", "closed"],
+          "initialState": "raw",
+          "transitions": [
+            { "from": "raw", "to": "verified" },
+            { "from": "verified", "to": "enriched" },
+            { "from": "enriched", "to": "active" },
+            { "from": "active", "to": "closed" }
+          ]
+        },
+        "hydration": {
+          "rules": [
+            {
+              "sourceSystem": "CRM",
+              "matchKeys": ["crm_customer_id"],
+              "mergeStrategy": "preferMostRecent"
+            },
+            {
+              "sourceSystem": "KYC",
+              "matchKeys": ["kyc_party_id"],
+              "mergeStrategy": "preferHighestConfidence"
+            }
+          ]
+        },
+        "permissions": {
+          "view": ["KYC_Analyst", "Risk_Officer"],
+          "edit": ["Data_Steward"],
+          "export": ["Data_Governance"]
+        }
+      },
+      {
+        "name": "Account",
+        "displayName": "Account",
+        "description": "A financial account held by a customer.",
+        "primaryKey": "accountId",
+        "fields": [
+          {
+            "name": "accountId",
+            "type": "string",
+            "required": true,
+            "lineage": {
+              "sources": [
+                {
+                  "system": "CoreBanking",
+                  "field": "acct_id"
+                }
+              ]
+            }
+          },
+          {
+            "name": "accountType",
+            "type": "string",
+            "description": "Type of account (e.g., savings, loan, credit card)."
+          },
+          {
+            "name": "balance",
+            "type": "decimal",
+            "description": "Current account balance.",
+            "lineage": {
+              "sources": [
+                {
+                  "system": "CoreBanking",
+                  "field": "current_balance"
+                }
+              ]
+            }
+          }
+        ],
+        "relationships": [
+          {
+            "name": "hasTransactions",
+            "type": "AccountHasTransaction",
+            "direction": "outbound",
+            "targetEntity": "Transaction",
+            "cardinality": "one-to-many"
+          }
+        ],
+        "hydration": {
+          "rules": [
+            {
+              "sourceSystem": "CoreBanking",
+              "matchKeys": ["acct_id"],
+              "mergeStrategy": "preferMostRecent"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Transaction",
+        "displayName": "Transaction",
+        "description": "A financial movement associated with an account.",
+        "primaryKey": "txnId",
+        "fields": [
+          {
+            "name": "txnId",
+            "type": "string",
+            "required": true,
+            "lineage": {
+              "sources": [
+                {
+                  "system": "Payments",
+                  "field": "transaction_id"
+                }
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "decimal",
+            "description": "Transaction amount."
+          },
+          {
+            "name": "timestamp",
+            "type": "datetime",
+            "description": "When the transaction occurred."
+          },
+          {
+            "name": "counterparty",
+            "type": "string",
+            "description": "Counterparty identifier or name."
+          }
+        ],
+        "stateModel": {
+          "states": ["raw", "parsed", "classified", "reconciled", "reportable"],
+          "initialState": "raw",
+          "transitions": [
+            { "from": "raw", "to": "parsed" },
+            { "from": "parsed", "to": "classified" },
+            { "from": "classified", "to": "reconciled" },
+            { "from": "reconciled", "to": "reportable" }
+          ]
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "name": "CustomerOwnsAccount",
+        "sourceEntity": "Customer",
+        "targetEntity": "Account",
+        "description": "A customer owns one or more accounts.",
+        "cardinality": "one-to-many"
+      },
+      {
+        "name": "AccountHasTransaction",
+        "sourceEntity": "Account",
+        "targetEntity": "Transaction",
+        "description": "An account has many transactions.",
+        "cardinality": "one-to-many"
+      }
+    ],
+    "lineage": {
+      "graph": [
+        {
+          "from": "CRM.full_name",
+          "to": "Customer.fullName",
+          "transform": "direct"
+        },
+        {
+          "from": "CoreBanking.current_balance",
+          "to": "Account.balance",
+          "transform": "direct"
+        },
+        {
+          "from": "Payments.transaction_id",
+          "to": "Transaction.txnId",
+          "transform": "direct"
+        }
+      ]
+    }
+  }
+}

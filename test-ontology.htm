@@ -1,0 +1,150 @@
+
+<input type="file" title="Enter file" id="fileInput" accept="application/json">
+
+
+<script>
+var data;
+
+const input = document.getElementById("fileInput");
+
+input.addEventListener("change", () => {
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const text = reader.result;
+    json_data = JSON.parse(text);
+    console.log("json_data", json_data);
+    load_ontology(json_data);
+  };
+
+  reader.readAsText(file);
+});
+
+
+class RelationType {
+  constructor(str) { this.id = str; }
+  keyId() { return this.id }
+
+}
+
+class EntityType {
+  constructor(str) { this.id = str; }
+  keyId() { return this.id }
+
+}
+
+class Entity {
+  constructor(obj,key=null) { 
+    Object.assign(this, obj); 
+    this.id = key ?? obj.name ?? RandomId('E');
+  }
+  typeId() { return this.type ?? 'Entity'; }
+  keyId() { return this.id }
+  bind(t) { 
+    this.objType = t[this.typeId()];
+  }
+
+
+
+}
+
+class Relation  {
+  constructor(obj) {
+    Object.assign(this, obj);
+    this.id = obj.key ?? RandomId('R');
+  }
+  keyId() { return this.id }
+  typeId() { return this.predicate ?? this.cardinality ?? 'Relation'; }
+  fromId() { return this.subject ?? this.sourceEntity; }
+  toId() { return this.object ?? this.targetEntity; }
+  bind(e,r) { 
+    this.objFrom = e[this.fromId()];
+    this.objTo = e[this.toId()];
+    this.objType = r[this.typeId()];
+  }
+
+}
+class NodeDatum { 
+ constructor(obj) {
+    this.base = obj; // Entity
+    this.x = Math.random(); // same Entity can appear across many views each with its own NodeDatum (x,y,fx,fy,width etc.)
+ }
+}
+
+class LinkDatum {  
+ constructor(obj) {
+    this.base = obj; // Relation
+    this.y = Math.random(); // same Relation can appear across many views each with its own LinkDatum (x,y,fx,fy,width etc.)
+ }
+}
+
+
+entities = undefined; // dict of key-value pairs : each value is an object with members: 'labels' (array of string); 'type' (string, FK to class); 'properties' (dict of any)
+relations = undefined; // array of dicts with string keys not yet bound.  subject (->entity) predicate (->predicate) object (->entity)
+classes = undefined; // array of strings, to be expanded with eg URL of logo, bg_fill
+predicates = undefined; // array of strings, to be expanded eg with colour, 'nestability'
+
+
+function RandomId(prefix) {
+    return prefix + (1000000 + Math.round(1000800*Math.random()));
+}
+
+function load_ontology(src) {
+
+entities = undefined; 
+relations = undefined; 
+classes = undefined; 
+predicates = undefined;
+
+// Copilot doesn't always spit out the same JSON structure...
+    if (src.entities) entities = src.entities;
+    if (src.relations) relations = src.relations;
+    if (src.classes) classes = src.classes;
+    if (src.ontology) {
+        if (src.ontology.classes) classes = src.ontology.classes;
+        if (src.ontology.entities) entities = src.ontology.entities;
+        if (src.ontology.relationships) relations = src.ontology.relationships;
+        if (src.ontology.relations) predicates = src.ontology.relations;
+    }
+// Raw JSON may include dict of objects.  We want to cast those objects into custom classes
+// It helps to convert them to array of [key,obj] entries
+
+
+//----------------------------------------------------------
+if (Array.isArray(entities)) entities = entities.map(obj => new Entity(obj)); // assumes list of objects, not key-value pairs
+else { // assume dict of Objects
+  entities = Object.entries(entities); // convert dict to array of [key,obj] pairs
+  entities = entities.map(([key,obj]) => new Entity(obj,key)); // simple array of Entities
+}
+entities = entities.map(obj => [obj.keyId(),obj]); // use class method to get key
+entities = Object.fromEntries(entities); 
+
+//----------------------------------------------------------
+relations = relations.map(obj => new Relation(obj));
+relations = relations.map(obj => [obj.keyId(),obj]);  // use class method to get key
+relations = Object.fromEntries(relations);
+//----------------------------------------------------------
+if (!Array.isArray(classes)) classes = Object.values(entities).map(obj => obj.typeId()); 
+classes = [...new Set(classes)]; // de-dupe the array
+classes = classes.map(str => [str,new EntityType(str)]);  
+classes = Object.fromEntries(classes);
+//----------------------------------------------------------
+
+if (!Array.isArray(predicates)) predicates =  Object.values(relations).map(obj => obj.typeId()); 
+predicates = [...new Set(predicates)]; // de-dupe the array
+predicates = predicates.map(str => [str, new RelationType(str)]);  
+predicates = Object.fromEntries(predicates);
+
+//----------------------------------------------------------
+Object.values(entities).forEach(obj => obj.bind(classes));
+Object.values(relations).forEach(obj => obj.bind(entities,predicates));
+
+console.log("entities,relations,classes,predicates",entities,relations,classes,predicates);
+
+nodes = Object.values(entities).map(obj => new NodeDatum(obj));
+links = Object.values(relations).map(obj => new LinkDatum(obj));
+console.log("nodes,links",nodes,links);
+}
+
+</script>

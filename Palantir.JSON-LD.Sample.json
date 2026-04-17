@@ -1,0 +1,175 @@
+{
+  "@context": {
+    "schema": "http://schema.org/",
+    "onto": "http://example.com/ontology/",
+    "id": "@id",
+    "type": "@type",
+    "Customer": "onto:Customer",
+    "Account": "onto:Account",
+    "Transaction": "onto:Transaction",
+    "ownsAccount": { "@id": "onto:ownsAccount", "@type": "@id" },
+    "hasTransaction": { "@id": "onto:hasTransaction", "@type": "@id" },
+    "stateModel": "onto:stateModel",
+    "hydration": "onto:hydration",
+    "lineage": "onto:lineage"
+  },
+
+  "@graph": [
+
+    {
+      "id": "onto:Customer",
+      "type": "schema:Class",
+      "schema:name": "Customer",
+      "schema:description": "A person or organisation that holds accounts.",
+      "onto:primaryKey": "customerId",
+      "onto:fields": [
+        {
+          "name": "customerId",
+          "type": "schema:Text",
+          "required": true,
+          "lineage": {
+            "sources": [
+              { "system": "CRM", "field": "crm_customer_id", "confidence": 0.9 },
+              { "system": "KYC", "field": "kyc_party_id", "confidence": 0.7 }
+            ]
+          }
+        },
+        {
+          "name": "fullName",
+          "type": "schema:Text",
+          "lineage": {
+            "sources": [
+              { "system": "CRM", "field": "full_name" }
+            ]
+          }
+        },
+        {
+          "name": "riskRating",
+          "type": "schema:Number",
+          "lineage": {
+            "sources": [
+              { "system": "KYC", "field": "risk_score" }
+            ]
+          }
+        }
+      ],
+      "stateModel": {
+        "states": ["raw", "verified", "enriched", "active", "closed"],
+        "initialState": "raw",
+        "transitions": [
+          { "from": "raw", "to": "verified" },
+          { "from": "verified", "to": "enriched" },
+          { "from": "enriched", "to": "active" },
+          { "from": "active", "to": "closed" }
+        ]
+      },
+      "hydration": {
+        "rules": [
+          {
+            "sourceSystem": "CRM",
+            "matchKeys": ["crm_customer_id"],
+            "mergeStrategy": "preferMostRecent"
+          },
+          {
+            "sourceSystem": "KYC",
+            "matchKeys": ["kyc_party_id"],
+            "mergeStrategy": "preferHighestConfidence"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "onto:Account",
+      "type": "schema:Class",
+      "schema:name": "Account",
+      "schema:description": "A financial account held by a customer.",
+      "onto:primaryKey": "accountId",
+      "onto:fields": [
+        {
+          "name": "accountId",
+          "type": "schema:Text",
+          "required": true,
+          "lineage": {
+            "sources": [
+              { "system": "CoreBanking", "field": "acct_id" }
+            ]
+          }
+        },
+        {
+          "name": "accountType",
+          "type": "schema:Text"
+        },
+        {
+          "name": "balance",
+          "type": "schema:Number",
+          "lineage": {
+            "sources": [
+              { "system": "CoreBanking", "field": "current_balance" }
+            ]
+          }
+        }
+      ],
+      "hydration": {
+        "rules": [
+          {
+            "sourceSystem": "CoreBanking",
+            "matchKeys": ["acct_id"],
+            "mergeStrategy": "preferMostRecent"
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "onto:Transaction",
+      "type": "schema:Class",
+      "schema:name": "Transaction",
+      "schema:description": "A financial movement associated with an account.",
+      "onto:primaryKey": "txnId",
+      "onto:fields": [
+        {
+          "name": "txnId",
+          "type": "schema:Text",
+          "required": true,
+          "lineage": {
+            "sources": [
+              { "system": "Payments", "field": "transaction_id" }
+            ]
+          }
+        },
+        { "name": "amount", "type": "schema:Number" },
+        { "name": "timestamp", "type": "schema:DateTime" },
+        { "name": "counterparty", "type": "schema:Text" }
+      ],
+      "stateModel": {
+        "states": ["raw", "parsed", "classified", "reconciled", "reportable"],
+        "initialState": "raw",
+        "transitions": [
+          { "from": "raw", "to": "parsed" },
+          { "from": "parsed", "to": "classified" },
+          { "from": "classified", "to": "reconciled" },
+          { "from": "reconciled", "to": "reportable" }
+        ]
+      }
+    },
+
+    {
+      "id": "onto:CustomerOwnsAccount",
+      "type": "schema:Property",
+      "schema:name": "ownsAccount",
+      "schema:domainIncludes": { "id": "onto:Customer" },
+      "schema:rangeIncludes": { "id": "onto:Account" },
+      "schema:description": "A customer owns one or more accounts."
+    },
+
+    {
+      "id": "onto:AccountHasTransaction",
+      "type": "schema:Property",
+      "schema:name": "hasTransaction",
+      "schema:domainIncludes": { "id": "onto:Account" },
+      "schema:rangeIncludes": { "id": "onto:Transaction" },
+      "schema:description": "An account has many transactions."
+    }
+  ]
+}
