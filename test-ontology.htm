@@ -2,8 +2,10 @@
 <input type="file" title="Enter file" id="fileInput" accept="application/json">
 
 
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
 <script>
-var data;
+var graph, ont;
 
 const input = document.getElementById("fileInput");
 
@@ -15,7 +17,12 @@ input.addEventListener("change", () => {
     const text = reader.result;
     json_data = JSON.parse(text);
     console.log("json_data", json_data);
-    load_ontology(json_data);
+    
+  ont = load_ontology(json_data);
+  ont = bind_ontology(ont);
+  graph = create_graph(ont);
+
+
   };
 
   reader.readAsText(file);
@@ -59,9 +66,9 @@ class Relation  {
   fromId() { return this.subject ?? this.sourceEntity; }
   toId() { return this.object ?? this.targetEntity; }
   bind(e,r) { 
-    this.objFrom = e[this.fromId()];
-    this.objTo = e[this.toId()];
-    this.objType = r[this.typeId()];
+    this.baseFrom = e[this.fromId()];
+    this.baseTo = e[this.toId()];
+    this.baseType = r[this.typeId()];
   }
 
 }
@@ -77,6 +84,10 @@ class LinkDatum {
     this.base = obj; // Relation
     this.y = Math.random(); // same Relation can appear across many views each with its own LinkDatum (x,y,fx,fy,width etc.)
  }
+  bind(nodes_dict) { 
+    this.datumFrom = nodes_dict[this.base.baseFrom.id];
+    this.datumTo = nodes_dict[this.base.baseTo.id];
+  }
 }
 
 
@@ -110,41 +121,61 @@ predicates = undefined;
 // Raw JSON may include dict of objects.  We want to cast those objects into custom classes
 // It helps to convert them to array of [key,obj] entries
 
+return {entities, relations, classes, predicates} ;
+
+  }
+
+function bind_ontology(ont) {
 
 //----------------------------------------------------------
-if (Array.isArray(entities)) entities = entities.map(obj => new Entity(obj)); // assumes list of objects, not key-value pairs
+if (Array.isArray(ont.entities)) ont.entities = ont.entities.map(obj => new Entity(obj)); // assumes list of objects, not key-value pairs
 else { // assume dict of Objects
-  entities = Object.entries(entities); // convert dict to array of [key,obj] pairs
-  entities = entities.map(([key,obj]) => new Entity(obj,key)); // simple array of Entities
+  ont.entities = Object.entries(ont.entities); // convert dict to array of [key,obj] pairs
+  ont.entities = ont.entities.map(([key,obj]) => new Entity(obj,key)); // simple array of Entities
 }
-entities = entities.map(obj => [obj.keyId(),obj]); // use class method to get key
-entities = Object.fromEntries(entities); 
+ont.entities = ont.entities.map(obj => [obj.keyId(),obj]); // use class method to get key
+ont.entities = Object.fromEntries(ont.entities); 
 
 //----------------------------------------------------------
-relations = relations.map(obj => new Relation(obj));
-relations = relations.map(obj => [obj.keyId(),obj]);  // use class method to get key
-relations = Object.fromEntries(relations);
+ont.relations = ont.relations.map(obj => new Relation(obj));
+ont.relations = ont.relations.map(obj => [obj.keyId(),obj]);  // use class method to get key
+ont.relations = Object.fromEntries(ont.relations);
 //----------------------------------------------------------
-if (!Array.isArray(classes)) classes = Object.values(entities).map(obj => obj.typeId()); 
-classes = [...new Set(classes)]; // de-dupe the array
-classes = classes.map(str => [str,new EntityType(str)]);  
-classes = Object.fromEntries(classes);
+if (!Array.isArray(ont.classes)) ont.classes = Object.values(ont.entities).map(obj => obj.typeId()); 
+ont.classes = [...new Set(ont.classes)]; // de-dupe the array
+ont.classes = ont.classes.map(str => [str,new EntityType(str)]);  
+ont.classes = Object.fromEntries(ont.classes);
 //----------------------------------------------------------
 
-if (!Array.isArray(predicates)) predicates =  Object.values(relations).map(obj => obj.typeId()); 
-predicates = [...new Set(predicates)]; // de-dupe the array
-predicates = predicates.map(str => [str, new RelationType(str)]);  
-predicates = Object.fromEntries(predicates);
+if (!Array.isArray(ont.predicates)) ont.predicates =  Object.values(ont.relations).map(obj => obj.typeId()); 
+ont.predicates = [...new Set(ont.predicates)]; // de-dupe the array
+ont.predicates = ont.predicates.map(str => [str, new RelationType(str)]);  
+ont.predicates = Object.fromEntries(ont.predicates);
 
 //----------------------------------------------------------
-Object.values(entities).forEach(obj => obj.bind(classes));
-Object.values(relations).forEach(obj => obj.bind(entities,predicates));
+Object.values(ont.entities).forEach(obj => obj.bind(ont.classes));
+Object.values(ont.relations).forEach(obj => obj.bind(ont.entities,ont.predicates));
 
-console.log("entities,relations,classes,predicates",entities,relations,classes,predicates);
+console.log(ont);
 
-nodes = Object.values(entities).map(obj => new NodeDatum(obj));
-links = Object.values(relations).map(obj => new LinkDatum(obj));
+return ont;
+}
+
+//----------------------------------------------------------
+
+
+function create_graph(bound_ont) {
+
+nodes = Object.values(bound_ont.entities).map(obj => [obj.keyId(),new NodeDatum(obj)]); 
+nodes = Object.fromEntries(nodes); // convert to hashtable
+
+links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj));
+links.forEach(obj => obj.bind(nodes));
+
 console.log("nodes,links",nodes,links);
+
+return { nodes, links };
+
 }
 
 </script>
