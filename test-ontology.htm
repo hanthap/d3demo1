@@ -36,10 +36,15 @@ async function OnChange() {
   const new_ontologies = await Promise.all(
     arr.map(file => Ontology.createfromJson(file))
   );
+  console.log('new_ontologies',new_ontologies);
 
-  const new_graphs = new_ontologies.map(ont => create_graph(ont));
-  console.log(new_graphs);
-  create_view(new_graphs);
+  const graph = new GraphModel();
+// merge all ontologies into one D3-ready dataset
+  for (const ont of new_ontologies) 
+    graph.mergeOntology(ont);
+  console.log(graph);
+
+  create_view(graph);
   
 }
 //----------------------------------------------------------
@@ -49,21 +54,56 @@ input.addEventListener("change", OnChange);
 
 //----------------------------------------------------------
 
-function create_view(graphs) {
-
-  // append all nodelists into one
-  const all_nodes = graphs.flatMap(obj => Object.values(obj.nodes));
+function create_view(graph) {
 
   const body = d3.select('body');
 
   selPara = body.selectAll('p')
-    .data(all_nodes,d=>d.uniqueId())
+    .data(graph.nodes,d=>d.uniqueId())
     .join('p')
     .attr('id',d=>d.uniqueId())
     .text(d=>d.toString())
     ;
 
   return selPara;
+
+}
+
+
+//----------------------------------------------------------
+
+// each graph model has its own private set of D3 node coords, cloaking status etc as updated by user events & simulation
+// usually only one simulation per model but that's not a system constraint
+// it has one svg viewport
+// maybe call it GraphView? with derived class GraphEditor?
+
+class GraphModel {
+
+  constructor() {
+    this.nodes = [];
+    this.links = [];
+    // TODO: add other graph-specific override parameters eg formats, img_src urls etc
+  }
+
+//----------------------------------------------------------
+
+mergeOntology(bound_ont) { 
+  //  TODO: cater for upsert, like D3 join()
+  console.log("mergeOntology(bound_ont)",bound_ont);  
+
+  var nodes = Object.values(bound_ont.entities).map(obj => [obj.uniqueId(),new NodeDatum(obj)]); 
+  nodes = Object.fromEntries(nodes); //  for easy binding
+
+  var links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj));
+  links.forEach(obj => obj.bind(nodes));
+
+  console.log("nodes,links",nodes,links);  
+
+  // for now, we just blithely append new Node and Link objects without culling or re-binding
+  this.nodes.push(...Object.values(nodes));
+  this.links.push(...links);
+
+}
 
 }
 
