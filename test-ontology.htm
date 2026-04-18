@@ -31,12 +31,15 @@ async function read_json_file(file_obj) {
 
 //----------------------------------------------------------
 async function OnChange() {
+  
+  const arr = Array.from(input.files); // FileList is not an array & doesn't have .map()
+  const new_ontologies = await Promise.all(
+    arr.map(file => Ontology.createfromJson(file))
+  );
 
-    const file = input.files[0];
-    const ont = await Ontology.createfromJson(file);
-    console.log(ont);
-    const graph = create_graph(ont);
-    create_view(graph);
+  const new_graphs = new_ontologies.map(ont => create_graph(ont));
+  console.log(new_graphs);
+  create_view(new_graphs);
   
 }
 //----------------------------------------------------------
@@ -46,18 +49,21 @@ input.addEventListener("change", OnChange);
 
 //----------------------------------------------------------
 
-function create_view(graph) {
+function create_view(graphs) {
+
+  // append all nodelists into one
+  const all_nodes = graphs.flatMap(obj => Object.values(obj.nodes));
 
   const body = d3.select('body');
 
   selPara = body.selectAll('p')
-    .data(Object.values(graph.nodes),d=>d.uniqueId())
+    .data(all_nodes,d=>d.uniqueId())
     .join('p')
     .attr('id',d=>d.uniqueId())
     .text(d=>d.toString())
     ;
 
-  console.log(selPara);
+  return selPara;
 
 }
 
@@ -76,6 +82,9 @@ class Ontology {
     return new Ontology(bound);
 
   }
+
+  uniqueId() { return this.uid; }
+  toString() { return this.file.name; }
 
 }
 //----------------------------------------------------------
@@ -144,6 +153,7 @@ class Relation  {
   }
   keyId() { return this.id }
   uniqueId() { return this.uid } 
+  // adapt to various names used in the source data
   typeId() { return this.predicate ?? this.cardinality ?? 'Relation'; }
   fromId() { return this.subject ?? this.sourceEntity; }
   toId() { return this.object ?? this.targetEntity; }
@@ -177,7 +187,7 @@ function RandomId(prefix) {
 }
 
 //----------------------------------------------------------
-// re-align raw JSON structure ready for type-casting and binding 
+// re-align high-level JSON structure in preparation for type-casting and binding 
 function load_ontology(json,file) {
 
 entities = undefined; 
@@ -199,10 +209,10 @@ uid = hashString(file.name);
 
 return {uid, file, entities, relations, classes, predicates} ;
 
-  }
+}
 
 //----------------------------------------------------------
-// given aligned ontology structure, add local object bindings based on lookup keys
+// given aligned ontology structure, add local object bindings based on original lookup keys
 
 function bind_ontology(ont) {
 
@@ -210,7 +220,7 @@ function bind_ontology(ont) {
 // Then cast the generic objects into custom classes, which can generate the approriate local key id
 // Finally use those local keys to bind all objects within this ontology
 
-  //----------------------------------------------------------
+//----------------------------------------------------------
 
 if (Array.isArray(ont.entities)) // assumes it's an array of objects (not key-value pairs)
   ont.entities = ont.entities.map(obj => new Entity(obj,ont)); 
