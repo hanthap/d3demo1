@@ -23,8 +23,8 @@ function hashString(str) {
 }
 //----------------------------------------------------------
 
-async function read_json_file(file_obj) {
-  const text = await file_obj.text();
+async function read_json_file(file) {
+  const text = await file.text();
   const json_data = JSON.parse(text);
   return json_data;
 }
@@ -131,14 +131,22 @@ class Ontology {
 
   static async createfromJson(file) {
     const json = await read_json_file(file);
-    const aligned = load_ontology(json,file); // calls class constructor
-    const bound = bind_ontology(aligned);
-    return bound; 
-
+    return Ontology
+              .conformJson(json,file) // calls class constructor
+              .addBindings();
   }
 
   uniqueId() { return this.uid; }
   toString() { return this.file.name; }
+
+  static conformJson(json,file) {
+    return load_ontology(json,file); 
+  }
+
+  addBindings() {
+    return bind_ontology(this);
+  }
+
 
 }
 //----------------------------------------------------------
