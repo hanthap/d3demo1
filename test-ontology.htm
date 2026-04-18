@@ -32,12 +32,11 @@ async function read_json_file(file_obj) {
 //----------------------------------------------------------
 async function OnChange() {
 
-    const file_obj = input.files[0];
-    const json_data = await read_json_file(file_obj);
-    var ont = load_ontology(json_data,file_obj);
-    ont = bind_ontology(ont);
+    const file = input.files[0];
+    const ont = await Ontology.createfromJson(file);
+    console.log(ont);
     const graph = create_graph(ont);
-    start(graph);
+    create_view(graph);
   
 }
 //----------------------------------------------------------
@@ -47,7 +46,7 @@ input.addEventListener("change", OnChange);
 
 //----------------------------------------------------------
 
-function start(graph) {
+function create_view(graph) {
 
   const body = d3.select('body');
 
@@ -59,6 +58,24 @@ function start(graph) {
     ;
 
   console.log(selPara);
+
+}
+
+//----------------------------------------------------------
+
+class Ontology {
+
+  constructor(obj) {  // cannot be async
+    Object.assign(this,obj);
+  }
+
+  static async createfromJson(file) {
+    const json = await read_json_file(file);
+    const aligned = load_ontology(json,file);
+    const bound = bind_ontology(aligned);
+    return new Ontology(bound);
+
+  }
 
 }
 //----------------------------------------------------------
@@ -111,7 +128,7 @@ class Entity {
   }
   typeId() { return this.type ?? 'Entity'; }
   keyId() { return this.id } // for local binding within this ontology
-  uniqueId() { return this.uid } // for graph binding across ontologies
+  uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
   bind(types) { this.objType = types[this.typeId()]; }
   toString() { return `${this.objType.toString()}: ${this.id}: [${this.labels  ?? this.description ?? Object.entries(this.properties)}]`    }
 
@@ -156,31 +173,31 @@ class LinkDatum {
 
 
 function RandomId(prefix) {
-    return prefix + (1000000 + Math.round(1000800*Math.random()));
+    return prefix + (1000000 + Math.round(1000000*Math.random()));
 }
 
 //----------------------------------------------------------
 // re-align raw JSON structure ready for type-casting and binding 
-function load_ontology(src,file_obj) {
+function load_ontology(json,file) {
 
 entities = undefined; 
 relations = undefined; 
 classes = undefined; 
 predicates = undefined;
-uid = hashString(file_obj.name);
+uid = hashString(file.name);
 
 // LLMs don't always spit out the same JSON structure & naming convention... Here we cater for just some of the variants
-    if (src.entities) entities = src.entities;
-    if (src.relations) relations = src.relations;
-    if (src.classes) classes = src.classes;
-    if (src.ontology) {
-        if (src.ontology.classes) classes = src.ontology.classes;
-        if (src.ontology.entities) entities = src.ontology.entities;
-        if (src.ontology.relationships) relations = src.ontology.relationships;
-        if (src.ontology.relations) predicates = src.ontology.relations;
+    if (json.entities) entities = json.entities;
+    if (json.relations) relations = json.relations;
+    if (json.classes) classes = json.classes;
+    if (json.ontology) {
+        if (json.ontology.classes) classes = json.ontology.classes;
+        if (json.ontology.entities) entities = json.ontology.entities;
+        if (json.ontology.relationships) relations = json.ontology.relationships;
+        if (json.ontology.relations) predicates = json.ontology.relations;
     }
 
-return {file_obj, uid, entities, relations, classes, predicates} ;
+return {uid, file, entities, relations, classes, predicates} ;
 
   }
 
