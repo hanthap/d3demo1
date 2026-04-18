@@ -38,7 +38,8 @@ async function OnChange() {
   );
   console.log('new_ontologies',new_ontologies);
 
-  const graph = new GraphModel();
+  // const 
+  graph = new GraphModel();
 // merge all ontologies into one D3-ready dataset
   for (const ont of new_ontologies) 
     graph.mergeOntology(ont);
@@ -68,7 +69,20 @@ function create_view(graph) {
   return selPara;
 
 }
+// WeakMap is a good way to store child->parent reverse lookups - helps prevent memory leaks 
+// think of it as deliberately avoiding referential integrity constraints between objects
+// eg from (child) Entity to (parent) Ontology 
+// If every Entity was strongly bound to its Ontology then garbage collection would never happen
+// With WeakMap, If the key (child) becomes "unreachable" then the association disappears automatically
+// maybe even Datum->Entity? 
 
+class WeakBind {
+static parentOf = new WeakMap();
+static attach(parent, key, child) {
+  parent[key] = child;
+  WeakBind.parentOf.set(child, parent);
+}
+}
 
 //----------------------------------------------------------
 
@@ -91,10 +105,10 @@ mergeOntology(bound_ont) {
   //  TODO: cater for upsert, like D3 join()
   console.log("mergeOntology(bound_ont)",bound_ont);  
 
-  var nodes = Object.values(bound_ont.entities).map(obj => [obj.uniqueId(),new NodeDatum(obj)]); 
+  var nodes = Object.values(bound_ont.entities).map(obj => [obj.uniqueId(),new NodeDatum(obj,this)]); 
   nodes = Object.fromEntries(nodes); //  for easy binding
 
-  var links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj));
+  var links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
   links.forEach(obj => obj.bind(nodes));
 
   console.log("nodes,links",nodes,links);  
@@ -117,9 +131,9 @@ class Ontology {
 
   static async createfromJson(file) {
     const json = await read_json_file(file);
-    const aligned = load_ontology(json,file);
+    const aligned = load_ontology(json,file); // calls class constructor
     const bound = bind_ontology(aligned);
-    return new Ontology(bound);
+    return bound; 
 
   }
 
@@ -130,12 +144,15 @@ class Ontology {
 //----------------------------------------------------------
 
 class NodeDatum { 
- constructor(obj) {
+
+  constructor(obj,graph) {
     this.base = obj; // Entity
     this.x = Math.random(); // same Entity can appear across many views each with its own NodeDatum (x,y,fx,fy,width etc.)
- }
+    WeakBind.parentOf.set(this,graph);
+  }
 uniqueId() { return this.base.uniqueId() }
 toString() { return this.base.toString() }
+getParent() { return WeakBind.parentOf.get(this) }
 
  }
 
@@ -146,12 +163,14 @@ class RelationType {
   constructor(str,ont) { 
     this.id = str;
     this.uid = hashString(this.id) + ont.uid;
-  
+    WeakBind.parentOf.set(this,ont);
+
   }
 
   keyId() { return this.id }
   uniqueId() { return this.uid } 
   toString() { return this.id }
+  getParent() { return WeakBind.parentOf.get(this) }
 
 }
 
@@ -161,12 +180,15 @@ class EntityType {
   constructor(str,ont) { 
     this.id = str; 
     this.uid = hashString(this.id) + ont.uid;
+    WeakBind.parentOf.set(this,ont);
   }
   keyId() { return this.id } // for binding
   uniqueId() { return this.uid } 
   toString() { return this.id }
+  getParent() { return WeakBind.parentOf.get(this) }
 
 }
+
 //----------------------------------------------------------
 
 class Entity {
@@ -174,13 +196,15 @@ class Entity {
     Object.assign(this, obj); 
     this.id = key ?? obj.name ?? RandomId('E');
     this.uid = hashString(this.id) + ont.uid;
+    WeakBind.parentOf.set(this,ont);
   }
   typeId() { return this.type ?? 'Entity'; }
   keyId() { return this.id } // for local binding within this ontology
   uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
   bind(types) { this.objType = types[this.typeId()]; }
-  toString() { return `${this.objType.toString()}: ${this.id}: [${this.labels  ?? this.description ?? Object.entries(this.properties)}]`    }
 
+  toString() { return `${this.objType.toString()}: ${this.id}: [${this.labels  ?? this.description ?? Object.entries(this.properties)}]`    }
+  getParent() { return WeakBind.parentOf.get(this) }
 }
 
 //----------------------------------------------------------
@@ -190,6 +214,7 @@ class Relation  {
     Object.assign(this, obj);
     this.id = obj.key ?? RandomId('R');
     this.uid = hashString(this.id) + ont.uid;
+    WeakBind.parentOf.set(this,ont);
   }
   keyId() { return this.id }
   uniqueId() { return this.uid } 
@@ -202,25 +227,27 @@ class Relation  {
     this.baseTo = entities[this.toId()];
     this.baseType = relations[this.typeId()];
   }
+  getParent() { return WeakBind.parentOf.get(this) }
 
 }
 
 //----------------------------------------------------------
 
-// same Relation can appear across many views each with its own LinkDatum (x,y,fx,fy,width etc.)
+// same Relation can appear across many GraphModels each with its own LinkDatum (x,y,fx,fy,width etc.)
 
 class LinkDatum {  
- constructor(obj) {
+ constructor(obj,graph) {
     this.base = obj; // Relation
     this.y = Math.random(); 
+    WeakBind.parentOf.set(this,graph);
  }
   bind(nodes) { 
     this.datumFrom = nodes[this.base.baseFrom.uniqueId()];
     this.datumTo = nodes[this.base.baseTo.uniqueId()];
   }
+  getParent() { return WeakBind.parentOf.get(this) }
 }
 //----------------------------------------------------------
-
 
 function RandomId(prefix) {
     return prefix + (1000000 + Math.round(1000000*Math.random()));
@@ -247,7 +274,7 @@ uid = hashString(file.name);
         if (json.ontology.relations) predicates = json.ontology.relations;
     }
 
-return {uid, file, entities, relations, classes, predicates} ;
+return new Ontology({uid, file, entities, relations, classes, predicates}) ;
 
 }
 
@@ -258,7 +285,7 @@ function bind_ontology(ont) {
 
 // First step is to convert each dict to an array of [key,obj] entries
 // Then cast the generic objects into custom classes, which can generate the approriate local key id
-// Finally use those local keys to bind all objects within this ontology
+// Finally use those local keys to strongly bind all objects within this ontology
 
 //----------------------------------------------------------
 
@@ -269,7 +296,7 @@ else { // assume dict of Objects
   ont.entities = ont.entities.map(([key,obj]) => new Entity(obj,ont,key)); // simple array of Entities
 }
 ont.entities = ont.entities.map(obj => [obj.keyId(),obj]); // use class method to get key
-ont.entities = Object.fromEntries(ont.entities); 
+ont.entities = Object.fromEntries(ont.entities); // convert to a hashtable ready for binding
 
 //----------------------------------------------------------
 ont.relations = ont.relations.map(obj => new Relation(obj,ont));
@@ -282,7 +309,7 @@ ont.classes = ont.classes.map(str => [str,new EntityType(str,ont)]);
 ont.classes = Object.fromEntries(ont.classes);
 //----------------------------------------------------------
 
-if (!Array.isArray(ont.predicates)) ont.predicates =  Object.values(ont.relations).map(obj => obj.typeId()); 
+if (!Array.isArray(ont.predicates)) ont.predicates = Object.values(ont.relations).map(obj => obj.typeId()); 
 ont.predicates = [...new Set(ont.predicates)]; // de-dupe the array
 ont.predicates = ont.predicates.map(str => [str, new RelationType(str,ont)]);  
 ont.predicates = Object.fromEntries(ont.predicates);
@@ -295,32 +322,5 @@ console.log(ont);
 
 return ont;
 }
-
-//----------------------------------------------------------
-// given a bound ontology, generate a fresh set of datum objects that D3 can manipulate wihtout impacting others
-// TODO: support multiple graphs/views, each referencing multiple ontologies while avoiding name collisions
-function create_graph(bound_ont) {
-
-nodes = Object.values(bound_ont.entities).map(obj => [obj.uniqueId(),new NodeDatum(obj)]); 
-nodes = Object.fromEntries(nodes); // convert to dict object
-
-links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj));
-links.forEach(obj => obj.bind(nodes));
-
-console.log("nodes,links",nodes,links);
-
-return { nodes, links };
-
-}
-
-//----------------------------------------------------------
-
-
-
-
-
-
-
-
 
 </script>
