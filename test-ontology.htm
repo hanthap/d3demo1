@@ -221,8 +221,8 @@ class Ontology {
     ont.predicates = ont.predicates.map(str => [str, new RelationType(str,ont)]);  
     ont.predicates = Object.fromEntries(ont.predicates);
     //----------------------------------------------------------
-    Object.values(ont.entities).forEach(ent => ent.bind(ont.classes));
-    Object.values(ont.relations).forEach(rel => rel.bind(ont.entities,ont.predicates));
+    Object.values(ont.entities).forEach(ent => ent.bind(ont));
+    Object.values(ont.relations).forEach(rel => rel.bind(ont));
 
 //    console.log(ont);
 
@@ -282,16 +282,19 @@ class EntityType {
 class Entity {
   constructor(obj,ont,key=null) { 
     Object.assign(this, obj); 
+    // align property names
     this.id = this.id ?? key ?? obj.name ?? RandomId('E');
+    this.txtName = this.name ?? this.id;
+    this.txtNote = this.labels ?? this.description ?? this.role ?? (this.properties ? Object.entries(this.properties) : '');
     this.uid = hashString(this.id) + ont.uid;
     WeakBind.parentOf.set(this,ont);
   }
   typeId() { return this.type ?? 'Entity'; }
   keyId() { return this.id } // for local binding within this ontology
   uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
-  bind(types) { this.objType = types[this.typeId()]; }
+  bind(ont) { this.objType = ont.classes[this.typeId()]; }
 
-  toString() { return `${this.objType.toString()}: ${this.id}: [${this.labels ?? this.description ?? this.role ?? (this.properties ? Object.entries(this.properties) : '')}]`    }
+  toString() { return `${this.objType.toString()}: ${this.txtName}: ${this.txtNote}` }
   getParent() { return WeakBind.parentOf.get(this) }
 }
 
@@ -317,10 +320,12 @@ class Relation  {
   typeId() { return this.idRelnType }
   fromId() { return this.idFromEntity }
   toId() { return this.idToEntity }
-  bind(entities,predicates) {  // do not call before entitiies & predicates are hashtables
-    this.baseFrom = entities[this.fromId()];
-    this.baseTo = entities[this.toId()];
-    this.baseType = predicates[this.typeId()];
+  bind(ont) {  // do not call before entitiies & predicates are hashtables
+// TODO: if matching Entity not found in ont then create a placeholder object with that ID and bind to that
+// Copilot sometimes creates Relations without a matching source or target
+    this.baseFrom = ont.entities[this.fromId()];
+    this.baseTo = ont.entities[this.toId()];
+    this.baseType = ont.predicates[this.typeId()];
   }
   getParent() { return WeakBind.parentOf.get(this) }
 
@@ -337,8 +342,10 @@ class LinkDatum {
     WeakBind.parentOf.set(this,graph);
  }
   bind(nodes) { 
+    try {
     this.datumFrom = nodes[this.base.baseFrom.uniqueId()];
     this.datumTo = nodes[this.base.baseTo.uniqueId()];
+    } catch (e) { console.log('LinkDatum.bind()', this,nodes) }
   }
   getParent() { return WeakBind.parentOf.get(this) }
 }
