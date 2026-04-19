@@ -1,0 +1,67 @@
+{
+  "ontology": {
+    "title": "Hamlet (Summary Ontology)",
+    "version": "1.0",
+    "metadata": {
+      "work": "Hamlet",
+      "author": "William Shakespeare",
+      "type": "Tragedy",
+      "summary": "A prince seeks to uncover the truth behind his father's death, leading to political intrigue, moral conflict, and widespread tragedy."
+    },
+
+    "entities": [
+      { "id": "hamlet", "type": "Person", "name": "Hamlet", "role": "Prince of Denmark" },
+      { "id": "claudius", "type": "Person", "name": "Claudius", "role": "King of Denmark" },
+      { "id": "gertrude", "type": "Person", "name": "Gertrude", "role": "Queen of Denmark" },
+      { "id": "ghost_hamlet_sr", "type": "Supernatural", "name": "Ghost of King Hamlet" },
+      { "id": "polonius", "type": "Person", "name": "Polonius", "role": "Lord Chamberlain" },
+      { "id": "ophelia", "type": "Person", "name": "Ophelia" },
+      { "id": "laertes", "type": "Person", "name": "Laertes" },
+      { "id": "horatio", "type": "Person", "name": "Horatio" },
+      { "id": "rosencrantz", "type": "Person", "name": "Rosencrantz" },
+      { "id": "guildenstern", "type": "Person", "name": "Guildenstern" },
+      { "id": "fortinbras", "type": "Person", "name": "Fortinbras", "role": "Prince of Norway" },
+      { "id": "denmark", "type": "Place", "name": "Denmark" },
+      { "id": "elsinore", "type": "Place", "name": "Elsinore Castle" },
+      { "id": "play_within_play", "type": "Event", "name": "The Mousetrap" },
+      { "id": "duel", "type": "Event", "name": "Final Duel" }
+    ],
+
+    "relationships": [
+      { "from": "hamlet", "to": "gertrude", "type": "child_of" },
+      { "from": "hamlet", "to": "ghost_hamlet_sr", "type": "child_of" },
+      { "from": "gertrude", "to": "claudius", "type": "married_to" },
+      { "from": "claudius", "to": "ghost_hamlet_sr", "type": "murdered" },
+      { "from": "ghost_hamlet_sr", "to": "hamlet", "type": "commands_revenge" },
+
+      { "from": "hamlet", "to": "horatio", "type": "trusted_friend" },
+      { "from": "hamlet", "to": "ophelia", "type": "romantic_connection" },
+      { "from": "ophelia", "to": "polonius", "type": "child_of" },
+      { "from": "laertes", "to": "polonius", "type": "child_of" },
+      { "from": "laertes", "to": "ophelia", "type": "sibling_of" },
+
+      { "from": "claudius", "to": "rosencrantz", "type": "manipulates" },
+      { "from": "claudius", "to": "guildenstern", "type": "manipulates" },
+      { "from": "rosencrantz", "to": "hamlet", "type": "spies_on" },
+      { "from": "guildenstern", "to": "hamlet", "type": "spies_on" },
+
+      { "from": "hamlet", "to": "play_within_play", "type": "orchestrates" },
+      { "from": "play_within_play", "to": "claudius", "type": "reveals_guilt" },
+
+      { "from": "claudius", "to": "hamlet", "type": "plots_to_kill" },
+      { "from": "hamlet", "to": "polonius", "type": "kills_accidentally" },
+      { "from": "ophelia", "to": "polonius", "type": "grieves" },
+      { "from": "ophelia", "to": "ophelia", "type": "descends_into_madness" },
+
+      { "from": "laertes", "to": "claudius", "type": "conspires_with" },
+      { "from": "laertes", "to": "duel", "type": "participates_in" },
+      { "from": "hamlet", "to": "duel", "type": "participates_in" },
+
+      { "from": "laertes", "to": "hamlet", "type": "wounds_fatally" },
+      { "from": "hamlet", "to": "claudius", "type": "kills" },
+
+      { "from": "fortinbras", "to": "denmark", "type": "claims_authority" },
+      { "from": "fortinbras", "to": "hamlet", "type": "honours_memory" }
+    ]
+  }
+}

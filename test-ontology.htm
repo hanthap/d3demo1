@@ -55,6 +55,20 @@ input.addEventListener("change", OnChange);
 
 //----------------------------------------------------------
 
+class GraphView {
+  constructor(objGraph, objPage) {
+    this.graph = objGraph;
+    this.page = objPage;
+    this.svg = this.page 
+  }
+
+
+  }
+
+//----------------------------------------------------------
+
+
+
 function create_view(graph) {
 
   const body = d3.select('body');
@@ -70,20 +84,20 @@ function create_view(graph) {
 
 }
 // WeakMap is a good way to store child->parent reverse lookups - helps prevent memory leaks 
-// think of it as deliberately avoiding referential integrity constraints between objects
+// think of it as disabling foreign key constraints
 // eg from (child) Entity to (parent) Ontology 
 // If every Entity was strongly bound to its Ontology then garbage collection would never happen
-// With WeakMap, If the key (child) becomes "unreachable" then the association disappears automatically
+// With WeakMap, If the key (child) becomes "unreachable" then the mapping disappears automatically
 // maybe even Datum->Entity? 
 
 //============================================================
 
 class WeakBind {
-static parentOf = new WeakMap();
-static attach(parent, key, child) {
-  parent[key] = child;
-  WeakBind.parentOf.set(child, parent);
-}
+  static parentOf = new WeakMap();
+  static attach(parent, key, child) {
+    parent[key] = child;
+    WeakBind.parentOf.set(child, parent);
+  }
 }
 
 //============================================================
@@ -98,6 +112,7 @@ class GraphModel {
   constructor() {
     this.nodes = [];
     this.links = [];
+    this.forces = []; // will hold 
     // TODO: add other graph-specific override parameters eg formats, img_src urls etc
   }
 
@@ -206,8 +221,8 @@ class Ontology {
     ont.predicates = ont.predicates.map(str => [str, new RelationType(str,ont)]);  
     ont.predicates = Object.fromEntries(ont.predicates);
     //----------------------------------------------------------
-    Object.values(ont.entities).forEach(obj => obj.bind(ont.classes));
-    Object.values(ont.relations).forEach(obj => obj.bind(ont.entities,ont.predicates));
+    Object.values(ont.entities).forEach(ent => ent.bind(ont.classes));
+    Object.values(ont.relations).forEach(rel => rel.bind(ont.entities,ont.predicates));
 
 //    console.log(ont);
 
@@ -232,7 +247,6 @@ class NodeDatum {
  }
 
 //============================================================
-
 
 class RelationType {
   constructor(str,ont) { 
@@ -268,7 +282,7 @@ class EntityType {
 class Entity {
   constructor(obj,ont,key=null) { 
     Object.assign(this, obj); 
-    this.id = key ?? obj.name ?? RandomId('E');
+    this.id = this.id ?? key ?? obj.name ?? RandomId('E');
     this.uid = hashString(this.id) + ont.uid;
     WeakBind.parentOf.set(this,ont);
   }
@@ -277,7 +291,7 @@ class Entity {
   uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
   bind(types) { this.objType = types[this.typeId()]; }
 
-  toString() { return `${this.objType.toString()}: ${this.id}: [${this.labels  ?? this.description ?? Object.entries(this.properties)}]`    }
+  toString() { return `${this.objType.toString()}: ${this.id}: [${this.labels ?? this.description ?? this.role ?? (this.properties ? Object.entries(this.properties) : '')}]`    }
   getParent() { return WeakBind.parentOf.get(this) }
 }
 
@@ -288,18 +302,25 @@ class Relation  {
     Object.assign(this, obj);
     this.id = obj.key ?? RandomId('R');
     this.uid = hashString(this.id) + ont.uid;
+    // standardise keys for local binding within ontology
+    this.idFromEntity = this.subject ?? this.from ?? this.sourceEntity;
+    this.idToEntity = this.object ?? this.to ?? this.targetEntity;
+    this.idRelnType = this.predicate ?? this.type ?? this.cardinality ?? 'Relation';
+    
     WeakBind.parentOf.set(this,ont);
   }
   keyId() { return this.id }
   uniqueId() { return this.uid } 
-  // adapt to various names used in the source data
-  typeId() { return this.predicate ?? this.cardinality ?? 'Relation'; }
-  fromId() { return this.subject ?? this.sourceEntity; }
-  toId() { return this.object ?? this.targetEntity; }
-  bind(entities,relations) { 
+
+  // adapt to various names used in the source JSON data
+
+  typeId() { return this.idRelnType }
+  fromId() { return this.idFromEntity }
+  toId() { return this.idToEntity }
+  bind(entities,predicates) {  // do not call before entitiies & predicates are hashtables
     this.baseFrom = entities[this.fromId()];
     this.baseTo = entities[this.toId()];
-    this.baseType = relations[this.typeId()];
+    this.baseType = predicates[this.typeId()];
   }
   getParent() { return WeakBind.parentOf.get(this) }
 
@@ -307,7 +328,7 @@ class Relation  {
 
 //============================================================
 
-// same Relation can appear across many GraphModels each with its own LinkDatum (x,y,fx,fy,width etc.)
+// each Relation may be referenced in many GraphModels each with its own LinkDatum (x,y,fx,fy,width etc.)
 
 class LinkDatum {  
  constructor(obj,graph) {

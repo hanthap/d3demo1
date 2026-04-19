@@ -1,0 +1,142 @@
+{
+  "ontology": {
+    "title": "Macbeth (Summary Ontology)",
+    "version": "1.0",
+    "metadata": {
+      "work": "Macbeth",
+      "author": "William Shakespeare",
+      "type": "Tragedy",
+      "summary": "A Scottish nobleman, driven by prophecy and ambition, murders his king and descends into tyranny, paranoia, and ruin."
+    },
+
+    "entities": [
+      { "id": "macbeth", "type": "Person", "name": "Macbeth", "role": "Thane of Glamis / later King of Scotland" },
+      { "id": "lady_macbeth", "type": "Person", "name": "Lady Macbeth" },
+      { "id": "duncan", "type": "Person", "name": "King Duncan" },
+      { "id": "malcolm", "type": "Person", "name": "Malcolm", "role": "Prince of Cumberland" },
+      { "id": "donalbain", "type": "Person", "name": "Donalbain" },
+      { "id": "banquo", "type": "Person", "name": "Banquo" },
+      { "id": "fleance", "type": "Person", "name": "Fleance" },
+      { "id": "macduff", "type": "Person", "name": "Macduff" },
+      
+      { "id": "macduff_family", "type": "Family", "name": "Macduff Family" },
+
+      { "id": "lady_macduff", "type": "Person", "name": "Lady Macduff" },
+      { "id": "macduff_son", "type": "Person", "name": "Macduff's Son" },
+      { "id": "ross", "type": "Person", "name": "Ross" },
+      { "id": "lennox", "type": "Person", "name": "Lennox" },
+      { "id": "menteth", "type": "Person", "name": "Menteth" },
+      { "id": "angus", "type": "Person", "name": "Angus" },
+      { "id": "caithness", "type": "Person", "name": "Caithness" },
+      { "id": "siward", "type": "Person", "name": "Siward", "role": "Earl of Northumberland" },
+      { "id": "young_siward", "type": "Person", "name": "Young Siward" },
+      { "id": "porter", "type": "Person", "name": "Porter" },
+      { "id": "doctor", "type": "Person", "name": "Doctor" },
+      { "id": "gentlewoman", "type": "Person", "name": "Gentlewoman" },
+
+      { "id": "witch_1", "type": "Supernatural", "name": "First Witch" },
+      { "id": "witch_2", "type": "Supernatural", "name": "Second Witch" },
+      { "id": "witch_3", "type": "Supernatural", "name": "Third Witch" },
+      { "id": "hecate", "type": "Supernatural", "name": "Hecate" },
+
+      { "id": "apparition_armed_head", "type": "Supernatural", "name": "Apparition: Armed Head" },
+      { "id": "apparition_bloody_child", "type": "Supernatural", "name": "Apparition: Bloody Child" },
+      { "id": "apparition_crowned_child", "type": "Supernatural", "name": "Apparition: Crowned Child" },
+      { "id": "vision_banquo_line", "type": "Supernatural", "name": "Vision: Line of Banquo's Descendants" },
+
+      { "id": "scotland", "type": "Place", "name": "Scotland" },
+      { "id": "forres", "type": "Place", "name": "Forres" },
+      { "id": "inverness", "type": "Place", "name": "Macbeth's Castle at Inverness" },
+      { "id": "dunsinane", "type": "Place", "name": "Dunsinane Hill" },
+      { "id": "fife", "type": "Place", "name": "Fife" },
+      { "id": "birnam_wood", "type": "Place", "name": "Birnam Wood" },
+
+      { "id": "battle_opening", "type": "Event", "name": "Opening Battle" },
+      { "id": "prophecy_initial", "type": "Event", "name": "Initial Prophecy" },
+      { "id": "murder_duncan", "type": "Event", "name": "Murder of Duncan" },
+      { "id": "coronation_macbeth", "type": "Event", "name": "Macbeth's Coronation" },
+      { "id": "murder_banquo", "type": "Event", "name": "Murder of Banquo" },
+      { "id": "banquet_ghost", "type": "Event", "name": "Banquet and Banquo's Ghost" },
+      { "id": "second_prophecy", "type": "Event", "name": "Second Prophecy" },
+      { "id": "murder_macduff_family", "type": "Event", "name": "Murder of Macduff's Family" },
+      { "id": "sleepwalking_scene", "type": "Event", "name": "Lady Macbeth's Sleepwalking" },
+      { "id": "final_battle", "type": "Event", "name": "Final Battle at Dunsinane" }
+    ],
+
+    "relationships": [
+      { "from": "macbeth", "to": "lady_macbeth", "type": "married_to" },
+      { "from": "duncan", "to": "malcolm", "type": "parent_of" },
+      { "from": "duncan", "to": "donalbain", "type": "parent_of" },
+      { "from": "banquo", "to": "fleance", "type": "parent_of" },
+
+      { "from": "witch_1", "to": "macbeth", "type": "prophesies_to" },
+      { "from": "witch_2", "to": "macbeth", "type": "prophesies_to" },
+      { "from": "witch_3", "to": "macbeth", "type": "prophesies_to" },
+      { "from": "witch_1", "to": "banquo", "type": "prophesies_to" },
+      { "from": "witch_2", "to": "banquo", "type": "prophesies_to" },
+      { "from": "witch_3", "to": "banquo", "type": "prophesies_to" },
+
+      { "from": "hecate", "to": "witch_1", "type": "commands" },
+      { "from": "hecate", "to": "witch_2", "type": "commands" },
+      { "from": "hecate", "to": "witch_3", "type": "commands" },
+
+      { "from": "macbeth", "to": "battle_opening", "type": "participates_in" },
+      { "from": "banquo", "to": "battle_opening", "type": "participates_in" },
+
+      { "from": "prophecy_initial", "to": "macbeth", "type": "declares_future_titles" },
+      { "from": "prophecy_initial", "to": "banquo", "type": "declares_descendants_will_rule" },
+
+      { "from": "macbeth", "to": "lady_macbeth", "type": "confides_in" },
+      { "from": "lady_macbeth", "to": "macbeth", "type": "urges_to_murder" },
+
+      { "from": "macbeth", "to": "duncan", "type": "kills" },
+      { "from": "murder_duncan", "to": "duncan", "type": "victim" },
+      { "from": "murder_duncan", "to": "macbeth", "type": "perpetrator" },
+      { "from": "murder_duncan", "to": "lady_macbeth", "type": "accomplice" },
+
+      { "from": "malcolm", "to": "donalbain", "type": "flees_with" },
+      { "from": "malcolm", "to": "scotland", "type": "heir_to" },
+
+      { "from": "coronation_macbeth", "to": "macbeth", "type": "crowns" },
+      { "from": "coronation_macbeth", "to": "lady_macbeth", "type": "crowns_queen" },
+
+      { "from": "macbeth", "to": "banquo", "type": "fears_descendants" },
+      { "from": "macbeth", "to": "murder_banquo", "type": "orders" },
+      { "from": "murder_banquo", "to": "banquo", "type": "victim" },
+      { "from": "murder_banquo", "to": "fleance", "type": "target_but_escapes" },
+
+      { "from": "banquet_ghost", "to": "macbeth", "type": "terrifies" },
+      { "from": "banquet_ghost", "to": "banquo", "type": "appears_as_ghost" },
+
+      { "from": "second_prophecy", "to": "apparition_armed_head", "type": "includes" },
+      { "from": "second_prophecy", "to": "apparition_bloody_child", "type": "includes" },
+      { "from": "second_prophecy", "to": "apparition_crowned_child", "type": "includes" },
+      { "from": "second_prophecy", "to": "vision_banquo_line", "type": "includes" },
+
+      { "from": "apparition_armed_head", "to": "macbeth", "type": "warns_against_macduff" },
+      { "from": "apparition_bloody_child", "to": "macbeth", "type": "claims_no_man_born_of_woman_can_harm" },
+      { "from": "apparition_crowned_child", "to": "macbeth", "type": "foretells_fall_when_birnam_moves" },
+      { "from": "vision_banquo_line", "to": "banquo", "type": "shows_descendants" },
+
+      { "from": "macbeth", "to": "macduff_family", "type": "orders_murder" },
+      { "from": "murder_macduff_family", "to": "lady_macduff", "type": "victim" },
+      { "from": "murder_macduff_family", "to": "macduff_son", "type": "victim" },
+
+      { "from": "macduff", "to": "malcolm", "type": "joins_forces_with" },
+      { "from": "malcolm", "to": "siward", "type": "allies_with" },
+      { "from": "siward", "to": "young_siward", "type": "parent_of" },
+
+      { "from": "sleepwalking_scene", "to": "lady_macbeth", "type": "involves" },
+      { "from": "lady_macbeth", "to": "lady_macbeth", "type": "descends_into_madness" },
+
+      { "from": "birnam_wood", "to": "dunsinane", "type": "appears_to_move_toward" },
+      { "from": "malcolm", "to": "birnam_wood", "type": "orders_soldiers_to_cut_branches" },
+
+      { "from": "final_battle", "to": "macbeth", "type": "participates_in" },
+      { "from": "final_battle", "to": "macduff", "type": "participates_in" },
+      { "from": "macduff", "to": "macbeth", "type": "kills" },
+
+      { "from": "malcolm", "to": "scotland", "type": "claims_throne" }
+    ]
+  }
+}
