@@ -204,11 +204,12 @@ class Ontology {
   toString() { return this.file.name; }
   getEntityType(str) { return this.classes[str] ?? (this.classes[str] = new EntityType(str,this)) }
   getRelationType(str) { return this.predicates[str] ?? (this.predicates[str] = new RelationType(str,this)) }
+  getEntity(str) { return this.entities[str] ?? (this.entities[str] = new Entity(str,this)).bind(this) }
   addEntity(obj,key) { return this.entities[key] = (new Entity(obj,this)).bind(this) }
   
   // REQUIRES that .baseFrom, .baseTo and .baseType are ALREADY defined in obj
   // i.e it is called from GraphModel.addLink()
-  addRelation(obj)  { return this.relations.push(new Relation(obj,this)) }
+  addRelation(obj) { return this.relations.push(new Relation(obj,this)) }
 
 
 // note: Relation.bind(ont) will bind within ont only, using local keys. 
@@ -371,8 +372,17 @@ class EntityType {
 
 class Entity {
   constructor(obj,ont,key=null) { 
-    Object.assign(this, obj); 
 
+if (typeof obj === "string") { // convert it to a generic precursor object
+    obj = {
+        id: obj,
+        name: obj,
+        description: 'Not found in source JSON file',
+        type: 'Entity'
+        }
+    }
+
+    Object.assign(this, obj); 
 
     // align property names
     this.id = this.id ?? key ?? obj.name ?? RandomId('E');
@@ -415,11 +425,10 @@ class Relation  {
   fromId() { return this.idFromEntity }
   toId() { return this.idToEntity }
   bind(ont) { // passing ont is probably much faster than getting it via WeakBind every time...
-// TODO: if matching Entity not found in ont then create a placeholder object with that ID and bind to that
-// Copilot sometimes creates Relations without a matching source or target
-    this.baseFrom = ont.entities[this.fromId()];
-    this.baseTo = ont.entities[this.toId()];
-    this.baseType = ont.predicates[this.typeId()];
+// Note: source JSON may lack some of the Entities referenced by Relations in the same file.
+    this.baseFrom = ont.getEntity(this.fromId());
+    this.baseTo = ont.getEntity(this.toId());
+    this.baseType = ont.getRelationType(this.typeId());
   }
 
   getParent() { return WeakBind.parentOf.get(this) }
