@@ -73,12 +73,20 @@ function create_view(graph) {
 
   const body = d3.select('body');
 
-  selPara = body.selectAll('p')
-    .data(graph.nodes,d=>d.uniqueId())
+  // selPara = body.selectAll('p')
+  //   .data(graph.nodeData(),d=>d.uniqueId())
+  //   .join('p')
+  //   .attr('id',d=>d.uniqueId())
+  //   .text(d=>d.toString())
+  //   ;
+
+selPara = body.selectAll('p')
+    .data(graph.linkData(),d=>d.uniqueId())
     .join('p')
     .attr('id',d=>d.uniqueId())
     .text(d=>d.toString())
     ;
+
 
   return selPara;
 
@@ -119,23 +127,26 @@ class GraphModel {
   //----------------------------------------------------------
 
   mergeOntology(bound_ont) { 
-    //  TODO: cater for upsert, like D3 join()
+
     console.log("mergeOntology(bound_ont)",bound_ont);  
 
-    var nodes = Object.values(bound_ont.entities).map(obj => [obj.uniqueId(),new NodeDatum(obj,this)]); 
-    nodes = Object.fromEntries(nodes); //  for easy binding
-
-    var links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
-    links.forEach(obj => obj.bind(nodes));
-
-    console.log("nodes,links",nodes,links);  
-
+    //  TODO: cater for upsert, like D3 join()
     // for now, we just blithely append new Node and Link objects without culling or re-binding
-    this.nodes.push(...Object.values(nodes));
-    this.links.push(...links);
+
+    // first merge new nodes into the master hashtable, so links can bind themselves 
+    // TODO: is there a more efficient approach than converting to & from array?
+    const new_node_entries = Object.values(bound_ont.entities).map(obj => [obj.uniqueId(),new NodeDatum(obj,this)]); 
+    const all_node_entries = Object.entries(this.nodes);
+    all_node_entries.push(...new_node_entries);
+    this.nodes = Object.fromEntries(all_node_entries); //  for easy binding
+    
+    var new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
+    this.links.push(...new_links);
 
   }
-
+  // expose the nodes and links as datum arrays as expected by D3.
+  nodeData() { return Object.values(this.nodes) }
+  linkData() { return this.links }
 }
 
 //============================================================
@@ -199,9 +210,9 @@ class Ontology {
     const ont = this;
     if (Array.isArray(ont.entities)) // assumes it's an array of objects (not key-value pairs)
       ont.entities = ont.entities.map(obj => new Entity(obj,ont)); 
-    else { // assume dict of Objects
-      ont.entities = Object.entries(ont.entities); // convert dict to array of [key,obj] pairs
-      ont.entities = ont.entities.map(([key,obj]) => new Entity(obj,ont,key)); // simple array of Entities
+    else { // assume dict of Objects, with keys that must be preserved to enable binding
+      ont.entities = Object.entries(ont.entities) // convert dict to array of [key,obj] pairs
+          .map(([key,obj]) => new Entity(obj,ont,key)); // simple array of Entities
     }
     ont.entities = ont.entities.map(obj => [obj.keyId(),obj]); // use class method to get key
     ont.entities = Object.fromEntries(ont.entities); // convert to a hashtable ready to suppoprt binding
@@ -239,8 +250,11 @@ class NodeDatum {
     this.base = obj; // Entity
     this.x = Math.random(); // same Entity can appear across many views each with its own NodeDatum (x,y,fx,fy,width etc.)
     WeakBind.parentOf.set(this,graph);
+    // capture robust keys to enable re-binding eg after ontology is refreshed
+    this.uidEntity = this.base.uid;
+    this.uidEntityType = this.base.objType.uid;
   }
-  uniqueId() { return this.base.uniqueId() }
+  uniqueId() { return this.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
   toString() { return this.base.toString() }
   getParent() { return WeakBind.parentOf.get(this) }
 
@@ -314,13 +328,15 @@ class Relation  {
   }
   keyId() { return this.id }
   uniqueId() { return this.uid } 
+  toString() { return `${this.baseFrom.toString()} | ${this.baseType.toString()} | ${this.baseTo.toString()}` }
+
 
   // adapt to various names used in the source JSON data
 
   typeId() { return this.idRelnType }
   fromId() { return this.idFromEntity }
   toId() { return this.idToEntity }
-  bind(ont) {  // do not call before entitiies & predicates are hashtables
+  bind(ont) {  
 // TODO: if matching Entity not found in ont then create a placeholder object with that ID and bind to that
 // Copilot sometimes creates Relations without a matching source or target
     this.baseFrom = ont.entities[this.fromId()];
@@ -338,15 +354,27 @@ class Relation  {
 class LinkDatum {  
  constructor(obj,graph) {
     this.base = obj; // Relation
+    this.bind(graph);
+    
     this.y = Math.random(); 
     WeakBind.parentOf.set(this,graph);
+
  }
-  bind(nodes) { 
+  toString() { return this.base.toString() }
+  uniqueId() { return this.uid } 
+
+  bind(graph) { 
     try {
-    this.datumFrom = nodes[this.base.baseFrom.uniqueId()];
-    this.datumTo = nodes[this.base.baseTo.uniqueId()];
-    } catch (e) { console.log('LinkDatum.bind()', this,nodes) }
+    this.datumFrom = graph.nodes[this.base.baseFrom.uniqueId()];
+    this.datumTo = graph.nodes[this.base.baseTo.uniqueId()];
+    // capture robust keys to enable re-binding eg after ontology is refreshed
+    this.uidEntityFrom = this.base.baseFrom.uid;
+    this.uidEntityTo = this.base.baseTo.uid;
+    this.uidRelnType = this.base.baseType.uid;
+    this.uid = hashString(this.uidEntityFrom + this.uidEntityTo + this.uidRelnType);
+    } catch (e) { console.log('LinkDatum.bind(graph)', this,graph) }
   }
+
   getParent() { return WeakBind.parentOf.get(this) }
 }
 
