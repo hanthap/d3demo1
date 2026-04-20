@@ -55,15 +55,15 @@ input.addEventListener("change", OnChange);
 
 //----------------------------------------------------------
 
-class GraphView {
-  constructor(objGraph, objPage) {
-    this.graph = objGraph;
-    this.page = objPage;
-    this.svg = this.page 
-  }
+// class GraphView {
+//   constructor(objGraph, objPage) {
+//     this.graph = objGraph;
+//     this.page = objPage;
+//     this.svg = this.page 
+//   }
 
 
-  }
+//   }
 
 //----------------------------------------------------------
 
@@ -79,9 +79,12 @@ function create_view(graph) {
   //   .attr('id',d=>d.uniqueId())
   //   .text(d=>d.toString())
   //   ;
+const obj = { id: '123', name: 'Name', description: 'description', class: 'Entity' };
+graph.addNode(obj);
+
 
 selPara = body.selectAll('p')
-    .data(graph.linkData(),d=>d.uniqueId())
+    .data(graph.nodeData(),d=>d.uniqueId())
     .join('p')
     .attr('id',d=>d.uniqueId())
     .text(d=>d.toString())
@@ -118,7 +121,7 @@ class WeakBind {
 class GraphModel {
 
   constructor() {
-    this.nodes = [];
+    this.nodes_dict = {};
     this.links = [];
     this.forces = []; // will hold 
     // TODO: add other graph-specific override parameters eg formats, img_src urls etc
@@ -136,17 +139,26 @@ class GraphModel {
     // first merge new nodes into the master hashtable, so links can bind themselves 
     // TODO: is there a more efficient approach than converting to & from array?
     const new_node_entries = Object.values(bound_ont.entities).map(obj => [obj.uniqueId(),new NodeDatum(obj,this)]); 
-    const all_node_entries = Object.entries(this.nodes);
+    const all_node_entries = Object.entries(this.nodes_dict);
     all_node_entries.push(...new_node_entries);
-    this.nodes = Object.fromEntries(all_node_entries); //  for easy binding
+    this.nodes_dict = Object.fromEntries(all_node_entries); 
     
     var new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
     this.links.push(...new_links);
 
   }
   // expose the nodes and links as datum arrays as expected by D3.
-  nodeData() { return Object.values(this.nodes) }
+  nodeData() { return Object.values(this.nodes_dict) }
   linkData() { return this.links }
+
+  addNode(obj) {
+    const new_entity = Ontology.getDefault().addEntity(obj);
+    const new_datum = new NodeDatum(new_entity,this);
+    this.nodes_dict[new_datum.uniqueId()] = new_datum;
+//    console.log('addNode(obj) new_entity,new_datum,this',obj,new_entity,new_datum,this);
+
+  }
+
 }
 
 //============================================================
@@ -161,18 +173,35 @@ class Ontology {
 
   uniqueId() { return this.uid; }
   toString() { return this.file.name; }
+  getEntityType(str) { return this.classes[str] ?? (this.classes[str] = new EntityType(str,this)) }
+  addEntity(obj,key) { 
+    
+    return this.entities[key] = (new Entity(obj,this)).bind(this) 
+  
+  }
 
   //----------------------------------------------------------
   // constructors cannot use async functions
   static async createfromJson(file) {
     const json = await read_json_file(file);
     return Ontology
-              .conformJson(json,file) // calls class constructor
-              .addBindings();
+            .conformJson(json,file) // static method, calls class constructor
+            .addBindings();
   }
 
-  //----------------------------------------------------------
 
+
+  //----------------------------------------------------------
+  
+  // all newly-created Entity & Relation objects will be maintained together in one container
+  // It could be one of the source ontologies, but for now assume output will be a different file.
+  // TODO might also be the output destination for ALL Graph, Node and Link objects?
+  // I think it's cleaner to save each Graph as a separate JSON file, which stores the path of each input Ontology
+  static outputOntology = new Ontology({uid: '_NEW', file: {}, entities: {}, relations: {}, classes: {}, predicates: {}});
+
+  static getDefault() { return Ontology.outputOntology; }
+//----------------------------------------------------------
+  
   static conformJson(json,file) {
     // re-align high-level JSON structure in preparation for type-casting and binding 
     // LLMs don't always follow a standard JSON structure & naming convention... 
@@ -208,6 +237,7 @@ class Ontology {
     // Finally use those local keys to strongly bind all objects within this ontology
 
     const ont = this;
+
     if (Array.isArray(ont.entities)) // assumes it's an array of objects (not key-value pairs)
       ont.entities = ont.entities.map(obj => new Entity(obj,ont)); 
     else { // assume dict of Objects, with keys that must be preserved to enable binding
@@ -221,11 +251,13 @@ class Ontology {
     ont.relations = ont.relations.map(obj => new Relation(obj,ont));
     ont.relations = ont.relations.map(obj => [obj.keyId(),obj]);  // use class method to get key
     ont.relations = Object.fromEntries(ont.relations);
+
     //----------------------------------------------------------
     if (!Array.isArray(ont.classes)) ont.classes = Object.values(ont.entities).map(obj => obj.typeId()); 
     ont.classes = [...new Set(ont.classes)]; // de-dupe the array
     ont.classes = ont.classes.map(str => [str,new EntityType(str,ont)]);  
     ont.classes = Object.fromEntries(ont.classes);
+
     //----------------------------------------------------------
     if (!Array.isArray(ont.predicates)) ont.predicates = Object.values(ont.relations).map(obj => obj.typeId()); 
     ont.predicates = [...new Set(ont.predicates)]; // de-dupe the array
@@ -296,6 +328,8 @@ class EntityType {
 class Entity {
   constructor(obj,ont,key=null) { 
     Object.assign(this, obj); 
+
+
     // align property names
     this.id = this.id ?? key ?? obj.name ?? RandomId('E');
     this.txtName = this.name ?? this.id;
@@ -306,7 +340,7 @@ class Entity {
   typeId() { return this.type ?? 'Entity'; }
   keyId() { return this.id } // for local binding within this ontology
   uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
-  bind(ont) { this.objType = ont.classes[this.typeId()]; }
+  bind(ont) { this.objType = ont.getEntityType(this.typeId()); return this; }
 
   toString() { return `${this.objType.toString()}: ${this.txtName}: ${this.txtNote}` }
   getParent() { return WeakBind.parentOf.get(this) }
