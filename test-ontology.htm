@@ -79,12 +79,21 @@ function create_view(graph) {
   //   .attr('id',d=>d.uniqueId())
   //   .text(d=>d.toString())
   //   ;
-const obj = { id: '123', name: 'Name', description: 'description', class: 'Entity' };
-graph.addNode(obj);
+const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor', type: 'Person' },
+new_node = graph.addNode(node_spec);
+console.log('new_node',new_node);
 
+const nodes = graph.nodeData(),
+      datumFrom = nodes[3],
+      datumTo = new_node,
+      predicate = 'reports_to'
+      link_spec = {datumFrom,datumTo,predicate};
+graph.addLink(link_spec);
+
+console.log(graph);
 
 selPara = body.selectAll('p')
-    .data(graph.nodeData(),d=>d.uniqueId())
+    .data(graph.linkData(),d=>d.uniqueId())
     .join('p')
     .attr('id',d=>d.uniqueId())
     .text(d=>d.toString())
@@ -151,13 +160,33 @@ class GraphModel {
   nodeData() { return Object.values(this.nodes_dict) }
   linkData() { return this.links }
 
+  //---------------------------------------------------------------------------------
+
   addNode(obj) {
     const new_entity = Ontology.getDefault().addEntity(obj);
     const new_datum = new NodeDatum(new_entity,this);
-    this.nodes_dict[new_datum.uniqueId()] = new_datum;
-//    console.log('addNode(obj) new_entity,new_datum,this',obj,new_entity,new_datum,this);
+    return this.nodes_dict[new_datum.uniqueId()] = new_datum;
+  }
+
+  //---------------------------------------------------------------------------------
+
+  addLink({datumFrom,datumTo,predicate}) { 
+
+    const ont = Ontology.getDefault();
+    const info =  {  
+      baseFrom: datumFrom.base,
+      baseTo: datumTo.base,
+      baseType: ont.getRelationType(predicate)
+      };
+
+    const new_relation = new Relation(info,ont);
+    const new_datum = new LinkDatum(new_relation,this);
+    this.links.push(new_datum);
+    return new_datum;
 
   }
+
+  //---------------------------------------------------------------------------------
 
 }
 
@@ -174,11 +203,26 @@ class Ontology {
   uniqueId() { return this.uid; }
   toString() { return this.file.name; }
   getEntityType(str) { return this.classes[str] ?? (this.classes[str] = new EntityType(str,this)) }
-  addEntity(obj,key) { 
-    
-    return this.entities[key] = (new Entity(obj,this)).bind(this) 
+  getRelationType(str) { return this.predicates[str] ?? (this.predicates[str] = new RelationType(str,this)) }
+  addEntity(obj,key) { return this.entities[key] = (new Entity(obj,this)).bind(this) }
   
-  }
+  // REQUIRES that .baseFrom, .baseTo and .baseType are ALREADY defined in obj
+  // i.e it is called from GraphModel.addLink()
+  addRelation(obj)  { return this.relations.push(new Relation(obj,this)) }
+
+
+// note: Relation.bind(ont) will bind within ont only, using local keys. 
+// Here we want to bind across all ontologies 
+// which is best done with object references. 
+
+//this.id = obj.key ?? RandomId('R');
+    // this.uid = hashString(this.id) + ont.uid;
+    // // standardise keys for local binding within ontology
+    // this.idFromEntity = this.subject ?? this.from ?? this.sourceEntity;
+    // this.idToEntity = this.object ?? this.to ?? this.targetEntity;
+    // this.idRelnType = this.predicate ?? this.type ?? this.cardinality ?? 'Relation';
+
+
 
   //----------------------------------------------------------
   // constructors cannot use async functions
@@ -370,13 +414,14 @@ class Relation  {
   typeId() { return this.idRelnType }
   fromId() { return this.idFromEntity }
   toId() { return this.idToEntity }
-  bind(ont) {  
+  bind(ont) { // passing ont is probably much faster than getting it via WeakBind every time...
 // TODO: if matching Entity not found in ont then create a placeholder object with that ID and bind to that
 // Copilot sometimes creates Relations without a matching source or target
     this.baseFrom = ont.entities[this.fromId()];
     this.baseTo = ont.entities[this.toId()];
     this.baseType = ont.predicates[this.typeId()];
   }
+
   getParent() { return WeakBind.parentOf.get(this) }
 
 }
@@ -398,15 +443,15 @@ class LinkDatum {
   uniqueId() { return this.uid } 
 
   bind(graph) { 
-    try {
-    this.datumFrom = graph.nodes[this.base.baseFrom.uniqueId()];
-    this.datumTo = graph.nodes[this.base.baseTo.uniqueId()];
+   // try {
+    this.datumFrom = graph.nodes_dict[this.base.baseFrom.uniqueId()];
+    this.datumTo = graph.nodes_dict[this.base.baseTo.uniqueId()];
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.uidEntityFrom = this.base.baseFrom.uid;
     this.uidEntityTo = this.base.baseTo.uid;
     this.uidRelnType = this.base.baseType.uid;
     this.uid = hashString(this.uidEntityFrom + this.uidEntityTo + this.uidRelnType);
-    } catch (e) { console.log('LinkDatum.bind(graph)', this,graph) }
+  //  } catch (e) { console.log('LinkDatum.bind(graph)', this,graph) }
   }
 
   getParent() { return WeakBind.parentOf.get(this) }
