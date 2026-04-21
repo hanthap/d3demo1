@@ -79,6 +79,15 @@ function create_view(graph) {
   //   .attr('id',d=>d.uniqueId())
   //   .text(d=>d.toString())
   //   ;
+
+graph
+  .addStyleGroup('Person',['Party','individual'])
+  .addStyleGroup('child_of',['son_of','daughter_of'])
+  .addStyleGroup('reports_to',['employee_of','works_for'])
+  .bindAllStyles();
+
+
+
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor', type: 'Person' },
 new_node = graph.addNode(node_spec);
 console.log('new_node',new_node);
@@ -86,7 +95,7 @@ console.log('new_node',new_node);
 const nodes = graph.nodeData(),
       datumFrom = nodes[3],
       datumTo = new_node,
-      predicate = 'reports_to'
+      predicate = 'reports_to',
       link_spec = {datumFrom,datumTo,predicate};
 graph.addLink(link_spec);
 
@@ -133,8 +142,31 @@ class GraphModel {
     this.nodes_dict = {};
     this.links = [];
     this.forces = []; // will hold 
-    // TODO: add other graph-specific override parameters eg formats, img_src urls etc
+    this.styles_dict = {};
+    this.addStyleGroup(new StyleGroup('default',this));
   }
+
+  addStyleGroup(obj,aliases=[]) { 
+    if ( typeof obj == "string") obj = new StyleGroup(obj,this);
+    this.styles_dict[obj.name] = obj;
+    obj.addAliases(aliases);
+    return this;
+  }
+ 
+  getStyleGroup(type_name) {
+    const found = Object.values(this.styles_dict)
+      .filter(sg => sg.appliesTo(type_name));
+
+    if (found.length == 0) return this.styles_dict.default;
+    else return found[0]; // just the first one 
+  }
+
+  bindAllStyles() {
+    this.nodeData().forEach(d => d.bindStyle(this));
+    this.linkData().forEach(d => d.bindStyle(this));
+    return this;
+    }
+
 
   //----------------------------------------------------------
 
@@ -176,7 +208,10 @@ class GraphModel {
     const info =  {  
       baseFrom: datumFrom.base,
       baseTo: datumTo.base,
-      baseType: ont.getRelationType(predicate)
+      baseType: ont.getRelationType(predicate),
+      from:datumFrom.base.id,
+      to:datumTo.base.id,
+      type: predicate
       };
 
     const new_relation = new Relation(info,ont);
@@ -215,14 +250,6 @@ class Ontology {
 // note: Relation.bind(ont) will bind within ont only, using local keys. 
 // Here we want to bind across all ontologies 
 // which is best done with object references. 
-
-//this.id = obj.key ?? RandomId('R');
-    // this.uid = hashString(this.id) + ont.uid;
-    // // standardise keys for local binding within ontology
-    // this.idFromEntity = this.subject ?? this.from ?? this.sourceEntity;
-    // this.idToEntity = this.object ?? this.to ?? this.targetEntity;
-    // this.idRelnType = this.predicate ?? this.type ?? this.cardinality ?? 'Relation';
-
 
 
   //----------------------------------------------------------
@@ -330,12 +357,37 @@ class NodeDatum {
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.uidEntity = this.base.uid;
     this.uidEntityType = this.base.objType.uid;
+    this.bindStyle(graph);
   }
   uniqueId() { return this.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
   toString() { return this.base.toString() }
   getParent() { return WeakBind.parentOf.get(this) }
+  bindStyle(graph) { this.style = graph.getStyleGroup(this.base.objType.id) }
 
  }
+
+//============================================================
+// a list of EntityType and/or RelationType ids that share the same CSS class attributes, image URL, initial transforms etc.
+
+class StyleGroup {
+  constructor(group_name,graph) {
+    WeakBind.parentOf.set(this,graph);
+    this.name = group_name;
+    this.setTypeNames = new Set();
+    this.addAliases([group_name]);
+    this.img_src = 'tba.svg';
+    this.bg_fill = 'white';
+  }
+
+  addAliases(aliases) { 
+    aliases.forEach( str => this.setTypeNames.add(str) )  
+    return this;
+  
+  
+  }
+  appliesTo(str) { return this.setTypeNames.has(str) }
+
+}
 
 //============================================================
 
@@ -408,8 +460,8 @@ class Relation  {
     this.id = obj.key ?? RandomId('R');
     this.uid = hashString(this.id) + ont.uid;
     // standardise keys for local binding within ontology
-    this.idFromEntity = this.subject ?? this.from ?? this.sourceEntity;
-    this.idToEntity = this.object ?? this.to ?? this.targetEntity;
+    this.idEntityFrom = this.subject ?? this.from ?? this.sourceEntity;
+    this.idEntityTo = this.object ?? this.to ?? this.targetEntity;
     this.idRelnType = this.predicate ?? this.type ?? this.cardinality ?? 'Relation';
     
     WeakBind.parentOf.set(this,ont);
@@ -422,8 +474,8 @@ class Relation  {
   // adapt to various names used in the source JSON data
 
   typeId() { return this.idRelnType }
-  fromId() { return this.idFromEntity }
-  toId() { return this.idToEntity }
+  fromId() { return this.idEntityFrom }
+  toId() { return this.idEntityTo }
   bind(ont) { // passing ont is probably much faster than getting it via WeakBind every time...
 // Note: source JSON may lack some of the Entities referenced by Relations in the same file.
     this.baseFrom = ont.getEntity(this.fromId());
@@ -452,7 +504,6 @@ class LinkDatum {
   uniqueId() { return this.uid } 
 
   bind(graph) { 
-   // try {
     this.datumFrom = graph.nodes_dict[this.base.baseFrom.uniqueId()];
     this.datumTo = graph.nodes_dict[this.base.baseTo.uniqueId()];
     // capture robust keys to enable re-binding eg after ontology is refreshed
@@ -460,8 +511,9 @@ class LinkDatum {
     this.uidEntityTo = this.base.baseTo.uid;
     this.uidRelnType = this.base.baseType.uid;
     this.uid = hashString(this.uidEntityFrom + this.uidEntityTo + this.uidRelnType);
-  //  } catch (e) { console.log('LinkDatum.bind(graph)', this,graph) }
   }
+  
+  bindStyle(graph) { this.style = graph.getStyleGroup(this.base.baseType.id) }
 
   getParent() { return WeakBind.parentOf.get(this) }
 }
