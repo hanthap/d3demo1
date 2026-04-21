@@ -177,17 +177,22 @@ class GraphModel {
     }
 
 
-  downloadJSON(filename = "graph.json") {
-    const json_nodes = JSON.stringify(this.nodes_dict, (key, value) => {
-        if (key === "password") return undefined;   // omit
-       // if (value instanceof Set) return [...value]; // convert
-        return value;
-          }, 2 );
-    const blob = new Blob([json_nodes], { type: "application/json" });
+  downloadJSON(to_filename = "graph.json") {
+    
+    const exclude_regex = new RegExp('^_', "i"); // skip keys that start with underscore
+
+    const json = JSON.stringify(this, (key, value) => {
+        if (exclude_regex.test(key)) return undefined;
+        else {
+          if (value instanceof Set) return [...value]; // convert
+          if (typeof value === 'number') return Math.round(value*10000)/10000;
+          else return value;
+          } }, 2 );
+    const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = filename;
+    a.download = to_filename;
     a.click();
 
     URL.revokeObjectURL(url);
@@ -232,9 +237,9 @@ class GraphModel {
 
     const ont = Ontology.getDefault();
     const info =  {  
-      baseFrom: datumFrom.base,
-      baseTo: datumTo.base,
-      baseType: ont.getRelationType(predicate),
+      _baseFrom: datumFrom.base,
+      _baseTo: datumTo.base,
+      _baseType: ont.getRelationType(predicate),
       from:datumFrom.base.id,
       to:datumTo.base.id,
       type: predicate
@@ -384,7 +389,7 @@ class NodeDatum {
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.keys = {
       uidEntity: this.base.uniqueId(),
-      uidEntityType: this.base.objType.uniqueId()
+      uidEntityType: this.base._type.uniqueId()
     }
 
     this.bindStyle(graph);
@@ -394,7 +399,7 @@ class NodeDatum {
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
   toString() { return this.base.toString() }
   getParent() { return WeakBind.parentOf.get(this) }
-  bindStyle(graph) { this.style = graph.getStyleGroup(this.base.objType.id) }
+  bindStyle(graph) { this._style = graph.getStyleGroup(this.base._type.id) }
 
  }
 
@@ -481,9 +486,9 @@ class Entity {
   typeId() { return this.type ?? 'Entity'; }
   keyId() { return this.id } // for local binding within this ontology
   uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
-  bind(ont) { this.objType = ont.getEntityType(this.typeId()); return this; }
+  bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
 
-  toString() { return `${this.objType.toString()}: ${this.txtName}: ${this.txtNote}` }
+  toString() { return `${this._type.toString()}: ${this.txtName}: ${this.txtNote}` }
   getParent() { return WeakBind.parentOf.get(this) }
 }
 
@@ -508,7 +513,7 @@ class Relation  {
 
   keyId() { return this.keys.id }
   uniqueId() { return this.keys.uid } 
-  toString() { return `${this.baseFrom.toString()} | ${this.baseType.toString()} | ${this.baseTo.toString()}` }
+  toString() { return `${this._baseFrom.toString()} | ${this._baseType.toString()} | ${this._baseTo.toString()}` }
 
 
   // adapt to various names used in the source JSON data
@@ -517,9 +522,9 @@ class Relation  {
   fromId() { return this.keys.idEntityFrom }
   toId() { return this.keys.idEntityTo }
   bind(ont) { 
-    this.baseFrom = ont.getEntity(this.fromId());
-    this.baseTo = ont.getEntity(this.toId());
-    this.baseType = ont.getRelationType(this.typeId());
+    this._baseFrom = ont.getEntity(this.fromId());
+    this._baseTo = ont.getEntity(this.toId());
+    this._baseType = ont.getRelationType(this.typeId());
   }
 
   getParent() { return WeakBind.parentOf.get(this) }
@@ -532,30 +537,30 @@ class Relation  {
 
 class LinkDatum {  
  constructor(obj,graph) {
-    this.base = obj; // Relation
+    this._base = obj; // Relation
     this.bind(graph);
     
     this.y = Math.random(); 
     WeakBind.parentOf.set(this,graph);
 
  }
-  toString() { return this.base.toString() }
+  toString() { return this._base.toString() }
   uniqueId() { return this.keys.uidThis } 
 
   bind(graph) { 
-    this.datumFrom = graph.nodes_dict[this.base.baseFrom.uniqueId()];
-    this.datumTo = graph.nodes_dict[this.base.baseTo.uniqueId()];
+    this._datumFrom = graph.nodes_dict[this._base._baseFrom.uniqueId()];
+    this._datumTo = graph.nodes_dict[this._base._baseTo.uniqueId()];
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.keys = {
-      uidDatumFrom: this.datumFrom.uniqueId(),
-      uidDatumTo:   this.datumTo.uniqueId(),
-      uidLinkType:  this.base.baseType.uniqueId(),
-      uidBase:      this.base.uniqueId()
+      uidDatumFrom: this._datumFrom.uniqueId(),
+      uidDatumTo:   this._datumTo.uniqueId(),
+      uidLinkType:  this._base._baseType.uniqueId(),
+      uidBase:      this._base.uniqueId()
     };
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
   }
   
-  bindStyle(graph) { this.style = graph.getStyleGroup(this.base.baseType.id) }
+  bindStyle(graph) { this._style = graph.getStyleGroup(this._base._baseType.id) }
 
   getParent() { return WeakBind.parentOf.get(this) }
 }
