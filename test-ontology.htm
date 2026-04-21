@@ -178,12 +178,12 @@ class GraphModel {
 
 
   downloadJSON(filename = "graph.json") {
-    const json = JSON.stringify(this, (key, value) => {
+    const json_nodes = JSON.stringify(this.nodes_dict, (key, value) => {
         if (key === "password") return undefined;   // omit
-        if (value instanceof Set) return [...value]; // convert
+       // if (value instanceof Set) return [...value]; // convert
         return value;
-          } );
-    const blob = new Blob([json], { type: "application/json" });
+          }, 2 );
+    const blob = new Blob([json_nodes], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -380,12 +380,18 @@ class NodeDatum {
     this.base = obj; // Entity
     this.x = Math.random(); // same Entity can appear across many views each with its own NodeDatum (x,y,fx,fy,width etc.)
     WeakBind.parentOf.set(this,graph);
+
     // capture robust keys to enable re-binding eg after ontology is refreshed
-    this.uidEntity = this.base.uid;
-    this.uidEntityType = this.base.objType.uid;
+    this.keys = {
+      uidEntity: this.base.uniqueId(),
+      uidEntityType: this.base.objType.uniqueId()
+    }
+
     this.bindStyle(graph);
   }
-  uniqueId() { return this.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
+// TODO: re-bind after ontology is reloaded.
+
+  uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
   toString() { return this.base.toString() }
   getParent() { return WeakBind.parentOf.get(this) }
   bindStyle(graph) { this.style = graph.getStyleGroup(this.base.objType.id) }
@@ -451,23 +457,26 @@ class EntityType {
 class Entity {
   constructor(obj,ont,key=null) { 
 
-if (typeof obj === "string") { // convert it to a generic precursor object
-    obj = {
-        id: obj,
-        name: obj,
-        description: 'Not found in source JSON file',
-        type: 'Entity'
+    WeakBind.parentOf.set(this,ont);
+
+    if (typeof obj === "string") { // convert it to a generic precursor object
+      obj = {
+          id: obj,
+          name: obj,
+          description: 'Not found in source JSON file',
+          type: 'Entity'
+          }
         }
-    }
 
     Object.assign(this, obj); 
 
     // align property names
+
     this.id = this.id ?? key ?? obj.name ?? RandomId('E');
+    this.uid = hashString(this.id) + ont.uid;
     this.txtName = this.name ?? this.id;
     this.txtNote = this.labels ?? this.description ?? this.role ?? (this.properties ? Object.entries(this.properties) : '');
-    this.uid = hashString(this.id) + ont.uid;
-    WeakBind.parentOf.set(this,ont);
+    
   }
   typeId() { return this.type ?? 'Entity'; }
   keyId() { return this.id } // for local binding within this ontology
@@ -481,29 +490,33 @@ if (typeof obj === "string") { // convert it to a generic precursor object
 //============================================================
 
 class Relation  {
+
   constructor(obj,ont) {
     Object.assign(this, obj);
-    this.id = obj.key ?? RandomId('R');
-    this.uid = hashString(this.id) + ont.uid;
-    // standardise keys for local binding within ontology
-    this.idEntityFrom = this.subject ?? this.from ?? this.sourceEntity;
-    this.idEntityTo = this.object ?? this.to ?? this.targetEntity;
-    this.idRelnType = this.predicate ?? this.type ?? this.cardinality ?? 'Relation';
-    
     WeakBind.parentOf.set(this,ont);
-  }
-  keyId() { return this.id }
-  uniqueId() { return this.uid } 
+
+    this.keys = {
+      id: obj.key ?? RandomId('R'),
+      // standardise keys for local binding within ontology
+      idEntityFrom: this.subject ?? this.from ?? this.sourceEntity,
+      idEntityTo: this.object ?? this.to ?? this.targetEntity,
+      idRelnType: this.predicate ?? this.type ?? this.cardinality ?? 'Relation'
+    };
+
+    this.keys.uid =hashString(this.keys.id) + ont.uid;
+    }
+
+  keyId() { return this.keys.id }
+  uniqueId() { return this.keys.uid } 
   toString() { return `${this.baseFrom.toString()} | ${this.baseType.toString()} | ${this.baseTo.toString()}` }
 
 
   // adapt to various names used in the source JSON data
 
-  typeId() { return this.idRelnType }
-  fromId() { return this.idEntityFrom }
-  toId() { return this.idEntityTo }
-  bind(ont) { // passing ont is probably much faster than getting it via WeakBind every time...
-// Note: source JSON may lack some of the Entities referenced by Relations in the same file.
+  typeId() { return this.keys.idRelnType }
+  fromId() { return this.keys.idEntityFrom }
+  toId() { return this.keys.idEntityTo }
+  bind(ont) { 
     this.baseFrom = ont.getEntity(this.fromId());
     this.baseTo = ont.getEntity(this.toId());
     this.baseType = ont.getRelationType(this.typeId());
@@ -536,8 +549,8 @@ class LinkDatum {
     this.keys = {
       uidDatumFrom: this.datumFrom.uniqueId(),
       uidDatumTo:   this.datumTo.uniqueId(),
-      uidLinkType:  this.base.baseType.uid,
-      uidRelation:  this.base.uid
+      uidLinkType:  this.base.baseType.uniqueId(),
+      uidBase:      this.base.uniqueId()
     };
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
   }
