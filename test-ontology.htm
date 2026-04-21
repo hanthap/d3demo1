@@ -84,6 +84,12 @@ graph
   .addStyleGroup('Person',['Party','individual'])
   .addStyleGroup('child_of',['son_of','daughter_of'])
   .addStyleGroup('reports_to',['employee_of','works_for'])
+  .addStyleGroup('Variable',['measure'])
+  .addStyleGroup('Policy',['measure'])
+  .addStyleGroup('Model',['ModelClass'])
+  .addStyleGroup('part_of',['belongs_to_class'])
+
+
   .bindAllStyles();
 
 
@@ -107,6 +113,9 @@ selPara = body.selectAll('p')
     .attr('id',d=>d.uniqueId())
     .text(d=>d.toString())
     ;
+
+graph.downloadJSON('test_output.json');
+
 
 
   return selPara;
@@ -166,6 +175,23 @@ class GraphModel {
     this.linkData().forEach(d => d.bindStyle(this));
     return this;
     }
+
+
+  downloadJSON(filename = "graph.json") {
+    const json = JSON.stringify(this, (key, value) => {
+        if (key === "password") return undefined;   // omit
+        if (value instanceof Set) return [...value]; // convert
+        return value;
+          } );
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+
+    URL.revokeObjectURL(url);
+  }
 
 
   //----------------------------------------------------------
@@ -501,16 +527,19 @@ class LinkDatum {
 
  }
   toString() { return this.base.toString() }
-  uniqueId() { return this.uid } 
+  uniqueId() { return this.keys.uidThis } 
 
   bind(graph) { 
     this.datumFrom = graph.nodes_dict[this.base.baseFrom.uniqueId()];
     this.datumTo = graph.nodes_dict[this.base.baseTo.uniqueId()];
     // capture robust keys to enable re-binding eg after ontology is refreshed
-    this.uidEntityFrom = this.base.baseFrom.uid;
-    this.uidEntityTo = this.base.baseTo.uid;
-    this.uidRelnType = this.base.baseType.uid;
-    this.uid = hashString(this.uidEntityFrom + this.uidEntityTo + this.uidRelnType);
+    this.keys = {
+      uidDatumFrom: this.datumFrom.uniqueId(),
+      uidDatumTo:   this.datumTo.uniqueId(),
+      uidLinkType:  this.base.baseType.uid,
+      uidRelation:  this.base.uid
+    };
+    this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
   }
   
   bindStyle(graph) { this.style = graph.getStyleGroup(this.base.baseType.id) }
