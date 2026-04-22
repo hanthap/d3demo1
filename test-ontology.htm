@@ -90,15 +90,15 @@ inputGraph.addEventListener("change", OnChangeGraph);
 function embellish_graph(graph) {
 
   graph
-  .addStyleGroup('Person',['Party','individual'])
-  .addStyleGroup('child_of',['son_of','daughter_of'])
-  .addStyleGroup('parent_of',['father_of','mother_of'])
-  .addStyleGroup('reports_to',['employee_of','works_for'])
-  .addStyleGroup('Variable',['measure'])
-  .addStyleGroup('Policy')
-  .addStyleGroup('Model',['ModelClass'])
-  .addStyleGroup('part_of',['belongs_to_class'])
-  .bindAllStyles();
+  .addLayerGroup('Person',['Party','individual'])
+  .addLayerGroup('child_of',['son_of','daughter_of'])
+  .addLayerGroup('parent_of',['father_of','mother_of'])
+  .addLayerGroup('reports_to',['employee_of','works_for'])
+  .addLayerGroup('Variable',['measure'])
+  .addLayerGroup('Policy')
+  .addLayerGroup('Model',['ModelClass'])
+  .addLayerGroup('part_of',['belongs_to_class'])
+  .bindAllLayers();
 
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor', type: 'Person' },
 new_node = graph.addNode(node_spec);
@@ -178,8 +178,8 @@ class GraphModel {
     this.nodes_dict = {};
     this.links_dict = {};
     this.forces = [];  
-    this.styles_dict = {};
-    this.addStyleGroup(new StyleGroup('default',this));
+    this.layers_dict = {};
+    this.addLayerGroup(new LayerGroup('default',this));
   }
 
   // expose the nodes and links as datum arrays as expected by D3.
@@ -195,12 +195,12 @@ class GraphModel {
     this.forces = json.forces;  
 
 
-    // ingest new styles
-    Object.values(json.styles_dict).forEach(d => {
-      Object.setPrototypeOf(d,StyleGroup.prototype);
+    // ingest new layers
+    Object.values(json.layers_dict).forEach(d => {
+      Object.setPrototypeOf(d,LayerGroup.prototype);
       Object.setPrototypeOf(d.image,Image.prototype);
-      d.type_names_set = new Set(d.type_names_set);
-      this.styles_dict[d.uniqueId()] = d;
+      d.types = new Set(d.types);
+      this.layers_dict[d.uniqueId()] = d;
       }
     );
 
@@ -212,7 +212,7 @@ class GraphModel {
       Object.setPrototypeOf(d,NodeDatum.prototype);
       Object.setPrototypeOf(d.base,Entity.prototype);
       if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
-      d.bindStyle(this);
+      d.bindLayer(this);
       this.nodes_dict[d.uniqueId()] = d;
       }
     ); 
@@ -222,7 +222,7 @@ class GraphModel {
       Object.setPrototypeOf(d.base,Relation.prototype);
       d._datumFrom = this.nodes_dict[d.keys.uidDatumFrom];
       d._datumTo = this.nodes_dict[d.keys.uidDatumTo];
-      d.bindStyle(this);
+      d.bindLayer(this);
       this.links_dict[d.uniqueId()] = d;
       }
     );
@@ -236,24 +236,24 @@ class GraphModel {
   }
 
 
-  addStyleGroup(obj,aliases=[]) { 
-    if (typeof obj == 'string') obj = new StyleGroup(obj,this);
-    this.styles_dict[obj.uniqueId()] = obj;
+  addLayerGroup(obj,aliases=[]) { 
+    if (typeof obj == 'string') obj = new LayerGroup(obj,this);
+    this.layers_dict[obj.uniqueId()] = obj;
     obj.addAliases(aliases);
     return this;
   }
  
-  getStyleGroup(type_name) {
-    const found = Object.values(this.styles_dict)
+  getLayerGroup(type_name) {
+    const found = Object.values(this.layers_dict)
       .filter(sg => sg.appliesTo(type_name));
 
-    if (found.length == 0) return this.styles_dict.default;
+    if (found.length == 0) return this.layers_dict.default;
     else return found[0]; // just the first one 
   }
 
-  bindAllStyles() {
-    this.nodeData().forEach(d => d.bindStyle(this));
-    this.linkData().forEach(d => d.bindStyle(this));
+  bindAllLayers() {
+    this.nodeData().forEach(d => d.bindLayer(this));
+    this.linkData().forEach(d => d.bindLayer(this));
     return this;
     }
 
@@ -469,14 +469,14 @@ class NodeDatum {
       xidEntityType: this.base._type.keyId()
     }
 
-    this.bindStyle(graph);
+    this.bindLayer(graph);
   }
 // TODO: re-bind after ontology is reloaded.
 
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
   toString() { return this.base.toString() }
   getParent() { return WeakBind.parentOf.get(this) }
-  bindStyle(graph) { this._style = graph.getStyleGroup(this.base.typeId()) }
+  bindLayer(graph) { this._layer = graph.getLayerGroup(this.base.typeId()) }
   addImage(url,xid='default') { 
     if (!this.images) this.images = {};
     const new_img = new Image(url);
@@ -512,11 +512,11 @@ class Image {
 // a list of EntityType and/or RelationType ids that share the same CSS class
 // also drives non-CSS default attributes such as image URL, initial transform, nestable, default cloaking etc.
 
-class StyleGroup {
+class LayerGroup {
   constructor(class_name,graph) {
     const obj = {
       class_name: class_name,
-      type_names_set: new Set([class_name]),
+      types: new Set([class_name]),
       nesting: { 
           enabled: false, // true <=> a non-empty node opens to an Euler region/contour
           closed: true, // true => a non-empty node initially display as collasped (rect)
@@ -537,11 +537,11 @@ class StyleGroup {
   uniqueId() { return this.class_name }
 
   addAliases(aliases) { 
-    aliases.forEach(str => this.type_names_set.add(str));  
+    aliases.forEach(str => this.types.add(str));  
     return this;
     
   }
-  appliesTo(str) { return this.type_names_set.has(str) }
+  appliesTo(str) { return this.types.has(str) }
 
 }
 
@@ -679,9 +679,8 @@ class LinkDatum {
     };
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
   }
-  
-  //bindStyle(graph) { this._style = graph.getStyleGroup(this._base._baseType.xid) }
-  bindStyle(graph) { this._style = graph.getStyleGroup(this.keys.xidRelnType) }
+
+  bindLayer(graph) { this._layer = graph.getLayerGroup(this.keys.xidRelnType) }
 
   getParent() { return WeakBind.parentOf.get(this) }
 }
