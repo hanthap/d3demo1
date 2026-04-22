@@ -57,7 +57,7 @@ async function OnChange() {
   for (const ont of new_ontologies) 
     graph.mergeOntology(ont);
   console.log(graph);
-
+  embellish_graph(graph);
   create_view(graph);
   
 }
@@ -71,11 +71,8 @@ const test_json = await read_json_file(arr[0]);
 test_graph = new GraphModel();
 
 test_graph.upsertfromJson(test_json);
-
+create_view(test_graph);
 console.log(test_graph);
-
-
-
 
 }
 
@@ -88,10 +85,43 @@ const inputGraph = document.getElementById("fileInputGraph");
 inputGraph.addEventListener("change", OnChangeGraph);
 
 
-
-
 //----------------------------------------------------------
 
+function embellish_graph(graph) {
+
+  graph
+  .addStyleGroup('Person',['Party','individual'])
+  .addStyleGroup('child_of',['son_of','daughter_of'])
+  .addStyleGroup('parent_of',['father_of','mother_of'])
+  .addStyleGroup('reports_to',['employee_of','works_for'])
+  .addStyleGroup('Variable',['measure'])
+  .addStyleGroup('Policy')
+  .addStyleGroup('Model',['ModelClass'])
+  .addStyleGroup('part_of',['belongs_to_class'])
+  .bindAllStyles();
+
+const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor', type: 'Person' },
+new_node = graph.addNode(node_spec);
+new_node.addImage('Peter.jpg','main');
+
+
+console.log('new_node',new_node);
+
+const nodes = graph.nodeData(),
+      datumFrom = nodes[3],
+      datumTo = new_node,
+      predicate = 'reports_to',
+      link_spec = {datumFrom,datumTo,predicate};
+graph.addLink(link_spec);
+
+console.log(graph);
+
+graph.downloadJSON('test_output.json');
+
+
+}
+
+//----------------------------------------------------------
 
 
 function create_view(graph) {
@@ -105,30 +135,6 @@ function create_view(graph) {
   //   .text(d=>d.toString())
   //   ;
 
-graph
-  .addStyleGroup('Person',['Party','individual'])
-  .addStyleGroup('child_of',['son_of','daughter_of'])
-  .addStyleGroup('parent_of',['father_of','mother_of'])
-  .addStyleGroup('reports_to',['employee_of','works_for'])
-  .addStyleGroup('Variable',['measure'])
-  .addStyleGroup('Policy')
-  .addStyleGroup('Model',['ModelClass'])
-  .addStyleGroup('part_of',['belongs_to_class'])
-  .bindAllStyles();
-
-const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor', type: 'Person' },
-new_node = graph.addNode(node_spec);
-console.log('new_node',new_node);
-
-const nodes = graph.nodeData(),
-      datumFrom = nodes[3],
-      datumTo = new_node,
-      predicate = 'reports_to',
-      link_spec = {datumFrom,datumTo,predicate};
-graph.addLink(link_spec);
-
-console.log(graph);
-
 selPara = body.selectAll('p')
     .data(graph.linkData(),d=>d.uniqueId())
     .join('p')
@@ -136,7 +142,6 @@ selPara = body.selectAll('p')
     .text(d=>d.toString())
     ;
 
-graph.downloadJSON('test_output.json');
 
 
 
@@ -188,7 +193,16 @@ class GraphModel {
     // TODO : replace these with proper upsert 
 
     this.forces = json.forces;  
-    this.styles_dict = json.styles_dict;
+
+
+    // ingest new styles
+    Object.values(json.styles_dict).forEach(d => {
+      Object.setPrototypeOf(d,StyleGroup.prototype);
+      Object.setPrototypeOf(d.image,Image.prototype);
+      d.type_names_set = new Set(d.type_names_set);
+      this.styles_dict[d.uniqueId()] = d;
+      }
+    );
 
   // apply classes without executing constructors and immediately insert/replace
   // any existing nodes with the same uid => VOIDS any unsaved edits
@@ -197,21 +211,19 @@ class GraphModel {
     Object.values(json.nodes_dict).forEach(d => {
       Object.setPrototypeOf(d,NodeDatum.prototype);
       Object.setPrototypeOf(d.base,Entity.prototype);
+      if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
+      d.bindStyle(this);
       this.nodes_dict[d.uniqueId()] = d;
       }
     ); 
 
     Object.values(json.links_dict).forEach(d => {
       Object.setPrototypeOf(d,LinkDatum.prototype);
+      Object.setPrototypeOf(d.base,Relation.prototype);
       d._datumFrom = this.nodes_dict[d.keys.uidDatumFrom];
       d._datumTo = this.nodes_dict[d.keys.uidDatumTo];
+      d.bindStyle(this);
       this.links_dict[d.uniqueId()] = d;
-      }
-    );
-
-    Object.values(this.styles_dict).forEach(d => {
-        Object.setPrototypeOf(d,StyleGroup.prototype);
-        d.setTypeNames = new Set(d.setTypeNames);
       }
     );
 
@@ -225,7 +237,7 @@ class GraphModel {
 
 
   addStyleGroup(obj,aliases=[]) { 
-    if ( typeof obj == "string") obj = new StyleGroup(obj,this);
+    if (typeof obj == 'string') obj = new StyleGroup(obj,this);
     this.styles_dict[obj.uniqueId()] = obj;
     obj.addAliases(aliases);
     return this;
@@ -279,7 +291,7 @@ class GraphModel {
 
     const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
     new_links.forEach(d => this.links_dict[d.uniqueId()] = d);
-//    this.links_dict.push(...new_links);
+
     return this;
 
   }
@@ -453,7 +465,8 @@ class NodeDatum {
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.keys = {
       uidEntity: this.base.uniqueId(),
-      uidEntityType: this.base._type.uniqueId()
+      uidEntityType: this.base._type.uniqueId(),
+      xidEntityType: this.base._type.keyId()
     }
 
     this.bindStyle(graph);
@@ -464,8 +477,36 @@ class NodeDatum {
   toString() { return this.base.toString() }
   getParent() { return WeakBind.parentOf.get(this) }
   bindStyle(graph) { this._style = graph.getStyleGroup(this.base.typeId()) }
-
+  addImage(url,xid='default') { 
+    if (!this.images) this.images = {};
+    const new_img = new Image(url);
+    this.images[xid]=new_img;
+    return new_img;
  }
+ }
+
+//============================================================
+
+
+class Image {
+  constructor(url=null) {
+
+    const obj = {
+    
+      img_src: url ? url :'tba.svg',
+      transform: {
+          circle: 'translate(0,0) scale(1)',
+          rect: 'translate(0,0) scale(1)',
+          frame: 'translate(0,0) scale(1)'
+          }
+
+  };
+
+  Object.assign(this,obj);
+
+}
+}
+
 
 //============================================================
 // a list of EntityType and/or RelationType ids that share the same CSS class
@@ -473,23 +514,34 @@ class NodeDatum {
 
 class StyleGroup {
   constructor(class_name,graph) {
+    const obj = {
+      class_name: class_name,
+      type_names_set: new Set([class_name]),
+      nesting: { 
+          enabled: false, // true <=> a non-empty node opens to an Euler region/contour
+          closed: true, // true => a non-empty node initially display as collasped (rect)
+          reversed: false // true <=> the 'from' node is logically the superset in each pair (normally the subset/element)
+      },
+      colour: { 
+          fill: 'white',
+          stroke: 'black'
+      },
+      image: new Image()
+    }
+    Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
-    this.class_name = class_name; 
-    this.setTypeNames = new Set();
-    this.addAliases([class_name]);
-    this.img_src = 'tba.svg';
-    this.bg_fill = 'white';
-    this.fg_stroke = 'black';
     return this;
   }
+
+
   uniqueId() { return this.class_name }
 
   addAliases(aliases) { 
-    aliases.forEach(str => this.setTypeNames.add(str));  
+    aliases.forEach(str => this.type_names_set.add(str));  
     return this;
     
   }
-  appliesTo(str) { return this.setTypeNames.has(str) }
+  appliesTo(str) { return this.type_names_set.has(str) }
 
 }
 
@@ -498,7 +550,7 @@ class StyleGroup {
 class RelationType {
   constructor(str,ont) { 
     this.xid = str;
-    this.uid = hashString(this.xid) + ont.uid;
+    this.uid = hashString(this.xid + ont.uid);
     WeakBind.parentOf.set(this,ont);
   }
 
@@ -514,7 +566,7 @@ class RelationType {
 class EntityType {
   constructor(str,ont) { 
     this.xid = str; 
-    this.uid = hashString(this.xid) + ont.uid;
+    this.uid = hashString(this.xid + ont.uid);
     WeakBind.parentOf.set(this,ont);
   }
   keyId() { return this.xid } 
@@ -545,7 +597,7 @@ class Entity {
     // align property names
 
     this.xid = this.id ?? key ?? obj.name ?? RandomId('E');
-    this.uid = hashString(this.xid) + ont.uid;
+    this.uid = hashString(this.xid + ont.uid);
     this.txtName = this.name ?? this.xid;
     this.txtNote = this.labels ?? this.description ?? this.role ?? (this.properties ? Object.entries(this.properties) : '');
     
@@ -555,7 +607,7 @@ class Entity {
   uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
   bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
 
-  toString() { return `${this._type.toString()}: ${this.txtName}: ${this.txtNote}` }
+  toString() { return `${this.typeId()}: ${this.txtName}: ${this.txtNote}` }
   getParent() { return WeakBind.parentOf.get(this) }
 }
 
@@ -575,7 +627,7 @@ class Relation  {
       xidRelnType: this.predicate ?? this.type ?? this.cardinality ?? 'Relation'
     };
 
-    this.keys.uid =hashString(this.keys.xid) + ont.uid;
+    this.keys.uid =hashString(this.keys.xid + ont.uid);
     }
 
   keyId() { return this.keys.xid }
@@ -604,30 +656,32 @@ class Relation  {
 
 class LinkDatum {  
  constructor(obj,graph) {
-    this._base = obj; // Relation
+    this.base = obj; // Relation
     this.bind(graph);
     
     this.y = Math.random(); 
     WeakBind.parentOf.set(this,graph);
 
  }
-  toString() { return this._base.toString() }
+  toString() { return `${this._datumFrom.toString()} | ${this.base.typeId()} | ${this._datumTo.toString()}` } 
   uniqueId() { return this.keys.uidThis } 
 
   bind(graph) { 
-    this._datumFrom = graph.nodes_dict[this._base._baseFrom.uniqueId()];
-    this._datumTo = graph.nodes_dict[this._base._baseTo.uniqueId()];
+    this._datumFrom = graph.nodes_dict[this.base._baseFrom.uniqueId()];
+    this._datumTo = graph.nodes_dict[this.base._baseTo.uniqueId()];
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.keys = {
       uidDatumFrom: this._datumFrom.uniqueId(),
       uidDatumTo:   this._datumTo.uniqueId(),
-      uidLinkType:  this._base._baseType.uniqueId(),
-      uidBase:      this._base.uniqueId()
+      uidLinkType:  this.base._baseType.uniqueId(),
+      uidBase:      this.base.uniqueId(),
+      xidRelnType:  this.base._baseType.keyId()
     };
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
   }
   
-  bindStyle(graph) { this._style = graph.getStyleGroup(this._base._baseType.xid) }
+  //bindStyle(graph) { this._style = graph.getStyleGroup(this._base._baseType.xid) }
+  bindStyle(graph) { this._style = graph.getStyleGroup(this.keys.xidRelnType) }
 
   getParent() { return WeakBind.parentOf.get(this) }
 }
