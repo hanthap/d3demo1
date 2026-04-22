@@ -171,22 +171,28 @@ class GraphModel {
 
   constructor() {
     this.nodes_dict = {};
-    this.links = [];
+    this.links_dict = {};
     this.forces = [];  
     this.styles_dict = {};
     this.addStyleGroup(new StyleGroup('default',this));
   }
+
+  // expose the nodes and links as datum arrays as expected by D3.
+  nodeData() { return Object.values(this.nodes_dict) }
+  linkData() { return Object.values(this.links_dict) }
+
 
   upsertfromJson(json) {
             // .conformJson(json) 
             // .addBindings();
     // TODO : replace these with proper upsert 
 
+    this.forces = json.forces;  
+    this.styles_dict = json.styles_dict;
 
-    
-// apply classes without executing constructors and immediately insert/replace
-// any existing nodes with the same uid => VOIDS any unsaved edits
-// but graph's other nodes are left as-is
+  // apply classes without executing constructors and immediately insert/replace
+  // any existing nodes with the same uid => VOIDS any unsaved edits
+  // the graph's other nodes are left untouched
 
     Object.values(json.nodes_dict).forEach(d => {
       Object.setPrototypeOf(d,NodeDatum.prototype);
@@ -195,15 +201,11 @@ class GraphModel {
       }
     ); 
 
-    this.links = json.links;
-    this.forces = json.forces;  
-    this.styles_dict = json.styles_dict;
-
-    // TODO : do the same as for nodes
-    this.linkData().forEach(d => {
+    Object.values(json.links_dict).forEach(d => {
       Object.setPrototypeOf(d,LinkDatum.prototype);
       d._datumFrom = this.nodes_dict[d.keys.uidDatumFrom];
       d._datumTo = this.nodes_dict[d.keys.uidDatumTo];
+      this.links_dict[d.uniqueId()] = d;
       }
     );
 
@@ -211,9 +213,7 @@ class GraphModel {
         Object.setPrototypeOf(d,StyleGroup.prototype);
         d.setTypeNames = new Set(d.setTypeNames);
       }
-      
-      );
-
+    );
 
     return this;
 
@@ -222,7 +222,6 @@ class GraphModel {
   addBindings() {
 
   }
-
 
 
   addStyleGroup(obj,aliases=[]) { 
@@ -275,23 +274,15 @@ class GraphModel {
 
     console.log("mergeOntology(bound_ont)",bound_ont);  
 
-    //  TODO: cater for upsert, like D3 join()
-    // for now, we just blithely append new Node and Link objects without culling or re-binding
+    const new_nodes = Object.values(bound_ont.entities).map(obj => new NodeDatum(obj,this)); 
+    new_nodes.forEach(d => this.nodes_dict[d.uniqueId()] = d);
 
-    // first merge new nodes into the master hashtable, so links can bind themselves 
-    // TODO: is there a more efficient approach than converting to & from array?
-    const new_node_entries = Object.values(bound_ont.entities).map(obj => [obj.uniqueId(),new NodeDatum(obj,this)]); 
-    const all_node_entries = Object.entries(this.nodes_dict);
-    all_node_entries.push(...new_node_entries);
-    this.nodes_dict = Object.fromEntries(all_node_entries); 
-    
-    var new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
-    this.links.push(...new_links);
+    const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
+    new_links.forEach(d => this.links_dict[d.uniqueId()] = d);
+//    this.links_dict.push(...new_links);
+    return this;
 
   }
-  // expose the nodes and links as datum arrays as expected by D3.
-  nodeData() { return Object.values(this.nodes_dict) }
-  linkData() { return this.links }
 
   //---------------------------------------------------------------------------------
 
@@ -317,7 +308,8 @@ class GraphModel {
 
     const new_relation = new Relation(info,ont);
     const new_datum = new LinkDatum(new_relation,this);
-    this.links.push(new_datum);
+//    this.links.push(new_datum);
+      this.links_dict[new_datum.uniqueId()] = new_datum;
     return new_datum;
 
   }
@@ -525,7 +517,7 @@ class EntityType {
     this.uid = hashString(this.xid) + ont.uid;
     WeakBind.parentOf.set(this,ont);
   }
-  keyId() { return this.xid } // for binding
+  keyId() { return this.xid } 
   uniqueId() { return this.uid } 
   toString() { return this.xid }
   getParent() { return WeakBind.parentOf.get(this) }
