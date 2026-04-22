@@ -1,6 +1,8 @@
 
 <input type="file" title="Choose ontology file(s)" id="fileInput" accept="application/json" multiple>
 
+<input type="file" title="Choose graph file" id="fileInputGraph" accept="application/json">
+
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
@@ -33,6 +35,17 @@ async function read_json_file(file) {
 async function OnChange() {
   
   const arr = Array.from(input.files); // FileList is not an array & doesn't have .map()
+
+// TODO: what if some of the files are graphs, not ontologies?
+// can we handle a generic situation - ingest each one in sequence
+// if the same key already exists, then newer info upserts existing?
+
+// if no graph already then create one (from the first ontology)
+// after that, any further graphs get merged into this one (upsert)
+// ditto for any new ontologies
+// then save the graph.
+
+
   const new_ontologies = await Promise.all(
     arr.map(file => Ontology.createfromJson(file))
   );
@@ -50,20 +63,32 @@ async function OnChange() {
 }
 //----------------------------------------------------------
 
+async function OnChangeGraph() {
+  
+const arr = Array.from(inputGraph.files); 
+const test_json = await read_json_file(arr[0]);
+
+test_graph = new GraphModel();
+
+test_graph.upsertfromJson(test_json);
+
+console.log(test_graph);
+
+
+
+
+}
+
+
+var test_graph;
 const input = document.getElementById("fileInput");
 input.addEventListener("change", OnChange);
 
-//----------------------------------------------------------
-
-// class GraphView {
-//   constructor(objGraph, objPage) {
-//     this.graph = objGraph;
-//     this.page = objPage;
-//     this.svg = this.page 
-//   }
+const inputGraph = document.getElementById("fileInputGraph");
+inputGraph.addEventListener("change", OnChangeGraph);
 
 
-//   }
+
 
 //----------------------------------------------------------
 
@@ -83,16 +108,13 @@ function create_view(graph) {
 graph
   .addStyleGroup('Person',['Party','individual'])
   .addStyleGroup('child_of',['son_of','daughter_of'])
+  .addStyleGroup('parent_of',['father_of','mother_of'])
   .addStyleGroup('reports_to',['employee_of','works_for'])
   .addStyleGroup('Variable',['measure'])
-  .addStyleGroup('Policy',['measure'])
+  .addStyleGroup('Policy')
   .addStyleGroup('Model',['ModelClass'])
   .addStyleGroup('part_of',['belongs_to_class'])
-
-
   .bindAllStyles();
-
-
 
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor', type: 'Person' },
 new_node = graph.addNode(node_spec);
@@ -150,14 +172,62 @@ class GraphModel {
   constructor() {
     this.nodes_dict = {};
     this.links = [];
-    this.forces = []; // will hold 
+    this.forces = [];  
     this.styles_dict = {};
     this.addStyleGroup(new StyleGroup('default',this));
   }
 
+  upsertfromJson(json) {
+            // .conformJson(json) 
+            // .addBindings();
+    // TODO : replace these with proper upsert 
+
+
+    
+// apply classes without executing constructors and immediately insert/replace
+// any existing nodes with the same uid => VOIDS any unsaved edits
+// but graph's other nodes are left as-is
+
+    Object.values(json.nodes_dict).forEach(d => {
+      Object.setPrototypeOf(d,NodeDatum.prototype);
+      Object.setPrototypeOf(d.base,Entity.prototype);
+      this.nodes_dict[d.uniqueId()] = d;
+      }
+    ); 
+
+    this.links = json.links;
+    this.forces = json.forces;  
+    this.styles_dict = json.styles_dict;
+
+    // TODO : do the same as for nodes
+    this.linkData().forEach(d => {
+      Object.setPrototypeOf(d,LinkDatum.prototype);
+      d._datumFrom = this.nodes_dict[d.keys.uidDatumFrom];
+      d._datumTo = this.nodes_dict[d.keys.uidDatumTo];
+      }
+    );
+
+    Object.values(this.styles_dict).forEach(d => {
+        Object.setPrototypeOf(d,StyleGroup.prototype);
+        d.setTypeNames = new Set(d.setTypeNames);
+      }
+      
+      );
+
+
+    return this;
+
+  }
+
+  addBindings() {
+
+  }
+
+
+
   addStyleGroup(obj,aliases=[]) { 
     if ( typeof obj == "string") obj = new StyleGroup(obj,this);
-    this.styles_dict[obj.name] = obj;
+    this.styles_dict[obj.uniqueId()] = obj;
     obj.addAliases(aliases);
     return this;
   }
@@ -179,7 +249,7 @@ class GraphModel {
 
   downloadJSON(to_filename = "graph.json") {
     
-    const exclude_regex = new RegExp('^_', "i"); // skip keys that start with underscore
+    const exclude_regex = new RegExp('^_', "i"); // skip any keys that start with underscore
 
     const json = JSON.stringify(this, (key, value) => {
         if (exclude_regex.test(key)) return undefined;
@@ -240,8 +310,8 @@ class GraphModel {
       _baseFrom: datumFrom.base,
       _baseTo: datumTo.base,
       _baseType: ont.getRelationType(predicate),
-      from:datumFrom.base.id,
-      to:datumTo.base.id,
+      from:datumFrom.base.xid,
+      to:datumTo.base.xid,
       type: predicate
       };
 
@@ -309,6 +379,8 @@ class Ontology {
     // re-align high-level JSON structure in preparation for type-casting and binding 
     // LLMs don't always follow a standard JSON structure & naming convention... 
     // Here we cater for a few variants encountered so far
+
+    // TODO: check - does it even look like an ontology? Maybe it's a graph?
     var
         entities, 
         relations, 
@@ -399,28 +471,31 @@ class NodeDatum {
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
   toString() { return this.base.toString() }
   getParent() { return WeakBind.parentOf.get(this) }
-  bindStyle(graph) { this._style = graph.getStyleGroup(this.base._type.id) }
+  bindStyle(graph) { this._style = graph.getStyleGroup(this.base.typeId()) }
 
  }
 
 //============================================================
-// a list of EntityType and/or RelationType ids that share the same CSS class attributes, image URL, initial transforms etc.
+// a list of EntityType and/or RelationType ids that share the same CSS class
+// also drives non-CSS default attributes such as image URL, initial transform, nestable, default cloaking etc.
 
 class StyleGroup {
-  constructor(group_name,graph) {
+  constructor(class_name,graph) {
     WeakBind.parentOf.set(this,graph);
-    this.name = group_name;
+    this.class_name = class_name; 
     this.setTypeNames = new Set();
-    this.addAliases([group_name]);
+    this.addAliases([class_name]);
     this.img_src = 'tba.svg';
     this.bg_fill = 'white';
+    this.fg_stroke = 'black';
+    return this;
   }
+  uniqueId() { return this.class_name }
 
   addAliases(aliases) { 
-    aliases.forEach( str => this.setTypeNames.add(str) )  
+    aliases.forEach(str => this.setTypeNames.add(str));  
     return this;
-  
-  
+    
   }
   appliesTo(str) { return this.setTypeNames.has(str) }
 
@@ -430,14 +505,14 @@ class StyleGroup {
 
 class RelationType {
   constructor(str,ont) { 
-    this.id = str;
-    this.uid = hashString(this.id) + ont.uid;
+    this.xid = str;
+    this.uid = hashString(this.xid) + ont.uid;
     WeakBind.parentOf.set(this,ont);
   }
 
-  keyId() { return this.id }
+  keyId() { return this.xid }
   uniqueId() { return this.uid } 
-  toString() { return this.id }
+  toString() { return this.xid }
   getParent() { return WeakBind.parentOf.get(this) }
 
 }
@@ -446,13 +521,13 @@ class RelationType {
 
 class EntityType {
   constructor(str,ont) { 
-    this.id = str; 
-    this.uid = hashString(this.id) + ont.uid;
+    this.xid = str; 
+    this.uid = hashString(this.xid) + ont.uid;
     WeakBind.parentOf.set(this,ont);
   }
-  keyId() { return this.id } // for binding
+  keyId() { return this.xid } // for binding
   uniqueId() { return this.uid } 
-  toString() { return this.id }
+  toString() { return this.xid }
   getParent() { return WeakBind.parentOf.get(this) }
 
 }
@@ -466,7 +541,7 @@ class Entity {
 
     if (typeof obj === "string") { // convert it to a generic precursor object
       obj = {
-          id: obj,
+          key: obj,
           name: obj,
           description: 'Not found in source JSON file',
           type: 'Entity'
@@ -477,14 +552,14 @@ class Entity {
 
     // align property names
 
-    this.id = this.id ?? key ?? obj.name ?? RandomId('E');
-    this.uid = hashString(this.id) + ont.uid;
-    this.txtName = this.name ?? this.id;
+    this.xid = this.id ?? key ?? obj.name ?? RandomId('E');
+    this.uid = hashString(this.xid) + ont.uid;
+    this.txtName = this.name ?? this.xid;
     this.txtNote = this.labels ?? this.description ?? this.role ?? (this.properties ? Object.entries(this.properties) : '');
     
   }
   typeId() { return this.type ?? 'Entity'; }
-  keyId() { return this.id } // for local binding within this ontology
+  keyId() { return this.xid } // for local binding within this ontology
   uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
   bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
 
@@ -501,26 +576,26 @@ class Relation  {
     WeakBind.parentOf.set(this,ont);
 
     this.keys = {
-      id: obj.key ?? RandomId('R'),
+      xid: obj.key ?? RandomId('R'),
       // standardise keys for local binding within ontology
-      idEntityFrom: this.subject ?? this.from ?? this.sourceEntity,
-      idEntityTo: this.object ?? this.to ?? this.targetEntity,
-      idRelnType: this.predicate ?? this.type ?? this.cardinality ?? 'Relation'
+      xidEntityFrom: this.subject ?? this.from ?? this.sourceEntity,
+      xidEntityTo: this.object ?? this.to ?? this.targetEntity,
+      xidRelnType: this.predicate ?? this.type ?? this.cardinality ?? 'Relation'
     };
 
-    this.keys.uid =hashString(this.keys.id) + ont.uid;
+    this.keys.uid =hashString(this.keys.xid) + ont.uid;
     }
 
-  keyId() { return this.keys.id }
+  keyId() { return this.keys.xid }
   uniqueId() { return this.keys.uid } 
   toString() { return `${this._baseFrom.toString()} | ${this._baseType.toString()} | ${this._baseTo.toString()}` }
 
 
   // adapt to various names used in the source JSON data
 
-  typeId() { return this.keys.idRelnType }
-  fromId() { return this.keys.idEntityFrom }
-  toId() { return this.keys.idEntityTo }
+  typeId() { return this.keys.xidRelnType }
+  fromId() { return this.keys.xidEntityFrom }
+  toId() { return this.keys.xidEntityTo }
   bind(ont) { 
     this._baseFrom = ont.getEntity(this.fromId());
     this._baseTo = ont.getEntity(this.toId());
@@ -560,7 +635,7 @@ class LinkDatum {
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
   }
   
-  bindStyle(graph) { this._style = graph.getStyleGroup(this._base._baseType.id) }
+  bindStyle(graph) { this._style = graph.getStyleGroup(this._base._baseType.xid) }
 
   getParent() { return WeakBind.parentOf.get(this) }
 }
