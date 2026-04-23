@@ -52,7 +52,7 @@ async function OnChange() {
   console.log('new_ontologies',new_ontologies);
 
   // const 
-  graph = new GraphModel();
+  if (!(graph instanceof GraphModel)) graph = new GraphModel();
 // merge all ontologies into one D3-ready dataset
   for (const ont of new_ontologies) 
     graph.mergeOntology(ont);
@@ -66,15 +66,17 @@ async function OnChange() {
 async function OnChangeGraph() {
   
 const arr = Array.from(inputGraph.files); 
-const test_json = await read_json_file(arr[0]);
+const file = arr[0];
+const json = await read_json_file(file);
 
-test_graph = new GraphModel();
+if (!(graph instanceof GraphModel)) graph = new GraphModel();
 
-test_graph.upsertfromJson(test_json);
-create_view(test_graph);
-console.log(test_graph);
+graph.upsertfromJson(json,file);
+create_view(graph);
+console.log(graph);
 
 }
+//----------------------------------------------------------
 
 
 var test_graph;
@@ -83,7 +85,6 @@ input.addEventListener("change", OnChange);
 
 const inputGraph = document.getElementById("fileInputGraph");
 inputGraph.addEventListener("change", OnChangeGraph);
-
 
 //----------------------------------------------------------
 
@@ -175,24 +176,28 @@ class GraphModel {
 
   constructor() {
     this.sources = {};
-    this.nodes_dict = {};
-    this.links_dict = {};
+    this.nodes = {};
+    this.links = {};
     this.forces = [];  
-    this.layers_dict = {};
+    this.layers = {};
     this.addLayer(new LayerDatum('default',this));
   }
 
   // expose the nodes and links as datum arrays as expected by D3.
-  nodeData() { return Object.values(this.nodes_dict) }
-  linkData() { return Object.values(this.links_dict) }
+  nodeData() { return Object.values(this.nodes) }
+  linkData() { return Object.values(this.links) }
 
 
-  upsertfromJson(json) {
+  upsertfromJson(json,file) {
             // .conformJson(json) 
             // .addBindings();
     // TODO : replace these with proper upsert 
 
     this.forces = json.forces;  
+
+    const source = new Source(file,'GraphModel');
+
+    this.sources[source.uniqueId()] = source;
 
     Object.values(json.sources).forEach(d => {
       Object.setPrototypeOf(d,Source.prototype);
@@ -202,11 +207,11 @@ class GraphModel {
 
 
     // ingest new layers
-    Object.values(json.layers_dict).forEach(d => {
+    Object.values(json.layers).forEach(d => {
       Object.setPrototypeOf(d,LayerDatum.prototype);
       Object.setPrototypeOf(d.image,Image.prototype);
       d.types = new Set(d.types);
-      this.layers_dict[d.uniqueId()] = d;
+      this.layers[d.uniqueId()] = d;
       }
     );
 
@@ -214,22 +219,22 @@ class GraphModel {
   // any existing nodes with the same uid => VOIDS any unsaved edits
   // the graph's other nodes are left untouched
 
-    Object.values(json.nodes_dict).forEach(d => {
+    Object.values(json.nodes).forEach(d => {
       Object.setPrototypeOf(d,NodeDatum.prototype);
       Object.setPrototypeOf(d.base,Entity.prototype);
       if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
       d.bindLayer(this);
-      this.nodes_dict[d.uniqueId()] = d;
+      this.nodes[d.uniqueId()] = d;
       }
     ); 
 
-    Object.values(json.links_dict).forEach(d => {
+    Object.values(json.links).forEach(d => {
       Object.setPrototypeOf(d,LinkDatum.prototype);
       Object.setPrototypeOf(d.base,Relation.prototype);
-      d._datumFrom = this.nodes_dict[d.keys.uidDatumFrom];
-      d._datumTo = this.nodes_dict[d.keys.uidDatumTo];
+      d._datumFrom = this.nodes[d.keys.uidDatumFrom];
+      d._datumTo = this.nodes[d.keys.uidDatumTo];
       d.bindLayer(this);
-      this.links_dict[d.uniqueId()] = d;
+      this.links[d.uniqueId()] = d;
       }
     );
 
@@ -244,16 +249,16 @@ class GraphModel {
 
   addLayer(obj,aliases=[]) { 
     if (typeof obj == 'string') obj = new LayerDatum(obj,this);
-    this.layers_dict[obj.uniqueId()] = obj;
+    this.layers[obj.uniqueId()] = obj;
     obj.addAliases(aliases);
     return this;
   }
  
   getLayer(type_name) {
-    const found = Object.values(this.layers_dict)
+    const found = Object.values(this.layers)
       .filter(sg => sg.appliesTo(type_name));
 
-    if (found.length == 0) return this.layers_dict.default;
+    if (found.length == 0) return this.layers.default;
     else return found[0]; // just the first one 
   }
 
@@ -266,14 +271,25 @@ class GraphModel {
 
   downloadJSON(to_filename = "graph.json") {
     
-    const exclude_regex = new RegExp('^_', "i"); // skip any keys that start with underscore
+  // const ts = new Date().toLocaleString('sv');
+
+  //   this.info = {
+  //               uid: hashString(to_filename+ts),
+  //               fileName: to_filename,
+  //               lastModifiedDate: ts,
+  //               type: this.constructor.name,
+  //               editorVersion: 0.1
+  //       };
+
+        const exclude_regex = new RegExp('^_', "i"); // skip any keys that start with underscore
+
 
     const json = JSON.stringify(this, (key, value) => {
         if (exclude_regex.test(key)) return undefined;
         else {
           if (value instanceof Set) return [...value]; // convert
           if (typeof value === 'number') return Math.round(value*10000)/10000;
-          else return value;
+          else return value; // objects are already grouped by class, so no need to insert a __class hint in the output JSON
           } }, 2 );
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -292,13 +308,13 @@ class GraphModel {
 
     console.log("mergeOntology(bound_ont)",bound_ont);  
 
-    this.sources[bound_ont.uniqueId()] = bound_ont.source;
+    this.sources[bound_ont.source.uniqueId()] = bound_ont.source;
 
     const new_nodes = Object.values(bound_ont.entities).map(obj => new NodeDatum(obj,this)); 
-    new_nodes.forEach(d => this.nodes_dict[d.uniqueId()] = d);
+    new_nodes.forEach(d => this.nodes[d.uniqueId()] = d);
 
     const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
-    new_links.forEach(d => this.links_dict[d.uniqueId()] = d);
+    new_links.forEach(d => this.links[d.uniqueId()] = d);
 
     return this;
 
@@ -309,7 +325,7 @@ class GraphModel {
   addNode(obj) {
     const new_entity = Ontology.getDefault().addEntity(obj);
     const new_datum = new NodeDatum(new_entity,this);
-    return this.nodes_dict[new_datum.uniqueId()] = new_datum;
+    return this.nodes[new_datum.uniqueId()] = new_datum;
   }
 
   //---------------------------------------------------------------------------------
@@ -328,7 +344,7 @@ class GraphModel {
 
     const new_relation = new Relation(info,ont);
     const new_datum = new LinkDatum(new_relation,this);
-    this.links_dict[new_datum.uniqueId()] = new_datum;
+    this.links[new_datum.uniqueId()] = new_datum;
     return new_datum;
 
   }
@@ -338,12 +354,12 @@ class GraphModel {
 }
 
 class Source {
-
+  
   constructor(file,type) {
     Object.assign(this, {
           uid: hashString(file.name + file.lastModifiedDate.toString()),
           type,
-          readerVersion: 0.1,
+          editorVersion: 0.1,
           fileName: file.name,
           lastModifiedDate: file.lastModifiedDate.toString(),
           fileSize: file.size
@@ -502,7 +518,7 @@ class NodeDatum {
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
   toString() { return this.base.toString() }
   getParent() { return WeakBind.parentOf.get(this) }
-  bindLayer(graph) { this._layer = graph.getLayer(this.base.typeId()) }
+  bindLayer(graph) { this._datumLayer = graph.getLayer(this.base.typeId()) }
   addImage(url,xid='default') { 
     if (!this.images) this.images = {};
     const new_img = new Image(url);
@@ -693,8 +709,8 @@ class LinkDatum {
   uniqueId() { return this.keys.uidThis } 
 
   bind(graph) { 
-    this._datumFrom = graph.nodes_dict[this.base._baseFrom.uniqueId()];
-    this._datumTo = graph.nodes_dict[this.base._baseTo.uniqueId()];
+    this._datumFrom = graph.nodes[this.base._baseFrom.uniqueId()];
+    this._datumTo = graph.nodes[this.base._baseTo.uniqueId()];
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.keys = {
       uidDatumFrom: this._datumFrom.uniqueId(),
@@ -706,7 +722,7 @@ class LinkDatum {
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
   }
 
-  bindLayer(graph) { this._layer = graph.getLayer(this.keys.xidRelnType) }
+  bindLayer(graph) { this._datumLayer = graph.getLayer(this.keys.xidRelnType) }
 
   getParent() { return WeakBind.parentOf.get(this) }
 }
