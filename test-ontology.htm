@@ -194,8 +194,7 @@ class GraphModel {
     // TODO : replace these with proper upsert 
 
     this.forces = json.forces;  
-
-    const source = new Source(file,'GraphModel');
+    const source = new Source(file,'GraphModel',json.metadata);
 
     this.sources[source.uniqueId()] = source;
 
@@ -349,14 +348,15 @@ class GraphModel {
 
 class Source {
   
-  constructor(file,type) {
+  constructor(file,type,metadata) {
     Object.assign(this, {
           uid: hashString(file.name + file.lastModifiedDate.toString()),
           type,
           editorVersion: 0.1,
           fileName: file.name,
           lastModifiedDate: file.lastModifiedDate.toString(),
-          fileSize: file.size
+          fileSize: file.size,
+          metadata
         });
       }
 
@@ -421,6 +421,7 @@ class Ontology {
 
     // TODO: check - does it even look like an ontology? Maybe it's a graph?
     var
+        metadata,
         entities, 
         relations, 
         classes, 
@@ -429,9 +430,12 @@ class Ontology {
     const uid = hashString(file.name);
     const source = new Source(file,'Ontology');
 
+    if (json.metadata) metadata = json.metadata;
     if (json.entities) entities = json.entities;
     if (json.relations) relations = json.relations;
     if (json.classes) classes = json.classes;
+    if (json.predicates) predicates = json.predicates;
+
     if (json.ontology) {
         if (json.ontology.classes) classes = json.ontology.classes;
         if (json.ontology.entities) entities = json.ontology.entities;
@@ -439,7 +443,7 @@ class Ontology {
         if (json.ontology.relations) predicates = json.ontology.relations;
     }
 
-    return new Ontology({uid, source, entities, relations, classes, predicates}) ;
+    return new Ontology({uid, source, metadata, entities, relations, classes, predicates}) ;
 
   }
 //----------------------------------------------------------
@@ -468,15 +472,27 @@ class Ontology {
     ont.relations = Object.fromEntries(ont.relations);
 
     //----------------------------------------------------------
-    if (!Array.isArray(ont.classes)) ont.classes = Object.values(ont.entities).map(obj => obj.typeId()); 
-    ont.classes = [...new Set(ont.classes)]; // de-dupe the array
-    ont.classes = ont.classes.map(str => [str,new EntityType(str,ont)]);  
+
+    if (Array.isArray(ont.classes)) {
+      ont.classes = ont.classes.map(obj => new EntityType(obj,ont)); 
+      ont.classes = ont.classes.map(obj => [obj.keyId(),obj]);  
+    } else { // derive from Entities
+     ont.classes = Object.values(ont.entities).map(obj => obj.typeId()); 
+     ont.classes = [...new Set(ont.classes)]; // de-dupe the array - may be redundant?
+     ont.classes = ont.classes.map(str => [str,new EntityType(str,ont)]);  
+    }
     ont.classes = Object.fromEntries(ont.classes);
 
     //----------------------------------------------------------
-    if (!Array.isArray(ont.predicates)) ont.predicates = Object.values(ont.relations).map(obj => obj.typeId()); 
-    ont.predicates = [...new Set(ont.predicates)]; // de-dupe the array
-    ont.predicates = ont.predicates.map(str => [str, new RelationType(str,ont)]);  
+
+    if (Array.isArray(ont.predicates)) {
+      ont.predicates = ont.predicates.map(obj => new RelationType(obj,ont)); 
+      ont.predicates = ont.predicates.map(obj => [obj.keyId(),obj]);  
+      } else { // derive from Relations
+      ont.predicates = Object.values(ont.relations).map(obj => obj.typeId()); 
+      ont.predicates = [...new Set(ont.predicates)]; // de-dupe the array
+      ont.predicates = ont.predicates.map(str => [str, new RelationType(str,ont)]);  
+    }
     ont.predicates = Object.fromEntries(ont.predicates);
     //----------------------------------------------------------
     Object.values(ont.entities).forEach(ent => ent.bind(ont));
@@ -537,8 +553,8 @@ class NodeDatum {
 
 class CircleNode extends NodeDatum {
   // lightweight, prototype only, assigned dynamically at runtime (not recommended when performance matters)
-  // no need for a constructor?
   foobar() { return 'hello circle'}
+
 }
 
 //============================================================
@@ -558,8 +574,10 @@ class RectangleNode extends NodeDatum {
 // scale can be zoomed with mouse wheel
 
 class CollapsedRectangleNode extends RectangleNode {
-  constructor() {
-    this.super();
+
+  restore() {
+    // swap left,top,width,height into D3's node attributes
+
   }
 
 }
@@ -571,28 +589,23 @@ class CollapsedRectangleNode extends RectangleNode {
 // also preserves collapsed width,height for next zoom-out action
 
 class ExpandedRectangleNode extends RectangleNode {
-  constructor() {
-    this.super();
+
+  minimise() {
+    // swap left,top,width,height into D3's node attributes
   }
 
 }
 
-
-
 //============================================================
-// A 'passive' Euler region (with optional thumbnail, header text  but not body)
+// A 'passive' Euler region (with optional thumbnail, header html text  but not body)
 // position and shape are dictated by all its active children (floating or fixed)
 // floating non-members are then pushed out, by custom simulation force
 class ContourNode extends ExpandedRectangleNode {
-  constructor() {
-    this.super();
-  }
-
 
 }
 
 //============================================================
-// a fixed rectangle (with optional thumbnail, header text & body)
+// a locked/fixed rectangle (with optional thumbnail, header text & body)
 // left,top coords are fixed relative to its frame of reference
 // i.e. the lowest (innermost) fixed ancestor (else the viewport itself)
 // width & height are fixed (editable by mouse drag)
@@ -603,10 +616,6 @@ class ContourNode extends ExpandedRectangleNode {
 // directed lines.
 
 class FrameNode extends ExpandedRectangleNode {
-  constructor() {
-    this.super();
-  }
-
 
 }
 
@@ -675,15 +684,20 @@ class LayerDatum {
 //============================================================
 
 class RelationType {
-  constructor(str,ont) { 
-    this.xid = str;
+  constructor(obj,ont) { 
+    if (typeof(obj) == "string") 
+      this.xid = obj; 
+    else {
+      Object.assign(this,obj);
+      this.xid = obj.id;  
+    }
     this.uid = hashString(this.xid + ont.uid);
     WeakBind.parentOf.set(this,ont);
   }
 
   keyId() { return this.xid }
   uniqueId() { return this.uid } 
-  toString() { return this.xid }
+  toString() { return this.label ?? this.xid }
   getParent() { return WeakBind.parentOf.get(this) }
 
 }
@@ -691,14 +705,19 @@ class RelationType {
 //============================================================
 
 class EntityType {
-  constructor(str,ont) { 
-    this.xid = str; 
+  constructor(obj,ont) { 
+    if (typeof(obj) == "string") 
+      this.xid = obj; 
+    else {
+      Object.assign(this,obj);
+      this.xid = obj.id;  // TODO: defensive
+    }
     this.uid = hashString(this.xid + ont.uid);
     WeakBind.parentOf.set(this,ont);
   }
   keyId() { return this.xid } 
   uniqueId() { return this.uid } 
-  toString() { return this.xid }
+  toString() { return this.label ?? this.xid }
   getParent() { return WeakBind.parentOf.get(this) }
 
 }
@@ -725,11 +744,11 @@ class Entity {
 
     this.xid = this.id ?? key ?? obj.name ?? RandomId('E');
     this.uid = hashString(this.xid + ont.uid);
-    this.txtName = this.name ?? this.xid;
+    this.txtName = this.name ?? this.label ?? this.xid;
     this.txtNote = this.labels ?? this.description ?? this.role ?? (this.properties ? Object.entries(this.properties) : '');
     
   }
-  typeId() { return this.type ?? 'Entity'; }
+  typeId() { return this.type ?? this.class ?? 'Entity'; }
   keyId() { return this.xid } // for local binding within this ontology
   uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
   bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
