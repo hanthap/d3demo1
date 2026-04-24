@@ -56,7 +56,7 @@ async function OnChange() {
 // merge all ontologies into one D3-ready dataset
   for (const ont of new_ontologies) 
     graph.mergeOntology(ont);
-  console.log(graph);
+ // console.log(graph);
   embellish_graph(graph);
   create_view(graph);
   
@@ -224,6 +224,7 @@ class GraphModel {
       Object.setPrototypeOf(d.base,Entity.prototype);
       if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
       d.bindLayer(this);
+      d.setSubClass(); 
       this.nodes[d.uniqueId()] = d;
       }
     ); 
@@ -270,26 +271,18 @@ class GraphModel {
 
 
   downloadJSON(to_filename = "graph.json") {
-    
-  // const ts = new Date().toLocaleString('sv');
 
-  //   this.info = {
-  //               uid: hashString(to_filename+ts),
-  //               fileName: to_filename,
-  //               lastModifiedDate: ts,
-  //               type: this.constructor.name,
-  //               editorVersion: 0.1
-  //       };
-
-        const exclude_regex = new RegExp('^_', "i"); // skip any keys that start with underscore
-
+    const exclude_regex = new RegExp('^_', "i"); // skip any keys that start with underscore
 
     const json = JSON.stringify(this, (key, value) => {
         if (exclude_regex.test(key)) return undefined;
         else {
           if (value instanceof Set) return [...value]; // convert
           if (typeof value === 'number') return Math.round(value*10000)/10000;
-          else return value; // objects are already grouped by class, so no need to insert a __class hint in the output JSON
+          else return value; 
+          // objects are already grouped by base class, 
+          // setSubClass() will take care of the details
+          // no need to insert a __class hint in the output JSON
           } }, 2 );
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -312,7 +305,8 @@ class GraphModel {
 
     const new_nodes = Object.values(bound_ont.entities).map(obj => new NodeDatum(obj,this)); 
     new_nodes.forEach(d => this.nodes[d.uniqueId()] = d);
-
+    new_nodes.forEach(d => d.setSubClass()); // prototype does change, but not reflected in Edge DevTools console
+    
     const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
     new_links.forEach(d => this.links[d.uniqueId()] = d);
 
@@ -519,6 +513,14 @@ class NodeDatum {
   toString() { return this.base.toString() }
   getParent() { return WeakBind.parentOf.get(this) }
   bindLayer(graph) { this._datumLayer = graph.getLayer(this.base.typeId()) }
+  
+  setSubClass() { 
+    // TODO: decide which subclass I belong to, based on current properties
+    const newClass= this.x < 0.4 ? RectangleNode : CircleNode; 
+    Object.setPrototypeOf(this,newClass.prototype);      // de-optimises. not recommended when performance matters
+    return this;
+  }
+
   addImage(url,xid='default') { 
     if (!this.images) this.images = {};
     const new_img = new Image(url);
@@ -526,6 +528,89 @@ class NodeDatum {
     return new_img;
  }
  }
+
+//============================================================
+// simplest leaf node with no uncloaked children
+// displayed as <circle> with attributes x,y (same as D3 simulation)
+// usually includes a thumbnail image clipped to a circle
+// scale can be zoomed with mouse wheel
+
+class CircleNode extends NodeDatum {
+  // lightweight, prototype only, assigned dynamically at runtime (not recommended when performance matters)
+  // no need for a constructor?
+  foobar() { return 'hello circle'}
+}
+
+//============================================================
+// an abstract base class for container nodes
+// but <rect> attributes in SVG use left,top,width,height 
+// instead of centroid (x,y) as updated by D3 simulation
+class RectangleNode extends NodeDatum {
+  foobar() { return 'hello rect'}
+}
+
+//============================================================
+// a small rect with thumbnail only (or text) but no banner or stub
+// behaves as a leaf node but can be expanded by 'zooming in'
+// may be fixed or floating
+// also preserves expanded width,height for next zoom-in action
+// usually includes a thumbnail image clipped to a rect
+// scale can be zoomed with mouse wheel
+
+class CollapsedRectangleNode extends RectangleNode {
+  constructor() {
+    this.super();
+  }
+
+}
+
+
+
+//============================================================
+// handles foreignObject with html banner, stub, thumbnail and body 
+// also preserves collapsed width,height for next zoom-out action
+
+class ExpandedRectangleNode extends RectangleNode {
+  constructor() {
+    this.super();
+  }
+
+}
+
+
+
+//============================================================
+// A 'passive' Euler region (with optional thumbnail, header text  but not body)
+// position and shape are dictated by all its active children (floating or fixed)
+// floating non-members are then pushed out, by custom simulation force
+class ContourNode extends ExpandedRectangleNode {
+  constructor() {
+    this.super();
+  }
+
+
+}
+
+//============================================================
+// a fixed rectangle (with optional thumbnail, header text & body)
+// left,top coords are fixed relative to its frame of reference
+// i.e. the lowest (innermost) fixed ancestor (else the viewport itself)
+// width & height are fixed (editable by mouse drag)
+// limiting the movement of its active floating children
+// any fixed descendants move precisely in sync with this frame
+// what if there are 2 fixed ancestors at the same depth?
+// can't satisfy both with nested shape. All bar one have to revert to 
+// directed lines.
+
+class FrameNode extends ExpandedRectangleNode {
+  constructor() {
+    this.super();
+  }
+
+
+}
+
+
 
 //============================================================
 
