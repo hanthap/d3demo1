@@ -3,6 +3,7 @@
 
 <input type="file" title="Choose graph file" id="fileInputGraph" accept="application/json">
 
+<button type="button" onclick="graph.downloadJSON('test_output.json')">Download</button>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
@@ -101,9 +102,11 @@ graph
   .addLayer('part_of',['belongs_to_class'])
   .bindAllLayers();
 
-const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor', type: 'Person' };
+const nt = graph.getNodeType('Person'); // might default if 'Person' is not already registered
 
-const new_node = graph.addNode(node_spec);
+const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor' };
+
+const new_node = graph.addNode(node_spec,nt);
 new_node.addImage('Peter.jpg','main');
 
 const nodes = graph.nodeData(),
@@ -115,8 +118,6 @@ const nodes = graph.nodeData(),
 graph.addLink(link_spec);
 
 console.log(graph);
-
-graph.downloadJSON('test_output.json');
 
 
 }
@@ -178,15 +179,24 @@ class GraphModel {
     this.sources = {};
     this.nodes = {};
     this.links = {};
-    this.forces = [];  
+    this.forces = {};  
     this.layers = {};
+    this.scenes = {};
+    this.episodes = {};
+    this.studies = {};
+    this.linkTypes = {};
+    this.nodeTypes = {}; 
     this.addLayer(new LayerDatum('default',this));
+    // TODO: this avoids runtime errors but after rehydrating we still get a spurious nodeType with hashstring as its uniqueId
+    this.nodeTypes.default = new NodeType({xid:'Unknown'},this);
+
   }
 
   // expose the nodes and links as datum arrays as expected by D3.
   nodeData() { return Object.values(this.nodes) }
   linkData() { return Object.values(this.links) }
 
+//------------------------------------------------------------------\
 
   upsertfromJson(json,file) {
             // .conformJson(json) 
@@ -204,7 +214,6 @@ class GraphModel {
       }
     );
 
-
     // ingest new layers
     Object.values(json.layers).forEach(d => {
       Object.setPrototypeOf(d,LayerDatum.prototype);
@@ -213,6 +222,16 @@ class GraphModel {
       this.layers[d.uniqueId()] = d;
       }
     );
+
+    // ingest new nodeTypes (required before adding nodes)
+    Object.values(json.nodeTypes).forEach(d => {
+      Object.setPrototypeOf(d,NodeType.prototype);
+      this.nodeTypes[d.uniqueId()] = d;
+      }
+    );
+
+// TODO: ingest new LinkTypes, Scenes, Episodes, Studies
+
 
   // apply classes without executing constructors and immediately insert/replace
   // any existing nodes with the same uid => VOIDS any unsaved edits
@@ -223,6 +242,7 @@ class GraphModel {
       Object.setPrototypeOf(d.base,Entity.prototype);
       if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
       d.bindLayer(this);
+      d.bind(this); // explicit, because we bypassed the constructor!
       d.setSubClass(); 
       this.nodes[d.uniqueId()] = d;
       }
@@ -234,6 +254,7 @@ class GraphModel {
       d._datumFrom = this.nodes[d.keys.uidDatumFrom];
       d._datumTo = this.nodes[d.keys.uidDatumTo];
       d.bindLayer(this);
+      // d.bind(this); // TODO: use a rehydration method instead.
       this.links[d.uniqueId()] = d;
       }
     );
@@ -242,10 +263,13 @@ class GraphModel {
 
   }
 
+  //------------------------------------------------------------------
+
   addBindings() {
 
   }
 
+//------------------------------------------------------------------
 
   addLayer(obj,aliases=[]) { 
     if (typeof obj == 'string') obj = new LayerDatum(obj,this);
@@ -253,7 +277,18 @@ class GraphModel {
     obj.addAliases(aliases);
     return this;
   }
- 
+
+//------------------------------------------------------------------
+
+  addNodeType(obj) { 
+    if (typeof obj == 'string') obj = new NodeType(obj,this);
+    this.nodeTypes[obj.uniqueId()] = obj;
+    return this;
+  }
+
+
+  //------------------------------------------------------------------
+  
   getLayer(type_name) {
     const found = Object.values(this.layers)
       .filter(sg => sg.appliesTo(type_name));
@@ -262,12 +297,36 @@ class GraphModel {
     else return found[0]; // just the first one 
   }
 
-  bindAllLayers() {
+  //------------------------------------------------------------------
+
+
+  getNodeType(type_name) {
+    const found = Object.values(this.nodeTypes)
+      .filter(nt => nt.nameMatches(type_name));
+
+    if (found.length == 0) return this.nodeTypes.default; // created during constructor
+    else return found[0]; // just the first one 
+  }
+
+
+  //------------------------------------------------------------------
+
+  bindAllLayers() { // to be invoked after user-initiated change of type-to-layer mapping
     this.nodeData().forEach(d => d.bindLayer(this));
     this.linkData().forEach(d => d.bindLayer(this));
     return this;
     }
 
+  //------------------------------------------------------------------
+
+  bindAll() { // one-time re-hydration
+    this.nodeData().forEach(d => d.bind(this));
+    this.linkData().forEach(d => d.bind(this));
+    return this;
+    }
+
+
+  //------------------------------------------------------------------
 
   downloadJSON(to_filename = "graph.json") {
 
@@ -293,7 +352,6 @@ class GraphModel {
     URL.revokeObjectURL(url);
   }
 
-
   //----------------------------------------------------------
 
   mergeOntology(bound_ont) { 
@@ -302,6 +360,9 @@ class GraphModel {
 
     this.sources[bound_ont.source.uniqueId()] = bound_ont.source;
 
+    const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new NodeType(obj,this)); 
+    new_nodeTypes.forEach(d => this.nodeTypes[d.uniqueId()] = d);
+
     const new_nodes = Object.values(bound_ont.entities).map(obj => new NodeDatum(obj,this)); 
     new_nodes.forEach(d => this.nodes[d.uniqueId()] = d);
     new_nodes.forEach(d => d.setSubClass()); // prototype does change, but not reflected in Edge DevTools console
@@ -309,15 +370,18 @@ class GraphModel {
     const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
     new_links.forEach(d => this.links[d.uniqueId()] = d);
 
+
+  
     return this;
 
   }
 
   //---------------------------------------------------------------------------------
 
-  addNode(obj) {
+  addNode(obj,nodeType) {
     const new_entity = Ontology.getDefault().addEntity(obj);
     const new_datum = new NodeDatum(new_entity,this);
+    new_datum.setNodeType(nodeType);
     return this.nodes[new_datum.uniqueId()] = new_datum;
   }
 
@@ -380,7 +444,13 @@ class Ontology {
   getEntityType(str) { return this.classes[str] ?? (this.classes[str] = new EntityType(str,this)) }
   getRelationType(str) { return this.predicates[str] ?? (this.predicates[str] = new RelationType(str,this)) }
   getEntity(str) { return this.entities[str] ?? (this.entities[str] = new Entity(str,this)).bind(this) }
-  addEntity(obj,key) { return this.entities[key] = (new Entity(obj,this)).bind(this) }
+  addEntity(obj,key) { 
+      key = key ?? obj.xid ?? obj.id;
+      const e = new Entity(obj,this);
+      e.bind(this); 
+      this.entities[key] = e;
+      return e;
+    }
   
   // REQUIRES that .baseFrom, .baseTo and .baseType are ALREADY defined in obj
   // i.e it is called from GraphModel.addLink()
@@ -517,18 +587,35 @@ class NodeDatum {
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.keys = {
       uidEntity: this.base.uniqueId(),
-      uidEntityType: this.base._type.uniqueId(),
-      xidEntityType: this.base._type.keyId()
+ //     uidEntityType: this.base._type.uniqueId(),
+      xidEntityType: this.base._type.keyId(),
+      uidNodeType: this.base._type.uniqueId()
+  
     }
-
+    this.bind(graph); // ASSUMES graph.nodeTypes is already populated
     this.bindLayer(graph);
+
   }
 // TODO: re-bind after ontology is reloaded.
 
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
-  toString() { return this.base.toString() }
+  toString() { return `${this._datumType.toString()}: ${this.base.toString()}` }
   getParent() { return WeakBind.parentOf.get(this) }
-  bindLayer(graph) { this._datumLayer = graph.getLayer(this.base.typeId()) }
+
+  bindLayer(graph) { // can vary during session if user edits type-to-layer mapping rules
+    this._datumLayer = graph.getLayer(this.base.typeId()); // TODO: should use _datumType in case of name collision
+    return this;
+  }
+
+  bind(graph) { // static bindings
+    this._datumType = graph.nodeTypes[this.keys.uidNodeType];
+  }
+
+  setNodeType(nodeType) {
+    this._datumType = nodeType;
+    this.keys.uidNodeType = nodeType.uniqueId();  // otherwise rehydration fails
+    return this;
+  }
   
   setSubClass() { 
     // TODO: decide which subclass I belong to, based on current properties
@@ -619,6 +706,29 @@ class FrameNode extends ExpandedRectangleNode {
 
 }
 
+//============================================================
+
+
+class NodeType {
+  constructor(obj,graph) {
+
+  //   if (typeof(obj) == "string") 
+  //     this.xid = obj; 
+  //   else {
+  //     Object.assign(this,obj);
+  // //    this.xid = obj.id;  
+  //   }
+    this.uid = hashString(this.xid + graph.uid);
+
+    Object.assign(this,obj);
+    WeakBind.parentOf.set(this,graph);
+    return this;
+  }
+
+  uniqueId() { return this.uid }
+  toString() { return this.label ?? this.xid ?? this.uid }
+  nameMatches(type_name) { return this.toString() == type_name }
+}
 
 
 //============================================================
@@ -704,9 +814,12 @@ class RelationType {
 
 //============================================================
 
+
+
+
 class EntityType {
   constructor(obj,ont) { 
-    if (typeof(obj) == "string") 
+    if (typeof(obj) == 'string') 
       this.xid = obj; 
     else {
       Object.assign(this,obj);
@@ -750,10 +863,11 @@ class Entity {
   }
   typeId() { return this.type ?? this.class ?? 'Entity'; }
   keyId() { return this.xid } // for local binding within this ontology
-  uniqueId() { return this.uid } // used by d3, and to bind graph nodes & links across ontologies
+  uniqueId() { return this.uid } // used by d3, and to safely bind across ontologies without name collisions
   bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
 
-  toString() { return `${this.typeId()}: ${this.txtName}: ${this.txtNote}` }
+//  toString() { return `${this._type.toString()}: ${this.txtName}: ${this.txtNote}` }
+  toString() { return `${this.txtName}: ${this.txtNote}` } // NodeDatum.toString() will add descriptor via _datumType
   getParent() { return WeakBind.parentOf.get(this) }
 }
 
@@ -809,10 +923,14 @@ class LinkDatum {
     WeakBind.parentOf.set(this,graph);
 
  }
-  toString() { return `${this._datumFrom.toString()} | ${this.base.typeId()} | ${this._datumTo.toString()}` } 
+//  toString() { return `${this._datumFrom.toString()} | ${this.base._baseType.toString()} | ${this._datumTo.toString()}` } 
+  toString() { return `${this._datumFrom.toString()} | LINKTYPE LOGIC TBA | ${this._datumTo.toString()}` } 
+
+
   uniqueId() { return this.keys.uidThis } 
 
-  bind(graph) { 
+  // this only works when merging Ontology. not when rehydrating a saved Graph json
+  bind(graph) {  // TODO: use _datumFrom instead of base? 
     this._datumFrom = graph.nodes[this.base._baseFrom.uniqueId()];
     this._datumTo = graph.nodes[this.base._baseTo.uniqueId()];
     // capture robust keys to enable re-binding eg after ontology is refreshed
@@ -830,6 +948,39 @@ class LinkDatum {
 
   getParent() { return WeakBind.parentOf.get(this) }
 }
+
+//============================================================
+
+class Scene { // aka Context
+// each scene is a saved, named editable collection of links (and their nodes) that are illuminated 'in foreground' (uncloaked)
+// scenes can be arranged in sequence and grouped into episodes
+// optionally, edges (and their vertices) from other scenes (past or future) can be 'alluded to' semi-present as 'grey ghosts' 
+// some links are always subtext, never stated
+// user can explore analyse one scene, or an arbitrary selection of them
+// the results can be saved as a 'study'
+// each scene belongs to one episode (but can be in many studies)
+// a link can be illuminated or alluded to in many scenes
+}
+
+
+//============================================================
+
+class Study { // aka Interpretation, Analysis, Discussion
+  // a saved & named selection of multiple scenes, from different episodes,
+  // maybe with notes & comments?
+  // a study can highlight links directly and attach futher meaning?
+}
+
+//============================================================
+
+class Episode { // aka chapter or Act or Movement
+  // a saved & named selection of scenes (or episodes), in sequence
+  // tree to any depth - Table of Contents
+}
+
+
+
+
 
 //============================================================
 
