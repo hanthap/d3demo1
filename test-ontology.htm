@@ -7,6 +7,7 @@ Graphs <input type="file" title="Graph" id="fileInputGraph" accept="application/
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
+
 <script>
 var graph, ont, selPara;
 
@@ -75,7 +76,7 @@ if (!(graph instanceof GraphModel)) graph = new GraphModel();
 
 graph.upsertfromJson(json,file);
 create_view(graph);
-console.log(graph);
+console.log(Workspace.graphs);
 
 }
 
@@ -131,23 +132,50 @@ console.log(graph);
 
 //----------------------------------------------------------
 
+
+class ReadOnlyListener {
+
+static OnClick(e) {
+  const d = e.srcElement.__data__;
+  if (d) {
+  console.log(e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
+  }
+
+}
+
+}
+
+
+//----------------------------------------------------------
+
 function create_view(graph) {
 
+  const listener = ReadOnlyListener;
   const body = d3.select('body');
+  body.on('click',listener.OnClick);
 
-  // selPara = body.selectAll('p')
-  //   .data(graph.nodeData(),d=>d.uniqueId())
-  //   .join('p')
-  //   .attr('id',d=>d.uniqueId())
-  //   .text(d=>d.toString())
-  //   ;
-
-selPara = body.selectAll('p')
+  selPara = body.selectAll('p')
     .data(graph.linkData(),d=>d.uniqueId())
     .join('p')
     .attr('id',d=>d.uniqueId())
     .text(d=>d.toString())
+
     ;
+// what's the cleanest way to keep all 'edit' functions in a separate JS file
+// so it can be either included or removed with a single comment
+// and if included, can be disabled/enabled at the press of a key (to preview the 'explore only' mode)
+
+
+// working backwards from the UI, we want a function that adds event listeners
+// globally at the document level, so they don't have to be manipulated per node  etc.
+// but where we use classes & OOP paradigm - polymorphism
+// which event listeners depends on which JS files are included
+// "read static graph (no forces, no 
+// eg. "explore this graph html using mouse" (embedded JS data, no json read, no edit, no save) 
+// "open & edit graph.json" (but no merge), then save edits, re-open and continue editing. 
+// vs "import & merge (multiple ontologies or graphs)" - no need for GUI.
+
+
 
   return selPara;
 
@@ -171,51 +199,87 @@ class WeakBind {
 
 //============================================================
 
+class Workspace {
+    static graphs = {};
+  
+  static loadGraph(filename,dateString,json_obj) {
+    const graph = new GraphModel();
+    // TODO: clean up this!
+    const file = { name: filename, lastModifiedDate: dateString };
+    const metadata = { sources: [] };
+    const source = new Source(file,'Javascript',metadata);
+    json_obj.metadata = json_obj.metadata ?? { sources: [source] };
+    graph.upsertfromJson(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
+    Workspace.graphs[source.uniqueId()] = graph;
+  }
+
+}
+
+//============================================================
+
 // each graph model has its own private set of D3 node coords, cloaking status etc as updated by user events & simulation
 // usually only one simulation per model but that's not a system constraint
 // it has one svg viewport
 
+// A graph can be exported as json file 
+// or as a .js file that assigns it to a variable - can then be included as an embedded script for autoload.
+
 class GraphModel {
 
-  constructor() {
-    this.metadata = { sources: {} };
-    this.nodes = {};
-    this.links = {};
-    this.forces = {};  
-    this.layers = {};
-    this.scenes = {};
-    this.episodes = {};
-    this.studies = {};
-    this.linkTypes = {};
-    this.nodeTypes = {}; 
-    this.addLayer(new LayerDatum('default',this));
-    this.nodeTypes.default = new NodeType({xid:'Unknown'},this);
-    this.linkTypes.default = new LinkType({xid:'Unknown'},this);
+  constructor(obj=null) {
+    if (obj) {
+      Object.assign(this,obj);
+      // TODO: rehydrate
+
+    }
+    else {
+      this.metadata = { sources: {} };
+      this.nodes = {};
+      this.links = {};
+      this.forces = {};  
+      this.layers = {};
+      this.scenes = {};
+      this.episodes = {};
+      this.studies = {};
+      this.linkTypes = {};
+      this.nodeTypes = {}; 
+      this.addLayer(new LayerDatum('default',this));
+      this.nodeTypes.default = new NodeType({xid:'Unknown'},this);
+      this.linkTypes.default = new LinkType({xid:'Unknown'},this);
+    }
 
   }
+
+//------------------------------------------------------------------\
 
   // expose the nodes and links as datum arrays as expected by D3.
   nodeData() { return Object.values(this.nodes) }
   linkData() { return Object.values(this.links) }
+  uniqueId()  { return 'TBA' };
 
 //------------------------------------------------------------------\
 
-  upsertfromJson(json,file) {
+// TODO: misnomer, in that "json" is already an object - just needs to be rehydrated.
+// 2 steps, rehydrate the json object first, then fold it into this graph
+// should be 2 distinct methods
+
+  upsertfromJson(json,source=null) { 
             // .conformJson(json) 
             // .addBindings();
     // TODO : replace these with proper upsert 
 
     this.forces = json.forces;  
-    const source = new Source(file,'GraphModel',json.metadata);
 
+
+    // TODO : how best to handle embedded js model
+    if (!source) source = new Source(file,'GraphModel',json.metadata);
     this.metadata.sources[source.uniqueId()] = source;
-
     Object.values(json.metadata.sources).forEach(d => {
       Object.setPrototypeOf(d,Source.prototype);
       this.metadata.sources[d.uniqueId()] = d;
-      }
+      } 
     );
-
+  
     // ingest new layers
     Object.values(json.layers).forEach(d => {
       Object.setPrototypeOf(d,LayerDatum.prototype);
@@ -959,24 +1023,29 @@ class LinkDatum {
 
 //============================================================
 
-class Scene { // aka Context
-// each scene is a saved, named editable collection of links (and their nodes) that are illuminated 'in foreground' (uncloaked)
+class Scene { // aka Context 
+// each scene is a named, editable collection of links (and their nodes) that are illuminated 'in foreground' (uncloaked)
+// saved within a GraphModel. 
 // scenes can be arranged in sequence and grouped into episodes
 // optionally, edges (and their vertices) from other scenes (past or future) can be 'alluded to' semi-present as 'grey ghosts' 
 // some links are always subtext, never stated
-// user can explore analyse one scene, or an arbitrary selection of them
-// the results can be saved as a 'study'
-// each scene belongs to one episode (but can be in many studies)
+// user can explore analyse one scene, or an arbitrary selection of them in combination
+// the results can be saved as a 'study' (view)
+// each scene belongs to one episode (but can be included in many studies)
 // a link can be illuminated or alluded to in many scenes
 }
 
 
 //============================================================
 
-class Study { // aka Interpretation, Analysis, Discussion
+class Study { // aka Interpretation, Analysis, Discussion, Project
   // a saved & named selection of multiple scenes, from different episodes,
   // maybe with notes & comments?
+  // defined at 'workspace' level - the Workspace can include several Graphs
+  
   // a study can highlight links directly and attach futher meaning?
+  // a study can be saved to a separate file, with references to the graph/s that need to be imported
+  // webpages can't auto-load 
 }
 
 //============================================================
@@ -993,5 +1062,16 @@ function RandomId(prefix) {
 }
 
 //----------------------------------------------------------
+
+</script>
+
+<script src="graphs\psychology.js"></script>
+<script src="graphs\hamlet.js"></script>
+<script src="graphs\RipVanWinkle.js"></script>
+
+<script>
+console.log(Workspace.graphs);
+const graph0 = Object.values(Workspace.graphs)[0];
+create_view(graph0);
 
 </script>

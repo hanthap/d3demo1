@@ -1,0 +1,7798 @@
+Workspace.loadGraph( 'psychology.js', '28-Apr-2026', 
+{
+  "metadata": {
+    "sources": {
+      "0770b161": {
+        "uid": "0770b161",
+        "type": "Ontology",
+        "editorVersion": 0.1,
+        "fileName": "psychology.json",
+        "lastModifiedDate": "Fri Apr 24 2026 16:40:16 GMT+1000 (Australian Eastern Standard Time)",
+        "fileSize": 40079,
+        "metadata": {
+          "abstract": "This ontology summarizes mainstream theoretical frameworks in modern neuroscience and psychology by organizing them into interrelated classes, entities, predicates, and relations. It spans behaviorist, cognitive, computational, dynamical, Bayesian, predictive processing, embodied, social, developmental, and clinical perspectives, as well as major theories of consciousness and decision-making. Each framework is represented alongside its core constructs, canonical models, and characteristic explanatory targets, such as perception, action, learning, memory, emotion, and social cognition. The ontology highlights how different traditions emphasize levels of analysis—from neural circuits and population codes to cognitive architectures and ecological interactions—and how they connect through shared constructs like representation, prediction, control, and plasticity. By encoding these links as explicit relations, the ontology supports comparative reasoning about theories, clarifies overlaps and tensions between paradigms, and offers a structured scaffold for integrating empirical findings, computational models, and philosophical interpretations across contemporary neuroscience and psychology.",
+          "prompt": "Summarise the mainstream theoretical frameworks in modern neuroscience and psychology. Output as an ontology in JSON format, with at least 300 distinct entities and/or relations. Include top level objects for classes, entities, predicates and relations. Also include a top-level metadata object containing a 150-word abstract and this verbatim prompt. Make sure each relation's \"from\" and \"to\" entities are both included in the JSON data."
+        }
+      }
+    }
+  },
+  "nodes": {
+    "14725562": {
+      "base": {
+        "id": "E_CognitiveFlexibility",
+        "label": "Cognitive Flexibility",
+        "class": "C_Construct",
+        "xid": "E_CognitiveFlexibility",
+        "uid": "14725562",
+        "txtName": "Cognitive Flexibility",
+        "txtNote": ""
+      },
+      "x": 0.8706,
+      "keys": {
+        "uidEntity": "14725562",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "62652952": {
+      "base": {
+        "id": "E_MEG",
+        "label": "Magnetoencephalography",
+        "class": "C_Method",
+        "xid": "E_MEG",
+        "uid": "62652952",
+        "txtName": "Magnetoencephalography",
+        "txtNote": ""
+      },
+      "x": 0.5055,
+      "keys": {
+        "uidEntity": "62652952",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "88288013": {
+      "base": {
+        "id": "E_AttachmentStyle",
+        "label": "Attachment Style",
+        "class": "C_Construct",
+        "xid": "E_AttachmentStyle",
+        "uid": "88288013",
+        "txtName": "Attachment Style",
+        "txtNote": ""
+      },
+      "x": 0.4587,
+      "keys": {
+        "uidEntity": "88288013",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "99941472": {
+      "base": {
+        "id": "E_McClelland",
+        "label": "James McClelland",
+        "class": "C_Person",
+        "xid": "E_McClelland",
+        "uid": "99941472",
+        "txtName": "James McClelland",
+        "txtNote": ""
+      },
+      "x": 0.1146,
+      "keys": {
+        "uidEntity": "99941472",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "052c60ca": {
+      "base": {
+        "id": "E_Neuroscience",
+        "label": "Neuroscience",
+        "class": "C_Discipline",
+        "xid": "E_Neuroscience",
+        "uid": "052c60ca",
+        "txtName": "Neuroscience",
+        "txtNote": ""
+      },
+      "x": 0.8863,
+      "keys": {
+        "uidEntity": "052c60ca",
+        "xidEntityType": "C_Discipline",
+        "uidNodeType": "85e69571"
+      }
+    },
+    "b943343e": {
+      "base": {
+        "id": "E_Psychology",
+        "label": "Psychology",
+        "class": "C_Discipline",
+        "xid": "E_Psychology",
+        "uid": "b943343e",
+        "txtName": "Psychology",
+        "txtNote": ""
+      },
+      "x": 0.5597,
+      "keys": {
+        "uidEntity": "b943343e",
+        "xidEntityType": "C_Discipline",
+        "uidNodeType": "85e69571"
+      }
+    },
+    "b07720a6": {
+      "base": {
+        "id": "E_Behaviorism",
+        "label": "Behaviorism",
+        "class": "C_Framework",
+        "xid": "E_Behaviorism",
+        "uid": "b07720a6",
+        "txtName": "Behaviorism",
+        "txtNote": ""
+      },
+      "x": 0.542,
+      "keys": {
+        "uidEntity": "b07720a6",
+        "xidEntityType": "C_Framework",
+        "uidNodeType": "f06487e7"
+      }
+    },
+    "241a67b6": {
+      "base": {
+        "id": "E_RadicalBehaviorism",
+        "label": "Radical Behaviorism",
+        "class": "C_Theory",
+        "xid": "E_RadicalBehaviorism",
+        "uid": "241a67b6",
+        "txtName": "Radical Behaviorism",
+        "txtNote": ""
+      },
+      "x": 0.3744,
+      "keys": {
+        "uidEntity": "241a67b6",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "447505fd": {
+      "base": {
+        "id": "E_OperantConditioning",
+        "label": "Operant Conditioning",
+        "class": "C_Theory",
+        "xid": "E_OperantConditioning",
+        "uid": "447505fd",
+        "txtName": "Operant Conditioning",
+        "txtNote": ""
+      },
+      "x": 0.7829,
+      "keys": {
+        "uidEntity": "447505fd",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "7bcf4ec7": {
+      "base": {
+        "id": "E_ClassicalConditioning",
+        "label": "Classical Conditioning",
+        "class": "C_Theory",
+        "xid": "E_ClassicalConditioning",
+        "uid": "7bcf4ec7",
+        "txtName": "Classical Conditioning",
+        "txtNote": ""
+      },
+      "x": 0.4216,
+      "keys": {
+        "uidEntity": "7bcf4ec7",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "c53171a1": {
+      "base": {
+        "id": "E_Stimulus",
+        "label": "Stimulus",
+        "class": "C_Construct",
+        "xid": "E_Stimulus",
+        "uid": "c53171a1",
+        "txtName": "Stimulus",
+        "txtNote": ""
+      },
+      "x": 0.9984,
+      "keys": {
+        "uidEntity": "c53171a1",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "75313a9e": {
+      "base": {
+        "id": "E_Response",
+        "label": "Response",
+        "class": "C_Construct",
+        "xid": "E_Response",
+        "uid": "75313a9e",
+        "txtName": "Response",
+        "txtNote": ""
+      },
+      "x": 0.5677,
+      "keys": {
+        "uidEntity": "75313a9e",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "7e414f22": {
+      "base": {
+        "id": "E_Reinforcement",
+        "label": "Reinforcement",
+        "class": "C_Construct",
+        "xid": "E_Reinforcement",
+        "uid": "7e414f22",
+        "txtName": "Reinforcement",
+        "txtNote": ""
+      },
+      "x": 0.962,
+      "keys": {
+        "uidEntity": "7e414f22",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "a4f1c2f6": {
+      "base": {
+        "id": "E_Punishment",
+        "label": "Punishment",
+        "class": "C_Construct",
+        "xid": "E_Punishment",
+        "uid": "a4f1c2f6",
+        "txtName": "Punishment",
+        "txtNote": ""
+      },
+      "x": 0.0667,
+      "keys": {
+        "uidEntity": "a4f1c2f6",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "c5dba1bb": {
+      "base": {
+        "id": "E_Skinner",
+        "label": "B. F. Skinner",
+        "class": "C_Person",
+        "xid": "E_Skinner",
+        "uid": "c5dba1bb",
+        "txtName": "B. F. Skinner",
+        "txtNote": ""
+      },
+      "x": 0.0254,
+      "keys": {
+        "uidEntity": "c5dba1bb",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "d927d34f": {
+      "base": {
+        "id": "E_Pavlov",
+        "label": "Ivan Pavlov",
+        "class": "C_Person",
+        "xid": "E_Pavlov",
+        "uid": "d927d34f",
+        "txtName": "Ivan Pavlov",
+        "txtNote": ""
+      },
+      "x": 0.8903,
+      "keys": {
+        "uidEntity": "d927d34f",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "3fcdc2ff": {
+      "base": {
+        "id": "E_BehavioralTherapy",
+        "label": "Behavioral Therapy",
+        "class": "C_ClinicalFramework",
+        "xid": "E_BehavioralTherapy",
+        "uid": "3fcdc2ff",
+        "txtName": "Behavioral Therapy",
+        "txtNote": ""
+      },
+      "x": 0.2187,
+      "keys": {
+        "uidEntity": "3fcdc2ff",
+        "xidEntityType": "C_ClinicalFramework",
+        "uidNodeType": "9f72eae8"
+      }
+    },
+    "0bc4d8ed": {
+      "base": {
+        "id": "E_Cognitivism",
+        "label": "Cognitivism",
+        "class": "C_Framework",
+        "xid": "E_Cognitivism",
+        "uid": "0bc4d8ed",
+        "txtName": "Cognitivism",
+        "txtNote": ""
+      },
+      "x": 0.3757,
+      "keys": {
+        "uidEntity": "0bc4d8ed",
+        "xidEntityType": "C_Framework",
+        "uidNodeType": "f06487e7"
+      }
+    },
+    "2ec03a9a": {
+      "base": {
+        "id": "E_InformationProcessing",
+        "label": "Information Processing Approach",
+        "class": "C_Theory",
+        "xid": "E_InformationProcessing",
+        "uid": "2ec03a9a",
+        "txtName": "Information Processing Approach",
+        "txtNote": ""
+      },
+      "x": 0.2986,
+      "keys": {
+        "uidEntity": "2ec03a9a",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "6e6f185d": {
+      "base": {
+        "id": "E_WorkingMemory",
+        "label": "Working Memory",
+        "class": "C_Construct",
+        "xid": "E_WorkingMemory",
+        "uid": "6e6f185d",
+        "txtName": "Working Memory",
+        "txtNote": ""
+      },
+      "x": 0.5397,
+      "keys": {
+        "uidEntity": "6e6f185d",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "6e9ec3b8": {
+      "base": {
+        "id": "E_LongTermMemory",
+        "label": "Long-Term Memory",
+        "class": "C_Construct",
+        "xid": "E_LongTermMemory",
+        "uid": "6e9ec3b8",
+        "txtName": "Long-Term Memory",
+        "txtNote": ""
+      },
+      "x": 0.6541,
+      "keys": {
+        "uidEntity": "6e9ec3b8",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "59e90b6b": {
+      "base": {
+        "id": "E_Attention",
+        "label": "Attention",
+        "class": "C_Construct",
+        "xid": "E_Attention",
+        "uid": "59e90b6b",
+        "txtName": "Attention",
+        "txtNote": ""
+      },
+      "x": 0.1669,
+      "keys": {
+        "uidEntity": "59e90b6b",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "73f9afa3": {
+      "base": {
+        "id": "E_MentalRepresentation",
+        "label": "Mental Representation",
+        "class": "C_Representation",
+        "xid": "E_MentalRepresentation",
+        "uid": "73f9afa3",
+        "txtName": "Mental Representation",
+        "txtNote": ""
+      },
+      "x": 0.4143,
+      "keys": {
+        "uidEntity": "73f9afa3",
+        "xidEntityType": "C_Representation",
+        "uidNodeType": "edcfb1da"
+      }
+    },
+    "96915c6a": {
+      "base": {
+        "id": "E_CognitiveArchitecture",
+        "label": "Cognitive Architecture",
+        "class": "C_Model",
+        "xid": "E_CognitiveArchitecture",
+        "uid": "96915c6a",
+        "txtName": "Cognitive Architecture",
+        "txtNote": ""
+      },
+      "x": 0.1394,
+      "keys": {
+        "uidEntity": "96915c6a",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "800ea984": {
+      "base": {
+        "id": "E_Newell",
+        "label": "Allen Newell",
+        "class": "C_Person",
+        "xid": "E_Newell",
+        "uid": "800ea984",
+        "txtName": "Allen Newell",
+        "txtNote": ""
+      },
+      "x": 0.8513,
+      "keys": {
+        "uidEntity": "800ea984",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "5aabf9eb": {
+      "base": {
+        "id": "E_Simon",
+        "label": "Herbert Simon",
+        "class": "C_Person",
+        "xid": "E_Simon",
+        "uid": "5aabf9eb",
+        "txtName": "Herbert Simon",
+        "txtNote": ""
+      },
+      "x": 0.8041,
+      "keys": {
+        "uidEntity": "5aabf9eb",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "bec899bc": {
+      "base": {
+        "id": "E_Connectionism",
+        "label": "Connectionism",
+        "class": "C_Framework",
+        "xid": "E_Connectionism",
+        "uid": "bec899bc",
+        "txtName": "Connectionism",
+        "txtNote": ""
+      },
+      "x": 0.664,
+      "keys": {
+        "uidEntity": "bec899bc",
+        "xidEntityType": "C_Framework",
+        "uidNodeType": "f06487e7"
+      }
+    },
+    "54ba7524": {
+      "base": {
+        "id": "E_ArtificialNeuralNetwork",
+        "label": "Artificial Neural Network",
+        "class": "C_Model",
+        "xid": "E_ArtificialNeuralNetwork",
+        "uid": "54ba7524",
+        "txtName": "Artificial Neural Network",
+        "txtNote": ""
+      },
+      "x": 0.2602,
+      "keys": {
+        "uidEntity": "54ba7524",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "23c5f562": {
+      "base": {
+        "id": "E_HebbianLearning",
+        "label": "Hebbian Learning",
+        "class": "C_LearningRule",
+        "xid": "E_HebbianLearning",
+        "uid": "23c5f562",
+        "txtName": "Hebbian Learning",
+        "txtNote": ""
+      },
+      "x": 0.7123,
+      "keys": {
+        "uidEntity": "23c5f562",
+        "xidEntityType": "C_LearningRule",
+        "uidNodeType": "e3b9f061"
+      }
+    },
+    "5c3fa170": {
+      "base": {
+        "id": "E_Backpropagation",
+        "label": "Backpropagation",
+        "class": "C_LearningRule",
+        "xid": "E_Backpropagation",
+        "uid": "5c3fa170",
+        "txtName": "Backpropagation",
+        "txtNote": ""
+      },
+      "x": 0.8465,
+      "keys": {
+        "uidEntity": "5c3fa170",
+        "xidEntityType": "C_LearningRule",
+        "uidNodeType": "e3b9f061"
+      }
+    },
+    "b65638ef": {
+      "base": {
+        "id": "E_DistributedRepresentation",
+        "label": "Distributed Representation",
+        "class": "C_Representation",
+        "xid": "E_DistributedRepresentation",
+        "uid": "b65638ef",
+        "txtName": "Distributed Representation",
+        "txtNote": ""
+      },
+      "x": 0.0096,
+      "keys": {
+        "uidEntity": "b65638ef",
+        "xidEntityType": "C_Representation",
+        "uidNodeType": "edcfb1da"
+      }
+    },
+    "cf8cab71": {
+      "base": {
+        "id": "E_Rumelhart",
+        "label": "David Rumelhart",
+        "class": "C_Person",
+        "xid": "E_Rumelhart",
+        "uid": "cf8cab71",
+        "txtName": "David Rumelhart",
+        "txtNote": ""
+      },
+      "x": 0.4779,
+      "keys": {
+        "uidEntity": "cf8cab71",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "4de982ca": {
+      "base": {
+        "id": "E_ComputationalNeuroscience",
+        "label": "Computational Neuroscience",
+        "class": "C_ComputationalFramework",
+        "xid": "E_ComputationalNeuroscience",
+        "uid": "4de982ca",
+        "txtName": "Computational Neuroscience",
+        "txtNote": ""
+      },
+      "x": 0.7539,
+      "keys": {
+        "uidEntity": "4de982ca",
+        "xidEntityType": "C_ComputationalFramework",
+        "uidNodeType": "368f16a7"
+      }
+    },
+    "8b7a1f1e": {
+      "base": {
+        "id": "E_SpikingNeuronModel",
+        "label": "Spiking Neuron Model",
+        "class": "C_Model",
+        "xid": "E_SpikingNeuronModel",
+        "uid": "8b7a1f1e",
+        "txtName": "Spiking Neuron Model",
+        "txtNote": ""
+      },
+      "x": 0.7308,
+      "keys": {
+        "uidEntity": "8b7a1f1e",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "622abe32": {
+      "base": {
+        "id": "E_RateCode",
+        "label": "Rate Code",
+        "class": "C_Representation",
+        "xid": "E_RateCode",
+        "uid": "622abe32",
+        "txtName": "Rate Code",
+        "txtNote": ""
+      },
+      "x": 0.1999,
+      "keys": {
+        "uidEntity": "622abe32",
+        "xidEntityType": "C_Representation",
+        "uidNodeType": "edcfb1da"
+      }
+    },
+    "70910ddb": {
+      "base": {
+        "id": "E_PopulationCode",
+        "label": "Population Code",
+        "class": "C_Representation",
+        "xid": "E_PopulationCode",
+        "uid": "70910ddb",
+        "txtName": "Population Code",
+        "txtNote": ""
+      },
+      "x": 0.2511,
+      "keys": {
+        "uidEntity": "70910ddb",
+        "xidEntityType": "C_Representation",
+        "uidNodeType": "edcfb1da"
+      }
+    },
+    "e7a1bb80": {
+      "base": {
+        "id": "E_HodgkinHuxley",
+        "label": "Hodgkin-Huxley Model",
+        "class": "C_Model",
+        "xid": "E_HodgkinHuxley",
+        "uid": "e7a1bb80",
+        "txtName": "Hodgkin-Huxley Model",
+        "txtNote": ""
+      },
+      "x": 0.7659,
+      "keys": {
+        "uidEntity": "e7a1bb80",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "a77e52fd": {
+      "base": {
+        "id": "E_IntegrateAndFire",
+        "label": "Integrate-and-Fire Model",
+        "class": "C_Model",
+        "xid": "E_IntegrateAndFire",
+        "uid": "a77e52fd",
+        "txtName": "Integrate-and-Fire Model",
+        "txtNote": ""
+      },
+      "x": 0.545,
+      "keys": {
+        "uidEntity": "a77e52fd",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "30c63181": {
+      "base": {
+        "id": "E_BayesianBrain",
+        "label": "Bayesian Brain Hypothesis",
+        "class": "C_BayesianFramework",
+        "xid": "E_BayesianBrain",
+        "uid": "30c63181",
+        "txtName": "Bayesian Brain Hypothesis",
+        "txtNote": ""
+      },
+      "x": 0.9956,
+      "keys": {
+        "uidEntity": "30c63181",
+        "xidEntityType": "C_BayesianFramework",
+        "uidNodeType": "27931bed"
+      }
+    },
+    "a2e64d0b": {
+      "base": {
+        "id": "E_ProbabilisticInference",
+        "label": "Probabilistic Inference",
+        "class": "C_Mechanism",
+        "xid": "E_ProbabilisticInference",
+        "uid": "a2e64d0b",
+        "txtName": "Probabilistic Inference",
+        "txtNote": ""
+      },
+      "x": 0.7074,
+      "keys": {
+        "uidEntity": "a2e64d0b",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "3f0555cb": {
+      "base": {
+        "id": "E_Prior",
+        "label": "Prior Belief",
+        "class": "C_Construct",
+        "xid": "E_Prior",
+        "uid": "3f0555cb",
+        "txtName": "Prior Belief",
+        "txtNote": ""
+      },
+      "x": 0.6504,
+      "keys": {
+        "uidEntity": "3f0555cb",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "f97d24bf": {
+      "base": {
+        "id": "E_Likelihood",
+        "label": "Likelihood",
+        "class": "C_Construct",
+        "xid": "E_Likelihood",
+        "uid": "f97d24bf",
+        "txtName": "Likelihood",
+        "txtNote": ""
+      },
+      "x": 0.6909,
+      "keys": {
+        "uidEntity": "f97d24bf",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "300bf626": {
+      "base": {
+        "id": "E_Posterior",
+        "label": "Posterior Belief",
+        "class": "C_Construct",
+        "xid": "E_Posterior",
+        "uid": "300bf626",
+        "txtName": "Posterior Belief",
+        "txtNote": ""
+      },
+      "x": 0.034,
+      "keys": {
+        "uidEntity": "300bf626",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "dcc4f4ed": {
+      "base": {
+        "id": "E_Uncertainty",
+        "label": "Uncertainty",
+        "class": "C_Construct",
+        "xid": "E_Uncertainty",
+        "uid": "dcc4f4ed",
+        "txtName": "Uncertainty",
+        "txtNote": ""
+      },
+      "x": 0.3335,
+      "keys": {
+        "uidEntity": "dcc4f4ed",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "d77c0c83": {
+      "base": {
+        "id": "E_BayesOptimalDecision",
+        "label": "Bayes-Optimal Decision",
+        "class": "C_Mechanism",
+        "xid": "E_BayesOptimalDecision",
+        "uid": "d77c0c83",
+        "txtName": "Bayes-Optimal Decision",
+        "txtNote": ""
+      },
+      "x": 0.4832,
+      "keys": {
+        "uidEntity": "d77c0c83",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "c2e6d1b1": {
+      "base": {
+        "id": "E_PredictiveProcessing",
+        "label": "Predictive Processing",
+        "class": "C_Framework",
+        "xid": "E_PredictiveProcessing",
+        "uid": "c2e6d1b1",
+        "txtName": "Predictive Processing",
+        "txtNote": ""
+      },
+      "x": 0.3009,
+      "keys": {
+        "uidEntity": "c2e6d1b1",
+        "xidEntityType": "C_Framework",
+        "uidNodeType": "f06487e7"
+      }
+    },
+    "0cffc5b0": {
+      "base": {
+        "id": "E_PredictionError",
+        "label": "Prediction Error",
+        "class": "C_Construct",
+        "xid": "E_PredictionError",
+        "uid": "0cffc5b0",
+        "txtName": "Prediction Error",
+        "txtNote": ""
+      },
+      "x": 0.4265,
+      "keys": {
+        "uidEntity": "0cffc5b0",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "4b23f5a6": {
+      "base": {
+        "id": "E_GenerativeModel",
+        "label": "Generative Model",
+        "class": "C_Model",
+        "xid": "E_GenerativeModel",
+        "uid": "4b23f5a6",
+        "txtName": "Generative Model",
+        "txtNote": ""
+      },
+      "x": 0.3671,
+      "keys": {
+        "uidEntity": "4b23f5a6",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "40b49e6f": {
+      "base": {
+        "id": "E_HierarchicalInference",
+        "label": "Hierarchical Inference",
+        "class": "C_Mechanism",
+        "xid": "E_HierarchicalInference",
+        "uid": "40b49e6f",
+        "txtName": "Hierarchical Inference",
+        "txtNote": ""
+      },
+      "x": 0.1442,
+      "keys": {
+        "uidEntity": "40b49e6f",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "76eab191": {
+      "base": {
+        "id": "E_TopDownPrediction",
+        "label": "Top-Down Prediction",
+        "class": "C_Mechanism",
+        "xid": "E_TopDownPrediction",
+        "uid": "76eab191",
+        "txtName": "Top-Down Prediction",
+        "txtNote": ""
+      },
+      "x": 0.5037,
+      "keys": {
+        "uidEntity": "76eab191",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "879f9b11": {
+      "base": {
+        "id": "E_BottomUpErrorSignal",
+        "label": "Bottom-Up Error Signal",
+        "class": "C_Mechanism",
+        "xid": "E_BottomUpErrorSignal",
+        "uid": "879f9b11",
+        "txtName": "Bottom-Up Error Signal",
+        "txtNote": ""
+      },
+      "x": 0.1725,
+      "keys": {
+        "uidEntity": "879f9b11",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "d53967fc": {
+      "base": {
+        "id": "E_Frith",
+        "label": "Chris Frith",
+        "class": "C_Person",
+        "xid": "E_Frith",
+        "uid": "d53967fc",
+        "txtName": "Chris Frith",
+        "txtNote": ""
+      },
+      "x": 0.8877,
+      "keys": {
+        "uidEntity": "d53967fc",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "a8385bbc": {
+      "base": {
+        "id": "E_Hohwy",
+        "label": "Jakob Hohwy",
+        "class": "C_Person",
+        "xid": "E_Hohwy",
+        "uid": "a8385bbc",
+        "txtName": "Jakob Hohwy",
+        "txtNote": ""
+      },
+      "x": 0.5302,
+      "keys": {
+        "uidEntity": "a8385bbc",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "bc75285d": {
+      "base": {
+        "id": "E_FreeEnergyPrinciple",
+        "label": "Free Energy Principle",
+        "class": "C_Framework",
+        "xid": "E_FreeEnergyPrinciple",
+        "uid": "bc75285d",
+        "txtName": "Free Energy Principle",
+        "txtNote": ""
+      },
+      "x": 0.151,
+      "keys": {
+        "uidEntity": "bc75285d",
+        "xidEntityType": "C_Framework",
+        "uidNodeType": "f06487e7"
+      }
+    },
+    "5810d237": {
+      "base": {
+        "id": "E_VariationalFreeEnergy",
+        "label": "Variational Free Energy",
+        "class": "C_Construct",
+        "xid": "E_VariationalFreeEnergy",
+        "uid": "5810d237",
+        "txtName": "Variational Free Energy",
+        "txtNote": ""
+      },
+      "x": 0.4561,
+      "keys": {
+        "uidEntity": "5810d237",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "6da1c00a": {
+      "base": {
+        "id": "E_ActiveInference",
+        "label": "Active Inference",
+        "class": "C_Theory",
+        "xid": "E_ActiveInference",
+        "uid": "6da1c00a",
+        "txtName": "Active Inference",
+        "txtNote": ""
+      },
+      "x": 0.4123,
+      "keys": {
+        "uidEntity": "6da1c00a",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "6469839d": {
+      "base": {
+        "id": "E_PolicySelection",
+        "label": "Policy Selection",
+        "class": "C_Mechanism",
+        "xid": "E_PolicySelection",
+        "uid": "6469839d",
+        "txtName": "Policy Selection",
+        "txtNote": ""
+      },
+      "x": 0.8638,
+      "keys": {
+        "uidEntity": "6469839d",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "0a10d9dc": {
+      "base": {
+        "id": "E_Surprisal",
+        "label": "Surprisal",
+        "class": "C_Construct",
+        "xid": "E_Surprisal",
+        "uid": "0a10d9dc",
+        "txtName": "Surprisal",
+        "txtNote": ""
+      },
+      "x": 0.3829,
+      "keys": {
+        "uidEntity": "0a10d9dc",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "61ad3866": {
+      "base": {
+        "id": "E_Friston",
+        "label": "Karl Friston",
+        "class": "C_Person",
+        "xid": "E_Friston",
+        "uid": "61ad3866",
+        "txtName": "Karl Friston",
+        "txtNote": ""
+      },
+      "x": 0.3547,
+      "keys": {
+        "uidEntity": "61ad3866",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "5f87c750": {
+      "base": {
+        "id": "E_DynamicalSystemsNeuro",
+        "label": "Dynamical Systems Neuroscience",
+        "class": "C_DynamicalFramework",
+        "xid": "E_DynamicalSystemsNeuro",
+        "uid": "5f87c750",
+        "txtName": "Dynamical Systems Neuroscience",
+        "txtNote": ""
+      },
+      "x": 0.8614,
+      "keys": {
+        "uidEntity": "5f87c750",
+        "xidEntityType": "C_DynamicalFramework",
+        "uidNodeType": "ab145e9f"
+      }
+    },
+    "b72288db": {
+      "base": {
+        "id": "E_AttractorNetwork",
+        "label": "Attractor Network",
+        "class": "C_Model",
+        "xid": "E_AttractorNetwork",
+        "uid": "b72288db",
+        "txtName": "Attractor Network",
+        "txtNote": ""
+      },
+      "x": 0.7,
+      "keys": {
+        "uidEntity": "b72288db",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "253e0836": {
+      "base": {
+        "id": "E_PhaseSpace",
+        "label": "Phase Space",
+        "class": "C_Construct",
+        "xid": "E_PhaseSpace",
+        "uid": "253e0836",
+        "txtName": "Phase Space",
+        "txtNote": ""
+      },
+      "x": 0.3107,
+      "keys": {
+        "uidEntity": "253e0836",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "6d9731e6": {
+      "base": {
+        "id": "E_Trajectory",
+        "label": "State Trajectory",
+        "class": "C_Construct",
+        "xid": "E_Trajectory",
+        "uid": "6d9731e6",
+        "txtName": "State Trajectory",
+        "txtNote": ""
+      },
+      "x": 0.9926,
+      "keys": {
+        "uidEntity": "6d9731e6",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "31cc5418": {
+      "base": {
+        "id": "E_LimitCycle",
+        "label": "Limit Cycle",
+        "class": "C_Construct",
+        "xid": "E_LimitCycle",
+        "uid": "31cc5418",
+        "txtName": "Limit Cycle",
+        "txtNote": ""
+      },
+      "x": 0.2587,
+      "keys": {
+        "uidEntity": "31cc5418",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "1d8b9dcb": {
+      "base": {
+        "id": "E_Chaos",
+        "label": "Chaotic Dynamics",
+        "class": "C_Construct",
+        "xid": "E_Chaos",
+        "uid": "1d8b9dcb",
+        "txtName": "Chaotic Dynamics",
+        "txtNote": ""
+      },
+      "x": 0.1533,
+      "keys": {
+        "uidEntity": "1d8b9dcb",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "04996fa4": {
+      "base": {
+        "id": "E_EmbodiedCognition",
+        "label": "Embodied Cognition",
+        "class": "C_EmbodiedFramework",
+        "xid": "E_EmbodiedCognition",
+        "uid": "04996fa4",
+        "txtName": "Embodied Cognition",
+        "txtNote": ""
+      },
+      "x": 0.0208,
+      "keys": {
+        "uidEntity": "04996fa4",
+        "xidEntityType": "C_EmbodiedFramework",
+        "uidNodeType": "0d0ef92e"
+      }
+    },
+    "54a81588": {
+      "base": {
+        "id": "E_Enactivism",
+        "label": "Enactivism",
+        "class": "C_Framework",
+        "xid": "E_Enactivism",
+        "uid": "54a81588",
+        "txtName": "Enactivism",
+        "txtNote": ""
+      },
+      "x": 0.4661,
+      "keys": {
+        "uidEntity": "54a81588",
+        "xidEntityType": "C_Framework",
+        "uidNodeType": "f06487e7"
+      }
+    },
+    "a86a560c": {
+      "base": {
+        "id": "E_Affordance",
+        "label": "Affordance",
+        "class": "C_Construct",
+        "xid": "E_Affordance",
+        "uid": "a86a560c",
+        "txtName": "Affordance",
+        "txtNote": ""
+      },
+      "x": 0.3637,
+      "keys": {
+        "uidEntity": "a86a560c",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "0cdea9ce": {
+      "base": {
+        "id": "E_SensorimotorContingency",
+        "label": "Sensorimotor Contingency",
+        "class": "C_Mechanism",
+        "xid": "E_SensorimotorContingency",
+        "uid": "0cdea9ce",
+        "txtName": "Sensorimotor Contingency",
+        "txtNote": ""
+      },
+      "x": 0.1383,
+      "keys": {
+        "uidEntity": "0cdea9ce",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "b6d3e1a3": {
+      "base": {
+        "id": "E_Gibson",
+        "label": "James Gibson",
+        "class": "C_Person",
+        "xid": "E_Gibson",
+        "uid": "b6d3e1a3",
+        "txtName": "James Gibson",
+        "txtNote": ""
+      },
+      "x": 0.2052,
+      "keys": {
+        "uidEntity": "b6d3e1a3",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "348e9257": {
+      "base": {
+        "id": "E_Noë",
+        "label": "Alva Noë",
+        "class": "C_Person",
+        "xid": "E_Noë",
+        "uid": "348e9257",
+        "txtName": "Alva Noë",
+        "txtNote": ""
+      },
+      "x": 0.6882,
+      "keys": {
+        "uidEntity": "348e9257",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "ea5304b4": {
+      "base": {
+        "id": "E_EcologicalPsychology",
+        "label": "Ecological Psychology",
+        "class": "C_Framework",
+        "xid": "E_EcologicalPsychology",
+        "uid": "ea5304b4",
+        "txtName": "Ecological Psychology",
+        "txtNote": ""
+      },
+      "x": 0.4172,
+      "keys": {
+        "uidEntity": "ea5304b4",
+        "xidEntityType": "C_Framework",
+        "uidNodeType": "f06487e7"
+      }
+    },
+    "98f6780f": {
+      "base": {
+        "id": "E_EnvironmentOrganismSystem",
+        "label": "Environment-Organism System",
+        "class": "C_Construct",
+        "xid": "E_EnvironmentOrganismSystem",
+        "uid": "98f6780f",
+        "txtName": "Environment-Organism System",
+        "txtNote": ""
+      },
+      "x": 0.1512,
+      "keys": {
+        "uidEntity": "98f6780f",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "60f5dd2e": {
+      "base": {
+        "id": "E_GlobalWorkspaceTheory",
+        "label": "Global Workspace Theory",
+        "class": "C_ConsciousnessTheory",
+        "xid": "E_GlobalWorkspaceTheory",
+        "uid": "60f5dd2e",
+        "txtName": "Global Workspace Theory",
+        "txtNote": ""
+      },
+      "x": 0.8575,
+      "keys": {
+        "uidEntity": "60f5dd2e",
+        "xidEntityType": "C_ConsciousnessTheory",
+        "uidNodeType": "ac395a1f"
+      }
+    },
+    "8465c6b3": {
+      "base": {
+        "id": "E_GlobalWorkspace",
+        "label": "Global Workspace",
+        "class": "C_Construct",
+        "xid": "E_GlobalWorkspace",
+        "uid": "8465c6b3",
+        "txtName": "Global Workspace",
+        "txtNote": ""
+      },
+      "x": 0.7097,
+      "keys": {
+        "uidEntity": "8465c6b3",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "1afc8162": {
+      "base": {
+        "id": "E_Broadcasting",
+        "label": "Broadcasting Mechanism",
+        "class": "C_Mechanism",
+        "xid": "E_Broadcasting",
+        "uid": "1afc8162",
+        "txtName": "Broadcasting Mechanism",
+        "txtNote": ""
+      },
+      "x": 0.1747,
+      "keys": {
+        "uidEntity": "1afc8162",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "6a51039e": {
+      "base": {
+        "id": "E_Baars",
+        "label": "Bernard Baars",
+        "class": "C_Person",
+        "xid": "E_Baars",
+        "uid": "6a51039e",
+        "txtName": "Bernard Baars",
+        "txtNote": ""
+      },
+      "x": 0.3548,
+      "keys": {
+        "uidEntity": "6a51039e",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "2a4ac23b": {
+      "base": {
+        "id": "E_Dehaene",
+        "label": "Stanislas Dehaene",
+        "class": "C_Person",
+        "xid": "E_Dehaene",
+        "uid": "2a4ac23b",
+        "txtName": "Stanislas Dehaene",
+        "txtNote": ""
+      },
+      "x": 0.2759,
+      "keys": {
+        "uidEntity": "2a4ac23b",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "7cd59509": {
+      "base": {
+        "id": "E_IIT",
+        "label": "Integrated Information Theory",
+        "class": "C_ConsciousnessTheory",
+        "xid": "E_IIT",
+        "uid": "7cd59509",
+        "txtName": "Integrated Information Theory",
+        "txtNote": ""
+      },
+      "x": 0.4176,
+      "keys": {
+        "uidEntity": "7cd59509",
+        "xidEntityType": "C_ConsciousnessTheory",
+        "uidNodeType": "ac395a1f"
+      }
+    },
+    "a9c281ac": {
+      "base": {
+        "id": "E_Phi",
+        "label": "Integrated Information (Phi)",
+        "class": "C_Construct",
+        "xid": "E_Phi",
+        "uid": "a9c281ac",
+        "txtName": "Integrated Information (Phi)",
+        "txtNote": ""
+      },
+      "x": 0.1607,
+      "keys": {
+        "uidEntity": "a9c281ac",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "871ec350": {
+      "base": {
+        "id": "E_ConceptualStructure",
+        "label": "Conceptual Structure",
+        "class": "C_Construct",
+        "xid": "E_ConceptualStructure",
+        "uid": "871ec350",
+        "txtName": "Conceptual Structure",
+        "txtNote": ""
+      },
+      "x": 0.1094,
+      "keys": {
+        "uidEntity": "871ec350",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "198e3da0": {
+      "base": {
+        "id": "E_Tononi",
+        "label": "Giulio Tononi",
+        "class": "C_Person",
+        "xid": "E_Tononi",
+        "uid": "198e3da0",
+        "txtName": "Giulio Tononi",
+        "txtNote": ""
+      },
+      "x": 0.7421,
+      "keys": {
+        "uidEntity": "198e3da0",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "d9f80977": {
+      "base": {
+        "id": "E_HigherOrderThought",
+        "label": "Higher-Order Thought Theory",
+        "class": "C_ConsciousnessTheory",
+        "xid": "E_HigherOrderThought",
+        "uid": "d9f80977",
+        "txtName": "Higher-Order Thought Theory",
+        "txtNote": ""
+      },
+      "x": 0.8353,
+      "keys": {
+        "uidEntity": "d9f80977",
+        "xidEntityType": "C_ConsciousnessTheory",
+        "uidNodeType": "ac395a1f"
+      }
+    },
+    "2dc5298b": {
+      "base": {
+        "id": "E_HigherOrderRepresentation",
+        "label": "Higher-Order Representation",
+        "class": "C_Representation",
+        "xid": "E_HigherOrderRepresentation",
+        "uid": "2dc5298b",
+        "txtName": "Higher-Order Representation",
+        "txtNote": ""
+      },
+      "x": 0.759,
+      "keys": {
+        "uidEntity": "2dc5298b",
+        "xidEntityType": "C_Representation",
+        "uidNodeType": "edcfb1da"
+      }
+    },
+    "08186449": {
+      "base": {
+        "id": "E_Rosenthal",
+        "label": "David Rosenthal",
+        "class": "C_Person",
+        "xid": "E_Rosenthal",
+        "uid": "08186449",
+        "txtName": "David Rosenthal",
+        "txtNote": ""
+      },
+      "x": 0.4914,
+      "keys": {
+        "uidEntity": "08186449",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "968152f6": {
+      "base": {
+        "id": "E_ReinforcementLearning",
+        "label": "Reinforcement Learning",
+        "class": "C_ComputationalFramework",
+        "xid": "E_ReinforcementLearning",
+        "uid": "968152f6",
+        "txtName": "Reinforcement Learning",
+        "txtNote": ""
+      },
+      "x": 0.6159,
+      "keys": {
+        "uidEntity": "968152f6",
+        "xidEntityType": "C_ComputationalFramework",
+        "uidNodeType": "368f16a7"
+      }
+    },
+    "71e19bc7": {
+      "base": {
+        "id": "E_RewardPredictionError",
+        "label": "Reward Prediction Error",
+        "class": "C_Construct",
+        "xid": "E_RewardPredictionError",
+        "uid": "71e19bc7",
+        "txtName": "Reward Prediction Error",
+        "txtNote": ""
+      },
+      "x": 0.2215,
+      "keys": {
+        "uidEntity": "71e19bc7",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "6f5eabb4": {
+      "base": {
+        "id": "E_ValueFunction",
+        "label": "Value Function",
+        "class": "C_Model",
+        "xid": "E_ValueFunction",
+        "uid": "6f5eabb4",
+        "txtName": "Value Function",
+        "txtNote": ""
+      },
+      "x": 0.7326,
+      "keys": {
+        "uidEntity": "6f5eabb4",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "f6b4c75d": {
+      "base": {
+        "id": "E_Policy",
+        "label": "Policy",
+        "class": "C_Construct",
+        "xid": "E_Policy",
+        "uid": "f6b4c75d",
+        "txtName": "Policy",
+        "txtNote": ""
+      },
+      "x": 0.0067,
+      "keys": {
+        "uidEntity": "f6b4c75d",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "7c114178": {
+      "base": {
+        "id": "E_QLearning",
+        "label": "Q-Learning",
+        "class": "C_Model",
+        "xid": "E_QLearning",
+        "uid": "7c114178",
+        "txtName": "Q-Learning",
+        "txtNote": ""
+      },
+      "x": 0.2406,
+      "keys": {
+        "uidEntity": "7c114178",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "a63e1042": {
+      "base": {
+        "id": "E_TemporalDifferenceLearning",
+        "label": "Temporal Difference Learning",
+        "class": "C_LearningRule",
+        "xid": "E_TemporalDifferenceLearning",
+        "uid": "a63e1042",
+        "txtName": "Temporal Difference Learning",
+        "txtNote": ""
+      },
+      "x": 0.8353,
+      "keys": {
+        "uidEntity": "a63e1042",
+        "xidEntityType": "C_LearningRule",
+        "uidNodeType": "e3b9f061"
+      }
+    },
+    "50836a7a": {
+      "base": {
+        "id": "E_Sutton",
+        "label": "Richard Sutton",
+        "class": "C_Person",
+        "xid": "E_Sutton",
+        "uid": "50836a7a",
+        "txtName": "Richard Sutton",
+        "txtNote": ""
+      },
+      "x": 0.7206,
+      "keys": {
+        "uidEntity": "50836a7a",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "2d405e17": {
+      "base": {
+        "id": "E_Barto",
+        "label": "Andrew Barto",
+        "class": "C_Person",
+        "xid": "E_Barto",
+        "uid": "2d405e17",
+        "txtName": "Andrew Barto",
+        "txtNote": ""
+      },
+      "x": 0.967,
+      "keys": {
+        "uidEntity": "2d405e17",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "8c80dd37": {
+      "base": {
+        "id": "E_DualProcessTheory",
+        "label": "Dual-Process Theory",
+        "class": "C_Theory",
+        "xid": "E_DualProcessTheory",
+        "uid": "8c80dd37",
+        "txtName": "Dual-Process Theory",
+        "txtNote": ""
+      },
+      "x": 0.5367,
+      "keys": {
+        "uidEntity": "8c80dd37",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "7b821a29": {
+      "base": {
+        "id": "E_System1",
+        "label": "System 1",
+        "class": "C_Construct",
+        "xid": "E_System1",
+        "uid": "7b821a29",
+        "txtName": "System 1",
+        "txtNote": ""
+      },
+      "x": 0.4516,
+      "keys": {
+        "uidEntity": "7b821a29",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "f31dbbea": {
+      "base": {
+        "id": "E_System2",
+        "label": "System 2",
+        "class": "C_Construct",
+        "xid": "E_System2",
+        "uid": "f31dbbea",
+        "txtName": "System 2",
+        "txtNote": ""
+      },
+      "x": 0.8772,
+      "keys": {
+        "uidEntity": "f31dbbea",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "77e8a8d6": {
+      "base": {
+        "id": "E_Kahneman",
+        "label": "Daniel Kahneman",
+        "class": "C_Person",
+        "xid": "E_Kahneman",
+        "uid": "77e8a8d6",
+        "txtName": "Daniel Kahneman",
+        "txtNote": ""
+      },
+      "x": 0.2316,
+      "keys": {
+        "uidEntity": "77e8a8d6",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "bec44149": {
+      "base": {
+        "id": "E_Tversky",
+        "label": "Amos Tversky",
+        "class": "C_Person",
+        "xid": "E_Tversky",
+        "uid": "bec44149",
+        "txtName": "Amos Tversky",
+        "txtNote": ""
+      },
+      "x": 0.7091,
+      "keys": {
+        "uidEntity": "bec44149",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "1e6719b4": {
+      "base": {
+        "id": "E_RationalChoice",
+        "label": "Rational Choice Theory",
+        "class": "C_Theory",
+        "xid": "E_RationalChoice",
+        "uid": "1e6719b4",
+        "txtName": "Rational Choice Theory",
+        "txtNote": ""
+      },
+      "x": 0.6137,
+      "keys": {
+        "uidEntity": "1e6719b4",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "a9d7527c": {
+      "base": {
+        "id": "E_ProspectTheory",
+        "label": "Prospect Theory",
+        "class": "C_Theory",
+        "xid": "E_ProspectTheory",
+        "uid": "a9d7527c",
+        "txtName": "Prospect Theory",
+        "txtNote": ""
+      },
+      "x": 0.4199,
+      "keys": {
+        "uidEntity": "a9d7527c",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "8f8a0925": {
+      "base": {
+        "id": "E_LossAversion",
+        "label": "Loss Aversion",
+        "class": "C_Construct",
+        "xid": "E_LossAversion",
+        "uid": "8f8a0925",
+        "txtName": "Loss Aversion",
+        "txtNote": ""
+      },
+      "x": 0.2443,
+      "keys": {
+        "uidEntity": "8f8a0925",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "db8542ff": {
+      "base": {
+        "id": "E_UtilityFunction",
+        "label": "Utility Function",
+        "class": "C_Model",
+        "xid": "E_UtilityFunction",
+        "uid": "db8542ff",
+        "txtName": "Utility Function",
+        "txtNote": ""
+      },
+      "x": 0.9873,
+      "keys": {
+        "uidEntity": "db8542ff",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "86436a39": {
+      "base": {
+        "id": "E_SocialCognitiveTheory",
+        "label": "Social Cognitive Theory",
+        "class": "C_SocialFramework",
+        "xid": "E_SocialCognitiveTheory",
+        "uid": "86436a39",
+        "txtName": "Social Cognitive Theory",
+        "txtNote": ""
+      },
+      "x": 0.7302,
+      "keys": {
+        "uidEntity": "86436a39",
+        "xidEntityType": "C_SocialFramework",
+        "uidNodeType": "cb6d415c"
+      }
+    },
+    "dc783b06": {
+      "base": {
+        "id": "E_ObservationalLearning",
+        "label": "Observational Learning",
+        "class": "C_Mechanism",
+        "xid": "E_ObservationalLearning",
+        "uid": "dc783b06",
+        "txtName": "Observational Learning",
+        "txtNote": ""
+      },
+      "x": 0.2395,
+      "keys": {
+        "uidEntity": "dc783b06",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "2a3f4015": {
+      "base": {
+        "id": "E_SelfEfficacy",
+        "label": "Self-Efficacy",
+        "class": "C_Construct",
+        "xid": "E_SelfEfficacy",
+        "uid": "2a3f4015",
+        "txtName": "Self-Efficacy",
+        "txtNote": ""
+      },
+      "x": 0.4695,
+      "keys": {
+        "uidEntity": "2a3f4015",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "36bf0f92": {
+      "base": {
+        "id": "E_Bandura",
+        "label": "Albert Bandura",
+        "class": "C_Person",
+        "xid": "E_Bandura",
+        "uid": "36bf0f92",
+        "txtName": "Albert Bandura",
+        "txtNote": ""
+      },
+      "x": 0.4694,
+      "keys": {
+        "uidEntity": "36bf0f92",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "8615136d": {
+      "base": {
+        "id": "E_SocialIdentityTheory",
+        "label": "Social Identity Theory",
+        "class": "C_SocialFramework",
+        "xid": "E_SocialIdentityTheory",
+        "uid": "8615136d",
+        "txtName": "Social Identity Theory",
+        "txtNote": ""
+      },
+      "x": 0.4598,
+      "keys": {
+        "uidEntity": "8615136d",
+        "xidEntityType": "C_SocialFramework",
+        "uidNodeType": "cb6d415c"
+      }
+    },
+    "e687b345": {
+      "base": {
+        "id": "E_Ingroup",
+        "label": "Ingroup",
+        "class": "C_Construct",
+        "xid": "E_Ingroup",
+        "uid": "e687b345",
+        "txtName": "Ingroup",
+        "txtNote": ""
+      },
+      "x": 0.5705,
+      "keys": {
+        "uidEntity": "e687b345",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "6b5d3dec": {
+      "base": {
+        "id": "E_Outgroup",
+        "label": "Outgroup",
+        "class": "C_Construct",
+        "xid": "E_Outgroup",
+        "uid": "6b5d3dec",
+        "txtName": "Outgroup",
+        "txtNote": ""
+      },
+      "x": 0.971,
+      "keys": {
+        "uidEntity": "6b5d3dec",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "a7b4120d": {
+      "base": {
+        "id": "E_Tajfel",
+        "label": "Henri Tajfel",
+        "class": "C_Person",
+        "xid": "E_Tajfel",
+        "uid": "a7b4120d",
+        "txtName": "Henri Tajfel",
+        "txtNote": ""
+      },
+      "x": 0.6283,
+      "keys": {
+        "uidEntity": "a7b4120d",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "089e3c19": {
+      "base": {
+        "id": "E_AttachmentTheory",
+        "label": "Attachment Theory",
+        "class": "C_DevelopmentalFramework",
+        "xid": "E_AttachmentTheory",
+        "uid": "089e3c19",
+        "txtName": "Attachment Theory",
+        "txtNote": ""
+      },
+      "x": 0.168,
+      "keys": {
+        "uidEntity": "089e3c19",
+        "xidEntityType": "C_DevelopmentalFramework",
+        "uidNodeType": "1edb8979"
+      }
+    },
+    "1c0d64f3": {
+      "base": {
+        "id": "E_SecureAttachment",
+        "label": "Secure Attachment",
+        "class": "C_Construct",
+        "xid": "E_SecureAttachment",
+        "uid": "1c0d64f3",
+        "txtName": "Secure Attachment",
+        "txtNote": ""
+      },
+      "x": 0.6748,
+      "keys": {
+        "uidEntity": "1c0d64f3",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "4e1b4d73": {
+      "base": {
+        "id": "E_AnxiousAttachment",
+        "label": "Anxious Attachment",
+        "class": "C_Construct",
+        "xid": "E_AnxiousAttachment",
+        "uid": "4e1b4d73",
+        "txtName": "Anxious Attachment",
+        "txtNote": ""
+      },
+      "x": 0.6073,
+      "keys": {
+        "uidEntity": "4e1b4d73",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "9775bd2a": {
+      "base": {
+        "id": "E_AvoidantAttachment",
+        "label": "Avoidant Attachment",
+        "class": "C_Construct",
+        "xid": "E_AvoidantAttachment",
+        "uid": "9775bd2a",
+        "txtName": "Avoidant Attachment",
+        "txtNote": ""
+      },
+      "x": 0.3632,
+      "keys": {
+        "uidEntity": "9775bd2a",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "5c4b90d0": {
+      "base": {
+        "id": "E_Bowlby",
+        "label": "John Bowlby",
+        "class": "C_Person",
+        "xid": "E_Bowlby",
+        "uid": "5c4b90d0",
+        "txtName": "John Bowlby",
+        "txtNote": ""
+      },
+      "x": 0.8873,
+      "keys": {
+        "uidEntity": "5c4b90d0",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "dddb195e": {
+      "base": {
+        "id": "E_Ainsworth",
+        "label": "Mary Ainsworth",
+        "class": "C_Person",
+        "xid": "E_Ainsworth",
+        "uid": "dddb195e",
+        "txtName": "Mary Ainsworth",
+        "txtNote": ""
+      },
+      "x": 0.6537,
+      "keys": {
+        "uidEntity": "dddb195e",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "a6998b88": {
+      "base": {
+        "id": "E_PiagetianTheory",
+        "label": "Piagetian Developmental Theory",
+        "class": "C_DevelopmentalFramework",
+        "xid": "E_PiagetianTheory",
+        "uid": "a6998b88",
+        "txtName": "Piagetian Developmental Theory",
+        "txtNote": ""
+      },
+      "x": 0.8039,
+      "keys": {
+        "uidEntity": "a6998b88",
+        "xidEntityType": "C_DevelopmentalFramework",
+        "uidNodeType": "1edb8979"
+      }
+    },
+    "4cb7204d": {
+      "base": {
+        "id": "E_SensorimotorStage",
+        "label": "Sensorimotor Stage",
+        "class": "C_Construct",
+        "xid": "E_SensorimotorStage",
+        "uid": "4cb7204d",
+        "txtName": "Sensorimotor Stage",
+        "txtNote": ""
+      },
+      "x": 0.606,
+      "keys": {
+        "uidEntity": "4cb7204d",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "926de6a6": {
+      "base": {
+        "id": "E_PreoperationalStage",
+        "label": "Preoperational Stage",
+        "class": "C_Construct",
+        "xid": "E_PreoperationalStage",
+        "uid": "926de6a6",
+        "txtName": "Preoperational Stage",
+        "txtNote": ""
+      },
+      "x": 0.2369,
+      "keys": {
+        "uidEntity": "926de6a6",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "7b837d26": {
+      "base": {
+        "id": "E_ConcreteOperationalStage",
+        "label": "Concrete Operational Stage",
+        "class": "C_Construct",
+        "xid": "E_ConcreteOperationalStage",
+        "uid": "7b837d26",
+        "txtName": "Concrete Operational Stage",
+        "txtNote": ""
+      },
+      "x": 0.427,
+      "keys": {
+        "uidEntity": "7b837d26",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "6e14307a": {
+      "base": {
+        "id": "E_FormalOperationalStage",
+        "label": "Formal Operational Stage",
+        "class": "C_Construct",
+        "xid": "E_FormalOperationalStage",
+        "uid": "6e14307a",
+        "txtName": "Formal Operational Stage",
+        "txtNote": ""
+      },
+      "x": 0.4419,
+      "keys": {
+        "uidEntity": "6e14307a",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "1e6fb133": {
+      "base": {
+        "id": "E_Piaget",
+        "label": "Jean Piaget",
+        "class": "C_Person",
+        "xid": "E_Piaget",
+        "uid": "1e6fb133",
+        "txtName": "Jean Piaget",
+        "txtNote": ""
+      },
+      "x": 0.3926,
+      "keys": {
+        "uidEntity": "1e6fb133",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "de46bfeb": {
+      "base": {
+        "id": "E_PsychodynamicTheory",
+        "label": "Psychodynamic Theory",
+        "class": "C_ClinicalFramework",
+        "xid": "E_PsychodynamicTheory",
+        "uid": "de46bfeb",
+        "txtName": "Psychodynamic Theory",
+        "txtNote": ""
+      },
+      "x": 0.2791,
+      "keys": {
+        "uidEntity": "de46bfeb",
+        "xidEntityType": "C_ClinicalFramework",
+        "uidNodeType": "9f72eae8"
+      }
+    },
+    "e54d6cb4": {
+      "base": {
+        "id": "E_Unconscious",
+        "label": "Unconscious Mind",
+        "class": "C_Construct",
+        "xid": "E_Unconscious",
+        "uid": "e54d6cb4",
+        "txtName": "Unconscious Mind",
+        "txtNote": ""
+      },
+      "x": 0.9485,
+      "keys": {
+        "uidEntity": "e54d6cb4",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "37957e3c": {
+      "base": {
+        "id": "E_DefenseMechanism",
+        "label": "Defense Mechanism",
+        "class": "C_Construct",
+        "xid": "E_DefenseMechanism",
+        "uid": "37957e3c",
+        "txtName": "Defense Mechanism",
+        "txtNote": ""
+      },
+      "x": 0.2423,
+      "keys": {
+        "uidEntity": "37957e3c",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "37280b1d": {
+      "base": {
+        "id": "E_Freud",
+        "label": "Sigmund Freud",
+        "class": "C_Person",
+        "xid": "E_Freud",
+        "uid": "37280b1d",
+        "txtName": "Sigmund Freud",
+        "txtNote": ""
+      },
+      "x": 0.0598,
+      "keys": {
+        "uidEntity": "37280b1d",
+        "xidEntityType": "C_Person",
+        "uidNodeType": "37f32b0e"
+      }
+    },
+    "e8ed249d": {
+      "base": {
+        "id": "E_ObjectRelations",
+        "label": "Object Relations Theory",
+        "class": "C_Theory",
+        "xid": "E_ObjectRelations",
+        "uid": "e8ed249d",
+        "txtName": "Object Relations Theory",
+        "txtNote": ""
+      },
+      "x": 0.4295,
+      "keys": {
+        "uidEntity": "e8ed249d",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "8ab9ac68": {
+      "base": {
+        "id": "E_CBT",
+        "label": "Cognitive Behavioral Therapy",
+        "class": "C_ClinicalFramework",
+        "xid": "E_CBT",
+        "uid": "8ab9ac68",
+        "txtName": "Cognitive Behavioral Therapy",
+        "txtNote": ""
+      },
+      "x": 0.5278,
+      "keys": {
+        "uidEntity": "8ab9ac68",
+        "xidEntityType": "C_ClinicalFramework",
+        "uidNodeType": "9f72eae8"
+      }
+    },
+    "03756154": {
+      "base": {
+        "id": "E_CognitiveDistortion",
+        "label": "Cognitive Distortion",
+        "class": "C_Construct",
+        "xid": "E_CognitiveDistortion",
+        "uid": "03756154",
+        "txtName": "Cognitive Distortion",
+        "txtNote": ""
+      },
+      "x": 0.262,
+      "keys": {
+        "uidEntity": "03756154",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "2efba98f": {
+      "base": {
+        "id": "E_Reappraisal",
+        "label": "Cognitive Reappraisal",
+        "class": "C_Mechanism",
+        "xid": "E_Reappraisal",
+        "uid": "2efba98f",
+        "txtName": "Cognitive Reappraisal",
+        "txtNote": ""
+      },
+      "x": 0.6246,
+      "keys": {
+        "uidEntity": "2efba98f",
+        "xidEntityType": "C_Mechanism",
+        "uidNodeType": "d4ee24e0"
+      }
+    },
+    "a1189d05": {
+      "base": {
+        "id": "E_NetworkPsychiatry",
+        "label": "Network Psychiatry",
+        "class": "C_ClinicalFramework",
+        "xid": "E_NetworkPsychiatry",
+        "uid": "a1189d05",
+        "txtName": "Network Psychiatry",
+        "txtNote": ""
+      },
+      "x": 0.4104,
+      "keys": {
+        "uidEntity": "a1189d05",
+        "xidEntityType": "C_ClinicalFramework",
+        "uidNodeType": "9f72eae8"
+      }
+    },
+    "03bf21a2": {
+      "base": {
+        "id": "E_SymptomNetwork",
+        "label": "Symptom Network",
+        "class": "C_Model",
+        "xid": "E_SymptomNetwork",
+        "uid": "03bf21a2",
+        "txtName": "Symptom Network",
+        "txtNote": ""
+      },
+      "x": 0.1478,
+      "keys": {
+        "uidEntity": "03bf21a2",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "aec49e81": {
+      "base": {
+        "id": "E_EmotionTheoryBasic",
+        "label": "Basic Emotion Theory",
+        "class": "C_Theory",
+        "xid": "E_EmotionTheoryBasic",
+        "uid": "aec49e81",
+        "txtName": "Basic Emotion Theory",
+        "txtNote": ""
+      },
+      "x": 0.5021,
+      "keys": {
+        "uidEntity": "aec49e81",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "694024cf": {
+      "base": {
+        "id": "E_ConstructedEmotionTheory",
+        "label": "Constructed Emotion Theory",
+        "class": "C_Theory",
+        "xid": "E_ConstructedEmotionTheory",
+        "uid": "694024cf",
+        "txtName": "Constructed Emotion Theory",
+        "txtNote": ""
+      },
+      "x": 0.8106,
+      "keys": {
+        "uidEntity": "694024cf",
+        "xidEntityType": "C_Theory",
+        "uidNodeType": "88ca7c46"
+      }
+    },
+    "437b5427": {
+      "base": {
+        "id": "E_Amygdala",
+        "label": "Amygdala",
+        "class": "C_Construct",
+        "xid": "E_Amygdala",
+        "uid": "437b5427",
+        "txtName": "Amygdala",
+        "txtNote": ""
+      },
+      "x": 0.4466,
+      "keys": {
+        "uidEntity": "437b5427",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "c24de781": {
+      "base": {
+        "id": "E_PrefrontalCortex",
+        "label": "Prefrontal Cortex",
+        "class": "C_Construct",
+        "xid": "E_PrefrontalCortex",
+        "uid": "c24de781",
+        "txtName": "Prefrontal Cortex",
+        "txtNote": ""
+      },
+      "x": 0.2473,
+      "keys": {
+        "uidEntity": "c24de781",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "95baa8bc": {
+      "base": {
+        "id": "E_Interoception",
+        "label": "Interoception",
+        "class": "C_Construct",
+        "xid": "E_Interoception",
+        "uid": "95baa8bc",
+        "txtName": "Interoception",
+        "txtNote": ""
+      },
+      "x": 0.2442,
+      "keys": {
+        "uidEntity": "95baa8bc",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "c524d70b": {
+      "base": {
+        "id": "E_DefaultModeNetwork",
+        "label": "Default Mode Network",
+        "class": "C_Construct",
+        "xid": "E_DefaultModeNetwork",
+        "uid": "c524d70b",
+        "txtName": "Default Mode Network",
+        "txtNote": ""
+      },
+      "x": 0.9332,
+      "keys": {
+        "uidEntity": "c524d70b",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "d542b779": {
+      "base": {
+        "id": "E_SalienceNetwork",
+        "label": "Salience Network",
+        "class": "C_Construct",
+        "xid": "E_SalienceNetwork",
+        "uid": "d542b779",
+        "txtName": "Salience Network",
+        "txtNote": ""
+      },
+      "x": 0.9776,
+      "keys": {
+        "uidEntity": "d542b779",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "b8c2cc00": {
+      "base": {
+        "id": "E_CentralExecutiveNetwork",
+        "label": "Central Executive Network",
+        "class": "C_Construct",
+        "xid": "E_CentralExecutiveNetwork",
+        "uid": "b8c2cc00",
+        "txtName": "Central Executive Network",
+        "txtNote": ""
+      },
+      "x": 0.7279,
+      "keys": {
+        "uidEntity": "b8c2cc00",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "c144fbd0": {
+      "base": {
+        "id": "E_PerceptionDomain",
+        "label": "Perception",
+        "class": "C_Domain",
+        "xid": "E_PerceptionDomain",
+        "uid": "c144fbd0",
+        "txtName": "Perception",
+        "txtNote": ""
+      },
+      "x": 0.8417,
+      "keys": {
+        "uidEntity": "c144fbd0",
+        "xidEntityType": "C_Domain",
+        "uidNodeType": "32b5eefb"
+      }
+    },
+    "47d2739c": {
+      "base": {
+        "id": "E_MemoryDomain",
+        "label": "Memory",
+        "class": "C_Domain",
+        "xid": "E_MemoryDomain",
+        "uid": "47d2739c",
+        "txtName": "Memory",
+        "txtNote": ""
+      },
+      "x": 0.2148,
+      "keys": {
+        "uidEntity": "47d2739c",
+        "xidEntityType": "C_Domain",
+        "uidNodeType": "32b5eefb"
+      }
+    },
+    "ba013d46": {
+      "base": {
+        "id": "E_EmotionDomain",
+        "label": "Emotion",
+        "class": "C_Domain",
+        "xid": "E_EmotionDomain",
+        "uid": "ba013d46",
+        "txtName": "Emotion",
+        "txtNote": ""
+      },
+      "x": 0.5379,
+      "keys": {
+        "uidEntity": "ba013d46",
+        "xidEntityType": "C_Domain",
+        "uidNodeType": "32b5eefb"
+      }
+    },
+    "3c97434a": {
+      "base": {
+        "id": "E_DecisionMakingDomain",
+        "label": "Decision Making",
+        "class": "C_Domain",
+        "xid": "E_DecisionMakingDomain",
+        "uid": "3c97434a",
+        "txtName": "Decision Making",
+        "txtNote": ""
+      },
+      "x": 0.001,
+      "keys": {
+        "uidEntity": "3c97434a",
+        "xidEntityType": "C_Domain",
+        "uidNodeType": "32b5eefb"
+      }
+    },
+    "f20dc076": {
+      "base": {
+        "id": "E_SocialCognitionDomain",
+        "label": "Social Cognition",
+        "class": "C_Domain",
+        "xid": "E_SocialCognitionDomain",
+        "uid": "f20dc076",
+        "txtName": "Social Cognition",
+        "txtNote": ""
+      },
+      "x": 0.5155,
+      "keys": {
+        "uidEntity": "f20dc076",
+        "xidEntityType": "C_Domain",
+        "uidNodeType": "32b5eefb"
+      }
+    },
+    "3df318e4": {
+      "base": {
+        "id": "E_ConsciousnessDomain",
+        "label": "Consciousness",
+        "class": "C_Domain",
+        "xid": "E_ConsciousnessDomain",
+        "uid": "3df318e4",
+        "txtName": "Consciousness",
+        "txtNote": ""
+      },
+      "x": 0.1342,
+      "keys": {
+        "uidEntity": "3df318e4",
+        "xidEntityType": "C_Domain",
+        "uidNodeType": "32b5eefb"
+      }
+    },
+    "264781ea": {
+      "base": {
+        "id": "E_NeuralLevel",
+        "label": "Neural Level",
+        "class": "C_LevelOfAnalysis",
+        "xid": "E_NeuralLevel",
+        "uid": "264781ea",
+        "txtName": "Neural Level",
+        "txtNote": ""
+      },
+      "x": 0.8428,
+      "keys": {
+        "uidEntity": "264781ea",
+        "xidEntityType": "C_LevelOfAnalysis",
+        "uidNodeType": "5e3c45d6"
+      }
+    },
+    "810cde58": {
+      "base": {
+        "id": "E_CircuitLevel",
+        "label": "Circuit Level",
+        "class": "C_LevelOfAnalysis",
+        "xid": "E_CircuitLevel",
+        "uid": "810cde58",
+        "txtName": "Circuit Level",
+        "txtNote": ""
+      },
+      "x": 0.7258,
+      "keys": {
+        "uidEntity": "810cde58",
+        "xidEntityType": "C_LevelOfAnalysis",
+        "uidNodeType": "5e3c45d6"
+      }
+    },
+    "d797fcce": {
+      "base": {
+        "id": "E_SystemLevel",
+        "label": "System Level",
+        "class": "C_LevelOfAnalysis",
+        "xid": "E_SystemLevel",
+        "uid": "d797fcce",
+        "txtName": "System Level",
+        "txtNote": ""
+      },
+      "x": 0.1225,
+      "keys": {
+        "uidEntity": "d797fcce",
+        "xidEntityType": "C_LevelOfAnalysis",
+        "uidNodeType": "5e3c45d6"
+      }
+    },
+    "73ed8fe9": {
+      "base": {
+        "id": "E_CognitiveLevel",
+        "label": "Cognitive Level",
+        "class": "C_LevelOfAnalysis",
+        "xid": "E_CognitiveLevel",
+        "uid": "73ed8fe9",
+        "txtName": "Cognitive Level",
+        "txtNote": ""
+      },
+      "x": 0.5227,
+      "keys": {
+        "uidEntity": "73ed8fe9",
+        "xidEntityType": "C_LevelOfAnalysis",
+        "uidNodeType": "5e3c45d6"
+      }
+    },
+    "614cb6ea": {
+      "base": {
+        "id": "E_BehavioralLevel",
+        "label": "Behavioral Level",
+        "class": "C_LevelOfAnalysis",
+        "xid": "E_BehavioralLevel",
+        "uid": "614cb6ea",
+        "txtName": "Behavioral Level",
+        "txtNote": ""
+      },
+      "x": 0.0357,
+      "keys": {
+        "uidEntity": "614cb6ea",
+        "xidEntityType": "C_LevelOfAnalysis",
+        "uidNodeType": "5e3c45d6"
+      }
+    },
+    "3a5e72d0": {
+      "base": {
+        "id": "E_SocialLevel",
+        "label": "Social Level",
+        "class": "C_LevelOfAnalysis",
+        "xid": "E_SocialLevel",
+        "uid": "3a5e72d0",
+        "txtName": "Social Level",
+        "txtNote": ""
+      },
+      "x": 0.9709,
+      "keys": {
+        "uidEntity": "3a5e72d0",
+        "xidEntityType": "C_LevelOfAnalysis",
+        "uidNodeType": "5e3c45d6"
+      }
+    },
+    "fffcc7ad": {
+      "base": {
+        "id": "E_fMRI",
+        "label": "Functional MRI",
+        "class": "C_Method",
+        "xid": "E_fMRI",
+        "uid": "fffcc7ad",
+        "txtName": "Functional MRI",
+        "txtNote": ""
+      },
+      "x": 0.7878,
+      "keys": {
+        "uidEntity": "fffcc7ad",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "8c294d5a": {
+      "base": {
+        "id": "E_EEG",
+        "label": "Electroencephalography",
+        "class": "C_Method",
+        "xid": "E_EEG",
+        "uid": "8c294d5a",
+        "txtName": "Electroencephalography",
+        "txtNote": ""
+      },
+      "x": 0.1797,
+      "keys": {
+        "uidEntity": "8c294d5a",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "5158ebcc": {
+      "base": {
+        "id": "E_SingleUnitRecording",
+        "label": "Single-Unit Recording",
+        "class": "C_Method",
+        "xid": "E_SingleUnitRecording",
+        "uid": "5158ebcc",
+        "txtName": "Single-Unit Recording",
+        "txtNote": ""
+      },
+      "x": 0.7779,
+      "keys": {
+        "uidEntity": "5158ebcc",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "8c513f5d": {
+      "base": {
+        "id": "E_Optogenetics",
+        "label": "Optogenetics",
+        "class": "C_Method",
+        "xid": "E_Optogenetics",
+        "uid": "8c513f5d",
+        "txtName": "Optogenetics",
+        "txtNote": ""
+      },
+      "x": 0.8086,
+      "keys": {
+        "uidEntity": "8c513f5d",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "4ca4b092": {
+      "base": {
+        "id": "E_ComputationalModeling",
+        "label": "Computational Modeling",
+        "class": "C_Method",
+        "xid": "E_ComputationalModeling",
+        "uid": "4ca4b092",
+        "txtName": "Computational Modeling",
+        "txtNote": ""
+      },
+      "x": 0.2147,
+      "keys": {
+        "uidEntity": "4ca4b092",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "ee29a8c8": {
+      "base": {
+        "id": "E_Psychophysics",
+        "label": "Psychophysics",
+        "class": "C_Method",
+        "xid": "E_Psychophysics",
+        "uid": "ee29a8c8",
+        "txtName": "Psychophysics",
+        "txtNote": ""
+      },
+      "x": 0.3214,
+      "keys": {
+        "uidEntity": "ee29a8c8",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "c9067cdd": {
+      "base": {
+        "id": "E_BehavioralExperiment",
+        "label": "Behavioral Experiment",
+        "class": "C_Method",
+        "xid": "E_BehavioralExperiment",
+        "uid": "c9067cdd",
+        "txtName": "Behavioral Experiment",
+        "txtNote": ""
+      },
+      "x": 0.5309,
+      "keys": {
+        "uidEntity": "c9067cdd",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "4a0d5026": {
+      "base": {
+        "id": "E_RepresentationalSimilarityAnalysis",
+        "label": "Representational Similarity Analysis",
+        "class": "C_Method",
+        "xid": "E_RepresentationalSimilarityAnalysis",
+        "uid": "4a0d5026",
+        "txtName": "Representational Similarity Analysis",
+        "txtNote": ""
+      },
+      "x": 0.6149,
+      "keys": {
+        "uidEntity": "4a0d5026",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "591a7232": {
+      "base": {
+        "id": "E_MultivariatePatternAnalysis",
+        "label": "Multivariate Pattern Analysis",
+        "class": "C_Method",
+        "xid": "E_MultivariatePatternAnalysis",
+        "uid": "591a7232",
+        "txtName": "Multivariate Pattern Analysis",
+        "txtNote": ""
+      },
+      "x": 0.6437,
+      "keys": {
+        "uidEntity": "591a7232",
+        "xidEntityType": "C_Method",
+        "uidNodeType": "a2fc8264"
+      }
+    },
+    "de4859c6": {
+      "base": {
+        "id": "E_PredictiveCodingVisual",
+        "label": "Predictive Coding in Vision",
+        "class": "C_Model",
+        "xid": "E_PredictiveCodingVisual",
+        "uid": "de4859c6",
+        "txtName": "Predictive Coding in Vision",
+        "txtNote": ""
+      },
+      "x": 0.6966,
+      "keys": {
+        "uidEntity": "de4859c6",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "1367447b": {
+      "base": {
+        "id": "E_PredictiveCodingAuditory",
+        "label": "Predictive Coding in Audition",
+        "class": "C_Model",
+        "xid": "E_PredictiveCodingAuditory",
+        "uid": "1367447b",
+        "txtName": "Predictive Coding in Audition",
+        "txtNote": ""
+      },
+      "x": 0.1711,
+      "keys": {
+        "uidEntity": "1367447b",
+        "xidEntityType": "C_Model",
+        "uidNodeType": "03ae54f4"
+      }
+    },
+    "d49774ae": {
+      "base": {
+        "id": "E_HabitSystem",
+        "label": "Habit System",
+        "class": "C_Construct",
+        "xid": "E_HabitSystem",
+        "uid": "d49774ae",
+        "txtName": "Habit System",
+        "txtNote": ""
+      },
+      "x": 0.7196,
+      "keys": {
+        "uidEntity": "d49774ae",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "b7d77651": {
+      "base": {
+        "id": "E_GoalDirectedSystem",
+        "label": "Goal-Directed System",
+        "class": "C_Construct",
+        "xid": "E_GoalDirectedSystem",
+        "uid": "b7d77651",
+        "txtName": "Goal-Directed System",
+        "txtNote": ""
+      },
+      "x": 0.5985,
+      "keys": {
+        "uidEntity": "b7d77651",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "3eeb72d8": {
+      "base": {
+        "id": "E_Resilience",
+        "label": "Resilience",
+        "class": "C_Construct",
+        "xid": "E_Resilience",
+        "uid": "3eeb72d8",
+        "txtName": "Resilience",
+        "txtNote": ""
+      },
+      "x": 0.3501,
+      "keys": {
+        "uidEntity": "3eeb72d8",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "2e01c66e": {
+      "base": {
+        "id": "E_StressResponse",
+        "label": "Stress Response",
+        "class": "C_Construct",
+        "xid": "E_StressResponse",
+        "uid": "2e01c66e",
+        "txtName": "Stress Response",
+        "txtNote": ""
+      },
+      "x": 0.4464,
+      "keys": {
+        "uidEntity": "2e01c66e",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "adf4ce58": {
+      "base": {
+        "id": "E_HPA_Axis",
+        "label": "HPA Axis",
+        "class": "C_Construct",
+        "xid": "E_HPA_Axis",
+        "uid": "adf4ce58",
+        "txtName": "HPA Axis",
+        "txtNote": ""
+      },
+      "x": 0.7114,
+      "keys": {
+        "uidEntity": "adf4ce58",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "d7807e47": {
+      "base": {
+        "id": "E_TheoryOfMind",
+        "label": "Theory of Mind",
+        "class": "C_Construct",
+        "xid": "E_TheoryOfMind",
+        "uid": "d7807e47",
+        "txtName": "Theory of Mind",
+        "txtNote": ""
+      },
+      "x": 0.3385,
+      "keys": {
+        "uidEntity": "d7807e47",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "976c76cc": {
+      "base": {
+        "id": "E_MirrorNeuronSystem",
+        "label": "Mirror Neuron System",
+        "class": "C_Construct",
+        "xid": "E_MirrorNeuronSystem",
+        "uid": "976c76cc",
+        "txtName": "Mirror Neuron System",
+        "txtNote": ""
+      },
+      "x": 0.1371,
+      "keys": {
+        "uidEntity": "976c76cc",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "4824085f": {
+      "base": {
+        "id": "E_ExecutiveFunction",
+        "label": "Executive Function",
+        "class": "C_Construct",
+        "xid": "E_ExecutiveFunction",
+        "uid": "4824085f",
+        "txtName": "Executive Function",
+        "txtNote": ""
+      },
+      "x": 0.4346,
+      "keys": {
+        "uidEntity": "4824085f",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "170360ec": {
+      "base": {
+        "id": "E_Inhibition",
+        "label": "Inhibitory Control",
+        "class": "C_Construct",
+        "xid": "E_Inhibition",
+        "uid": "170360ec",
+        "txtName": "Inhibitory Control",
+        "txtNote": ""
+      },
+      "x": 0.2566,
+      "keys": {
+        "uidEntity": "170360ec",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "1fbbbf49": {
+      "base": {
+        "id": "E_Updating",
+        "label": "Working Memory Updating",
+        "class": "C_Construct",
+        "xid": "E_Updating",
+        "uid": "1fbbbf49",
+        "txtName": "Working Memory Updating",
+        "txtNote": ""
+      },
+      "x": 0.2905,
+      "keys": {
+        "uidEntity": "1fbbbf49",
+        "xidEntityType": "C_Construct",
+        "uidNodeType": "888d3c4e"
+      }
+    },
+    "f06487e7": {
+      "base": {
+        "key": "C_Framework",
+        "name": "C_Framework",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_Framework",
+        "uid": "f06487e7",
+        "txtName": "C_Framework",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.9126,
+      "keys": {
+        "uidEntity": "f06487e7",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "368f16a7": {
+      "base": {
+        "key": "C_ComputationalFramework",
+        "name": "C_ComputationalFramework",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_ComputationalFramework",
+        "uid": "368f16a7",
+        "txtName": "C_ComputationalFramework",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.4679,
+      "keys": {
+        "uidEntity": "368f16a7",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "27931bed": {
+      "base": {
+        "key": "C_BayesianFramework",
+        "name": "C_BayesianFramework",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_BayesianFramework",
+        "uid": "27931bed",
+        "txtName": "C_BayesianFramework",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.2801,
+      "keys": {
+        "uidEntity": "27931bed",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "ab145e9f": {
+      "base": {
+        "key": "C_DynamicalFramework",
+        "name": "C_DynamicalFramework",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_DynamicalFramework",
+        "uid": "ab145e9f",
+        "txtName": "C_DynamicalFramework",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.6516,
+      "keys": {
+        "uidEntity": "ab145e9f",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "0d0ef92e": {
+      "base": {
+        "key": "C_EmbodiedFramework",
+        "name": "C_EmbodiedFramework",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_EmbodiedFramework",
+        "uid": "0d0ef92e",
+        "txtName": "C_EmbodiedFramework",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.579,
+      "keys": {
+        "uidEntity": "0d0ef92e",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "ac395a1f": {
+      "base": {
+        "key": "C_ConsciousnessTheory",
+        "name": "C_ConsciousnessTheory",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_ConsciousnessTheory",
+        "uid": "ac395a1f",
+        "txtName": "C_ConsciousnessTheory",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.0475,
+      "keys": {
+        "uidEntity": "ac395a1f",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "88ca7c46": {
+      "base": {
+        "key": "C_Theory",
+        "name": "C_Theory",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_Theory",
+        "uid": "88ca7c46",
+        "txtName": "C_Theory",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.5897,
+      "keys": {
+        "uidEntity": "88ca7c46",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "cb6d415c": {
+      "base": {
+        "key": "C_SocialFramework",
+        "name": "C_SocialFramework",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_SocialFramework",
+        "uid": "cb6d415c",
+        "txtName": "C_SocialFramework",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.3235,
+      "keys": {
+        "uidEntity": "cb6d415c",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "1edb8979": {
+      "base": {
+        "key": "C_DevelopmentalFramework",
+        "name": "C_DevelopmentalFramework",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_DevelopmentalFramework",
+        "uid": "1edb8979",
+        "txtName": "C_DevelopmentalFramework",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.7505,
+      "keys": {
+        "uidEntity": "1edb8979",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "9f72eae8": {
+      "base": {
+        "key": "C_ClinicalFramework",
+        "name": "C_ClinicalFramework",
+        "description": "Not found in source JSON file",
+        "type": "Entity",
+        "xid": "C_ClinicalFramework",
+        "uid": "9f72eae8",
+        "txtName": "C_ClinicalFramework",
+        "txtNote": "Not found in source JSON file"
+      },
+      "x": 0.8582,
+      "keys": {
+        "uidEntity": "9f72eae8",
+        "xidEntityType": "Entity",
+        "uidNodeType": "19bbd87c"
+      }
+    },
+    "ea647dc9": {
+      "base": {
+        "id": "pl32983",
+        "name": "Peter Luckock",
+        "description": "Inventor",
+        "xid": "pl32983",
+        "uid": "ea647dc9",
+        "txtName": "Peter Luckock",
+        "txtNote": "Inventor"
+      },
+      "x": 0.8432,
+      "keys": {
+        "uidEntity": "ea647dc9",
+        "xidEntityType": "Entity",
+        "uidNodeType": "37f32b0e"
+      },
+      "images": {
+        "main": {
+          "img_src": "Peter.jpg",
+          "transform": {
+            "circle": "translate(0,0) scale(1)",
+            "rect": "translate(0,0) scale(1)",
+            "frame": "translate(0,0) scale(1)"
+          }
+        }
+      }
+    }
+  },
+  "links": {
+    "17135419": {
+      "base": {
+        "id": "R153",
+        "predicate": "P_contrasts_with",
+        "from": "E_Behaviorism",
+        "to": "E_Cognitivism",
+        "keys": {
+          "xid": "R1382425",
+          "xidEntityFrom": "E_Behaviorism",
+          "xidEntityTo": "E_Cognitivism",
+          "xidRelnType": "P_contrasts_with",
+          "uid": "07445aee"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b07720a6",
+        "uidDatumTo": "0bc4d8ed",
+        "uidLinkType": "98611444",
+        "uidBase": "07445aee",
+        "xidRelnType": "P_contrasts_with",
+        "uidThis": "17135419"
+      },
+      "y": 0.0012
+    },
+    "37149458": {
+      "base": {
+        "id": "R54",
+        "predicate": "P_uses_construct",
+        "from": "E_FreeEnergyPrinciple",
+        "to": "E_Surprisal",
+        "keys": {
+          "xid": "R1012055",
+          "xidEntityFrom": "E_FreeEnergyPrinciple",
+          "xidEntityTo": "E_Surprisal",
+          "xidRelnType": "P_uses_construct",
+          "uid": "6656a4e7"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bc75285d",
+        "uidDatumTo": "0a10d9dc",
+        "uidLinkType": "b2f58352",
+        "uidBase": "6656a4e7",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "37149458"
+      },
+      "y": 0.8737
+    },
+    "61840270": {
+      "base": {
+        "id": "R168",
+        "predicate": "P_uses_method",
+        "from": "E_Cognitivism",
+        "to": "E_RepresentationalSimilarityAnalysis",
+        "keys": {
+          "xid": "R1559189",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "E_RepresentationalSimilarityAnalysis",
+          "xidRelnType": "P_uses_method",
+          "uid": "6c7eca4d"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "4a0d5026",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "6c7eca4d",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "61840270"
+      },
+      "y": 0.6885
+    },
+    "87105593": {
+      "base": {
+        "id": "R78",
+        "predicate": "P_is_instance_of",
+        "from": "E_HigherOrderThought",
+        "to": "C_ConsciousnessTheory",
+        "keys": {
+          "xid": "R1915423",
+          "xidEntityFrom": "E_HigherOrderThought",
+          "xidEntityTo": "C_ConsciousnessTheory",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "984fb8cc"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d9f80977",
+        "uidDatumTo": "ac395a1f",
+        "uidLinkType": "b829fa32",
+        "uidBase": "984fb8cc",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "87105593"
+      },
+      "y": 0.7854
+    },
+    "e6a4a21c": {
+      "base": {
+        "id": "R1",
+        "predicate": "P_is_instance_of",
+        "from": "E_Behaviorism",
+        "to": "C_Framework",
+        "keys": {
+          "xid": "R1761775",
+          "xidEntityFrom": "E_Behaviorism",
+          "xidEntityTo": "C_Framework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "5775f3a1"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b07720a6",
+        "uidDatumTo": "f06487e7",
+        "uidLinkType": "b829fa32",
+        "uidBase": "5775f3a1",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "e6a4a21c"
+      },
+      "y": 0.6696
+    },
+    "d9ff4a83": {
+      "base": {
+        "id": "R2",
+        "predicate": "P_is_instance_of",
+        "from": "E_Cognitivism",
+        "to": "C_Framework",
+        "keys": {
+          "xid": "R1743960",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "C_Framework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "9ded88cb"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "f06487e7",
+        "uidLinkType": "b829fa32",
+        "uidBase": "9ded88cb",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "d9ff4a83"
+      },
+      "y": 0.4504
+    },
+    "4a653286": {
+      "base": {
+        "id": "R3",
+        "predicate": "P_is_instance_of",
+        "from": "E_Connectionism",
+        "to": "C_Framework",
+        "keys": {
+          "xid": "R1018818",
+          "xidEntityFrom": "E_Connectionism",
+          "xidEntityTo": "C_Framework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "b58b80ec"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bec899bc",
+        "uidDatumTo": "f06487e7",
+        "uidLinkType": "b829fa32",
+        "uidBase": "b58b80ec",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "4a653286"
+      },
+      "y": 0.4607
+    },
+    "95adb75c": {
+      "base": {
+        "id": "R4",
+        "predicate": "P_is_instance_of",
+        "from": "E_ComputationalNeuroscience",
+        "to": "C_ComputationalFramework",
+        "keys": {
+          "xid": "R1192640",
+          "xidEntityFrom": "E_ComputationalNeuroscience",
+          "xidEntityTo": "C_ComputationalFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "45122a6c"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "4de982ca",
+        "uidDatumTo": "368f16a7",
+        "uidLinkType": "b829fa32",
+        "uidBase": "45122a6c",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "95adb75c"
+      },
+      "y": 0.8575
+    },
+    "1e466232": {
+      "base": {
+        "id": "R5",
+        "predicate": "P_is_instance_of",
+        "from": "E_BayesianBrain",
+        "to": "C_BayesianFramework",
+        "keys": {
+          "xid": "R1254705",
+          "xidEntityFrom": "E_BayesianBrain",
+          "xidEntityTo": "C_BayesianFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "f35138c5"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "30c63181",
+        "uidDatumTo": "27931bed",
+        "uidLinkType": "b829fa32",
+        "uidBase": "f35138c5",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "1e466232"
+      },
+      "y": 0.6547
+    },
+    "1193a89f": {
+      "base": {
+        "id": "R6",
+        "predicate": "P_is_instance_of",
+        "from": "E_PredictiveProcessing",
+        "to": "C_Framework",
+        "keys": {
+          "xid": "R1933609",
+          "xidEntityFrom": "E_PredictiveProcessing",
+          "xidEntityTo": "C_Framework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "5b0ae542"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c2e6d1b1",
+        "uidDatumTo": "f06487e7",
+        "uidLinkType": "b829fa32",
+        "uidBase": "5b0ae542",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "1193a89f"
+      },
+      "y": 0.8154
+    },
+    "5428bb43": {
+      "base": {
+        "id": "R7",
+        "predicate": "P_is_instance_of",
+        "from": "E_FreeEnergyPrinciple",
+        "to": "C_Framework",
+        "keys": {
+          "xid": "R1573829",
+          "xidEntityFrom": "E_FreeEnergyPrinciple",
+          "xidEntityTo": "C_Framework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "abaf9c06"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bc75285d",
+        "uidDatumTo": "f06487e7",
+        "uidLinkType": "b829fa32",
+        "uidBase": "abaf9c06",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "5428bb43"
+      },
+      "y": 0.6597
+    },
+    "c3f8ead6": {
+      "base": {
+        "id": "R8",
+        "predicate": "P_is_instance_of",
+        "from": "E_DynamicalSystemsNeuro",
+        "to": "C_DynamicalFramework",
+        "keys": {
+          "xid": "R1239543",
+          "xidEntityFrom": "E_DynamicalSystemsNeuro",
+          "xidEntityTo": "C_DynamicalFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "8720922e"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "5f87c750",
+        "uidDatumTo": "ab145e9f",
+        "uidLinkType": "b829fa32",
+        "uidBase": "8720922e",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "c3f8ead6"
+      },
+      "y": 0.3342
+    },
+    "a84ac57a": {
+      "base": {
+        "id": "R9",
+        "predicate": "P_is_instance_of",
+        "from": "E_EmbodiedCognition",
+        "to": "C_EmbodiedFramework",
+        "keys": {
+          "xid": "R1096737",
+          "xidEntityFrom": "E_EmbodiedCognition",
+          "xidEntityTo": "C_EmbodiedFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "f01f87a8"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "04996fa4",
+        "uidDatumTo": "0d0ef92e",
+        "uidLinkType": "b829fa32",
+        "uidBase": "f01f87a8",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "a84ac57a"
+      },
+      "y": 0.7079
+    },
+    "a8358bcb": {
+      "base": {
+        "id": "R10",
+        "predicate": "P_is_instance_of",
+        "from": "E_EcologicalPsychology",
+        "to": "C_Framework",
+        "keys": {
+          "xid": "R1902218",
+          "xidEntityFrom": "E_EcologicalPsychology",
+          "xidEntityTo": "C_Framework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "c5bf0184"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "ea5304b4",
+        "uidDatumTo": "f06487e7",
+        "uidLinkType": "b829fa32",
+        "uidBase": "c5bf0184",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "a8358bcb"
+      },
+      "y": 0.0653
+    },
+    "e467eb5c": {
+      "base": {
+        "id": "R11",
+        "predicate": "P_associated_with",
+        "from": "E_Skinner",
+        "to": "E_Behaviorism",
+        "keys": {
+          "xid": "R1208496",
+          "xidEntityFrom": "E_Skinner",
+          "xidEntityTo": "E_Behaviorism",
+          "xidRelnType": "P_associated_with",
+          "uid": "1b00c4a5"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c5dba1bb",
+        "uidDatumTo": "b07720a6",
+        "uidLinkType": "52485c65",
+        "uidBase": "1b00c4a5",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "e467eb5c"
+      },
+      "y": 0.0921
+    },
+    "03f73db3": {
+      "base": {
+        "id": "R12",
+        "predicate": "P_associated_with",
+        "from": "E_Pavlov",
+        "to": "E_ClassicalConditioning",
+        "keys": {
+          "xid": "R1850018",
+          "xidEntityFrom": "E_Pavlov",
+          "xidEntityTo": "E_ClassicalConditioning",
+          "xidRelnType": "P_associated_with",
+          "uid": "bb9c40e0"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d927d34f",
+        "uidDatumTo": "7bcf4ec7",
+        "uidLinkType": "52485c65",
+        "uidBase": "bb9c40e0",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "03f73db3"
+      },
+      "y": 0.0674
+    },
+    "eb98baaa": {
+      "base": {
+        "id": "R13",
+        "predicate": "P_uses_construct",
+        "from": "E_OperantConditioning",
+        "to": "E_Reinforcement",
+        "keys": {
+          "xid": "R1385433",
+          "xidEntityFrom": "E_OperantConditioning",
+          "xidEntityTo": "E_Reinforcement",
+          "xidRelnType": "P_uses_construct",
+          "uid": "e7e5962e"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "447505fd",
+        "uidDatumTo": "7e414f22",
+        "uidLinkType": "b2f58352",
+        "uidBase": "e7e5962e",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "eb98baaa"
+      },
+      "y": 0.3607
+    },
+    "9f8a38cc": {
+      "base": {
+        "id": "R14",
+        "predicate": "P_uses_construct",
+        "from": "E_OperantConditioning",
+        "to": "E_Punishment",
+        "keys": {
+          "xid": "R1069568",
+          "xidEntityFrom": "E_OperantConditioning",
+          "xidEntityTo": "E_Punishment",
+          "xidRelnType": "P_uses_construct",
+          "uid": "a41285e0"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "447505fd",
+        "uidDatumTo": "a4f1c2f6",
+        "uidLinkType": "b2f58352",
+        "uidBase": "a41285e0",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "9f8a38cc"
+      },
+      "y": 0.2993
+    },
+    "21ceb387": {
+      "base": {
+        "id": "R15",
+        "predicate": "P_targets_domain",
+        "from": "E_Behaviorism",
+        "to": "E_BehavioralLevel",
+        "keys": {
+          "xid": "R1205314",
+          "xidEntityFrom": "E_Behaviorism",
+          "xidEntityTo": "E_BehavioralLevel",
+          "xidRelnType": "P_targets_domain",
+          "uid": "fa52fb85"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b07720a6",
+        "uidDatumTo": "614cb6ea",
+        "uidLinkType": "16b7e255",
+        "uidBase": "fa52fb85",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "21ceb387"
+      },
+      "y": 0.8808
+    },
+    "4ed271ab": {
+      "base": {
+        "id": "R16",
+        "predicate": "P_targets_domain",
+        "from": "E_Behaviorism",
+        "to": "E_DecisionMakingDomain",
+        "keys": {
+          "xid": "R1777348",
+          "xidEntityFrom": "E_Behaviorism",
+          "xidEntityTo": "E_DecisionMakingDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "ebbf450c"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b07720a6",
+        "uidDatumTo": "3c97434a",
+        "uidLinkType": "16b7e255",
+        "uidBase": "ebbf450c",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "4ed271ab"
+      },
+      "y": 0.9346
+    },
+    "6d9a42a9": {
+      "base": {
+        "id": "R17",
+        "predicate": "P_uses_construct",
+        "from": "E_Cognitivism",
+        "to": "E_WorkingMemory",
+        "keys": {
+          "xid": "R1343925",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "E_WorkingMemory",
+          "xidRelnType": "P_uses_construct",
+          "uid": "f0a7480e"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "6e6f185d",
+        "uidLinkType": "b2f58352",
+        "uidBase": "f0a7480e",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "6d9a42a9"
+      },
+      "y": 0.8463
+    },
+    "c2540177": {
+      "base": {
+        "id": "R18",
+        "predicate": "P_uses_construct",
+        "from": "E_Cognitivism",
+        "to": "E_LongTermMemory",
+        "keys": {
+          "xid": "R1764047",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "E_LongTermMemory",
+          "xidRelnType": "P_uses_construct",
+          "uid": "04ae6ce2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "6e9ec3b8",
+        "uidLinkType": "b2f58352",
+        "uidBase": "04ae6ce2",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "c2540177"
+      },
+      "y": 0.6638
+    },
+    "2e996b64": {
+      "base": {
+        "id": "R19",
+        "predicate": "P_uses_construct",
+        "from": "E_Cognitivism",
+        "to": "E_Attention",
+        "keys": {
+          "xid": "R1252384",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "E_Attention",
+          "xidRelnType": "P_uses_construct",
+          "uid": "002821ce"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "59e90b6b",
+        "uidLinkType": "b2f58352",
+        "uidBase": "002821ce",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "2e996b64"
+      },
+      "y": 0.7111
+    },
+    "3d73b95c": {
+      "base": {
+        "id": "R20",
+        "predicate": "P_uses_construct",
+        "from": "E_Cognitivism",
+        "to": "E_MentalRepresentation",
+        "keys": {
+          "xid": "R1790701",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "E_MentalRepresentation",
+          "xidRelnType": "P_uses_construct",
+          "uid": "6c6eecec"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "73f9afa3",
+        "uidLinkType": "b2f58352",
+        "uidBase": "6c6eecec",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "3d73b95c"
+      },
+      "y": 0.9959
+    },
+    "4fc1f31c": {
+      "base": {
+        "id": "R21",
+        "predicate": "P_associated_with",
+        "from": "E_Newell",
+        "to": "E_InformationProcessing",
+        "keys": {
+          "xid": "R1257313",
+          "xidEntityFrom": "E_Newell",
+          "xidEntityTo": "E_InformationProcessing",
+          "xidRelnType": "P_associated_with",
+          "uid": "eacd3d45"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "800ea984",
+        "uidDatumTo": "2ec03a9a",
+        "uidLinkType": "52485c65",
+        "uidBase": "eacd3d45",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "4fc1f31c"
+      },
+      "y": 0.8093
+    },
+    "647763da": {
+      "base": {
+        "id": "R22",
+        "predicate": "P_associated_with",
+        "from": "E_Simon",
+        "to": "E_InformationProcessing",
+        "keys": {
+          "xid": "R1774938",
+          "xidEntityFrom": "E_Simon",
+          "xidEntityTo": "E_InformationProcessing",
+          "xidRelnType": "P_associated_with",
+          "uid": "20d240c2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "5aabf9eb",
+        "uidDatumTo": "2ec03a9a",
+        "uidLinkType": "52485c65",
+        "uidBase": "20d240c2",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "647763da"
+      },
+      "y": 0.33
+    },
+    "e74290b3": {
+      "base": {
+        "id": "R23",
+        "predicate": "P_targets_domain",
+        "from": "E_Cognitivism",
+        "to": "E_MemoryDomain",
+        "keys": {
+          "xid": "R1493484",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "E_MemoryDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "14921aa2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "47d2739c",
+        "uidLinkType": "16b7e255",
+        "uidBase": "14921aa2",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "e74290b3"
+      },
+      "y": 0.195
+    },
+    "b919db9a": {
+      "base": {
+        "id": "R24",
+        "predicate": "P_targets_domain",
+        "from": "E_Cognitivism",
+        "to": "E_PerceptionDomain",
+        "keys": {
+          "xid": "R1664366",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "E_PerceptionDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "c3d06983"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "c144fbd0",
+        "uidLinkType": "16b7e255",
+        "uidBase": "c3d06983",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "b919db9a"
+      },
+      "y": 0.9749
+    },
+    "00218648": {
+      "base": {
+        "id": "R25",
+        "predicate": "P_uses_construct",
+        "from": "E_Connectionism",
+        "to": "E_DistributedRepresentation",
+        "keys": {
+          "xid": "R1130947",
+          "xidEntityFrom": "E_Connectionism",
+          "xidEntityTo": "E_DistributedRepresentation",
+          "xidRelnType": "P_uses_construct",
+          "uid": "0a0094ac"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bec899bc",
+        "uidDatumTo": "b65638ef",
+        "uidLinkType": "b2f58352",
+        "uidBase": "0a0094ac",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "00218648"
+      },
+      "y": 0.4852
+    },
+    "b34d4a97": {
+      "base": {
+        "id": "R26",
+        "predicate": "P_uses_construct",
+        "from": "E_Connectionism",
+        "to": "E_HebbianLearning",
+        "keys": {
+          "xid": "R1890878",
+          "xidEntityFrom": "E_Connectionism",
+          "xidEntityTo": "E_HebbianLearning",
+          "xidRelnType": "P_uses_construct",
+          "uid": "173740a2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bec899bc",
+        "uidDatumTo": "23c5f562",
+        "uidLinkType": "b2f58352",
+        "uidBase": "173740a2",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "b34d4a97"
+      },
+      "y": 0.2721
+    },
+    "806b2623": {
+      "base": {
+        "id": "R27",
+        "predicate": "P_uses_construct",
+        "from": "E_Connectionism",
+        "to": "E_Backpropagation",
+        "keys": {
+          "xid": "R1469759",
+          "xidEntityFrom": "E_Connectionism",
+          "xidEntityTo": "E_Backpropagation",
+          "xidRelnType": "P_uses_construct",
+          "uid": "60093e84"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bec899bc",
+        "uidDatumTo": "5c3fa170",
+        "uidLinkType": "b2f58352",
+        "uidBase": "60093e84",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "806b2623"
+      },
+      "y": 0.4794
+    },
+    "865b5e7d": {
+      "base": {
+        "id": "R28",
+        "predicate": "P_associated_with",
+        "from": "E_Rumelhart",
+        "to": "E_Connectionism",
+        "keys": {
+          "xid": "R1348386",
+          "xidEntityFrom": "E_Rumelhart",
+          "xidEntityTo": "E_Connectionism",
+          "xidRelnType": "P_associated_with",
+          "uid": "865d99e6"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "cf8cab71",
+        "uidDatumTo": "bec899bc",
+        "uidLinkType": "52485c65",
+        "uidBase": "865d99e6",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "865b5e7d"
+      },
+      "y": 0.7703
+    },
+    "62f9510b": {
+      "base": {
+        "id": "R29",
+        "predicate": "P_associated_with",
+        "from": "E_McClelland",
+        "to": "E_Connectionism",
+        "keys": {
+          "xid": "R1221470",
+          "xidEntityFrom": "E_McClelland",
+          "xidEntityTo": "E_Connectionism",
+          "xidRelnType": "P_associated_with",
+          "uid": "55946046"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "99941472",
+        "uidDatumTo": "bec899bc",
+        "uidLinkType": "52485c65",
+        "uidBase": "55946046",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "62f9510b"
+      },
+      "y": 0.7925
+    },
+    "246a0251": {
+      "base": {
+        "id": "R30",
+        "predicate": "P_models",
+        "from": "E_ArtificialNeuralNetwork",
+        "to": "E_MentalRepresentation",
+        "keys": {
+          "xid": "R1097916",
+          "xidEntityFrom": "E_ArtificialNeuralNetwork",
+          "xidEntityTo": "E_MentalRepresentation",
+          "xidRelnType": "P_models",
+          "uid": "e785e5c4"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "54ba7524",
+        "uidDatumTo": "73f9afa3",
+        "uidLinkType": "564dac94",
+        "uidBase": "e785e5c4",
+        "xidRelnType": "P_models",
+        "uidThis": "246a0251"
+      },
+      "y": 0.3099
+    },
+    "1ac1d97c": {
+      "base": {
+        "id": "R31",
+        "predicate": "P_models",
+        "from": "E_SpikingNeuronModel",
+        "to": "E_NeuralLevel",
+        "keys": {
+          "xid": "R1515032",
+          "xidEntityFrom": "E_SpikingNeuronModel",
+          "xidEntityTo": "E_NeuralLevel",
+          "xidRelnType": "P_models",
+          "uid": "6377b064"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8b7a1f1e",
+        "uidDatumTo": "264781ea",
+        "uidLinkType": "564dac94",
+        "uidBase": "6377b064",
+        "xidRelnType": "P_models",
+        "uidThis": "1ac1d97c"
+      },
+      "y": 0.695
+    },
+    "43478e99": {
+      "base": {
+        "id": "R32",
+        "predicate": "P_models",
+        "from": "E_HodgkinHuxley",
+        "to": "E_NeuralLevel",
+        "keys": {
+          "xid": "R1869065",
+          "xidEntityFrom": "E_HodgkinHuxley",
+          "xidEntityTo": "E_NeuralLevel",
+          "xidRelnType": "P_models",
+          "uid": "59edf0e0"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "e7a1bb80",
+        "uidDatumTo": "264781ea",
+        "uidLinkType": "564dac94",
+        "uidBase": "59edf0e0",
+        "xidRelnType": "P_models",
+        "uidThis": "43478e99"
+      },
+      "y": 0.9642
+    },
+    "e0700272": {
+      "base": {
+        "id": "R33",
+        "predicate": "P_models",
+        "from": "E_IntegrateAndFire",
+        "to": "E_NeuralLevel",
+        "keys": {
+          "xid": "R1382326",
+          "xidEntityFrom": "E_IntegrateAndFire",
+          "xidEntityTo": "E_NeuralLevel",
+          "xidRelnType": "P_models",
+          "uid": "93f587ea"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a77e52fd",
+        "uidDatumTo": "264781ea",
+        "uidLinkType": "564dac94",
+        "uidBase": "93f587ea",
+        "xidRelnType": "P_models",
+        "uidThis": "e0700272"
+      },
+      "y": 0.267
+    },
+    "983fbadf": {
+      "base": {
+        "id": "R34",
+        "predicate": "P_uses_construct",
+        "from": "E_ComputationalNeuroscience",
+        "to": "E_RateCode",
+        "keys": {
+          "xid": "R1764675",
+          "xidEntityFrom": "E_ComputationalNeuroscience",
+          "xidEntityTo": "E_RateCode",
+          "xidRelnType": "P_uses_construct",
+          "uid": "03216385"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "4de982ca",
+        "uidDatumTo": "622abe32",
+        "uidLinkType": "b2f58352",
+        "uidBase": "03216385",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "983fbadf"
+      },
+      "y": 0.1593
+    },
+    "87189cf3": {
+      "base": {
+        "id": "R35",
+        "predicate": "P_uses_construct",
+        "from": "E_ComputationalNeuroscience",
+        "to": "E_PopulationCode",
+        "keys": {
+          "xid": "R1361965",
+          "xidEntityFrom": "E_ComputationalNeuroscience",
+          "xidEntityTo": "E_PopulationCode",
+          "xidRelnType": "P_uses_construct",
+          "uid": "0296dfca"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "4de982ca",
+        "uidDatumTo": "70910ddb",
+        "uidLinkType": "b2f58352",
+        "uidBase": "0296dfca",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "87189cf3"
+      },
+      "y": 0.467
+    },
+    "7cf0d495": {
+      "base": {
+        "id": "R36",
+        "predicate": "P_uses_construct",
+        "from": "E_BayesianBrain",
+        "to": "E_ProbabilisticInference",
+        "keys": {
+          "xid": "R1204137",
+          "xidEntityFrom": "E_BayesianBrain",
+          "xidEntityTo": "E_ProbabilisticInference",
+          "xidRelnType": "P_uses_construct",
+          "uid": "5a70b027"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "30c63181",
+        "uidDatumTo": "a2e64d0b",
+        "uidLinkType": "b2f58352",
+        "uidBase": "5a70b027",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "7cf0d495"
+      },
+      "y": 0.5555
+    },
+    "42bccaa6": {
+      "base": {
+        "id": "R37",
+        "predicate": "P_uses_construct",
+        "from": "E_BayesianBrain",
+        "to": "E_Prior",
+        "keys": {
+          "xid": "R1322559",
+          "xidEntityFrom": "E_BayesianBrain",
+          "xidEntityTo": "E_Prior",
+          "xidRelnType": "P_uses_construct",
+          "uid": "8603eb0e"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "30c63181",
+        "uidDatumTo": "3f0555cb",
+        "uidLinkType": "b2f58352",
+        "uidBase": "8603eb0e",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "42bccaa6"
+      },
+      "y": 0.7193
+    },
+    "1c405d39": {
+      "base": {
+        "id": "R38",
+        "predicate": "P_uses_construct",
+        "from": "E_BayesianBrain",
+        "to": "E_Likelihood",
+        "keys": {
+          "xid": "R1276219",
+          "xidEntityFrom": "E_BayesianBrain",
+          "xidEntityTo": "E_Likelihood",
+          "xidRelnType": "P_uses_construct",
+          "uid": "7a289ead"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "30c63181",
+        "uidDatumTo": "f97d24bf",
+        "uidLinkType": "b2f58352",
+        "uidBase": "7a289ead",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "1c405d39"
+      },
+      "y": 0.1424
+    },
+    "93a76bf2": {
+      "base": {
+        "id": "R39",
+        "predicate": "P_uses_construct",
+        "from": "E_BayesianBrain",
+        "to": "E_Posterior",
+        "keys": {
+          "xid": "R1077866",
+          "xidEntityFrom": "E_BayesianBrain",
+          "xidEntityTo": "E_Posterior",
+          "xidRelnType": "P_uses_construct",
+          "uid": "47e77bec"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "30c63181",
+        "uidDatumTo": "300bf626",
+        "uidLinkType": "b2f58352",
+        "uidBase": "47e77bec",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "93a76bf2"
+      },
+      "y": 0.2801
+    },
+    "7d6a893f": {
+      "base": {
+        "id": "R40",
+        "predicate": "P_targets_domain",
+        "from": "E_BayesianBrain",
+        "to": "E_PerceptionDomain",
+        "keys": {
+          "xid": "R1098884",
+          "xidEntityFrom": "E_BayesianBrain",
+          "xidEntityTo": "E_PerceptionDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "c49ad081"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "30c63181",
+        "uidDatumTo": "c144fbd0",
+        "uidLinkType": "16b7e255",
+        "uidBase": "c49ad081",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "7d6a893f"
+      },
+      "y": 0.3369
+    },
+    "353acf51": {
+      "base": {
+        "id": "R41",
+        "predicate": "P_targets_domain",
+        "from": "E_BayesianBrain",
+        "to": "E_DecisionMakingDomain",
+        "keys": {
+          "xid": "R1699984",
+          "xidEntityFrom": "E_BayesianBrain",
+          "xidEntityTo": "E_DecisionMakingDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "fcfaabe7"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "30c63181",
+        "uidDatumTo": "3c97434a",
+        "uidLinkType": "16b7e255",
+        "uidBase": "fcfaabe7",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "353acf51"
+      },
+      "y": 0.5674
+    },
+    "775a6213": {
+      "base": {
+        "id": "R42",
+        "predicate": "P_extends",
+        "from": "E_PredictiveProcessing",
+        "to": "E_BayesianBrain",
+        "keys": {
+          "xid": "R1051583",
+          "xidEntityFrom": "E_PredictiveProcessing",
+          "xidEntityTo": "E_BayesianBrain",
+          "xidRelnType": "P_extends",
+          "uid": "78f030ee"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c2e6d1b1",
+        "uidDatumTo": "30c63181",
+        "uidLinkType": "e578be3d",
+        "uidBase": "78f030ee",
+        "xidRelnType": "P_extends",
+        "uidThis": "775a6213"
+      },
+      "y": 0.7817
+    },
+    "940e0cd9": {
+      "base": {
+        "id": "R43",
+        "predicate": "P_uses_construct",
+        "from": "E_PredictiveProcessing",
+        "to": "E_PredictionError",
+        "keys": {
+          "xid": "R1087022",
+          "xidEntityFrom": "E_PredictiveProcessing",
+          "xidEntityTo": "E_PredictionError",
+          "xidRelnType": "P_uses_construct",
+          "uid": "61141d6b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c2e6d1b1",
+        "uidDatumTo": "0cffc5b0",
+        "uidLinkType": "b2f58352",
+        "uidBase": "61141d6b",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "940e0cd9"
+      },
+      "y": 0.4604
+    },
+    "c3ec9a5d": {
+      "base": {
+        "id": "R44",
+        "predicate": "P_uses_construct",
+        "from": "E_PredictiveProcessing",
+        "to": "E_GenerativeModel",
+        "keys": {
+          "xid": "R1870139",
+          "xidEntityFrom": "E_PredictiveProcessing",
+          "xidEntityTo": "E_GenerativeModel",
+          "xidRelnType": "P_uses_construct",
+          "uid": "308b03e0"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c2e6d1b1",
+        "uidDatumTo": "4b23f5a6",
+        "uidLinkType": "b2f58352",
+        "uidBase": "308b03e0",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "c3ec9a5d"
+      },
+      "y": 0.3287
+    },
+    "bc141b90": {
+      "base": {
+        "id": "R45",
+        "predicate": "P_uses_construct",
+        "from": "E_PredictiveProcessing",
+        "to": "E_HierarchicalInference",
+        "keys": {
+          "xid": "R1724387",
+          "xidEntityFrom": "E_PredictiveProcessing",
+          "xidEntityTo": "E_HierarchicalInference",
+          "xidRelnType": "P_uses_construct",
+          "uid": "b63dca29"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c2e6d1b1",
+        "uidDatumTo": "40b49e6f",
+        "uidLinkType": "b2f58352",
+        "uidBase": "b63dca29",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "bc141b90"
+      },
+      "y": 0.187
+    },
+    "e74d4f10": {
+      "base": {
+        "id": "R46",
+        "predicate": "P_uses_construct",
+        "from": "E_PredictiveProcessing",
+        "to": "E_TopDownPrediction",
+        "keys": {
+          "xid": "R1042140",
+          "xidEntityFrom": "E_PredictiveProcessing",
+          "xidEntityTo": "E_TopDownPrediction",
+          "xidRelnType": "P_uses_construct",
+          "uid": "81de4847"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c2e6d1b1",
+        "uidDatumTo": "76eab191",
+        "uidLinkType": "b2f58352",
+        "uidBase": "81de4847",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "e74d4f10"
+      },
+      "y": 0.1002
+    },
+    "a9ce43c5": {
+      "base": {
+        "id": "R47",
+        "predicate": "P_uses_construct",
+        "from": "E_PredictiveProcessing",
+        "to": "E_BottomUpErrorSignal",
+        "keys": {
+          "xid": "R1144117",
+          "xidEntityFrom": "E_PredictiveProcessing",
+          "xidEntityTo": "E_BottomUpErrorSignal",
+          "xidRelnType": "P_uses_construct",
+          "uid": "fa802202"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c2e6d1b1",
+        "uidDatumTo": "879f9b11",
+        "uidLinkType": "b2f58352",
+        "uidBase": "fa802202",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "a9ce43c5"
+      },
+      "y": 0.7649
+    },
+    "11c11d60": {
+      "base": {
+        "id": "R48",
+        "predicate": "P_associated_with",
+        "from": "E_Frith",
+        "to": "E_PredictiveProcessing",
+        "keys": {
+          "xid": "R1774148",
+          "xidEntityFrom": "E_Frith",
+          "xidEntityTo": "E_PredictiveProcessing",
+          "xidRelnType": "P_associated_with",
+          "uid": "67b5b12d"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d53967fc",
+        "uidDatumTo": "c2e6d1b1",
+        "uidLinkType": "52485c65",
+        "uidBase": "67b5b12d",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "11c11d60"
+      },
+      "y": 0.9712
+    },
+    "89e71dbb": {
+      "base": {
+        "id": "R49",
+        "predicate": "P_associated_with",
+        "from": "E_Hohwy",
+        "to": "E_PredictiveProcessing",
+        "keys": {
+          "xid": "R1551533",
+          "xidEntityFrom": "E_Hohwy",
+          "xidEntityTo": "E_PredictiveProcessing",
+          "xidRelnType": "P_associated_with",
+          "uid": "7e7e04a0"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a8385bbc",
+        "uidDatumTo": "c2e6d1b1",
+        "uidLinkType": "52485c65",
+        "uidBase": "7e7e04a0",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "89e71dbb"
+      },
+      "y": 0.1579
+    },
+    "6574c10f": {
+      "base": {
+        "id": "R50",
+        "predicate": "P_models",
+        "from": "E_PredictiveCodingVisual",
+        "to": "E_PerceptionDomain",
+        "keys": {
+          "xid": "R1765438",
+          "xidEntityFrom": "E_PredictiveCodingVisual",
+          "xidEntityTo": "E_PerceptionDomain",
+          "xidRelnType": "P_models",
+          "uid": "a2c981ef"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "de4859c6",
+        "uidDatumTo": "c144fbd0",
+        "uidLinkType": "564dac94",
+        "uidBase": "a2c981ef",
+        "xidRelnType": "P_models",
+        "uidThis": "6574c10f"
+      },
+      "y": 0.3648
+    },
+    "231b988d": {
+      "base": {
+        "id": "R51",
+        "predicate": "P_models",
+        "from": "E_PredictiveCodingAuditory",
+        "to": "E_PerceptionDomain",
+        "keys": {
+          "xid": "R1303862",
+          "xidEntityFrom": "E_PredictiveCodingAuditory",
+          "xidEntityTo": "E_PerceptionDomain",
+          "xidRelnType": "P_models",
+          "uid": "03dc5b88"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "1367447b",
+        "uidDatumTo": "c144fbd0",
+        "uidLinkType": "564dac94",
+        "uidBase": "03dc5b88",
+        "xidRelnType": "P_models",
+        "uidThis": "231b988d"
+      },
+      "y": 0.3152
+    },
+    "bc7bc376": {
+      "base": {
+        "id": "R52",
+        "predicate": "P_extends",
+        "from": "E_FreeEnergyPrinciple",
+        "to": "E_PredictiveProcessing",
+        "keys": {
+          "xid": "R1146135",
+          "xidEntityFrom": "E_FreeEnergyPrinciple",
+          "xidEntityTo": "E_PredictiveProcessing",
+          "xidRelnType": "P_extends",
+          "uid": "5f222800"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bc75285d",
+        "uidDatumTo": "c2e6d1b1",
+        "uidLinkType": "e578be3d",
+        "uidBase": "5f222800",
+        "xidRelnType": "P_extends",
+        "uidThis": "bc7bc376"
+      },
+      "y": 0.4796
+    },
+    "4b68098c": {
+      "base": {
+        "id": "R53",
+        "predicate": "P_uses_construct",
+        "from": "E_FreeEnergyPrinciple",
+        "to": "E_VariationalFreeEnergy",
+        "keys": {
+          "xid": "R1928538",
+          "xidEntityFrom": "E_FreeEnergyPrinciple",
+          "xidEntityTo": "E_VariationalFreeEnergy",
+          "xidRelnType": "P_uses_construct",
+          "uid": "e0733409"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bc75285d",
+        "uidDatumTo": "5810d237",
+        "uidLinkType": "b2f58352",
+        "uidBase": "e0733409",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "4b68098c"
+      },
+      "y": 0.9684
+    },
+    "49dd4a11": {
+      "base": {
+        "id": "R55",
+        "predicate": "P_uses_construct",
+        "from": "E_ActiveInference",
+        "to": "E_PolicySelection",
+        "keys": {
+          "xid": "R1500118",
+          "xidEntityFrom": "E_ActiveInference",
+          "xidEntityTo": "E_PolicySelection",
+          "xidRelnType": "P_uses_construct",
+          "uid": "f13b9249"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "6da1c00a",
+        "uidDatumTo": "6469839d",
+        "uidLinkType": "b2f58352",
+        "uidBase": "f13b9249",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "49dd4a11"
+      },
+      "y": 0.7549
+    },
+    "8b53f90a": {
+      "base": {
+        "id": "R56",
+        "predicate": "P_associated_with",
+        "from": "E_Friston",
+        "to": "E_FreeEnergyPrinciple",
+        "keys": {
+          "xid": "R1637932",
+          "xidEntityFrom": "E_Friston",
+          "xidEntityTo": "E_FreeEnergyPrinciple",
+          "xidRelnType": "P_associated_with",
+          "uid": "d064a7ce"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "61ad3866",
+        "uidDatumTo": "bc75285d",
+        "uidLinkType": "52485c65",
+        "uidBase": "d064a7ce",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "8b53f90a"
+      },
+      "y": 0.0612
+    },
+    "1f426a5b": {
+      "base": {
+        "id": "R57",
+        "predicate": "P_uses_construct",
+        "from": "E_DynamicalSystemsNeuro",
+        "to": "E_PhaseSpace",
+        "keys": {
+          "xid": "R1995254",
+          "xidEntityFrom": "E_DynamicalSystemsNeuro",
+          "xidEntityTo": "E_PhaseSpace",
+          "xidRelnType": "P_uses_construct",
+          "uid": "0dd949a2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "5f87c750",
+        "uidDatumTo": "253e0836",
+        "uidLinkType": "b2f58352",
+        "uidBase": "0dd949a2",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "1f426a5b"
+      },
+      "y": 0.7122
+    },
+    "80bb0e6a": {
+      "base": {
+        "id": "R58",
+        "predicate": "P_uses_construct",
+        "from": "E_DynamicalSystemsNeuro",
+        "to": "E_Trajectory",
+        "keys": {
+          "xid": "R1823994",
+          "xidEntityFrom": "E_DynamicalSystemsNeuro",
+          "xidEntityTo": "E_Trajectory",
+          "xidRelnType": "P_uses_construct",
+          "uid": "2461a389"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "5f87c750",
+        "uidDatumTo": "6d9731e6",
+        "uidLinkType": "b2f58352",
+        "uidBase": "2461a389",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "80bb0e6a"
+      },
+      "y": 0.1753
+    },
+    "2b531a4d": {
+      "base": {
+        "id": "R59",
+        "predicate": "P_uses_construct",
+        "from": "E_DynamicalSystemsNeuro",
+        "to": "E_LimitCycle",
+        "keys": {
+          "xid": "R1993145",
+          "xidEntityFrom": "E_DynamicalSystemsNeuro",
+          "xidEntityTo": "E_LimitCycle",
+          "xidRelnType": "P_uses_construct",
+          "uid": "57564f07"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "5f87c750",
+        "uidDatumTo": "31cc5418",
+        "uidLinkType": "b2f58352",
+        "uidBase": "57564f07",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "2b531a4d"
+      },
+      "y": 0.6218
+    },
+    "b1716934": {
+      "base": {
+        "id": "R60",
+        "predicate": "P_uses_construct",
+        "from": "E_DynamicalSystemsNeuro",
+        "to": "E_Chaos",
+        "keys": {
+          "xid": "R1837751",
+          "xidEntityFrom": "E_DynamicalSystemsNeuro",
+          "xidEntityTo": "E_Chaos",
+          "xidRelnType": "P_uses_construct",
+          "uid": "00f7948b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "5f87c750",
+        "uidDatumTo": "1d8b9dcb",
+        "uidLinkType": "b2f58352",
+        "uidBase": "00f7948b",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "b1716934"
+      },
+      "y": 0.9748
+    },
+    "e75c73b1": {
+      "base": {
+        "id": "R61",
+        "predicate": "P_models",
+        "from": "E_AttractorNetwork",
+        "to": "E_WorkingMemory",
+        "keys": {
+          "xid": "R1407639",
+          "xidEntityFrom": "E_AttractorNetwork",
+          "xidEntityTo": "E_WorkingMemory",
+          "xidRelnType": "P_models",
+          "uid": "8359e28b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b72288db",
+        "uidDatumTo": "6e6f185d",
+        "uidLinkType": "564dac94",
+        "uidBase": "8359e28b",
+        "xidRelnType": "P_models",
+        "uidThis": "e75c73b1"
+      },
+      "y": 0.0224
+    },
+    "247b25b5": {
+      "base": {
+        "id": "R62",
+        "predicate": "P_uses_construct",
+        "from": "E_EmbodiedCognition",
+        "to": "E_Affordance",
+        "keys": {
+          "xid": "R1225635",
+          "xidEntityFrom": "E_EmbodiedCognition",
+          "xidEntityTo": "E_Affordance",
+          "xidRelnType": "P_uses_construct",
+          "uid": "f9484881"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "04996fa4",
+        "uidDatumTo": "a86a560c",
+        "uidLinkType": "b2f58352",
+        "uidBase": "f9484881",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "247b25b5"
+      },
+      "y": 0.6137
+    },
+    "68187be7": {
+      "base": {
+        "id": "R63",
+        "predicate": "P_uses_construct",
+        "from": "E_EmbodiedCognition",
+        "to": "E_SensorimotorContingency",
+        "keys": {
+          "xid": "R1506925",
+          "xidEntityFrom": "E_EmbodiedCognition",
+          "xidEntityTo": "E_SensorimotorContingency",
+          "xidRelnType": "P_uses_construct",
+          "uid": "fecd1c69"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "04996fa4",
+        "uidDatumTo": "0cdea9ce",
+        "uidLinkType": "b2f58352",
+        "uidBase": "fecd1c69",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "68187be7"
+      },
+      "y": 0.4759
+    },
+    "90ae354e": {
+      "base": {
+        "id": "R64",
+        "predicate": "P_associated_with",
+        "from": "E_Gibson",
+        "to": "E_EcologicalPsychology",
+        "keys": {
+          "xid": "R1879441",
+          "xidEntityFrom": "E_Gibson",
+          "xidEntityTo": "E_EcologicalPsychology",
+          "xidRelnType": "P_associated_with",
+          "uid": "aecf4223"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b6d3e1a3",
+        "uidDatumTo": "ea5304b4",
+        "uidLinkType": "52485c65",
+        "uidBase": "aecf4223",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "90ae354e"
+      },
+      "y": 0.6557
+    },
+    "9a88a8a9": {
+      "base": {
+        "id": "R65",
+        "predicate": "P_associated_with",
+        "from": "E_Noë",
+        "to": "E_EmbodiedCognition",
+        "keys": {
+          "xid": "R1449350",
+          "xidEntityFrom": "E_Noë",
+          "xidEntityTo": "E_EmbodiedCognition",
+          "xidRelnType": "P_associated_with",
+          "uid": "ad24f1cb"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "348e9257",
+        "uidDatumTo": "04996fa4",
+        "uidLinkType": "52485c65",
+        "uidBase": "ad24f1cb",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "9a88a8a9"
+      },
+      "y": 0.5512
+    },
+    "eee1ac61": {
+      "base": {
+        "id": "R66",
+        "predicate": "P_part_of",
+        "from": "E_EnvironmentOrganismSystem",
+        "to": "E_EcologicalPsychology",
+        "keys": {
+          "xid": "R1551657",
+          "xidEntityFrom": "E_EnvironmentOrganismSystem",
+          "xidEntityTo": "E_EcologicalPsychology",
+          "xidRelnType": "P_part_of",
+          "uid": "786b48e1"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "98f6780f",
+        "uidDatumTo": "ea5304b4",
+        "uidLinkType": "044def29",
+        "uidBase": "786b48e1",
+        "xidRelnType": "P_part_of",
+        "uidThis": "eee1ac61"
+      },
+      "y": 0.83
+    },
+    "cc766c3b": {
+      "base": {
+        "id": "R67",
+        "predicate": "P_is_instance_of",
+        "from": "E_GlobalWorkspaceTheory",
+        "to": "C_ConsciousnessTheory",
+        "keys": {
+          "xid": "R1678116",
+          "xidEntityFrom": "E_GlobalWorkspaceTheory",
+          "xidEntityTo": "C_ConsciousnessTheory",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "074f772b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "60f5dd2e",
+        "uidDatumTo": "ac395a1f",
+        "uidLinkType": "b829fa32",
+        "uidBase": "074f772b",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "cc766c3b"
+      },
+      "y": 0.1162
+    },
+    "3e45acc3": {
+      "base": {
+        "id": "R68",
+        "predicate": "P_uses_construct",
+        "from": "E_GlobalWorkspaceTheory",
+        "to": "E_GlobalWorkspace",
+        "keys": {
+          "xid": "R1246397",
+          "xidEntityFrom": "E_GlobalWorkspaceTheory",
+          "xidEntityTo": "E_GlobalWorkspace",
+          "xidRelnType": "P_uses_construct",
+          "uid": "234982a9"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "60f5dd2e",
+        "uidDatumTo": "8465c6b3",
+        "uidLinkType": "b2f58352",
+        "uidBase": "234982a9",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "3e45acc3"
+      },
+      "y": 0.8472
+    },
+    "0fa74c50": {
+      "base": {
+        "id": "R69",
+        "predicate": "P_uses_construct",
+        "from": "E_GlobalWorkspaceTheory",
+        "to": "E_Broadcasting",
+        "keys": {
+          "xid": "R1996014",
+          "xidEntityFrom": "E_GlobalWorkspaceTheory",
+          "xidEntityTo": "E_Broadcasting",
+          "xidRelnType": "P_uses_construct",
+          "uid": "33218e07"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "60f5dd2e",
+        "uidDatumTo": "1afc8162",
+        "uidLinkType": "b2f58352",
+        "uidBase": "33218e07",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "0fa74c50"
+      },
+      "y": 0.4098
+    },
+    "a7991895": {
+      "base": {
+        "id": "R70",
+        "predicate": "P_associated_with",
+        "from": "E_Baars",
+        "to": "E_GlobalWorkspaceTheory",
+        "keys": {
+          "xid": "R1328841",
+          "xidEntityFrom": "E_Baars",
+          "xidEntityTo": "E_GlobalWorkspaceTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "44c6bd60"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "6a51039e",
+        "uidDatumTo": "60f5dd2e",
+        "uidLinkType": "52485c65",
+        "uidBase": "44c6bd60",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "a7991895"
+      },
+      "y": 0.3097
+    },
+    "d6552d1f": {
+      "base": {
+        "id": "R71",
+        "predicate": "P_associated_with",
+        "from": "E_Dehaene",
+        "to": "E_GlobalWorkspaceTheory",
+        "keys": {
+          "xid": "R1686315",
+          "xidEntityFrom": "E_Dehaene",
+          "xidEntityTo": "E_GlobalWorkspaceTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "0ff4e6ab"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "2a4ac23b",
+        "uidDatumTo": "60f5dd2e",
+        "uidLinkType": "52485c65",
+        "uidBase": "0ff4e6ab",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "d6552d1f"
+      },
+      "y": 0.0438
+    },
+    "fa004998": {
+      "base": {
+        "id": "R72",
+        "predicate": "P_targets_domain",
+        "from": "E_GlobalWorkspaceTheory",
+        "to": "E_ConsciousnessDomain",
+        "keys": {
+          "xid": "R1444944",
+          "xidEntityFrom": "E_GlobalWorkspaceTheory",
+          "xidEntityTo": "E_ConsciousnessDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "866ed489"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "60f5dd2e",
+        "uidDatumTo": "3df318e4",
+        "uidLinkType": "16b7e255",
+        "uidBase": "866ed489",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "fa004998"
+      },
+      "y": 0.2545
+    },
+    "14f36eb9": {
+      "base": {
+        "id": "R73",
+        "predicate": "P_is_instance_of",
+        "from": "E_IIT",
+        "to": "C_ConsciousnessTheory",
+        "keys": {
+          "xid": "R1037688",
+          "xidEntityFrom": "E_IIT",
+          "xidEntityTo": "C_ConsciousnessTheory",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "3ef4a1a6"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "7cd59509",
+        "uidDatumTo": "ac395a1f",
+        "uidLinkType": "b829fa32",
+        "uidBase": "3ef4a1a6",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "14f36eb9"
+      },
+      "y": 0.679
+    },
+    "9a013908": {
+      "base": {
+        "id": "R74",
+        "predicate": "P_uses_construct",
+        "from": "E_IIT",
+        "to": "E_Phi",
+        "keys": {
+          "xid": "R1664960",
+          "xidEntityFrom": "E_IIT",
+          "xidEntityTo": "E_Phi",
+          "xidRelnType": "P_uses_construct",
+          "uid": "9628758f"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "7cd59509",
+        "uidDatumTo": "a9c281ac",
+        "uidLinkType": "b2f58352",
+        "uidBase": "9628758f",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "9a013908"
+      },
+      "y": 0.5857
+    },
+    "cb3fb2c4": {
+      "base": {
+        "id": "R75",
+        "predicate": "P_uses_construct",
+        "from": "E_IIT",
+        "to": "E_ConceptualStructure",
+        "keys": {
+          "xid": "R1320416",
+          "xidEntityFrom": "E_IIT",
+          "xidEntityTo": "E_ConceptualStructure",
+          "xidRelnType": "P_uses_construct",
+          "uid": "0d16fd06"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "7cd59509",
+        "uidDatumTo": "871ec350",
+        "uidLinkType": "b2f58352",
+        "uidBase": "0d16fd06",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "cb3fb2c4"
+      },
+      "y": 0.629
+    },
+    "a42114e8": {
+      "base": {
+        "id": "R76",
+        "predicate": "P_associated_with",
+        "from": "E_Tononi",
+        "to": "E_IIT",
+        "keys": {
+          "xid": "R1207046",
+          "xidEntityFrom": "E_Tononi",
+          "xidEntityTo": "E_IIT",
+          "xidRelnType": "P_associated_with",
+          "uid": "6aadb7e3"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "198e3da0",
+        "uidDatumTo": "7cd59509",
+        "uidLinkType": "52485c65",
+        "uidBase": "6aadb7e3",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "a42114e8"
+      },
+      "y": 0.2314
+    },
+    "79c7be9a": {
+      "base": {
+        "id": "R77",
+        "predicate": "P_targets_domain",
+        "from": "E_IIT",
+        "to": "E_ConsciousnessDomain",
+        "keys": {
+          "xid": "R1189381",
+          "xidEntityFrom": "E_IIT",
+          "xidEntityTo": "E_ConsciousnessDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "b2def94e"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "7cd59509",
+        "uidDatumTo": "3df318e4",
+        "uidLinkType": "16b7e255",
+        "uidBase": "b2def94e",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "79c7be9a"
+      },
+      "y": 0.44
+    },
+    "645b43b1": {
+      "base": {
+        "id": "R79",
+        "predicate": "P_uses_construct",
+        "from": "E_HigherOrderThought",
+        "to": "E_HigherOrderRepresentation",
+        "keys": {
+          "xid": "R1342697",
+          "xidEntityFrom": "E_HigherOrderThought",
+          "xidEntityTo": "E_HigherOrderRepresentation",
+          "xidRelnType": "P_uses_construct",
+          "uid": "75637e89"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d9f80977",
+        "uidDatumTo": "2dc5298b",
+        "uidLinkType": "b2f58352",
+        "uidBase": "75637e89",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "645b43b1"
+      },
+      "y": 0.8361
+    },
+    "3945351f": {
+      "base": {
+        "id": "R80",
+        "predicate": "P_associated_with",
+        "from": "E_Rosenthal",
+        "to": "E_HigherOrderThought",
+        "keys": {
+          "xid": "R1934042",
+          "xidEntityFrom": "E_Rosenthal",
+          "xidEntityTo": "E_HigherOrderThought",
+          "xidRelnType": "P_associated_with",
+          "uid": "35760b2c"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "08186449",
+        "uidDatumTo": "d9f80977",
+        "uidLinkType": "52485c65",
+        "uidBase": "35760b2c",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "3945351f"
+      },
+      "y": 0.318
+    },
+    "c87f2589": {
+      "base": {
+        "id": "R81",
+        "predicate": "P_is_instance_of",
+        "from": "E_ReinforcementLearning",
+        "to": "C_ComputationalFramework",
+        "keys": {
+          "xid": "R1596045",
+          "xidEntityFrom": "E_ReinforcementLearning",
+          "xidEntityTo": "C_ComputationalFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "ccab622f"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "968152f6",
+        "uidDatumTo": "368f16a7",
+        "uidLinkType": "b829fa32",
+        "uidBase": "ccab622f",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "c87f2589"
+      },
+      "y": 0.6828
+    },
+    "c9cb2ae6": {
+      "base": {
+        "id": "R82",
+        "predicate": "P_uses_construct",
+        "from": "E_ReinforcementLearning",
+        "to": "E_RewardPredictionError",
+        "keys": {
+          "xid": "R1783482",
+          "xidEntityFrom": "E_ReinforcementLearning",
+          "xidEntityTo": "E_RewardPredictionError",
+          "xidRelnType": "P_uses_construct",
+          "uid": "1d068a46"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "968152f6",
+        "uidDatumTo": "71e19bc7",
+        "uidLinkType": "b2f58352",
+        "uidBase": "1d068a46",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "c9cb2ae6"
+      },
+      "y": 0.3521
+    },
+    "f7133d6e": {
+      "base": {
+        "id": "R83",
+        "predicate": "P_uses_construct",
+        "from": "E_ReinforcementLearning",
+        "to": "E_ValueFunction",
+        "keys": {
+          "xid": "R1808982",
+          "xidEntityFrom": "E_ReinforcementLearning",
+          "xidEntityTo": "E_ValueFunction",
+          "xidRelnType": "P_uses_construct",
+          "uid": "2362e687"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "968152f6",
+        "uidDatumTo": "6f5eabb4",
+        "uidLinkType": "b2f58352",
+        "uidBase": "2362e687",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "f7133d6e"
+      },
+      "y": 0.3903
+    },
+    "4f547178": {
+      "base": {
+        "id": "R84",
+        "predicate": "P_uses_construct",
+        "from": "E_ReinforcementLearning",
+        "to": "E_Policy",
+        "keys": {
+          "xid": "R1241771",
+          "xidEntityFrom": "E_ReinforcementLearning",
+          "xidEntityTo": "E_Policy",
+          "xidRelnType": "P_uses_construct",
+          "uid": "507f3c02"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "968152f6",
+        "uidDatumTo": "f6b4c75d",
+        "uidLinkType": "b2f58352",
+        "uidBase": "507f3c02",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "4f547178"
+      },
+      "y": 0.8444
+    },
+    "7c4f361d": {
+      "base": {
+        "id": "R85",
+        "predicate": "P_uses_construct",
+        "from": "E_ReinforcementLearning",
+        "to": "E_TemporalDifferenceLearning",
+        "keys": {
+          "xid": "R1682051",
+          "xidEntityFrom": "E_ReinforcementLearning",
+          "xidEntityTo": "E_TemporalDifferenceLearning",
+          "xidRelnType": "P_uses_construct",
+          "uid": "e18591ac"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "968152f6",
+        "uidDatumTo": "a63e1042",
+        "uidLinkType": "b2f58352",
+        "uidBase": "e18591ac",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "7c4f361d"
+      },
+      "y": 0.6546
+    },
+    "d3ad8e45": {
+      "base": {
+        "id": "R86",
+        "predicate": "P_associated_with",
+        "from": "E_Sutton",
+        "to": "E_ReinforcementLearning",
+        "keys": {
+          "xid": "R1636862",
+          "xidEntityFrom": "E_Sutton",
+          "xidEntityTo": "E_ReinforcementLearning",
+          "xidRelnType": "P_associated_with",
+          "uid": "fab008cb"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "50836a7a",
+        "uidDatumTo": "968152f6",
+        "uidLinkType": "52485c65",
+        "uidBase": "fab008cb",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "d3ad8e45"
+      },
+      "y": 0.973
+    },
+    "7cfa794e": {
+      "base": {
+        "id": "R87",
+        "predicate": "P_associated_with",
+        "from": "E_Barto",
+        "to": "E_ReinforcementLearning",
+        "keys": {
+          "xid": "R1576542",
+          "xidEntityFrom": "E_Barto",
+          "xidEntityTo": "E_ReinforcementLearning",
+          "xidRelnType": "P_associated_with",
+          "uid": "a36f48a3"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "2d405e17",
+        "uidDatumTo": "968152f6",
+        "uidLinkType": "52485c65",
+        "uidBase": "a36f48a3",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "7cfa794e"
+      },
+      "y": 0.4604
+    },
+    "489510fd": {
+      "base": {
+        "id": "R88",
+        "predicate": "P_targets_domain",
+        "from": "E_ReinforcementLearning",
+        "to": "E_DecisionMakingDomain",
+        "keys": {
+          "xid": "R1059755",
+          "xidEntityFrom": "E_ReinforcementLearning",
+          "xidEntityTo": "E_DecisionMakingDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "9878594f"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "968152f6",
+        "uidDatumTo": "3c97434a",
+        "uidLinkType": "16b7e255",
+        "uidBase": "9878594f",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "489510fd"
+      },
+      "y": 0.4741
+    },
+    "9525e311": {
+      "base": {
+        "id": "R89",
+        "predicate": "P_is_instance_of",
+        "from": "E_DualProcessTheory",
+        "to": "C_Theory",
+        "keys": {
+          "xid": "R1118364",
+          "xidEntityFrom": "E_DualProcessTheory",
+          "xidEntityTo": "C_Theory",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "457a9d2d"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8c80dd37",
+        "uidDatumTo": "88ca7c46",
+        "uidLinkType": "b829fa32",
+        "uidBase": "457a9d2d",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "9525e311"
+      },
+      "y": 0.2717
+    },
+    "6282ccd9": {
+      "base": {
+        "id": "R90",
+        "predicate": "P_uses_construct",
+        "from": "E_DualProcessTheory",
+        "to": "E_System1",
+        "keys": {
+          "xid": "R1409359",
+          "xidEntityFrom": "E_DualProcessTheory",
+          "xidEntityTo": "E_System1",
+          "xidRelnType": "P_uses_construct",
+          "uid": "ebd06f06"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8c80dd37",
+        "uidDatumTo": "7b821a29",
+        "uidLinkType": "b2f58352",
+        "uidBase": "ebd06f06",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "6282ccd9"
+      },
+      "y": 0.5664
+    },
+    "ac8d6d59": {
+      "base": {
+        "id": "R91",
+        "predicate": "P_uses_construct",
+        "from": "E_DualProcessTheory",
+        "to": "E_System2",
+        "keys": {
+          "xid": "R1842886",
+          "xidEntityFrom": "E_DualProcessTheory",
+          "xidEntityTo": "E_System2",
+          "xidRelnType": "P_uses_construct",
+          "uid": "c85f000c"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8c80dd37",
+        "uidDatumTo": "f31dbbea",
+        "uidLinkType": "b2f58352",
+        "uidBase": "c85f000c",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "ac8d6d59"
+      },
+      "y": 0.6785
+    },
+    "513b469a": {
+      "base": {
+        "id": "R92",
+        "predicate": "P_associated_with",
+        "from": "E_Kahneman",
+        "to": "E_DualProcessTheory",
+        "keys": {
+          "xid": "R1349305",
+          "xidEntityFrom": "E_Kahneman",
+          "xidEntityTo": "E_DualProcessTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "d3bf178c"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "77e8a8d6",
+        "uidDatumTo": "8c80dd37",
+        "uidLinkType": "52485c65",
+        "uidBase": "d3bf178c",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "513b469a"
+      },
+      "y": 0.8603
+    },
+    "04b5b25b": {
+      "base": {
+        "id": "R93",
+        "predicate": "P_associated_with",
+        "from": "E_Tversky",
+        "to": "E_ProspectTheory",
+        "keys": {
+          "xid": "R1903338",
+          "xidEntityFrom": "E_Tversky",
+          "xidEntityTo": "E_ProspectTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "e3262366"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bec44149",
+        "uidDatumTo": "a9d7527c",
+        "uidLinkType": "52485c65",
+        "uidBase": "e3262366",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "04b5b25b"
+      },
+      "y": 0.7552
+    },
+    "b211f59e": {
+      "base": {
+        "id": "R94",
+        "predicate": "P_is_instance_of",
+        "from": "E_ProspectTheory",
+        "to": "C_Theory",
+        "keys": {
+          "xid": "R1250896",
+          "xidEntityFrom": "E_ProspectTheory",
+          "xidEntityTo": "C_Theory",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "65e04ca4"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a9d7527c",
+        "uidDatumTo": "88ca7c46",
+        "uidLinkType": "b829fa32",
+        "uidBase": "65e04ca4",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "b211f59e"
+      },
+      "y": 0.3109
+    },
+    "3fdc31db": {
+      "base": {
+        "id": "R95",
+        "predicate": "P_uses_construct",
+        "from": "E_ProspectTheory",
+        "to": "E_LossAversion",
+        "keys": {
+          "xid": "R1977600",
+          "xidEntityFrom": "E_ProspectTheory",
+          "xidEntityTo": "E_LossAversion",
+          "xidRelnType": "P_uses_construct",
+          "uid": "bb04788b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a9d7527c",
+        "uidDatumTo": "8f8a0925",
+        "uidLinkType": "b2f58352",
+        "uidBase": "bb04788b",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "3fdc31db"
+      },
+      "y": 0.5522
+    },
+    "08523edf": {
+      "base": {
+        "id": "R96",
+        "predicate": "P_uses_construct",
+        "from": "E_ProspectTheory",
+        "to": "E_UtilityFunction",
+        "keys": {
+          "xid": "R1613383",
+          "xidEntityFrom": "E_ProspectTheory",
+          "xidEntityTo": "E_UtilityFunction",
+          "xidRelnType": "P_uses_construct",
+          "uid": "48f7dce8"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a9d7527c",
+        "uidDatumTo": "db8542ff",
+        "uidLinkType": "b2f58352",
+        "uidBase": "48f7dce8",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "08523edf"
+      },
+      "y": 0.1302
+    },
+    "009ba986": {
+      "base": {
+        "id": "R97",
+        "predicate": "P_is_instance_of",
+        "from": "E_SocialCognitiveTheory",
+        "to": "C_SocialFramework",
+        "keys": {
+          "xid": "R1020924",
+          "xidEntityFrom": "E_SocialCognitiveTheory",
+          "xidEntityTo": "C_SocialFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "f7023649"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "86436a39",
+        "uidDatumTo": "cb6d415c",
+        "uidLinkType": "b829fa32",
+        "uidBase": "f7023649",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "009ba986"
+      },
+      "y": 0.1806
+    },
+    "063f5801": {
+      "base": {
+        "id": "R98",
+        "predicate": "P_uses_construct",
+        "from": "E_SocialCognitiveTheory",
+        "to": "E_ObservationalLearning",
+        "keys": {
+          "xid": "R1052488",
+          "xidEntityFrom": "E_SocialCognitiveTheory",
+          "xidEntityTo": "E_ObservationalLearning",
+          "xidRelnType": "P_uses_construct",
+          "uid": "0a718647"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "86436a39",
+        "uidDatumTo": "dc783b06",
+        "uidLinkType": "b2f58352",
+        "uidBase": "0a718647",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "063f5801"
+      },
+      "y": 0.4919
+    },
+    "78aa6d98": {
+      "base": {
+        "id": "R99",
+        "predicate": "P_uses_construct",
+        "from": "E_SocialCognitiveTheory",
+        "to": "E_SelfEfficacy",
+        "keys": {
+          "xid": "R1729893",
+          "xidEntityFrom": "E_SocialCognitiveTheory",
+          "xidEntityTo": "E_SelfEfficacy",
+          "xidRelnType": "P_uses_construct",
+          "uid": "f2f403ea"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "86436a39",
+        "uidDatumTo": "2a3f4015",
+        "uidLinkType": "b2f58352",
+        "uidBase": "f2f403ea",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "78aa6d98"
+      },
+      "y": 0.8178
+    },
+    "d7385733": {
+      "base": {
+        "id": "R100",
+        "predicate": "P_associated_with",
+        "from": "E_Bandura",
+        "to": "E_SocialCognitiveTheory",
+        "keys": {
+          "xid": "R1121094",
+          "xidEntityFrom": "E_Bandura",
+          "xidEntityTo": "E_SocialCognitiveTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "f927736b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "36bf0f92",
+        "uidDatumTo": "86436a39",
+        "uidLinkType": "52485c65",
+        "uidBase": "f927736b",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "d7385733"
+      },
+      "y": 0.8032
+    },
+    "d276eac6": {
+      "base": {
+        "id": "R101",
+        "predicate": "P_targets_domain",
+        "from": "E_SocialCognitiveTheory",
+        "to": "E_SocialCognitionDomain",
+        "keys": {
+          "xid": "R1699110",
+          "xidEntityFrom": "E_SocialCognitiveTheory",
+          "xidEntityTo": "E_SocialCognitionDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "8722bac2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "86436a39",
+        "uidDatumTo": "f20dc076",
+        "uidLinkType": "16b7e255",
+        "uidBase": "8722bac2",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "d276eac6"
+      },
+      "y": 0.5395
+    },
+    "880d9268": {
+      "base": {
+        "id": "R102",
+        "predicate": "P_is_instance_of",
+        "from": "E_SocialIdentityTheory",
+        "to": "C_SocialFramework",
+        "keys": {
+          "xid": "R1447580",
+          "xidEntityFrom": "E_SocialIdentityTheory",
+          "xidEntityTo": "C_SocialFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "0c43efee"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8615136d",
+        "uidDatumTo": "cb6d415c",
+        "uidLinkType": "b829fa32",
+        "uidBase": "0c43efee",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "880d9268"
+      },
+      "y": 0.0517
+    },
+    "9346b25c": {
+      "base": {
+        "id": "R103",
+        "predicate": "P_uses_construct",
+        "from": "E_SocialIdentityTheory",
+        "to": "E_Ingroup",
+        "keys": {
+          "xid": "R1277937",
+          "xidEntityFrom": "E_SocialIdentityTheory",
+          "xidEntityTo": "E_Ingroup",
+          "xidRelnType": "P_uses_construct",
+          "uid": "f1c3ca0b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8615136d",
+        "uidDatumTo": "e687b345",
+        "uidLinkType": "b2f58352",
+        "uidBase": "f1c3ca0b",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "9346b25c"
+      },
+      "y": 0.5938
+    },
+    "eac18944": {
+      "base": {
+        "id": "R104",
+        "predicate": "P_uses_construct",
+        "from": "E_SocialIdentityTheory",
+        "to": "E_Outgroup",
+        "keys": {
+          "xid": "R1015170",
+          "xidEntityFrom": "E_SocialIdentityTheory",
+          "xidEntityTo": "E_Outgroup",
+          "xidRelnType": "P_uses_construct",
+          "uid": "2ea87c46"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8615136d",
+        "uidDatumTo": "6b5d3dec",
+        "uidLinkType": "b2f58352",
+        "uidBase": "2ea87c46",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "eac18944"
+      },
+      "y": 0.2858
+    },
+    "de52fb96": {
+      "base": {
+        "id": "R105",
+        "predicate": "P_associated_with",
+        "from": "E_Tajfel",
+        "to": "E_SocialIdentityTheory",
+        "keys": {
+          "xid": "R1916148",
+          "xidEntityFrom": "E_Tajfel",
+          "xidEntityTo": "E_SocialIdentityTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "4af79da7"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a7b4120d",
+        "uidDatumTo": "8615136d",
+        "uidLinkType": "52485c65",
+        "uidBase": "4af79da7",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "de52fb96"
+      },
+      "y": 0.1361
+    },
+    "15a739c3": {
+      "base": {
+        "id": "R106",
+        "predicate": "P_is_instance_of",
+        "from": "E_AttachmentTheory",
+        "to": "C_DevelopmentalFramework",
+        "keys": {
+          "xid": "R1975252",
+          "xidEntityFrom": "E_AttachmentTheory",
+          "xidEntityTo": "C_DevelopmentalFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "1127efaa"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "089e3c19",
+        "uidDatumTo": "1edb8979",
+        "uidLinkType": "b829fa32",
+        "uidBase": "1127efaa",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "15a739c3"
+      },
+      "y": 0.1796
+    },
+    "84a6ed26": {
+      "base": {
+        "id": "R107",
+        "predicate": "P_uses_construct",
+        "from": "E_AttachmentTheory",
+        "to": "E_AttachmentStyle",
+        "keys": {
+          "xid": "R1633428",
+          "xidEntityFrom": "E_AttachmentTheory",
+          "xidEntityTo": "E_AttachmentStyle",
+          "xidRelnType": "P_uses_construct",
+          "uid": "69eafa2c"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "089e3c19",
+        "uidDatumTo": "88288013",
+        "uidLinkType": "b2f58352",
+        "uidBase": "69eafa2c",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "84a6ed26"
+      },
+      "y": 0.5812
+    },
+    "78f05cf7": {
+      "base": {
+        "id": "R108",
+        "predicate": "P_uses_construct",
+        "from": "E_AttachmentTheory",
+        "to": "E_SecureAttachment",
+        "keys": {
+          "xid": "R1443319",
+          "xidEntityFrom": "E_AttachmentTheory",
+          "xidEntityTo": "E_SecureAttachment",
+          "xidRelnType": "P_uses_construct",
+          "uid": "ff80a74c"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "089e3c19",
+        "uidDatumTo": "1c0d64f3",
+        "uidLinkType": "b2f58352",
+        "uidBase": "ff80a74c",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "78f05cf7"
+      },
+      "y": 0.8386
+    },
+    "b7230650": {
+      "base": {
+        "id": "R109",
+        "predicate": "P_uses_construct",
+        "from": "E_AttachmentTheory",
+        "to": "E_AnxiousAttachment",
+        "keys": {
+          "xid": "R1595169",
+          "xidEntityFrom": "E_AttachmentTheory",
+          "xidEntityTo": "E_AnxiousAttachment",
+          "xidRelnType": "P_uses_construct",
+          "uid": "3af3d983"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "089e3c19",
+        "uidDatumTo": "4e1b4d73",
+        "uidLinkType": "b2f58352",
+        "uidBase": "3af3d983",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "b7230650"
+      },
+      "y": 0.332
+    },
+    "283a645f": {
+      "base": {
+        "id": "R110",
+        "predicate": "P_uses_construct",
+        "from": "E_AttachmentTheory",
+        "to": "E_AvoidantAttachment",
+        "keys": {
+          "xid": "R1895516",
+          "xidEntityFrom": "E_AttachmentTheory",
+          "xidEntityTo": "E_AvoidantAttachment",
+          "xidRelnType": "P_uses_construct",
+          "uid": "911f4f02"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "089e3c19",
+        "uidDatumTo": "9775bd2a",
+        "uidLinkType": "b2f58352",
+        "uidBase": "911f4f02",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "283a645f"
+      },
+      "y": 0.4413
+    },
+    "91ce5a6a": {
+      "base": {
+        "id": "R111",
+        "predicate": "P_associated_with",
+        "from": "E_Bowlby",
+        "to": "E_AttachmentTheory",
+        "keys": {
+          "xid": "R1709516",
+          "xidEntityFrom": "E_Bowlby",
+          "xidEntityTo": "E_AttachmentTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "dc69d0a8"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "5c4b90d0",
+        "uidDatumTo": "089e3c19",
+        "uidLinkType": "52485c65",
+        "uidBase": "dc69d0a8",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "91ce5a6a"
+      },
+      "y": 0.1493
+    },
+    "5c6a2c29": {
+      "base": {
+        "id": "R112",
+        "predicate": "P_associated_with",
+        "from": "E_Ainsworth",
+        "to": "E_AttachmentTheory",
+        "keys": {
+          "xid": "R1420792",
+          "xidEntityFrom": "E_Ainsworth",
+          "xidEntityTo": "E_AttachmentTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "a4673bee"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "dddb195e",
+        "uidDatumTo": "089e3c19",
+        "uidLinkType": "52485c65",
+        "uidBase": "a4673bee",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "5c6a2c29"
+      },
+      "y": 0.944
+    },
+    "ac99ac62": {
+      "base": {
+        "id": "R113",
+        "predicate": "P_is_instance_of",
+        "from": "E_PiagetianTheory",
+        "to": "C_DevelopmentalFramework",
+        "keys": {
+          "xid": "R1412220",
+          "xidEntityFrom": "E_PiagetianTheory",
+          "xidEntityTo": "C_DevelopmentalFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "76dffd03"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a6998b88",
+        "uidDatumTo": "1edb8979",
+        "uidLinkType": "b829fa32",
+        "uidBase": "76dffd03",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "ac99ac62"
+      },
+      "y": 0.9189
+    },
+    "04b67037": {
+      "base": {
+        "id": "R114",
+        "predicate": "P_uses_construct",
+        "from": "E_PiagetianTheory",
+        "to": "E_SensorimotorStage",
+        "keys": {
+          "xid": "R1197172",
+          "xidEntityFrom": "E_PiagetianTheory",
+          "xidEntityTo": "E_SensorimotorStage",
+          "xidRelnType": "P_uses_construct",
+          "uid": "2f3e332f"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a6998b88",
+        "uidDatumTo": "4cb7204d",
+        "uidLinkType": "b2f58352",
+        "uidBase": "2f3e332f",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "04b67037"
+      },
+      "y": 0.1577
+    },
+    "ea61b59a": {
+      "base": {
+        "id": "R115",
+        "predicate": "P_uses_construct",
+        "from": "E_PiagetianTheory",
+        "to": "E_PreoperationalStage",
+        "keys": {
+          "xid": "R1735172",
+          "xidEntityFrom": "E_PiagetianTheory",
+          "xidEntityTo": "E_PreoperationalStage",
+          "xidRelnType": "P_uses_construct",
+          "uid": "5df96321"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a6998b88",
+        "uidDatumTo": "926de6a6",
+        "uidLinkType": "b2f58352",
+        "uidBase": "5df96321",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "ea61b59a"
+      },
+      "y": 0.475
+    },
+    "70fc4dae": {
+      "base": {
+        "id": "R116",
+        "predicate": "P_uses_construct",
+        "from": "E_PiagetianTheory",
+        "to": "E_ConcreteOperationalStage",
+        "keys": {
+          "xid": "R1520675",
+          "xidEntityFrom": "E_PiagetianTheory",
+          "xidEntityTo": "E_ConcreteOperationalStage",
+          "xidRelnType": "P_uses_construct",
+          "uid": "53f7f347"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a6998b88",
+        "uidDatumTo": "7b837d26",
+        "uidLinkType": "b2f58352",
+        "uidBase": "53f7f347",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "70fc4dae"
+      },
+      "y": 0.6844
+    },
+    "ec4e3b04": {
+      "base": {
+        "id": "R117",
+        "predicate": "P_uses_construct",
+        "from": "E_PiagetianTheory",
+        "to": "E_FormalOperationalStage",
+        "keys": {
+          "xid": "R1714740",
+          "xidEntityFrom": "E_PiagetianTheory",
+          "xidEntityTo": "E_FormalOperationalStage",
+          "xidRelnType": "P_uses_construct",
+          "uid": "659af6a5"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a6998b88",
+        "uidDatumTo": "6e14307a",
+        "uidLinkType": "b2f58352",
+        "uidBase": "659af6a5",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "ec4e3b04"
+      },
+      "y": 0.3697
+    },
+    "5442bb01": {
+      "base": {
+        "id": "R118",
+        "predicate": "P_associated_with",
+        "from": "E_Piaget",
+        "to": "E_PiagetianTheory",
+        "keys": {
+          "xid": "R1550362",
+          "xidEntityFrom": "E_Piaget",
+          "xidEntityTo": "E_PiagetianTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "8bfcf923"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "1e6fb133",
+        "uidDatumTo": "a6998b88",
+        "uidLinkType": "52485c65",
+        "uidBase": "8bfcf923",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "5442bb01"
+      },
+      "y": 0.0503
+    },
+    "7f413bd1": {
+      "base": {
+        "id": "R119",
+        "predicate": "P_is_instance_of",
+        "from": "E_PsychodynamicTheory",
+        "to": "C_ClinicalFramework",
+        "keys": {
+          "xid": "R1974896",
+          "xidEntityFrom": "E_PsychodynamicTheory",
+          "xidEntityTo": "C_ClinicalFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "7b38fb49"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "de46bfeb",
+        "uidDatumTo": "9f72eae8",
+        "uidLinkType": "b829fa32",
+        "uidBase": "7b38fb49",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "7f413bd1"
+      },
+      "y": 0.7589
+    },
+    "92b4e0a9": {
+      "base": {
+        "id": "R120",
+        "predicate": "P_uses_construct",
+        "from": "E_PsychodynamicTheory",
+        "to": "E_Unconscious",
+        "keys": {
+          "xid": "R1084997",
+          "xidEntityFrom": "E_PsychodynamicTheory",
+          "xidEntityTo": "E_Unconscious",
+          "xidRelnType": "P_uses_construct",
+          "uid": "3821a62f"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "de46bfeb",
+        "uidDatumTo": "e54d6cb4",
+        "uidLinkType": "b2f58352",
+        "uidBase": "3821a62f",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "92b4e0a9"
+      },
+      "y": 0.7915
+    },
+    "1ae94580": {
+      "base": {
+        "id": "R121",
+        "predicate": "P_uses_construct",
+        "from": "E_PsychodynamicTheory",
+        "to": "E_DefenseMechanism",
+        "keys": {
+          "xid": "R1248698",
+          "xidEntityFrom": "E_PsychodynamicTheory",
+          "xidEntityTo": "E_DefenseMechanism",
+          "xidRelnType": "P_uses_construct",
+          "uid": "fafb0f2d"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "de46bfeb",
+        "uidDatumTo": "37957e3c",
+        "uidLinkType": "b2f58352",
+        "uidBase": "fafb0f2d",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "1ae94580"
+      },
+      "y": 0.0887
+    },
+    "225109b2": {
+      "base": {
+        "id": "R122",
+        "predicate": "P_associated_with",
+        "from": "E_Freud",
+        "to": "E_PsychodynamicTheory",
+        "keys": {
+          "xid": "R1527450",
+          "xidEntityFrom": "E_Freud",
+          "xidEntityTo": "E_PsychodynamicTheory",
+          "xidRelnType": "P_associated_with",
+          "uid": "4bfa2725"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "37280b1d",
+        "uidDatumTo": "de46bfeb",
+        "uidLinkType": "52485c65",
+        "uidBase": "4bfa2725",
+        "xidRelnType": "P_associated_with",
+        "uidThis": "225109b2"
+      },
+      "y": 0.9415
+    },
+    "2eaa6d81": {
+      "base": {
+        "id": "R123",
+        "predicate": "P_is_instance_of",
+        "from": "E_ObjectRelations",
+        "to": "C_Theory",
+        "keys": {
+          "xid": "R1659833",
+          "xidEntityFrom": "E_ObjectRelations",
+          "xidEntityTo": "C_Theory",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "510d6146"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "e8ed249d",
+        "uidDatumTo": "88ca7c46",
+        "uidLinkType": "b829fa32",
+        "uidBase": "510d6146",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "2eaa6d81"
+      },
+      "y": 0.533
+    },
+    "c2bdda5f": {
+      "base": {
+        "id": "R124",
+        "predicate": "P_is_instance_of",
+        "from": "E_CBT",
+        "to": "C_ClinicalFramework",
+        "keys": {
+          "xid": "R1089456",
+          "xidEntityFrom": "E_CBT",
+          "xidEntityTo": "C_ClinicalFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "7ac481c2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8ab9ac68",
+        "uidDatumTo": "9f72eae8",
+        "uidLinkType": "b829fa32",
+        "uidBase": "7ac481c2",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "c2bdda5f"
+      },
+      "y": 0.2118
+    },
+    "94fb3283": {
+      "base": {
+        "id": "R125",
+        "predicate": "P_uses_construct",
+        "from": "E_CBT",
+        "to": "E_CognitiveDistortion",
+        "keys": {
+          "xid": "R1258662",
+          "xidEntityFrom": "E_CBT",
+          "xidEntityTo": "E_CognitiveDistortion",
+          "xidRelnType": "P_uses_construct",
+          "uid": "5c009909"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8ab9ac68",
+        "uidDatumTo": "03756154",
+        "uidLinkType": "b2f58352",
+        "uidBase": "5c009909",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "94fb3283"
+      },
+      "y": 0.4987
+    },
+    "04a83031": {
+      "base": {
+        "id": "R126",
+        "predicate": "P_uses_construct",
+        "from": "E_CBT",
+        "to": "E_Reappraisal",
+        "keys": {
+          "xid": "R1868026",
+          "xidEntityFrom": "E_CBT",
+          "xidEntityTo": "E_Reappraisal",
+          "xidRelnType": "P_uses_construct",
+          "uid": "70480586"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8ab9ac68",
+        "uidDatumTo": "2efba98f",
+        "uidLinkType": "b2f58352",
+        "uidBase": "70480586",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "04a83031"
+      },
+      "y": 0.941
+    },
+    "b56cc990": {
+      "base": {
+        "id": "R127",
+        "predicate": "P_is_instance_of",
+        "from": "E_NetworkPsychiatry",
+        "to": "C_ClinicalFramework",
+        "keys": {
+          "xid": "R1177546",
+          "xidEntityFrom": "E_NetworkPsychiatry",
+          "xidEntityTo": "C_ClinicalFramework",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "f7b26c42"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "a1189d05",
+        "uidDatumTo": "9f72eae8",
+        "uidLinkType": "b829fa32",
+        "uidBase": "f7b26c42",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "b56cc990"
+      },
+      "y": 0.8293
+    },
+    "e60473b9": {
+      "base": {
+        "id": "R128",
+        "predicate": "P_models",
+        "from": "E_SymptomNetwork",
+        "to": "E_EmotionDomain",
+        "keys": {
+          "xid": "R1166542",
+          "xidEntityFrom": "E_SymptomNetwork",
+          "xidEntityTo": "E_EmotionDomain",
+          "xidRelnType": "P_models",
+          "uid": "3a9a0966"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "03bf21a2",
+        "uidDatumTo": "ba013d46",
+        "uidLinkType": "564dac94",
+        "uidBase": "3a9a0966",
+        "xidRelnType": "P_models",
+        "uidThis": "e60473b9"
+      },
+      "y": 0.7181
+    },
+    "ef41fbc0": {
+      "base": {
+        "id": "R129",
+        "predicate": "P_is_instance_of",
+        "from": "E_EmotionTheoryBasic",
+        "to": "C_Theory",
+        "keys": {
+          "xid": "R1920929",
+          "xidEntityFrom": "E_EmotionTheoryBasic",
+          "xidEntityTo": "C_Theory",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "3a02352d"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "aec49e81",
+        "uidDatumTo": "88ca7c46",
+        "uidLinkType": "b829fa32",
+        "uidBase": "3a02352d",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "ef41fbc0"
+      },
+      "y": 0.23
+    },
+    "1d37a70e": {
+      "base": {
+        "id": "R130",
+        "predicate": "P_is_instance_of",
+        "from": "E_ConstructedEmotionTheory",
+        "to": "C_Theory",
+        "keys": {
+          "xid": "R1850474",
+          "xidEntityFrom": "E_ConstructedEmotionTheory",
+          "xidEntityTo": "C_Theory",
+          "xidRelnType": "P_is_instance_of",
+          "uid": "a70e73ae"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "694024cf",
+        "uidDatumTo": "88ca7c46",
+        "uidLinkType": "b829fa32",
+        "uidBase": "a70e73ae",
+        "xidRelnType": "P_is_instance_of",
+        "uidThis": "1d37a70e"
+      },
+      "y": 0.0434
+    },
+    "cfd28271": {
+      "base": {
+        "id": "R131",
+        "predicate": "P_targets_domain",
+        "from": "E_EmotionTheoryBasic",
+        "to": "E_EmotionDomain",
+        "keys": {
+          "xid": "R1702683",
+          "xidEntityFrom": "E_EmotionTheoryBasic",
+          "xidEntityTo": "E_EmotionDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "72afceac"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "aec49e81",
+        "uidDatumTo": "ba013d46",
+        "uidLinkType": "16b7e255",
+        "uidBase": "72afceac",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "cfd28271"
+      },
+      "y": 0.8323
+    },
+    "720cf7bf": {
+      "base": {
+        "id": "R132",
+        "predicate": "P_targets_domain",
+        "from": "E_ConstructedEmotionTheory",
+        "to": "E_EmotionDomain",
+        "keys": {
+          "xid": "R1548629",
+          "xidEntityFrom": "E_ConstructedEmotionTheory",
+          "xidEntityTo": "E_EmotionDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "ec19a660"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "694024cf",
+        "uidDatumTo": "ba013d46",
+        "uidLinkType": "16b7e255",
+        "uidBase": "ec19a660",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "720cf7bf"
+      },
+      "y": 0.6643
+    },
+    "a74faf9b": {
+      "base": {
+        "id": "R133",
+        "predicate": "P_realized_in",
+        "from": "E_Amygdala",
+        "to": "E_EmotionDomain",
+        "keys": {
+          "xid": "R1737774",
+          "xidEntityFrom": "E_Amygdala",
+          "xidEntityTo": "E_EmotionDomain",
+          "xidRelnType": "P_realized_in",
+          "uid": "dd340363"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "437b5427",
+        "uidDatumTo": "ba013d46",
+        "uidLinkType": "64c70cb8",
+        "uidBase": "dd340363",
+        "xidRelnType": "P_realized_in",
+        "uidThis": "a74faf9b"
+      },
+      "y": 0.8932
+    },
+    "4d5f2a11": {
+      "base": {
+        "id": "R134",
+        "predicate": "P_realized_in",
+        "from": "E_PrefrontalCortex",
+        "to": "E_ExecutiveFunction",
+        "keys": {
+          "xid": "R1705786",
+          "xidEntityFrom": "E_PrefrontalCortex",
+          "xidEntityTo": "E_ExecutiveFunction",
+          "xidRelnType": "P_realized_in",
+          "uid": "a15ff6cf"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c24de781",
+        "uidDatumTo": "4824085f",
+        "uidLinkType": "64c70cb8",
+        "uidBase": "a15ff6cf",
+        "xidRelnType": "P_realized_in",
+        "uidThis": "4d5f2a11"
+      },
+      "y": 0.9411
+    },
+    "407c1455": {
+      "base": {
+        "id": "R135",
+        "predicate": "P_uses_construct",
+        "from": "E_ConstructedEmotionTheory",
+        "to": "E_Interoception",
+        "keys": {
+          "xid": "R1052023",
+          "xidEntityFrom": "E_ConstructedEmotionTheory",
+          "xidEntityTo": "E_Interoception",
+          "xidRelnType": "P_uses_construct",
+          "uid": "0bf673c2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "694024cf",
+        "uidDatumTo": "95baa8bc",
+        "uidLinkType": "b2f58352",
+        "uidBase": "0bf673c2",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "407c1455"
+      },
+      "y": 0.1633
+    },
+    "1bdd6f96": {
+      "base": {
+        "id": "R136",
+        "predicate": "P_part_of",
+        "from": "E_DefaultModeNetwork",
+        "to": "E_SystemLevel",
+        "keys": {
+          "xid": "R1408691",
+          "xidEntityFrom": "E_DefaultModeNetwork",
+          "xidEntityTo": "E_SystemLevel",
+          "xidRelnType": "P_part_of",
+          "uid": "c6420da6"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c524d70b",
+        "uidDatumTo": "d797fcce",
+        "uidLinkType": "044def29",
+        "uidBase": "c6420da6",
+        "xidRelnType": "P_part_of",
+        "uidThis": "1bdd6f96"
+      },
+      "y": 0.8743
+    },
+    "f3fdbe0b": {
+      "base": {
+        "id": "R137",
+        "predicate": "P_part_of",
+        "from": "E_SalienceNetwork",
+        "to": "E_SystemLevel",
+        "keys": {
+          "xid": "R1756282",
+          "xidEntityFrom": "E_SalienceNetwork",
+          "xidEntityTo": "E_SystemLevel",
+          "xidRelnType": "P_part_of",
+          "uid": "486a9628"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d542b779",
+        "uidDatumTo": "d797fcce",
+        "uidLinkType": "044def29",
+        "uidBase": "486a9628",
+        "xidRelnType": "P_part_of",
+        "uidThis": "f3fdbe0b"
+      },
+      "y": 0.5225
+    },
+    "09717d6c": {
+      "base": {
+        "id": "R138",
+        "predicate": "P_part_of",
+        "from": "E_CentralExecutiveNetwork",
+        "to": "E_SystemLevel",
+        "keys": {
+          "xid": "R1938808",
+          "xidEntityFrom": "E_CentralExecutiveNetwork",
+          "xidEntityTo": "E_SystemLevel",
+          "xidRelnType": "P_part_of",
+          "uid": "e8cd18a6"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b8c2cc00",
+        "uidDatumTo": "d797fcce",
+        "uidLinkType": "044def29",
+        "uidBase": "e8cd18a6",
+        "xidRelnType": "P_part_of",
+        "uidThis": "09717d6c"
+      },
+      "y": 0.2867
+    },
+    "c6f1922b": {
+      "base": {
+        "id": "R139",
+        "predicate": "P_targets_domain",
+        "from": "E_DefaultModeNetwork",
+        "to": "E_ConsciousnessDomain",
+        "keys": {
+          "xid": "R1943730",
+          "xidEntityFrom": "E_DefaultModeNetwork",
+          "xidEntityTo": "E_ConsciousnessDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "5dded46e"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c524d70b",
+        "uidDatumTo": "3df318e4",
+        "uidLinkType": "16b7e255",
+        "uidBase": "5dded46e",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "c6f1922b"
+      },
+      "y": 0.0064
+    },
+    "e90c3c57": {
+      "base": {
+        "id": "R140",
+        "predicate": "P_uses_method",
+        "from": "E_ComputationalNeuroscience",
+        "to": "E_ComputationalModeling",
+        "keys": {
+          "xid": "R1091482",
+          "xidEntityFrom": "E_ComputationalNeuroscience",
+          "xidEntityTo": "E_ComputationalModeling",
+          "xidRelnType": "P_uses_method",
+          "uid": "c5a154e2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "4de982ca",
+        "uidDatumTo": "4ca4b092",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "c5a154e2",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "e90c3c57"
+      },
+      "y": 0.8566
+    },
+    "b51dcf42": {
+      "base": {
+        "id": "R141",
+        "predicate": "P_uses_method",
+        "from": "E_ComputationalNeuroscience",
+        "to": "E_SingleUnitRecording",
+        "keys": {
+          "xid": "R1856453",
+          "xidEntityFrom": "E_ComputationalNeuroscience",
+          "xidEntityTo": "E_SingleUnitRecording",
+          "xidRelnType": "P_uses_method",
+          "uid": "ff4d0bed"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "4de982ca",
+        "uidDatumTo": "5158ebcc",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "ff4d0bed",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "b51dcf42"
+      },
+      "y": 0.4451
+    },
+    "290089ac": {
+      "base": {
+        "id": "R142",
+        "predicate": "P_uses_method",
+        "from": "E_Neuroscience",
+        "to": "E_fMRI",
+        "keys": {
+          "xid": "R1419893",
+          "xidEntityFrom": "E_Neuroscience",
+          "xidEntityTo": "E_fMRI",
+          "xidRelnType": "P_uses_method",
+          "uid": "ae15734a"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "052c60ca",
+        "uidDatumTo": "fffcc7ad",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "ae15734a",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "290089ac"
+      },
+      "y": 0.1935
+    },
+    "5c2b2c0c": {
+      "base": {
+        "id": "R143",
+        "predicate": "P_uses_method",
+        "from": "E_Neuroscience",
+        "to": "E_EEG",
+        "keys": {
+          "xid": "R1324726",
+          "xidEntityFrom": "E_Neuroscience",
+          "xidEntityTo": "E_EEG",
+          "xidRelnType": "P_uses_method",
+          "uid": "048718a2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "052c60ca",
+        "uidDatumTo": "8c294d5a",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "048718a2",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "5c2b2c0c"
+      },
+      "y": 0.8611
+    },
+    "cf34a353": {
+      "base": {
+        "id": "R144",
+        "predicate": "P_uses_method",
+        "from": "E_Neuroscience",
+        "to": "E_MEG",
+        "keys": {
+          "xid": "R1064504",
+          "xidEntityFrom": "E_Neuroscience",
+          "xidEntityTo": "E_MEG",
+          "xidRelnType": "P_uses_method",
+          "uid": "5375f107"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "052c60ca",
+        "uidDatumTo": "62652952",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "5375f107",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "cf34a353"
+      },
+      "y": 0.0556
+    },
+    "bba210c3": {
+      "base": {
+        "id": "R145",
+        "predicate": "P_uses_method",
+        "from": "E_Neuroscience",
+        "to": "E_Optogenetics",
+        "keys": {
+          "xid": "R1924181",
+          "xidEntityFrom": "E_Neuroscience",
+          "xidEntityTo": "E_Optogenetics",
+          "xidRelnType": "P_uses_method",
+          "uid": "694582e3"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "052c60ca",
+        "uidDatumTo": "8c513f5d",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "694582e3",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "bba210c3"
+      },
+      "y": 0.6876
+    },
+    "723ee84d": {
+      "base": {
+        "id": "R146",
+        "predicate": "P_uses_method",
+        "from": "E_Psychology",
+        "to": "E_BehavioralExperiment",
+        "keys": {
+          "xid": "R1536434",
+          "xidEntityFrom": "E_Psychology",
+          "xidEntityTo": "E_BehavioralExperiment",
+          "xidRelnType": "P_uses_method",
+          "uid": "d7ec9bc7"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b943343e",
+        "uidDatumTo": "c9067cdd",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "d7ec9bc7",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "723ee84d"
+      },
+      "y": 0.827
+    },
+    "65d5b2ec": {
+      "base": {
+        "id": "R147",
+        "predicate": "P_uses_method",
+        "from": "E_Psychology",
+        "to": "E_Psychophysics",
+        "keys": {
+          "xid": "R1494625",
+          "xidEntityFrom": "E_Psychology",
+          "xidEntityTo": "E_Psychophysics",
+          "xidRelnType": "P_uses_method",
+          "uid": "0364498c"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b943343e",
+        "uidDatumTo": "ee29a8c8",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "0364498c",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "65d5b2ec"
+      },
+      "y": 0.0095
+    },
+    "bcd0d340": {
+      "base": {
+        "id": "R148",
+        "predicate": "P_operates_at_level",
+        "from": "E_Behaviorism",
+        "to": "E_BehavioralLevel",
+        "keys": {
+          "xid": "R1796045",
+          "xidEntityFrom": "E_Behaviorism",
+          "xidEntityTo": "E_BehavioralLevel",
+          "xidRelnType": "P_operates_at_level",
+          "uid": "8dc001ed"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b07720a6",
+        "uidDatumTo": "614cb6ea",
+        "uidLinkType": "ad67dd60",
+        "uidBase": "8dc001ed",
+        "xidRelnType": "P_operates_at_level",
+        "uidThis": "bcd0d340"
+      },
+      "y": 0.1986
+    },
+    "60deffd8": {
+      "base": {
+        "id": "R149",
+        "predicate": "P_operates_at_level",
+        "from": "E_Cognitivism",
+        "to": "E_CognitiveLevel",
+        "keys": {
+          "xid": "R1753459",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "E_CognitiveLevel",
+          "xidRelnType": "P_operates_at_level",
+          "uid": "ed5ffaed"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "73ed8fe9",
+        "uidLinkType": "ad67dd60",
+        "uidBase": "ed5ffaed",
+        "xidRelnType": "P_operates_at_level",
+        "uidThis": "60deffd8"
+      },
+      "y": 0.4809
+    },
+    "6c058409": {
+      "base": {
+        "id": "R150",
+        "predicate": "P_operates_at_level",
+        "from": "E_ComputationalNeuroscience",
+        "to": "E_NeuralLevel",
+        "keys": {
+          "xid": "R1048345",
+          "xidEntityFrom": "E_ComputationalNeuroscience",
+          "xidEntityTo": "E_NeuralLevel",
+          "xidRelnType": "P_operates_at_level",
+          "uid": "01dfbcca"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "4de982ca",
+        "uidDatumTo": "264781ea",
+        "uidLinkType": "ad67dd60",
+        "uidBase": "01dfbcca",
+        "xidRelnType": "P_operates_at_level",
+        "uidThis": "6c058409"
+      },
+      "y": 0.0481
+    },
+    "de313fe0": {
+      "base": {
+        "id": "R151",
+        "predicate": "P_operates_at_level",
+        "from": "E_SocialCognitiveTheory",
+        "to": "E_SocialLevel",
+        "keys": {
+          "xid": "R1447806",
+          "xidEntityFrom": "E_SocialCognitiveTheory",
+          "xidEntityTo": "E_SocialLevel",
+          "xidRelnType": "P_operates_at_level",
+          "uid": "69f45a2d"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "86436a39",
+        "uidDatumTo": "3a5e72d0",
+        "uidLinkType": "ad67dd60",
+        "uidBase": "69f45a2d",
+        "xidRelnType": "P_operates_at_level",
+        "uidThis": "de313fe0"
+      },
+      "y": 0.2878
+    },
+    "5854ca38": {
+      "base": {
+        "id": "R152",
+        "predicate": "P_operates_at_level",
+        "from": "E_AttachmentTheory",
+        "to": "E_SocialLevel",
+        "keys": {
+          "xid": "R1841417",
+          "xidEntityFrom": "E_AttachmentTheory",
+          "xidEntityTo": "E_SocialLevel",
+          "xidRelnType": "P_operates_at_level",
+          "uid": "746ce90b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "089e3c19",
+        "uidDatumTo": "3a5e72d0",
+        "uidLinkType": "ad67dd60",
+        "uidBase": "746ce90b",
+        "xidRelnType": "P_operates_at_level",
+        "uidThis": "5854ca38"
+      },
+      "y": 0.333
+    },
+    "b2e2e448": {
+      "base": {
+        "id": "R154",
+        "predicate": "P_contrasts_with",
+        "from": "E_PsychodynamicTheory",
+        "to": "E_CBT",
+        "keys": {
+          "xid": "R1025453",
+          "xidEntityFrom": "E_PsychodynamicTheory",
+          "xidEntityTo": "E_CBT",
+          "xidRelnType": "P_contrasts_with",
+          "uid": "dfb13f81"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "de46bfeb",
+        "uidDatumTo": "8ab9ac68",
+        "uidLinkType": "98611444",
+        "uidBase": "dfb13f81",
+        "xidRelnType": "P_contrasts_with",
+        "uidThis": "b2e2e448"
+      },
+      "y": 0.6649
+    },
+    "a2934408": {
+      "base": {
+        "id": "R155",
+        "predicate": "P_contrasts_with",
+        "from": "E_EmotionTheoryBasic",
+        "to": "E_ConstructedEmotionTheory",
+        "keys": {
+          "xid": "R1938156",
+          "xidEntityFrom": "E_EmotionTheoryBasic",
+          "xidEntityTo": "E_ConstructedEmotionTheory",
+          "xidRelnType": "P_contrasts_with",
+          "uid": "56592244"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "aec49e81",
+        "uidDatumTo": "694024cf",
+        "uidLinkType": "98611444",
+        "uidBase": "56592244",
+        "xidRelnType": "P_contrasts_with",
+        "uidThis": "a2934408"
+      },
+      "y": 0.5792
+    },
+    "208f2f31": {
+      "base": {
+        "id": "R156",
+        "predicate": "P_supports",
+        "from": "E_Connectionism",
+        "to": "E_ReinforcementLearning",
+        "keys": {
+          "xid": "R1075260",
+          "xidEntityFrom": "E_Connectionism",
+          "xidEntityTo": "E_ReinforcementLearning",
+          "xidRelnType": "P_supports",
+          "uid": "9f622822"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "bec899bc",
+        "uidDatumTo": "968152f6",
+        "uidLinkType": "7ec8b074",
+        "uidBase": "9f622822",
+        "xidRelnType": "P_supports",
+        "uidThis": "208f2f31"
+      },
+      "y": 0.5609
+    },
+    "abd070c4": {
+      "base": {
+        "id": "R157",
+        "predicate": "P_supports",
+        "from": "E_BayesianBrain",
+        "to": "E_PredictiveProcessing",
+        "keys": {
+          "xid": "R1856087",
+          "xidEntityFrom": "E_BayesianBrain",
+          "xidEntityTo": "E_PredictiveProcessing",
+          "xidRelnType": "P_supports",
+          "uid": "faeb2880"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "30c63181",
+        "uidDatumTo": "c2e6d1b1",
+        "uidLinkType": "7ec8b074",
+        "uidBase": "faeb2880",
+        "xidRelnType": "P_supports",
+        "uidThis": "abd070c4"
+      },
+      "y": 0.3076
+    },
+    "8aba6621": {
+      "base": {
+        "id": "R158",
+        "predicate": "P_supports",
+        "from": "E_PredictiveProcessing",
+        "to": "E_FreeEnergyPrinciple",
+        "keys": {
+          "xid": "R1730104",
+          "xidEntityFrom": "E_PredictiveProcessing",
+          "xidEntityTo": "E_FreeEnergyPrinciple",
+          "xidRelnType": "P_supports",
+          "uid": "0d0c7e25"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "c2e6d1b1",
+        "uidDatumTo": "bc75285d",
+        "uidLinkType": "7ec8b074",
+        "uidBase": "0d0c7e25",
+        "xidRelnType": "P_supports",
+        "uidThis": "8aba6621"
+      },
+      "y": 0.9497
+    },
+    "a46decd1": {
+      "base": {
+        "id": "R159",
+        "predicate": "P_models",
+        "from": "E_ReinforcementLearning",
+        "to": "E_HabitSystem",
+        "keys": {
+          "xid": "R1206885",
+          "xidEntityFrom": "E_ReinforcementLearning",
+          "xidEntityTo": "E_HabitSystem",
+          "xidRelnType": "P_models",
+          "uid": "7575ac85"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "968152f6",
+        "uidDatumTo": "d49774ae",
+        "uidLinkType": "564dac94",
+        "uidBase": "7575ac85",
+        "xidRelnType": "P_models",
+        "uidThis": "a46decd1"
+      },
+      "y": 0.3984
+    },
+    "6f1bb2eb": {
+      "base": {
+        "id": "R160",
+        "predicate": "P_models",
+        "from": "E_ReinforcementLearning",
+        "to": "E_GoalDirectedSystem",
+        "keys": {
+          "xid": "R1294134",
+          "xidEntityFrom": "E_ReinforcementLearning",
+          "xidEntityTo": "E_GoalDirectedSystem",
+          "xidRelnType": "P_models",
+          "uid": "437955ed"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "968152f6",
+        "uidDatumTo": "b7d77651",
+        "uidLinkType": "564dac94",
+        "uidBase": "437955ed",
+        "xidRelnType": "P_models",
+        "uidThis": "6f1bb2eb"
+      },
+      "y": 0.9386
+    },
+    "ff8fb98b": {
+      "base": {
+        "id": "R161",
+        "predicate": "P_regulates",
+        "from": "E_HPA_Axis",
+        "to": "E_StressResponse",
+        "keys": {
+          "xid": "R1362785",
+          "xidEntityFrom": "E_HPA_Axis",
+          "xidEntityTo": "E_StressResponse",
+          "xidRelnType": "P_regulates",
+          "uid": "20480369"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "adf4ce58",
+        "uidDatumTo": "2e01c66e",
+        "uidLinkType": "deb8d782",
+        "uidBase": "20480369",
+        "xidRelnType": "P_regulates",
+        "uidThis": "ff8fb98b"
+      },
+      "y": 0.1896
+    },
+    "d82468d8": {
+      "base": {
+        "id": "R162",
+        "predicate": "P_contributes_to",
+        "from": "E_Resilience",
+        "to": "E_StressResponse",
+        "keys": {
+          "xid": "R1174799",
+          "xidEntityFrom": "E_Resilience",
+          "xidEntityTo": "E_StressResponse",
+          "xidRelnType": "P_contributes_to",
+          "uid": "52a5a881"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "3eeb72d8",
+        "uidDatumTo": "2e01c66e",
+        "uidLinkType": "98cd5314",
+        "uidBase": "52a5a881",
+        "xidRelnType": "P_contributes_to",
+        "uidThis": "d82468d8"
+      },
+      "y": 0.741
+    },
+    "86f89018": {
+      "base": {
+        "id": "R163",
+        "predicate": "P_targets_domain",
+        "from": "E_TheoryOfMind",
+        "to": "E_SocialCognitionDomain",
+        "keys": {
+          "xid": "R1660689",
+          "xidEntityFrom": "E_TheoryOfMind",
+          "xidEntityTo": "E_SocialCognitionDomain",
+          "xidRelnType": "P_targets_domain",
+          "uid": "df75dcc3"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d7807e47",
+        "uidDatumTo": "f20dc076",
+        "uidLinkType": "16b7e255",
+        "uidBase": "df75dcc3",
+        "xidRelnType": "P_targets_domain",
+        "uidThis": "86f89018"
+      },
+      "y": 0.5621
+    },
+    "d1d21652": {
+      "base": {
+        "id": "R164",
+        "predicate": "P_realized_in",
+        "from": "E_MirrorNeuronSystem",
+        "to": "E_SocialCognitionDomain",
+        "keys": {
+          "xid": "R1672976",
+          "xidEntityFrom": "E_MirrorNeuronSystem",
+          "xidEntityTo": "E_SocialCognitionDomain",
+          "xidRelnType": "P_realized_in",
+          "uid": "d79bfd2f"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "976c76cc",
+        "uidDatumTo": "f20dc076",
+        "uidLinkType": "64c70cb8",
+        "uidBase": "d79bfd2f",
+        "xidRelnType": "P_realized_in",
+        "uidThis": "d1d21652"
+      },
+      "y": 0.2809
+    },
+    "796e5c9e": {
+      "base": {
+        "id": "R165",
+        "predicate": "P_uses_construct",
+        "from": "E_ExecutiveFunction",
+        "to": "E_Inhibition",
+        "keys": {
+          "xid": "R1440173",
+          "xidEntityFrom": "E_ExecutiveFunction",
+          "xidEntityTo": "E_Inhibition",
+          "xidRelnType": "P_uses_construct",
+          "uid": "4592d0e1"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "4824085f",
+        "uidDatumTo": "170360ec",
+        "uidLinkType": "b2f58352",
+        "uidBase": "4592d0e1",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "796e5c9e"
+      },
+      "y": 0.0277
+    },
+    "abdb5cff": {
+      "base": {
+        "id": "R166",
+        "predicate": "P_uses_construct",
+        "from": "E_ExecutiveFunction",
+        "to": "E_CognitiveFlexibility",
+        "keys": {
+          "xid": "R1125428",
+          "xidEntityFrom": "E_ExecutiveFunction",
+          "xidEntityTo": "E_CognitiveFlexibility",
+          "xidRelnType": "P_uses_construct",
+          "uid": "6ed1018c"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "4824085f",
+        "uidDatumTo": "14725562",
+        "uidLinkType": "b2f58352",
+        "uidBase": "6ed1018c",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "abdb5cff"
+      },
+      "y": 0.8271
+    },
+    "b7f46aa5": {
+      "base": {
+        "id": "R167",
+        "predicate": "P_uses_construct",
+        "from": "E_ExecutiveFunction",
+        "to": "E_Updating",
+        "keys": {
+          "xid": "R1777104",
+          "xidEntityFrom": "E_ExecutiveFunction",
+          "xidEntityTo": "E_Updating",
+          "xidRelnType": "P_uses_construct",
+          "uid": "2a909b86"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "4824085f",
+        "uidDatumTo": "1fbbbf49",
+        "uidLinkType": "b2f58352",
+        "uidBase": "2a909b86",
+        "xidRelnType": "P_uses_construct",
+        "uidThis": "b7f46aa5"
+      },
+      "y": 0.945
+    },
+    "09d5e8c8": {
+      "base": {
+        "id": "R169",
+        "predicate": "P_uses_method",
+        "from": "E_Cognitivism",
+        "to": "E_MultivariatePatternAnalysis",
+        "keys": {
+          "xid": "R1049366",
+          "xidEntityFrom": "E_Cognitivism",
+          "xidEntityTo": "E_MultivariatePatternAnalysis",
+          "xidRelnType": "P_uses_method",
+          "uid": "555581ea"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "0bc4d8ed",
+        "uidDatumTo": "591a7232",
+        "uidLinkType": "8e9e7ef8",
+        "uidBase": "555581ea",
+        "xidRelnType": "P_uses_method",
+        "uidThis": "09d5e8c8"
+      },
+      "y": 0.2641
+    },
+    "1f46e8fd": {
+      "base": {
+        "id": "R170",
+        "predicate": "P_contributes_to",
+        "from": "E_Neuroscience",
+        "to": "E_Psychology",
+        "keys": {
+          "xid": "R1732326",
+          "xidEntityFrom": "E_Neuroscience",
+          "xidEntityTo": "E_Psychology",
+          "xidRelnType": "P_contributes_to",
+          "uid": "96c2eda5"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "052c60ca",
+        "uidDatumTo": "b943343e",
+        "uidLinkType": "98cd5314",
+        "uidBase": "96c2eda5",
+        "xidRelnType": "P_contributes_to",
+        "uidThis": "1f46e8fd"
+      },
+      "y": 0.0552
+    },
+    "bbd654bd": {
+      "base": {
+        "id": "R171",
+        "predicate": "P_contributes_to",
+        "from": "E_Psychology",
+        "to": "E_Neuroscience",
+        "keys": {
+          "xid": "R1738056",
+          "xidEntityFrom": "E_Psychology",
+          "xidEntityTo": "E_Neuroscience",
+          "xidRelnType": "P_contributes_to",
+          "uid": "4bb61a0b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "b943343e",
+        "uidDatumTo": "052c60ca",
+        "uidLinkType": "98cd5314",
+        "uidBase": "4bb61a0b",
+        "xidRelnType": "P_contributes_to",
+        "uidThis": "bbd654bd"
+      },
+      "y": 0.3554
+    },
+    "064200c6": {
+      "base": {
+        "sourceEntity": "E_McClelland",
+        "targetEntity": "pl32983",
+        "predicate": "reports_to",
+        "keys": {
+          "xid": "R1277716",
+          "xidEntityFrom": "E_McClelland",
+          "xidEntityTo": "pl32983",
+          "xidRelnType": "reports_to",
+          "uid": "b8126e27"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "99941472",
+        "uidDatumTo": "ea647dc9",
+        "uidLinkType": "00001505",
+        "uidBase": "b8126e27",
+        "xidRelnType": "Unknown",
+        "uidThis": "064200c6"
+      },
+      "y": 0.8269
+    }
+  },
+  "forces": {},
+  "layers": {
+    "default": {
+      "class_name": "default",
+      "types": [
+        "default"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "Person": {
+      "class_name": "Person",
+      "types": [
+        "Person",
+        "Party",
+        "individual"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "child_of": {
+      "class_name": "child_of",
+      "types": [
+        "child_of",
+        "son_of",
+        "daughter_of"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "parent_of": {
+      "class_name": "parent_of",
+      "types": [
+        "parent_of",
+        "father_of",
+        "mother_of"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "reports_to": {
+      "class_name": "reports_to",
+      "types": [
+        "reports_to",
+        "employee_of",
+        "works_for"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "Variable": {
+      "class_name": "Variable",
+      "types": [
+        "Variable",
+        "measure"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "Policy": {
+      "class_name": "Policy",
+      "types": [
+        "Policy"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "Model": {
+      "class_name": "Model",
+      "types": [
+        "Model",
+        "ModelClass"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "part_of": {
+      "class_name": "part_of",
+      "types": [
+        "part_of",
+        "belongs_to_class"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    }
+  },
+  "scenes": {},
+  "episodes": {},
+  "studies": {},
+  "linkTypes": {
+    "98611444": {
+      "uid": "98611444",
+      "id": "P_contrasts_with",
+      "label": "contrasts with",
+      "xid": "P_contrasts_with"
+    },
+    "default": {
+      "uid": "00001505",
+      "xid": "Unknown"
+    },
+    "5562cb11": {
+      "uid": "5562cb11",
+      "id": "P_is_subclass_of",
+      "label": "is subclass of",
+      "xid": "P_is_subclass_of"
+    },
+    "b829fa32": {
+      "uid": "b829fa32",
+      "id": "P_is_instance_of",
+      "label": "is instance of",
+      "xid": "P_is_instance_of"
+    },
+    "044def29": {
+      "uid": "044def29",
+      "id": "P_part_of",
+      "label": "part of",
+      "xid": "P_part_of"
+    },
+    "0d0cfe8e": {
+      "uid": "0d0cfe8e",
+      "id": "P_influences",
+      "label": "influences",
+      "xid": "P_influences"
+    },
+    "a58e00fc": {
+      "uid": "a58e00fc",
+      "id": "P_explains",
+      "label": "explains",
+      "xid": "P_explains"
+    },
+    "0d22e8e2": {
+      "uid": "0d22e8e2",
+      "id": "P_implemented_by",
+      "label": "implemented by",
+      "xid": "P_implemented_by"
+    },
+    "52485c65": {
+      "uid": "52485c65",
+      "id": "P_associated_with",
+      "label": "associated with",
+      "xid": "P_associated_with"
+    },
+    "ad67dd60": {
+      "uid": "ad67dd60",
+      "id": "P_operates_at_level",
+      "label": "operates at level",
+      "xid": "P_operates_at_level"
+    },
+    "16b7e255": {
+      "uid": "16b7e255",
+      "id": "P_targets_domain",
+      "label": "targets domain",
+      "xid": "P_targets_domain"
+    },
+    "b2f58352": {
+      "uid": "b2f58352",
+      "id": "P_uses_construct",
+      "label": "uses construct",
+      "xid": "P_uses_construct"
+    },
+    "8e9e7ef8": {
+      "uid": "8e9e7ef8",
+      "id": "P_uses_method",
+      "label": "uses method",
+      "xid": "P_uses_method"
+    },
+    "050ece16": {
+      "uid": "050ece16",
+      "id": "P_formalizes",
+      "label": "formalizes",
+      "xid": "P_formalizes"
+    },
+    "e578be3d": {
+      "uid": "e578be3d",
+      "id": "P_extends",
+      "label": "extends",
+      "xid": "P_extends"
+    },
+    "64c70cb8": {
+      "uid": "64c70cb8",
+      "id": "P_realized_in",
+      "label": "realized in",
+      "xid": "P_realized_in"
+    },
+    "7ec8b074": {
+      "uid": "7ec8b074",
+      "id": "P_supports",
+      "label": "supports",
+      "xid": "P_supports"
+    },
+    "0192b598": {
+      "uid": "0192b598",
+      "id": "P_challenges",
+      "label": "challenges",
+      "xid": "P_challenges"
+    },
+    "564dac94": {
+      "uid": "564dac94",
+      "id": "P_models",
+      "label": "models",
+      "xid": "P_models"
+    },
+    "98cd5314": {
+      "uid": "98cd5314",
+      "id": "P_contributes_to",
+      "label": "contributes to",
+      "xid": "P_contributes_to"
+    },
+    "deb8d782": {
+      "uid": "deb8d782",
+      "id": "P_regulates",
+      "label": "regulates",
+      "xid": "P_regulates"
+    }
+  },
+  "nodeTypes": {
+    "default": {
+      "uid": "00001505",
+      "xid": "Unknown"
+    },
+    "f06487e7": {
+      "uid": "f06487e7",
+      "id": "C_Framework",
+      "label": "Theoretical Framework",
+      "description": "High-level organizing approach to explaining brain, mind, or behavior.",
+      "xid": "C_Framework"
+    },
+    "88ca7c46": {
+      "uid": "88ca7c46",
+      "id": "C_Theory",
+      "label": "Theory",
+      "description": "More specific explanatory system within or across frameworks.",
+      "xid": "C_Theory"
+    },
+    "888d3c4e": {
+      "uid": "888d3c4e",
+      "id": "C_Construct",
+      "label": "Construct",
+      "description": "Key concept or variable used within a framework or theory.",
+      "xid": "C_Construct"
+    },
+    "03ae54f4": {
+      "uid": "03ae54f4",
+      "id": "C_Model",
+      "label": "Model",
+      "description": "Formal or computational instantiation of a theory or framework.",
+      "xid": "C_Model"
+    },
+    "a2fc8264": {
+      "uid": "a2fc8264",
+      "id": "C_Method",
+      "label": "Method",
+      "description": "Empirical or analytical technique used to test or instantiate theories.",
+      "xid": "C_Method"
+    },
+    "5e3c45d6": {
+      "uid": "5e3c45d6",
+      "id": "C_LevelOfAnalysis",
+      "label": "Level of Analysis",
+      "description": "Granularity at which phenomena are described (neural, cognitive, behavioral, social, etc.).",
+      "xid": "C_LevelOfAnalysis"
+    },
+    "32b5eefb": {
+      "uid": "32b5eefb",
+      "id": "C_Domain",
+      "label": "Domain",
+      "description": "Broad area of phenomena (perception, memory, emotion, etc.).",
+      "xid": "C_Domain"
+    },
+    "37f32b0e": {
+      "uid": "37f32b0e",
+      "id": "C_Person",
+      "label": "Person",
+      "description": "Researcher or theorist associated with a framework.",
+      "xid": "C_Person"
+    },
+    "85e69571": {
+      "uid": "85e69571",
+      "id": "C_Discipline",
+      "label": "Discipline",
+      "description": "Academic field or subfield.",
+      "xid": "C_Discipline"
+    },
+    "d4ee24e0": {
+      "uid": "d4ee24e0",
+      "id": "C_Mechanism",
+      "label": "Mechanism",
+      "description": "Causal or computational mechanism posited by a theory.",
+      "xid": "C_Mechanism"
+    },
+    "edcfb1da": {
+      "uid": "edcfb1da",
+      "id": "C_Representation",
+      "label": "Representation",
+      "description": "Information-bearing structure or state in a system.",
+      "xid": "C_Representation"
+    },
+    "e3b9f061": {
+      "uid": "e3b9f061",
+      "id": "C_LearningRule",
+      "label": "Learning Rule",
+      "description": "Principle governing adaptation or plasticity.",
+      "xid": "C_LearningRule"
+    },
+    "ac395a1f": {
+      "uid": "ac395a1f",
+      "id": "C_ConsciousnessTheory",
+      "label": "Consciousness Theory",
+      "description": "Framework specifically addressing conscious experience.",
+      "xid": "C_ConsciousnessTheory"
+    },
+    "9f72eae8": {
+      "uid": "9f72eae8",
+      "id": "C_ClinicalFramework",
+      "label": "Clinical Framework",
+      "description": "Framework applied to psychopathology and treatment.",
+      "xid": "C_ClinicalFramework"
+    },
+    "1edb8979": {
+      "uid": "1edb8979",
+      "id": "C_DevelopmentalFramework",
+      "label": "Developmental Framework",
+      "description": "Framework focusing on lifespan change.",
+      "xid": "C_DevelopmentalFramework"
+    },
+    "cb6d415c": {
+      "uid": "cb6d415c",
+      "id": "C_SocialFramework",
+      "label": "Social Framework",
+      "description": "Framework focusing on social interaction and groups.",
+      "xid": "C_SocialFramework"
+    },
+    "368f16a7": {
+      "uid": "368f16a7",
+      "id": "C_ComputationalFramework",
+      "label": "Computational Framework",
+      "description": "Framework emphasizing formal or algorithmic models.",
+      "xid": "C_ComputationalFramework"
+    },
+    "ab145e9f": {
+      "uid": "ab145e9f",
+      "id": "C_DynamicalFramework",
+      "label": "Dynamical Framework",
+      "description": "Framework emphasizing dynamical systems and trajectories.",
+      "xid": "C_DynamicalFramework"
+    },
+    "0d0ef92e": {
+      "uid": "0d0ef92e",
+      "id": "C_EmbodiedFramework",
+      "label": "Embodied Framework",
+      "description": "Framework emphasizing body, environment, and action.",
+      "xid": "C_EmbodiedFramework"
+    },
+    "27931bed": {
+      "uid": "27931bed",
+      "id": "C_BayesianFramework",
+      "label": "Bayesian Framework",
+      "description": "Framework emphasizing probabilistic inference and prediction.",
+      "xid": "C_BayesianFramework"
+    },
+    "19bbd87c": {
+      "uid": "19bbd87c",
+      "xid": "Entity"
+    }
+  }
+} );

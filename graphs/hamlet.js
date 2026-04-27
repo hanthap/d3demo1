@@ -1,0 +1,1285 @@
+Workspace.loadGraph( 'hamlet.js', '01-Apr-2026', 
+{
+  "sources": {
+    "dbd60126": {
+      "uid": "dbd60126",
+      "type": "Ontology",
+      "editorVersion": 0.1,
+      "fileName": "Hamlet.json",
+      "lastModifiedDate": "Sun Apr 19 2026 15:54:52 GMT+1000 (Australian Eastern Standard Time)",
+      "fileSize": 3607
+    }
+  },
+  "nodes": {
+    "962e0633": {
+      "base": {
+        "id": "hamlet",
+        "type": "Person",
+        "name": "Hamlet",
+        "role": "Prince of Denmark",
+        "xid": "hamlet",
+        "uid": "962e0633",
+        "txtName": "Hamlet",
+        "txtNote": "Prince of Denmark"
+      },
+      "x": 0.9963,
+      "keys": {
+        "uidEntity": "962e0633",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "36b4995a": {
+      "base": {
+        "id": "claudius",
+        "type": "Person",
+        "name": "Claudius",
+        "role": "King of Denmark",
+        "xid": "claudius",
+        "uid": "36b4995a",
+        "txtName": "Claudius",
+        "txtNote": "King of Denmark"
+      },
+      "x": 0.2937,
+      "keys": {
+        "uidEntity": "36b4995a",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "8b9573c8": {
+      "base": {
+        "id": "gertrude",
+        "type": "Person",
+        "name": "Gertrude",
+        "role": "Queen of Denmark",
+        "xid": "gertrude",
+        "uid": "8b9573c8",
+        "txtName": "Gertrude",
+        "txtNote": "Queen of Denmark"
+      },
+      "x": 0.8051,
+      "keys": {
+        "uidEntity": "8b9573c8",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "26883e75": {
+      "base": {
+        "id": "ghost_hamlet_sr",
+        "type": "Supernatural",
+        "name": "Ghost of King Hamlet",
+        "xid": "ghost_hamlet_sr",
+        "uid": "26883e75",
+        "txtName": "Ghost of King Hamlet",
+        "txtNote": ""
+      },
+      "x": 0.4947,
+      "keys": {
+        "uidEntity": "26883e75",
+        "xidEntityType": "Supernatural",
+        "uidNodeType": "d5ef21da"
+      }
+    },
+    "6111ded7": {
+      "base": {
+        "id": "polonius",
+        "type": "Person",
+        "name": "Polonius",
+        "role": "Lord Chamberlain",
+        "xid": "polonius",
+        "uid": "6111ded7",
+        "txtName": "Polonius",
+        "txtNote": "Lord Chamberlain"
+      },
+      "x": 0.7129,
+      "keys": {
+        "uidEntity": "6111ded7",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "ad4ff33c": {
+      "base": {
+        "id": "ophelia",
+        "type": "Person",
+        "name": "Ophelia",
+        "xid": "ophelia",
+        "uid": "ad4ff33c",
+        "txtName": "Ophelia",
+        "txtNote": ""
+      },
+      "x": 0.4442,
+      "keys": {
+        "uidEntity": "ad4ff33c",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "d14aafb2": {
+      "base": {
+        "id": "laertes",
+        "type": "Person",
+        "name": "Laertes",
+        "xid": "laertes",
+        "uid": "d14aafb2",
+        "txtName": "Laertes",
+        "txtNote": ""
+      },
+      "x": 0.006,
+      "keys": {
+        "uidEntity": "d14aafb2",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "44b8f90c": {
+      "base": {
+        "id": "horatio",
+        "type": "Person",
+        "name": "Horatio",
+        "xid": "horatio",
+        "uid": "44b8f90c",
+        "txtName": "Horatio",
+        "txtNote": ""
+      },
+      "x": 0.4929,
+      "keys": {
+        "uidEntity": "44b8f90c",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "f8f423bf": {
+      "base": {
+        "id": "rosencrantz",
+        "type": "Person",
+        "name": "Rosencrantz",
+        "xid": "rosencrantz",
+        "uid": "f8f423bf",
+        "txtName": "Rosencrantz",
+        "txtNote": ""
+      },
+      "x": 0.4763,
+      "keys": {
+        "uidEntity": "f8f423bf",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "f449d26c": {
+      "base": {
+        "id": "guildenstern",
+        "type": "Person",
+        "name": "Guildenstern",
+        "xid": "guildenstern",
+        "uid": "f449d26c",
+        "txtName": "Guildenstern",
+        "txtNote": ""
+      },
+      "x": 0.1202,
+      "keys": {
+        "uidEntity": "f449d26c",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "48234ba0": {
+      "base": {
+        "id": "fortinbras",
+        "type": "Person",
+        "name": "Fortinbras",
+        "role": "Prince of Norway",
+        "xid": "fortinbras",
+        "uid": "48234ba0",
+        "txtName": "Fortinbras",
+        "txtNote": "Prince of Norway"
+      },
+      "x": 0.1299,
+      "keys": {
+        "uidEntity": "48234ba0",
+        "xidEntityType": "Person",
+        "uidNodeType": "9e96333f"
+      }
+    },
+    "0bf7cbf0": {
+      "base": {
+        "id": "denmark",
+        "type": "Place",
+        "name": "Denmark",
+        "xid": "denmark",
+        "uid": "0bf7cbf0",
+        "txtName": "Denmark",
+        "txtNote": ""
+      },
+      "x": 0.3456,
+      "keys": {
+        "uidEntity": "0bf7cbf0",
+        "xidEntityType": "Place",
+        "uidNodeType": "df8af4b1"
+      }
+    },
+    "bc7dab6f": {
+      "base": {
+        "id": "elsinore",
+        "type": "Place",
+        "name": "Elsinore Castle",
+        "xid": "elsinore",
+        "uid": "bc7dab6f",
+        "txtName": "Elsinore Castle",
+        "txtNote": ""
+      },
+      "x": 0.0131,
+      "keys": {
+        "uidEntity": "bc7dab6f",
+        "xidEntityType": "Place",
+        "uidNodeType": "df8af4b1"
+      }
+    },
+    "e69e1e2f": {
+      "base": {
+        "id": "play_within_play",
+        "type": "Event",
+        "name": "The Mousetrap",
+        "xid": "play_within_play",
+        "uid": "e69e1e2f",
+        "txtName": "The Mousetrap",
+        "txtNote": ""
+      },
+      "x": 0.2389,
+      "keys": {
+        "uidEntity": "e69e1e2f",
+        "xidEntityType": "Event",
+        "uidNodeType": "52140446"
+      }
+    },
+    "ad488d52": {
+      "base": {
+        "id": "duel",
+        "type": "Event",
+        "name": "Final Duel",
+        "xid": "duel",
+        "uid": "ad488d52",
+        "txtName": "Final Duel",
+        "txtNote": ""
+      },
+      "x": 0.6006,
+      "keys": {
+        "uidEntity": "ad488d52",
+        "xidEntityType": "Event",
+        "uidNodeType": "52140446"
+      }
+    },
+    "ea647dc9": {
+      "base": {
+        "id": "pl32983",
+        "name": "Peter Luckock",
+        "description": "Inventor",
+        "xid": "pl32983",
+        "uid": "ea647dc9",
+        "txtName": "Peter Luckock",
+        "txtNote": "Inventor"
+      },
+      "x": 0.1346,
+      "keys": {
+        "uidEntity": "ea647dc9",
+        "xidEntityType": "Entity",
+        "uidNodeType": "9e96333f"
+      },
+      "images": {
+        "main": {
+          "img_src": "Peter.jpg",
+          "transform": {
+            "circle": "translate(0,0) scale(1)",
+            "rect": "translate(0,0) scale(1)",
+            "frame": "translate(0,0) scale(1)"
+          }
+        }
+      }
+    }
+  },
+  "links": {
+    "35c6f4be": {
+      "base": {
+        "from": "hamlet",
+        "to": "gertrude",
+        "type": "child_of",
+        "keys": {
+          "xid": "R1694110",
+          "xidEntityFrom": "hamlet",
+          "xidEntityTo": "gertrude",
+          "xidRelnType": "child_of",
+          "uid": "60decce2"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "962e0633",
+        "uidDatumTo": "8b9573c8",
+        "uidLinkType": "e25bd8f6",
+        "uidBase": "60decce2",
+        "xidRelnType": "child_of",
+        "uidThis": "35c6f4be"
+      },
+      "y": 0.9716
+    },
+    "6428ba07": {
+      "base": {
+        "from": "hamlet",
+        "to": "ghost_hamlet_sr",
+        "type": "child_of",
+        "keys": {
+          "xid": "R1189153",
+          "xidEntityFrom": "hamlet",
+          "xidEntityTo": "ghost_hamlet_sr",
+          "xidRelnType": "child_of",
+          "uid": "b937ec6e"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "962e0633",
+        "uidDatumTo": "26883e75",
+        "uidLinkType": "e25bd8f6",
+        "uidBase": "b937ec6e",
+        "xidRelnType": "child_of",
+        "uidThis": "6428ba07"
+      },
+      "y": 0.4565
+    },
+    "4c58907b": {
+      "base": {
+        "from": "gertrude",
+        "to": "claudius",
+        "type": "married_to",
+        "keys": {
+          "xid": "R1403712",
+          "xidEntityFrom": "gertrude",
+          "xidEntityTo": "claudius",
+          "xidRelnType": "married_to",
+          "uid": "34db824a"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "8b9573c8",
+        "uidDatumTo": "36b4995a",
+        "uidLinkType": "ecc7e60a",
+        "uidBase": "34db824a",
+        "xidRelnType": "married_to",
+        "uidThis": "4c58907b"
+      },
+      "y": 0.0302
+    },
+    "dcd7fda1": {
+      "base": {
+        "from": "claudius",
+        "to": "ghost_hamlet_sr",
+        "type": "murdered",
+        "keys": {
+          "xid": "R1091960",
+          "xidEntityFrom": "claudius",
+          "xidEntityTo": "ghost_hamlet_sr",
+          "xidRelnType": "murdered",
+          "uid": "2ab1ac2e"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "36b4995a",
+        "uidDatumTo": "26883e75",
+        "uidLinkType": "755df0d2",
+        "uidBase": "2ab1ac2e",
+        "xidRelnType": "murdered",
+        "uidThis": "dcd7fda1"
+      },
+      "y": 0.5132
+    },
+    "6b86a327": {
+      "base": {
+        "from": "ghost_hamlet_sr",
+        "to": "hamlet",
+        "type": "commands_revenge",
+        "keys": {
+          "xid": "R1920975",
+          "xidEntityFrom": "ghost_hamlet_sr",
+          "xidEntityTo": "hamlet",
+          "xidRelnType": "commands_revenge",
+          "uid": "03c1d289"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "26883e75",
+        "uidDatumTo": "962e0633",
+        "uidLinkType": "08283269",
+        "uidBase": "03c1d289",
+        "xidRelnType": "commands_revenge",
+        "uidThis": "6b86a327"
+      },
+      "y": 0.8362
+    },
+    "f3f49ed2": {
+      "base": {
+        "from": "hamlet",
+        "to": "horatio",
+        "type": "trusted_friend",
+        "keys": {
+          "xid": "R1163125",
+          "xidEntityFrom": "hamlet",
+          "xidEntityTo": "horatio",
+          "xidRelnType": "trusted_friend",
+          "uid": "d08f820b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "962e0633",
+        "uidDatumTo": "44b8f90c",
+        "uidLinkType": "ea810a12",
+        "uidBase": "d08f820b",
+        "xidRelnType": "trusted_friend",
+        "uidThis": "f3f49ed2"
+      },
+      "y": 0.2478
+    },
+    "05d51cee": {
+      "base": {
+        "from": "hamlet",
+        "to": "ophelia",
+        "type": "romantic_connection",
+        "keys": {
+          "xid": "R1977192",
+          "xidEntityFrom": "hamlet",
+          "xidEntityTo": "ophelia",
+          "xidRelnType": "romantic_connection",
+          "uid": "2f04df2a"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "962e0633",
+        "uidDatumTo": "ad4ff33c",
+        "uidLinkType": "b7d91842",
+        "uidBase": "2f04df2a",
+        "xidRelnType": "romantic_connection",
+        "uidThis": "05d51cee"
+      },
+      "y": 0.9623
+    },
+    "e09f7f2e": {
+      "base": {
+        "from": "ophelia",
+        "to": "polonius",
+        "type": "child_of",
+        "keys": {
+          "xid": "R1176682",
+          "xidEntityFrom": "ophelia",
+          "xidEntityTo": "polonius",
+          "xidRelnType": "child_of",
+          "uid": "e9502ba5"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "ad4ff33c",
+        "uidDatumTo": "6111ded7",
+        "uidLinkType": "e25bd8f6",
+        "uidBase": "e9502ba5",
+        "xidRelnType": "child_of",
+        "uidThis": "e09f7f2e"
+      },
+      "y": 0.8034
+    },
+    "4be9900b": {
+      "base": {
+        "from": "laertes",
+        "to": "polonius",
+        "type": "child_of",
+        "keys": {
+          "xid": "R1951763",
+          "xidEntityFrom": "laertes",
+          "xidEntityTo": "polonius",
+          "xidRelnType": "child_of",
+          "uid": "a9c17846"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d14aafb2",
+        "uidDatumTo": "6111ded7",
+        "uidLinkType": "e25bd8f6",
+        "uidBase": "a9c17846",
+        "xidRelnType": "child_of",
+        "uidThis": "4be9900b"
+      },
+      "y": 0.3766
+    },
+    "3e67a22e": {
+      "base": {
+        "from": "laertes",
+        "to": "ophelia",
+        "type": "sibling_of",
+        "keys": {
+          "xid": "R1068328",
+          "xidEntityFrom": "laertes",
+          "xidEntityTo": "ophelia",
+          "xidRelnType": "sibling_of",
+          "uid": "035b378e"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d14aafb2",
+        "uidDatumTo": "ad4ff33c",
+        "uidLinkType": "3bccd748",
+        "uidBase": "035b378e",
+        "xidRelnType": "sibling_of",
+        "uidThis": "3e67a22e"
+      },
+      "y": 0.5705
+    },
+    "6d8cd1c3": {
+      "base": {
+        "from": "claudius",
+        "to": "rosencrantz",
+        "type": "manipulates",
+        "keys": {
+          "xid": "R1690804",
+          "xidEntityFrom": "claudius",
+          "xidEntityTo": "rosencrantz",
+          "xidRelnType": "manipulates",
+          "uid": "69699b0a"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "36b4995a",
+        "uidDatumTo": "f8f423bf",
+        "uidLinkType": "fdeb8c4b",
+        "uidBase": "69699b0a",
+        "xidRelnType": "manipulates",
+        "uidThis": "6d8cd1c3"
+      },
+      "y": 0.1618
+    },
+    "7e0c2b56": {
+      "base": {
+        "from": "claudius",
+        "to": "guildenstern",
+        "type": "manipulates",
+        "keys": {
+          "xid": "R1934677",
+          "xidEntityFrom": "claudius",
+          "xidEntityTo": "guildenstern",
+          "xidRelnType": "manipulates",
+          "uid": "128c9a01"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "36b4995a",
+        "uidDatumTo": "f449d26c",
+        "uidLinkType": "fdeb8c4b",
+        "uidBase": "128c9a01",
+        "xidRelnType": "manipulates",
+        "uidThis": "7e0c2b56"
+      },
+      "y": 0.4632
+    },
+    "fe47de9e": {
+      "base": {
+        "from": "rosencrantz",
+        "to": "hamlet",
+        "type": "spies_on",
+        "keys": {
+          "xid": "R1805021",
+          "xidEntityFrom": "rosencrantz",
+          "xidEntityTo": "hamlet",
+          "xidRelnType": "spies_on",
+          "uid": "58472ba7"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "f8f423bf",
+        "uidDatumTo": "962e0633",
+        "uidLinkType": "4b9a7948",
+        "uidBase": "58472ba7",
+        "xidRelnType": "spies_on",
+        "uidThis": "fe47de9e"
+      },
+      "y": 0.1936
+    },
+    "5b485b4b": {
+      "base": {
+        "from": "guildenstern",
+        "to": "hamlet",
+        "type": "spies_on",
+        "keys": {
+          "xid": "R1272547",
+          "xidEntityFrom": "guildenstern",
+          "xidEntityTo": "hamlet",
+          "xidRelnType": "spies_on",
+          "uid": "e06dd748"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "f449d26c",
+        "uidDatumTo": "962e0633",
+        "uidLinkType": "4b9a7948",
+        "uidBase": "e06dd748",
+        "xidRelnType": "spies_on",
+        "uidThis": "5b485b4b"
+      },
+      "y": 0.5294
+    },
+    "066e7cda": {
+      "base": {
+        "from": "hamlet",
+        "to": "play_within_play",
+        "type": "orchestrates",
+        "keys": {
+          "xid": "R1258619",
+          "xidEntityFrom": "hamlet",
+          "xidEntityTo": "play_within_play",
+          "xidRelnType": "orchestrates",
+          "uid": "8e04e728"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "962e0633",
+        "uidDatumTo": "e69e1e2f",
+        "uidLinkType": "8cccfa4f",
+        "uidBase": "8e04e728",
+        "xidRelnType": "orchestrates",
+        "uidThis": "066e7cda"
+      },
+      "y": 0.7105
+    },
+    "9106775f": {
+      "base": {
+        "from": "play_within_play",
+        "to": "claudius",
+        "type": "reveals_guilt",
+        "keys": {
+          "xid": "R1942237",
+          "xidEntityFrom": "play_within_play",
+          "xidEntityTo": "claudius",
+          "xidRelnType": "reveals_guilt",
+          "uid": "ccdcb9c0"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "e69e1e2f",
+        "uidDatumTo": "36b4995a",
+        "uidLinkType": "c3a4260c",
+        "uidBase": "ccdcb9c0",
+        "xidRelnType": "reveals_guilt",
+        "uidThis": "9106775f"
+      },
+      "y": 0.1014
+    },
+    "8904c699": {
+      "base": {
+        "from": "claudius",
+        "to": "hamlet",
+        "type": "plots_to_kill",
+        "keys": {
+          "xid": "R1435935",
+          "xidEntityFrom": "claudius",
+          "xidEntityTo": "hamlet",
+          "xidRelnType": "plots_to_kill",
+          "uid": "401526c4"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "36b4995a",
+        "uidDatumTo": "962e0633",
+        "uidLinkType": "fb030fc7",
+        "uidBase": "401526c4",
+        "xidRelnType": "plots_to_kill",
+        "uidThis": "8904c699"
+      },
+      "y": 0.9208
+    },
+    "8aa3d88c": {
+      "base": {
+        "from": "hamlet",
+        "to": "polonius",
+        "type": "kills_accidentally",
+        "keys": {
+          "xid": "R1886093",
+          "xidEntityFrom": "hamlet",
+          "xidEntityTo": "polonius",
+          "xidRelnType": "kills_accidentally",
+          "uid": "8c78c4a5"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "962e0633",
+        "uidDatumTo": "6111ded7",
+        "uidLinkType": "48cc18af",
+        "uidBase": "8c78c4a5",
+        "xidRelnType": "kills_accidentally",
+        "uidThis": "8aa3d88c"
+      },
+      "y": 0.6944
+    },
+    "a3c2c3e2": {
+      "base": {
+        "from": "ophelia",
+        "to": "polonius",
+        "type": "grieves",
+        "keys": {
+          "xid": "R1206342",
+          "xidEntityFrom": "ophelia",
+          "xidEntityTo": "polonius",
+          "xidRelnType": "grieves",
+          "uid": "ba0d4fc8"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "ad4ff33c",
+        "uidDatumTo": "6111ded7",
+        "uidLinkType": "01a06f33",
+        "uidBase": "ba0d4fc8",
+        "xidRelnType": "grieves",
+        "uidThis": "a3c2c3e2"
+      },
+      "y": 0.1729
+    },
+    "7a17d8ee": {
+      "base": {
+        "from": "ophelia",
+        "to": "ophelia",
+        "type": "descends_into_madness",
+        "keys": {
+          "xid": "R1450047",
+          "xidEntityFrom": "ophelia",
+          "xidEntityTo": "ophelia",
+          "xidRelnType": "descends_into_madness",
+          "uid": "7e9f6c0b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "ad4ff33c",
+        "uidDatumTo": "ad4ff33c",
+        "uidLinkType": "44ee9398",
+        "uidBase": "7e9f6c0b",
+        "xidRelnType": "descends_into_madness",
+        "uidThis": "7a17d8ee"
+      },
+      "y": 0.2366
+    },
+    "09fb39c9": {
+      "base": {
+        "from": "laertes",
+        "to": "claudius",
+        "type": "conspires_with",
+        "keys": {
+          "xid": "R1510755",
+          "xidEntityFrom": "laertes",
+          "xidEntityTo": "claudius",
+          "xidRelnType": "conspires_with",
+          "uid": "c08f054a"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d14aafb2",
+        "uidDatumTo": "36b4995a",
+        "uidLinkType": "403af97b",
+        "uidBase": "c08f054a",
+        "xidRelnType": "conspires_with",
+        "uidThis": "09fb39c9"
+      },
+      "y": 0.6924
+    },
+    "2ebd4bbe": {
+      "base": {
+        "from": "laertes",
+        "to": "duel",
+        "type": "participates_in",
+        "keys": {
+          "xid": "R1602713",
+          "xidEntityFrom": "laertes",
+          "xidEntityTo": "duel",
+          "xidRelnType": "participates_in",
+          "uid": "fec78ee8"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d14aafb2",
+        "uidDatumTo": "ad488d52",
+        "uidLinkType": "6f970055",
+        "uidBase": "fec78ee8",
+        "xidRelnType": "participates_in",
+        "uidThis": "2ebd4bbe"
+      },
+      "y": 0.0165
+    },
+    "f4098217": {
+      "base": {
+        "from": "hamlet",
+        "to": "duel",
+        "type": "participates_in",
+        "keys": {
+          "xid": "R1266062",
+          "xidEntityFrom": "hamlet",
+          "xidEntityTo": "duel",
+          "xidRelnType": "participates_in",
+          "uid": "c12a194f"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "962e0633",
+        "uidDatumTo": "ad488d52",
+        "uidLinkType": "6f970055",
+        "uidBase": "c12a194f",
+        "xidRelnType": "participates_in",
+        "uidThis": "f4098217"
+      },
+      "y": 0.8922
+    },
+    "1b92b497": {
+      "base": {
+        "from": "laertes",
+        "to": "hamlet",
+        "type": "wounds_fatally",
+        "keys": {
+          "xid": "R1317858",
+          "xidEntityFrom": "laertes",
+          "xidEntityTo": "hamlet",
+          "xidRelnType": "wounds_fatally",
+          "uid": "931519e9"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "d14aafb2",
+        "uidDatumTo": "962e0633",
+        "uidLinkType": "696f40aa",
+        "uidBase": "931519e9",
+        "xidRelnType": "wounds_fatally",
+        "uidThis": "1b92b497"
+      },
+      "y": 0.0538
+    },
+    "296a9dfe": {
+      "base": {
+        "from": "hamlet",
+        "to": "claudius",
+        "type": "kills",
+        "keys": {
+          "xid": "R1809366",
+          "xidEntityFrom": "hamlet",
+          "xidEntityTo": "claudius",
+          "xidRelnType": "kills",
+          "uid": "d36d9cab"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "962e0633",
+        "uidDatumTo": "36b4995a",
+        "uidLinkType": "bdd7b3db",
+        "uidBase": "d36d9cab",
+        "xidRelnType": "kills",
+        "uidThis": "296a9dfe"
+      },
+      "y": 0.5198
+    },
+    "4f89dc8a": {
+      "base": {
+        "from": "fortinbras",
+        "to": "denmark",
+        "type": "claims_authority",
+        "keys": {
+          "xid": "R1828642",
+          "xidEntityFrom": "fortinbras",
+          "xidEntityTo": "denmark",
+          "xidRelnType": "claims_authority",
+          "uid": "0b181d0b"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "48234ba0",
+        "uidDatumTo": "0bf7cbf0",
+        "uidLinkType": "c030c17d",
+        "uidBase": "0b181d0b",
+        "xidRelnType": "claims_authority",
+        "uidThis": "4f89dc8a"
+      },
+      "y": 0.1055
+    },
+    "c3ed45f8": {
+      "base": {
+        "from": "fortinbras",
+        "to": "hamlet",
+        "type": "honours_memory",
+        "keys": {
+          "xid": "R1784392",
+          "xidEntityFrom": "fortinbras",
+          "xidEntityTo": "hamlet",
+          "xidRelnType": "honours_memory",
+          "uid": "5bcaa94a"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "48234ba0",
+        "uidDatumTo": "962e0633",
+        "uidLinkType": "35300286",
+        "uidBase": "5bcaa94a",
+        "xidRelnType": "honours_memory",
+        "uidThis": "c3ed45f8"
+      },
+      "y": 0.7902
+    },
+    "44f5431b": {
+      "base": {
+        "sourceEntity": "ghost_hamlet_sr",
+        "targetEntity": "pl32983",
+        "predicate": "reports_to",
+        "keys": {
+          "xid": "R1194157",
+          "xidEntityFrom": "ghost_hamlet_sr",
+          "xidEntityTo": "pl32983",
+          "xidRelnType": "reports_to",
+          "uid": "4e77696a"
+        }
+      },
+      "keys": {
+        "uidDatumFrom": "26883e75",
+        "uidDatumTo": "ea647dc9",
+        "uidLinkType": "00001505",
+        "uidBase": "4e77696a",
+        "xidRelnType": "Unknown",
+        "uidThis": "44f5431b"
+      },
+      "y": 0.8468
+    }
+  },
+  "forces": {},
+  "layers": {
+    "default": {
+      "class_name": "default",
+      "types": [
+        "default"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "Person": {
+      "class_name": "Person",
+      "types": [
+        "Person",
+        "Party",
+        "individual"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "child_of": {
+      "class_name": "child_of",
+      "types": [
+        "child_of",
+        "son_of",
+        "daughter_of"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "parent_of": {
+      "class_name": "parent_of",
+      "types": [
+        "parent_of",
+        "father_of",
+        "mother_of"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "reports_to": {
+      "class_name": "reports_to",
+      "types": [
+        "reports_to",
+        "employee_of",
+        "works_for"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "Variable": {
+      "class_name": "Variable",
+      "types": [
+        "Variable",
+        "measure"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "Policy": {
+      "class_name": "Policy",
+      "types": [
+        "Policy"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "Model": {
+      "class_name": "Model",
+      "types": [
+        "Model",
+        "ModelClass"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    },
+    "part_of": {
+      "class_name": "part_of",
+      "types": [
+        "part_of",
+        "belongs_to_class"
+      ],
+      "nesting": {
+        "enabled": false,
+        "closed": true,
+        "reversed": false
+      },
+      "colour": {
+        "fill": "white",
+        "stroke": "black"
+      },
+      "image": {
+        "img_src": "tba.svg",
+        "transform": {
+          "circle": "translate(0,0) scale(1)",
+          "rect": "translate(0,0) scale(1)",
+          "frame": "translate(0,0) scale(1)"
+        }
+      }
+    }
+  },
+  "scenes": {},
+  "episodes": {},
+  "studies": {},
+  "linkTypes": {
+    "35300286": {
+      "uid": "35300286",
+      "xid": "honours_memory"
+    },
+    "default": {
+      "uid": "00001505",
+      "xid": "Unknown"
+    },
+    "e25bd8f6": {
+      "uid": "e25bd8f6",
+      "xid": "child_of"
+    },
+    "ecc7e60a": {
+      "uid": "ecc7e60a",
+      "xid": "married_to"
+    },
+    "755df0d2": {
+      "uid": "755df0d2",
+      "xid": "murdered"
+    },
+    "08283269": {
+      "uid": "08283269",
+      "xid": "commands_revenge"
+    },
+    "ea810a12": {
+      "uid": "ea810a12",
+      "xid": "trusted_friend"
+    },
+    "b7d91842": {
+      "uid": "b7d91842",
+      "xid": "romantic_connection"
+    },
+    "3bccd748": {
+      "uid": "3bccd748",
+      "xid": "sibling_of"
+    },
+    "fdeb8c4b": {
+      "uid": "fdeb8c4b",
+      "xid": "manipulates"
+    },
+    "4b9a7948": {
+      "uid": "4b9a7948",
+      "xid": "spies_on"
+    },
+    "8cccfa4f": {
+      "uid": "8cccfa4f",
+      "xid": "orchestrates"
+    },
+    "c3a4260c": {
+      "uid": "c3a4260c",
+      "xid": "reveals_guilt"
+    },
+    "fb030fc7": {
+      "uid": "fb030fc7",
+      "xid": "plots_to_kill"
+    },
+    "48cc18af": {
+      "uid": "48cc18af",
+      "xid": "kills_accidentally"
+    },
+    "01a06f33": {
+      "uid": "01a06f33",
+      "xid": "grieves"
+    },
+    "44ee9398": {
+      "uid": "44ee9398",
+      "xid": "descends_into_madness"
+    },
+    "403af97b": {
+      "uid": "403af97b",
+      "xid": "conspires_with"
+    },
+    "6f970055": {
+      "uid": "6f970055",
+      "xid": "participates_in"
+    },
+    "696f40aa": {
+      "uid": "696f40aa",
+      "xid": "wounds_fatally"
+    },
+    "bdd7b3db": {
+      "uid": "bdd7b3db",
+      "xid": "kills"
+    },
+    "c030c17d": {
+      "uid": "c030c17d",
+      "xid": "claims_authority"
+    }
+  },
+  "nodeTypes": {
+    "52140446": {
+      "uid": "52140446",
+      "xid": "Event"
+    },
+    "default": {
+      "uid": "00001505",
+      "xid": "Unknown"
+    },
+    "9e96333f": {
+      "uid": "9e96333f",
+      "xid": "Person"
+    },
+    "d5ef21da": {
+      "uid": "d5ef21da",
+      "xid": "Supernatural"
+    },
+    "df8af4b1": {
+      "uid": "df8af4b1",
+      "xid": "Place"
+    }
+  }
+}
+);
