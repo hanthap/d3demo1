@@ -62,6 +62,7 @@ async function OnChange() {
   create_view(graph);
   
 }
+
 //----------------------------------------------------------
 
 async function OnChangeGraph() {
@@ -77,8 +78,8 @@ create_view(graph);
 console.log(graph);
 
 }
-//----------------------------------------------------------
 
+//----------------------------------------------------------
 
 var test_graph;
 const input = document.getElementById("fileInput");
@@ -102,11 +103,11 @@ graph
   .addLayer('part_of',['belongs_to_class'])
   .bindAllLayers();
 
-const nt = graph.getNodeType('Person'); // might default if 'Person' is not already registered
+const node_type = graph.getNodeType('Person'); // might default if 'Person' is not already registered
 
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor' };
 
-const new_node = graph.addNode(node_spec,nt);
+const new_node = graph.addNode(node_spec,node_type);
 new_node.addImage('Peter.jpg','main');
 
 const link_type = graph.getLinkType('child_of'); // might default if 'belongs_to' is not already registered
@@ -121,17 +122,14 @@ const nodes = graph.nodeData(),
       predicate = 'reports_to',
       xid = predicate,
       relationSpec = {_baseFrom,_baseTo,_baseType, sourceEntity,targetEntity,predicate};
-
   
 graph.addLink(relationSpec,link_type);
 
 console.log(graph);
 
-
 }
 
 //----------------------------------------------------------
-
 
 function create_view(graph) {
 
@@ -150,9 +148,6 @@ selPara = body.selectAll('p')
     .attr('id',d=>d.uniqueId())
     .text(d=>d.toString())
     ;
-
-
-
 
   return selPara;
 
@@ -179,12 +174,11 @@ class WeakBind {
 // each graph model has its own private set of D3 node coords, cloaking status etc as updated by user events & simulation
 // usually only one simulation per model but that's not a system constraint
 // it has one svg viewport
-// maybe call it GraphView? with derived class GraphEditor?
 
 class GraphModel {
 
   constructor() {
-    this.sources = {};
+    this.metadata = { sources: {} };
     this.nodes = {};
     this.links = {};
     this.forces = {};  
@@ -195,7 +189,6 @@ class GraphModel {
     this.linkTypes = {};
     this.nodeTypes = {}; 
     this.addLayer(new LayerDatum('default',this));
-    // TODO: this avoids runtime errors but after rehydrating we still get a spurious nodeType with hashstring as its uniqueId
     this.nodeTypes.default = new NodeType({xid:'Unknown'},this);
     this.linkTypes.default = new LinkType({xid:'Unknown'},this);
 
@@ -215,11 +208,11 @@ class GraphModel {
     this.forces = json.forces;  
     const source = new Source(file,'GraphModel',json.metadata);
 
-    this.sources[source.uniqueId()] = source;
+    this.metadata.sources[source.uniqueId()] = source;
 
-    Object.values(json.sources).forEach(d => {
+    Object.values(json.metadata.sources).forEach(d => {
       Object.setPrototypeOf(d,Source.prototype);
-      this.sources[d.uniqueId()] = d;
+      this.metadata.sources[d.uniqueId()] = d;
       }
     );
 
@@ -303,7 +296,6 @@ class GraphModel {
     return this;
   }
 
-
   //------------------------------------------------------------------
   
   getLayer(type_name) {
@@ -316,7 +308,6 @@ class GraphModel {
 
   //------------------------------------------------------------------
 
-
   getNodeType(type_name) {
     const found = Object.values(this.nodeTypes)
       .filter(nt => nt.nameMatches(type_name));
@@ -326,7 +317,6 @@ class GraphModel {
   }
 
   //------------------------------------------------------------------
-
 
   getLinkType(type_name) {
     const found = Object.values(this.linkTypes)
@@ -352,26 +342,24 @@ class GraphModel {
     return this;
     }
 
-
   //------------------------------------------------------------------
 
-  downloadJSON(to_filename = "graph.json") {
+  downloadJSON(to_filename='graph.json') {
 
-    const exclude_regex = new RegExp('^_', "i"); // skip any keys that start with underscore
+    const exclude_regex = new RegExp('^_', "i"); 
 
-    const json = JSON.stringify(this, (key, value) => {
-        if (exclude_regex.test(key)) return undefined;
+    const json = JSON.stringify(this, (key, value) => { 
+        if (exclude_regex.test(key)) return undefined; // skip keys that start with underscore
         else {
           if (value instanceof Set) return [...value]; // convert
           if (typeof value === 'number') return Math.round(value*10000)/10000;
           else return value; 
-          // objects are already grouped by base class, 
-          // setSubClass() will take care of the details
-          // no need to insert a __class hint in the output JSON
-          } }, 2 );
+          } 
+        }, 2 );
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    console.log('BLOB object url',url);
+    const a = document.createElement('a');
     a.href = url;
     a.download = to_filename;
     a.click();
@@ -385,7 +373,7 @@ class GraphModel {
 
     console.log("mergeOntology(bound_ont)",bound_ont);  
 
-    this.sources[bound_ont.source.uniqueId()] = bound_ont.source;
+    this.metadata.sources[bound_ont.source.uniqueId()] = bound_ont.source;
 
     const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new NodeType(obj,this)); 
     new_nodeTypes.forEach(d => this.nodeTypes[d.uniqueId()] = d);
@@ -399,8 +387,6 @@ class GraphModel {
     
     const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
     new_links.forEach(d => this.links[d.uniqueId()] = d);
-
-
   
     return this;
 
@@ -418,29 +404,10 @@ class GraphModel {
   //---------------------------------------------------------------------------------
 
   addLink(relationSpec,linkType) { 
-
-  const new_relation = Ontology.getDefault().addRelation(relationSpec);
-  const new_LinkDatum = new LinkDatum(new_relation,this);
-  new_LinkDatum.setLinkType(linkType);
-  return this.links[new_LinkDatum.uniqueId()] = new_LinkDatum;
-
-
-    // const ont = Ontology.getDefault();
-    // const info =  {  
-    //   _baseFrom: obj.datumFrom.base,
-    //   _baseTo: obj.datumTo.base,
-    //   _baseType: ont.getRelationType(predicate),
-    //   from:datumFrom.base.xid,
-    //   to:datumTo.base.xid,
-    //   type: predicate
-    //   };
-
-    // const new_relation = new Relation(info,ont);
-    // //debugger;
-    // const new_link_datum = new LinkDatum(new_relation,this); // returns with ._linkType = undefined
-    // this.links[new_link_datum.uniqueId()] = new_link_datum;
-    // return new_link_datum;
-
+    const new_relation = Ontology.getDefault().addRelation(relationSpec);
+    const new_LinkDatum = new LinkDatum(new_relation,this);
+    new_LinkDatum.setLinkType(linkType);
+    return this.links[new_LinkDatum.uniqueId()] = new_LinkDatum;
   }
 
   //---------------------------------------------------------------------------------
@@ -523,7 +490,7 @@ class Ontology {
   // It could be one of the source ontologies, but for now assume output will be a different file.
   // TODO might also be the output destination for ALL Graph, Node and Link objects?
   // I think it's cleaner to save each Graph as a separate JSON file, which stores the path of each input Ontology
-  static outputOntology = new Ontology({uid: '_NEW', file: {}, entities: {}, relations: {}, classes: {}, predicates: {}});
+  static outputOntology = new Ontology({uid: '_NEW', file: {}, metadata: {}, entities: {}, relations: {}, classes: {}, predicates: {}});
 
   static getDefault() { return Ontology.outputOntology; }
 //----------------------------------------------------------
@@ -534,30 +501,18 @@ class Ontology {
     // Here we cater for a few variants encountered so far
 
     // TODO: check - does it even look like an ontology? Maybe it's a graph?
-    var
-        metadata,
-        entities, 
-        relations, 
-        classes, 
-        predicates;
 
-    const uid = hashString(file.name);
-    const source = new Source(file,'Ontology');
+    const 
+      uid = hashString(file.name),
+      source = new Source(file,'Ontology'),
+      entities = json.entities ?? json.ontology.entities ?? {},
+      relations = json.relations ?? json.ontology.relationships ?? {},
+      classes = json.classes ?? json.ontology.classes ?? {},
+      predicates = json.predicates ?? json.ontology.relations ?? {}; // Copilot uses 'relations' in 2 different ways
 
-    if (json.metadata) metadata = json.metadata;
-    if (json.entities) entities = json.entities;
-    if (json.relations) relations = json.relations;
-    if (json.classes) classes = json.classes;
-    if (json.predicates) predicates = json.predicates;
+    source.metadata = json.metadata ?? {};
 
-    if (json.ontology) {
-        if (json.ontology.classes) classes = json.ontology.classes;
-        if (json.ontology.entities) entities = json.ontology.entities;
-        if (json.ontology.relationships) relations = json.ontology.relationships;
-        if (json.ontology.relations) predicates = json.ontology.relations;
-    }
-
-    return new Ontology({uid, source, metadata, entities, relations, classes, predicates}) ;
+    return new Ontology({uid, source, entities, relations, classes, predicates}) ;
 
   }
 //----------------------------------------------------------
@@ -872,9 +827,6 @@ class RelationType {
 
 //============================================================
 
-
-
-
 class EntityType {
   constructor(obj,ont) { 
     if (typeof(obj) == 'string') 
@@ -923,8 +875,6 @@ class Entity {
   keyId() { return this.xid } // for local binding within this ontology
   uniqueId() { return this.uid } // used by d3, and to safely bind across ontologies without name collisions
   bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
-
-//  toString() { return `${this._type.toString()}: ${this.txtName}: ${this.txtNote}` }
   toString() { return `${this.txtName}: ${this.txtNote}` } // NodeDatum.toString() will add descriptor via _datumType
   getParent() { return WeakBind.parentOf.get(this) }
 }
@@ -951,7 +901,6 @@ class Relation  {
   keyId() { return this.keys.xid }
   uniqueId() { return this.keys.uid } 
   toString() { return `${this._baseFrom.toString()} | ${this._baseType.toString()} | ${this._baseTo.toString()}` }
-
 
   // adapt to various names used in the source JSON data
 
@@ -982,18 +931,12 @@ class LinkDatum {
     WeakBind.parentOf.set(this,graph);
 
  }
-//  toString() { return `${this._datumFrom.toString()} | ${this.base._baseType.toString()} | ${this._datumTo.toString()}` } 
   toString() { return `${this._datumFrom.toString()} | ${this._linkType.toString()} | ${this._datumTo.toString()}` } 
-
   setLinkType(linkType) { this._linkType = linkType; return this; }
-
   uniqueId() { return this.keys.uidThis } 
-
   // this only works when merging Ontology. not when rehydrating a saved Graph json
   bind(graph) {  // TODO: use _datumFrom instead of base? 
-
     // capture robust keys to enable re-binding eg after ontology is refreshed
-
     this.keys = this.keys ?? {
       uidDatumFrom: this.base._baseFrom.uniqueId(),
       uidDatumTo:   this.base._baseTo.uniqueId(),
@@ -1002,15 +945,9 @@ class LinkDatum {
       xidRelnType:  this.base._baseType.keyId()
     };
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
-
+    // rehydrate
     this._datumFrom = graph.nodes[this.keys.uidDatumFrom];
     this._datumTo = graph.nodes[this.keys.uidDatumTo];
-    // DEBUG: why does this return undefined, but only for new links created via graph.addLink.
-    // again, it's because we created a new object in the default Ontology.
-    // would be better to check for an existing linktype with that xid.
-    // same as we do with getNode
-
-   // if (this._datumTo.base.keyId() == 'pl32983') debugger;
     this._linkType = graph.linkTypes[this.keys.uidLinkType];
 
   }
@@ -1048,10 +985,6 @@ class Episode { // aka chapter or Act or Movement
   // a saved & named selection of scenes (or episodes), in sequence
   // tree to any depth - Table of Contents
 }
-
-
-
-
 
 //============================================================
 
