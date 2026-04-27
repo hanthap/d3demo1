@@ -1,7 +1,7 @@
 
-<input type="file" title="Choose ontology file(s)" id="fileInput" accept="application/json" multiple>
+Ontologies <input type="file" title="Ontology" id="fileInput" accept="application/json" multiple><br>
 
-<input type="file" title="Choose graph file" id="fileInputGraph" accept="application/json">
+Graphs <input type="file" title="Graph" id="fileInputGraph" accept="application/json"><br>
 
 <button type="button" onclick="graph.downloadJSON('test_output.json')">Download</button>
 
@@ -109,13 +109,21 @@ const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor
 const new_node = graph.addNode(node_spec,nt);
 new_node.addImage('Peter.jpg','main');
 
-const nodes = graph.nodeData(),
-      datumFrom = nodes[3],
-      datumTo = new_node,
-      predicate = 'reports_to',
-      link_spec = {datumFrom,datumTo,predicate};
+const link_type = graph.getLinkType('child_of'); // might default if 'belongs_to' is not already registered
 
-graph.addLink(link_spec);
+const nodes = graph.nodeData(),
+      _baseFrom = nodes[3].base,
+      _baseTo = new_node.base,
+      _baseType = link_type,
+      // used by Relation constructor to assign xid
+      sourceEntity = _baseFrom.keyId(),
+      targetEntity = _baseTo.keyId(),
+      predicate = 'reports_to',
+      xid = predicate,
+      relationSpec = {_baseFrom,_baseTo,_baseType, sourceEntity,targetEntity,predicate};
+
+  
+graph.addLink(relationSpec,link_type);
 
 console.log(graph);
 
@@ -189,6 +197,7 @@ class GraphModel {
     this.addLayer(new LayerDatum('default',this));
     // TODO: this avoids runtime errors but after rehydrating we still get a spurious nodeType with hashstring as its uniqueId
     this.nodeTypes.default = new NodeType({xid:'Unknown'},this);
+    this.linkTypes.default = new LinkType({xid:'Unknown'},this);
 
   }
 
@@ -230,8 +239,15 @@ class GraphModel {
       }
     );
 
-// TODO: ingest new LinkTypes, Scenes, Episodes, Studies
 
+    // ingest new linkTypes (required before adding links)
+    Object.values(json.linkTypes).forEach(d => {
+      Object.setPrototypeOf(d,LinkType.prototype);
+      this.linkTypes[d.uniqueId()] = d;
+      }
+    );
+
+// TODO: ingest new Scenes, Episodes, Studies
 
   // apply classes without executing constructors and immediately insert/replace
   // any existing nodes with the same uid => VOIDS any unsaved edits
@@ -253,6 +269,7 @@ class GraphModel {
       Object.setPrototypeOf(d.base,Relation.prototype);
       d._datumFrom = this.nodes[d.keys.uidDatumFrom];
       d._datumTo = this.nodes[d.keys.uidDatumTo];
+      d._linkType = this.linkTypes[d.keys.uidLinkType];
       d.bindLayer(this);
       // d.bind(this); // TODO: use a rehydration method instead.
       this.links[d.uniqueId()] = d;
@@ -308,6 +325,16 @@ class GraphModel {
     else return found[0]; // just the first one 
   }
 
+  //------------------------------------------------------------------
+
+
+  getLinkType(type_name) {
+    const found = Object.values(this.linkTypes)
+      .filter(lt => lt.nameMatches(type_name));
+
+    if (found.length == 0) return this.linkTypes.default; // created during constructor
+    else return found[0]; // just the first one 
+  }
 
   //------------------------------------------------------------------
 
@@ -363,6 +390,9 @@ class GraphModel {
     const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new NodeType(obj,this)); 
     new_nodeTypes.forEach(d => this.nodeTypes[d.uniqueId()] = d);
 
+    const new_linkTypes = Object.values(bound_ont.predicates).map(obj => new LinkType(obj,this)); 
+    new_linkTypes.forEach(d => this.linkTypes[d.uniqueId()] = d);
+
     const new_nodes = Object.values(bound_ont.entities).map(obj => new NodeDatum(obj,this)); 
     new_nodes.forEach(d => this.nodes[d.uniqueId()] = d);
     new_nodes.forEach(d => d.setSubClass()); // prototype does change, but not reflected in Edge DevTools console
@@ -378,31 +408,38 @@ class GraphModel {
 
   //---------------------------------------------------------------------------------
 
-  addNode(obj,nodeType) {
-    const new_entity = Ontology.getDefault().addEntity(obj);
-    const new_datum = new NodeDatum(new_entity,this);
-    new_datum.setNodeType(nodeType);
-    return this.nodes[new_datum.uniqueId()] = new_datum;
+  addNode(entitySpec,nodeType) {
+    const new_entity = Ontology.getDefault().addEntity(entitySpec);
+    const new_NodeDatum = new NodeDatum(new_entity,this);
+    new_NodeDatum.setNodeType(nodeType);
+    return this.nodes[new_NodeDatum.uniqueId()] = new_NodeDatum;
   }
 
   //---------------------------------------------------------------------------------
 
-  addLink({datumFrom,datumTo,predicate}) { 
+  addLink(relationSpec,linkType) { 
 
-    const ont = Ontology.getDefault();
-    const info =  {  
-      _baseFrom: datumFrom.base,
-      _baseTo: datumTo.base,
-      _baseType: ont.getRelationType(predicate),
-      from:datumFrom.base.xid,
-      to:datumTo.base.xid,
-      type: predicate
-      };
+  const new_relation = Ontology.getDefault().addRelation(relationSpec);
+  const new_LinkDatum = new LinkDatum(new_relation,this);
+  new_LinkDatum.setLinkType(linkType);
+  return this.links[new_LinkDatum.uniqueId()] = new_LinkDatum;
 
-    const new_relation = new Relation(info,ont);
-    const new_datum = new LinkDatum(new_relation,this);
-    this.links[new_datum.uniqueId()] = new_datum;
-    return new_datum;
+
+    // const ont = Ontology.getDefault();
+    // const info =  {  
+    //   _baseFrom: obj.datumFrom.base,
+    //   _baseTo: obj.datumTo.base,
+    //   _baseType: ont.getRelationType(predicate),
+    //   from:datumFrom.base.xid,
+    //   to:datumTo.base.xid,
+    //   type: predicate
+    //   };
+
+    // const new_relation = new Relation(info,ont);
+    // //debugger;
+    // const new_link_datum = new LinkDatum(new_relation,this); // returns with ._linkType = undefined
+    // this.links[new_link_datum.uniqueId()] = new_link_datum;
+    // return new_link_datum;
 
   }
 
@@ -451,11 +488,18 @@ class Ontology {
       this.entities[key] = e;
       return e;
     }
+  //----------------------------------------------------------
   
   // REQUIRES that .baseFrom, .baseTo and .baseType are ALREADY defined in obj
   // i.e it is called from GraphModel.addLink()
-  addRelation(obj) { return this.relations.push(new Relation(obj,this)) }
+  addRelation(relationSpec) { 
+    // 
 
+    const nr = new Relation(relationSpec,this);
+      this.relations[nr.keyId()] = nr;
+      //this.relations.push() .. it's not an array
+    return nr;
+  }
 
 // note: Relation.bind(ont) will bind within ont only, using local keys. 
 // Here we want to bind across all ontologies 
@@ -599,28 +643,28 @@ class NodeDatum {
 // TODO: re-bind after ontology is reloaded.
 
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
-  toString() { return `${this._datumType.toString()}: ${this.base.toString()}` }
+  toString() { return `${this._nodeType.toString()}: ${this.base.toString()}` }
   getParent() { return WeakBind.parentOf.get(this) }
 
   bindLayer(graph) { // can vary during session if user edits type-to-layer mapping rules
-    this._datumLayer = graph.getLayer(this.base.typeId()); // TODO: should use _datumType in case of name collision
+    this._datumLayer = graph.getLayer(this.base.typeId()); // TODO: should use _nodeType in case of name collision
     return this;
   }
 
   bind(graph) { // static bindings
-    this._datumType = graph.nodeTypes[this.keys.uidNodeType];
+    this._nodeType = graph.nodeTypes[this.keys.uidNodeType];
   }
 
   setNodeType(nodeType) {
-    this._datumType = nodeType;
+    this._nodeType = nodeType;
     this.keys.uidNodeType = nodeType.uniqueId();  // otherwise rehydration fails
     return this;
   }
   
   setSubClass() { 
     // TODO: decide which subclass I belong to, based on current properties
-    const newClass= this.x < 0.4 ? RectangleNode : CircleNode; 
-    Object.setPrototypeOf(this,newClass.prototype);      // de-optimises. not recommended when performance matters
+    const newSubClass= this.x < 0.4 ? RectangleNode : CircleNode; 
+    Object.setPrototypeOf(this,newSubClass.prototype);      // de-optimises. not recommended when performance matters
     return this;
   }
 
@@ -650,6 +694,13 @@ class CircleNode extends NodeDatum {
 // instead of centroid (x,y) as updated by D3 simulation
 class RectangleNode extends NodeDatum {
   foobar() { return 'hello rect'}
+
+  explodeFrame() {
+    // causes visible CHILD nodes to appear as ordinary connected vertices
+
+  }
+
+
 }
 
 //============================================================
@@ -662,11 +713,10 @@ class RectangleNode extends NodeDatum {
 
 class CollapsedRectangleNode extends RectangleNode {
 
-  restore() {
+  restoreFrame() {
     // swap left,top,width,height into D3's node attributes
 
   }
-
 }
 
 
@@ -677,7 +727,7 @@ class CollapsedRectangleNode extends RectangleNode {
 
 class ExpandedRectangleNode extends RectangleNode {
 
-  minimise() {
+  minimiseFrame() {
     // swap left,top,width,height into D3's node attributes
   }
 
@@ -708,18 +758,9 @@ class FrameNode extends ExpandedRectangleNode {
 
 //============================================================
 
-
 class NodeType {
   constructor(obj,graph) {
-
-  //   if (typeof(obj) == "string") 
-  //     this.xid = obj; 
-  //   else {
-  //     Object.assign(this,obj);
-  // //    this.xid = obj.id;  
-  //   }
     this.uid = hashString(this.xid + graph.uid);
-
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
     return this;
@@ -728,6 +769,23 @@ class NodeType {
   uniqueId() { return this.uid }
   toString() { return this.label ?? this.xid ?? this.uid }
   nameMatches(type_name) { return this.toString() == type_name }
+}
+
+
+//============================================================
+// trivially upcast the predicate object from ontology
+class LinkType {
+  constructor(obj,graph) {
+    this.uid = hashString(this.xid + graph.uid);
+    Object.assign(this,obj);
+    WeakBind.parentOf.set(this,graph);
+    return this;
+  }
+
+  uniqueId() { return this.uid }
+  keyId() { return this.xid }
+  toString() { return this.label ?? this.xid ?? this.uid }
+  nameMatches(xid) { return this.keyId() == xid }
 }
 
 
@@ -885,9 +943,9 @@ class Relation  {
       xidEntityFrom: this.subject ?? this.from ?? this.sourceEntity,
       xidEntityTo: this.object ?? this.to ?? this.targetEntity,
       xidRelnType: this.predicate ?? this.type ?? this.cardinality ?? 'Relation'
-    };
+      };
 
-    this.keys.uid =hashString(this.keys.xid + ont.uid);
+    this.keys.uid = hashString(this.keys.xid + ont.uid);
     }
 
   keyId() { return this.keys.xid }
@@ -917,6 +975,7 @@ class Relation  {
 class LinkDatum {  
  constructor(obj,graph) {
     this.base = obj; // Relation
+
     this.bind(graph);
     
     this.y = Math.random(); 
@@ -924,24 +983,36 @@ class LinkDatum {
 
  }
 //  toString() { return `${this._datumFrom.toString()} | ${this.base._baseType.toString()} | ${this._datumTo.toString()}` } 
-  toString() { return `${this._datumFrom.toString()} | LINKTYPE LOGIC TBA | ${this._datumTo.toString()}` } 
+  toString() { return `${this._datumFrom.toString()} | ${this._linkType.toString()} | ${this._datumTo.toString()}` } 
 
+  setLinkType(linkType) { this._linkType = linkType; return this; }
 
   uniqueId() { return this.keys.uidThis } 
 
   // this only works when merging Ontology. not when rehydrating a saved Graph json
   bind(graph) {  // TODO: use _datumFrom instead of base? 
-    this._datumFrom = graph.nodes[this.base._baseFrom.uniqueId()];
-    this._datumTo = graph.nodes[this.base._baseTo.uniqueId()];
+
     // capture robust keys to enable re-binding eg after ontology is refreshed
-    this.keys = {
-      uidDatumFrom: this._datumFrom.uniqueId(),
-      uidDatumTo:   this._datumTo.uniqueId(),
+
+    this.keys = this.keys ?? {
+      uidDatumFrom: this.base._baseFrom.uniqueId(),
+      uidDatumTo:   this.base._baseTo.uniqueId(),
       uidLinkType:  this.base._baseType.uniqueId(),
       uidBase:      this.base.uniqueId(),
       xidRelnType:  this.base._baseType.keyId()
     };
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
+
+    this._datumFrom = graph.nodes[this.keys.uidDatumFrom];
+    this._datumTo = graph.nodes[this.keys.uidDatumTo];
+    // DEBUG: why does this return undefined, but only for new links created via graph.addLink.
+    // again, it's because we created a new object in the default Ontology.
+    // would be better to check for an existing linktype with that xid.
+    // same as we do with getNode
+
+   // if (this._datumTo.base.keyId() == 'pl32983') debugger;
+    this._linkType = graph.linkTypes[this.keys.uidLinkType];
+
   }
 
   bindLayer(graph) { this._datumLayer = graph.getLayer(this.keys.xidRelnType) }
