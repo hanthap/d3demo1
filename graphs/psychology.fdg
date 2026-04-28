@@ -1,4 +1,4 @@
-Workspace.loadGraph( 'psychology.js', '28-Apr-2026', 
+Workspace.loadGraph( 'psychology.fdg', '28-Apr-2026', 
 {
   "metadata": {
     "sources": {

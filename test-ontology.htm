@@ -1,9 +1,9 @@
 
-Ontologies <input type="file" title="Ontology" id="fileInput" accept="application/json" multiple><br>
+Ontologies <input type="file" title="Ontology" id="fileInput" accept=".ont" multiple><br>
 
-Graphs <input type="file" title="Graph" id="fileInputGraph" accept="application/json"><br>
+Graphs <input type="file" title="Graph" id="fileInputGraph" accept=".fdg"><br>
 
-<button type="button" onclick="graph.downloadJSON('test_output.json')">Download</button>
+<button type="button" onclick="graph.downloadFdg()">Download Graph (.fdg)</button>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
@@ -66,7 +66,7 @@ async function OnChange() {
 
 //----------------------------------------------------------
 
-async function OnChangeGraph() {
+async function OnChangeGraph_OK() {
   
 const arr = Array.from(inputGraph.files); 
 const file = arr[0];
@@ -76,6 +76,18 @@ if (!(graph instanceof GraphModel)) graph = new GraphModel();
 
 graph.upsertfromJson(json,file);
 create_view(graph);
+console.log(Workspace.graphs);
+
+}
+
+
+async function OnChangeGraph() {
+  
+const arr = Array.from(inputGraph.files); 
+const file = arr[0];
+const fdg = await file.text(); // don't parse
+eval(fdg); // we assume it's valid JS
+
 console.log(Workspace.graphs);
 
 }
@@ -207,7 +219,7 @@ class Workspace {
     // TODO: clean up this!
     const file = { name: filename, lastModifiedDate: dateString };
     const metadata = { sources: [] };
-    const source = new Source(file,'Javascript',metadata);
+    const source = new Source(file,'GraphModel',metadata);
     json_obj.metadata = json_obj.metadata ?? { sources: [source] };
     graph.upsertfromJson(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
     Workspace.graphs[source.uniqueId()] = graph;
@@ -408,7 +420,7 @@ class GraphModel {
 
   //------------------------------------------------------------------
 
-  downloadJSON(to_filename='graph.json') {
+  downloadFdg(to_filename='NewGraph.fdg') {
 
     const exclude_regex = new RegExp('^_', "i"); 
 
@@ -420,7 +432,11 @@ class GraphModel {
           else return value; 
           } 
         }, 2 );
-    const blob = new Blob([json], { type: "application/json" });
+
+    const fdg = `Workspace.loadGraph('${this.uniqueId()}','${Date()}',` + json + ');' ;
+
+    const blob = new Blob([fdg], { type: "application/json" });
+    console.log(blob);
     const url = URL.createObjectURL(blob);
     console.log('BLOB object url',url);
     const a = document.createElement('a');
@@ -1065,9 +1081,9 @@ function RandomId(prefix) {
 
 </script>
 
-<script src="graphs\psychology.js"></script>
-<script src="graphs\hamlet.js"></script>
-<script src="graphs\RipVanWinkle.js"></script>
+<script src="graphs\RipVanWinkle.fdg"></script>
+<script src="graphs\psychology.fdg"></script>
+<script src="graphs\hamlet.fdg"></script>
 
 <script>
 console.log(Workspace.graphs);

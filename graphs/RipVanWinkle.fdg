@@ -1,13 +1,15 @@
-Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026', 
-{
-  "sources": {
-    "9b66d193": {
-      "uid": "9b66d193",
-      "type": "Ontology",
-      "editorVersion": 0.1,
-      "fileName": "RipVanWinkle.json",
-      "lastModifiedDate": "Sat Apr 11 2026 08:11:55 GMT+1000 (Australian Eastern Standard Time)",
-      "fileSize": 4250
+Workspace.loadGraph('RipVanWinkle.fdg','Tue Apr 28 2026 12:16:53 GMT+1000 (Australian Eastern Standard Time)',{
+  "metadata": {
+    "sources": {
+      "9b66d193": {
+        "uid": "9b66d193",
+        "type": "Ontology",
+        "editorVersion": 0.1,
+        "fileName": "RipVanWinkle.json",
+        "lastModifiedDate": "Sat Apr 11 2026 08:11:55 GMT+1000 (Australian Eastern Standard Time)",
+        "fileSize": 4250,
+        "metadata": {}
+      }
     }
   },
   "nodes": {
@@ -26,7 +28,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "magic sleep"
         ]
       },
-      "x": 0.7508,
+      "x": 0.3895,
       "keys": {
         "uidEntity": "61157303",
         "xidEntityType": "Theme",
@@ -54,7 +56,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "Rip Van Winkle"
         ]
       },
-      "x": 0.8503,
+      "x": 0.4082,
       "keys": {
         "uidEntity": "92a390f8",
         "xidEntityType": "Person",
@@ -81,7 +83,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "Dame Van Winkle"
         ]
       },
-      "x": 0.4349,
+      "x": 0.4587,
       "keys": {
         "uidEntity": "7fecfc7e",
         "xidEntityType": "Person",
@@ -106,7 +108,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "Rip's children"
         ]
       },
-      "x": 0.8079,
+      "x": 0.4818,
       "keys": {
         "uidEntity": "702a2d80",
         "xidEntityType": "Person",
@@ -131,7 +133,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "Catskill village"
         ]
       },
-      "x": 0.6007,
+      "x": 0.8033,
       "keys": {
         "uidEntity": "5299caa4",
         "xidEntityType": "Place",
@@ -151,7 +153,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "Catskill Mountains"
         ]
       },
-      "x": 0.3997,
+      "x": 0.5446,
       "keys": {
         "uidEntity": "64d2b227",
         "xidEntityType": "Place",
@@ -179,7 +181,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "ninepins players"
         ]
       },
-      "x": 0.6387,
+      "x": 0.1854,
       "keys": {
         "uidEntity": "017db91a",
         "xidEntityType": "Person",
@@ -199,7 +201,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "liquor"
         ]
       },
-      "x": 0.6583,
+      "x": 0.9816,
       "keys": {
         "uidEntity": "00cc4ea4",
         "xidEntityType": "Object",
@@ -219,7 +221,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "before American Revolution"
         ]
       },
-      "x": 0.1692,
+      "x": 0.4651,
       "keys": {
         "uidEntity": "aa8119b1",
         "xidEntityType": "TimePeriod",
@@ -239,7 +241,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "after American Revolution"
         ]
       },
-      "x": 0.2006,
+      "x": 0.1271,
       "keys": {
         "uidEntity": "c21ff18e",
         "xidEntityType": "TimePeriod",
@@ -259,7 +261,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "American Revolution"
         ]
       },
-      "x": 0.6036,
+      "x": 0.2596,
       "keys": {
         "uidEntity": "6b7a4a2d",
         "xidEntityType": "Event",
@@ -282,7 +284,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "Rip's enchanted sleep"
         ]
       },
-      "x": 0.3839,
+      "x": 0.3348,
       "keys": {
         "uidEntity": "2070d710",
         "xidEntityType": "Event",
@@ -302,7 +304,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "political change"
         ]
       },
-      "x": 0.6118,
+      "x": 0.2544,
       "keys": {
         "uidEntity": "c1529ff7",
         "xidEntityType": "Theme",
@@ -322,7 +324,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "domestic conflict"
         ]
       },
-      "x": 0.3664,
+      "x": 0.128,
       "keys": {
         "uidEntity": "691a5960",
         "xidEntityType": "Theme",
@@ -344,7 +346,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
           "oral tradition"
         ]
       },
-      "x": 0.4863,
+      "x": 0.7427,
       "keys": {
         "uidEntity": "3b6a4969",
         "xidEntityType": "Theme",
@@ -361,7 +363,7 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "txtName": "Peter Luckock",
         "txtNote": "Inventor"
       },
-      "x": 0.2435,
+      "x": 0.4669,
       "keys": {
         "uidEntity": "ea647dc9",
         "xidEntityType": "Entity",
@@ -386,22 +388,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "livesIn",
         "object": "Village",
         "keys": {
-          "xid": "R1524939",
+          "xid": "R1563303",
           "xidEntityFrom": "RipVanWinkle",
           "xidEntityTo": "Village",
           "xidRelnType": "livesIn",
-          "uid": "2031103b"
+          "uid": "77d78b7b"
         }
       },
       "keys": {
         "uidDatumFrom": "92a390f8",
         "uidDatumTo": "5299caa4",
         "uidLinkType": "8c9b191a",
-        "uidBase": "2031103b",
+        "uidBase": "77d78b7b",
         "xidRelnType": "livesIn",
         "uidThis": "6eee7d43"
       },
-      "y": 0.0249
+      "y": 0.7752
     },
     "0f02b7bc": {
       "base": {
@@ -409,22 +411,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "associatedWith",
         "object": "CatskillMountains",
         "keys": {
-          "xid": "R1792490",
+          "xid": "R1023015",
           "xidEntityFrom": "Village",
           "xidEntityTo": "CatskillMountains",
           "xidRelnType": "associatedWith",
-          "uid": "9056a5fa"
+          "uid": "579f307e"
         }
       },
       "keys": {
         "uidDatumFrom": "5299caa4",
         "uidDatumTo": "64d2b227",
         "uidLinkType": "e1bc682a",
-        "uidBase": "9056a5fa",
+        "uidBase": "579f307e",
         "xidRelnType": "associatedWith",
         "uidThis": "0f02b7bc"
       },
-      "y": 0.7092
+      "y": 0.3569
     },
     "179754a3": {
       "base": {
@@ -432,22 +434,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "marriedTo",
         "object": "DameVanWinkle",
         "keys": {
-          "xid": "R1410669",
+          "xid": "R1743452",
           "xidEntityFrom": "RipVanWinkle",
           "xidEntityTo": "DameVanWinkle",
           "xidRelnType": "marriedTo",
-          "uid": "0e8ee4f7"
+          "uid": "6fca1e18"
         }
       },
       "keys": {
         "uidDatumFrom": "92a390f8",
         "uidDatumTo": "7fecfc7e",
         "uidLinkType": "9fde6a67",
-        "uidBase": "0e8ee4f7",
+        "uidBase": "6fca1e18",
         "xidRelnType": "marriedTo",
         "uidThis": "179754a3"
       },
-      "y": 0.5221
+      "y": 0.8605
     },
     "8b6aabe9": {
       "base": {
@@ -455,22 +457,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "parentOf",
         "object": "RipChildren",
         "keys": {
-          "xid": "R1632514",
+          "xid": "R1323444",
           "xidEntityFrom": "RipVanWinkle",
           "xidEntityTo": "RipChildren",
           "xidRelnType": "parentOf",
-          "uid": "0e1dad9c"
+          "uid": "040c56bd"
         }
       },
       "keys": {
         "uidDatumFrom": "92a390f8",
         "uidDatumTo": "702a2d80",
         "uidLinkType": "5447f80d",
-        "uidBase": "0e1dad9c",
+        "uidBase": "040c56bd",
         "xidRelnType": "parentOf",
         "uidThis": "8b6aabe9"
       },
-      "y": 0.967
+      "y": 0.8251
     },
     "e6b6cd47": {
       "base": {
@@ -478,22 +480,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "occursDuring",
         "object": "PreRevolutionPeriod",
         "keys": {
-          "xid": "R1366511",
+          "xid": "R1486720",
           "xidEntityFrom": "RipVanWinkle",
           "xidEntityTo": "PreRevolutionPeriod",
           "xidRelnType": "occursDuring",
-          "uid": "32c0d57d"
+          "uid": "28eaecb4"
         }
       },
       "keys": {
         "uidDatumFrom": "92a390f8",
         "uidDatumTo": "aa8119b1",
         "uidLinkType": "29227d60",
-        "uidBase": "32c0d57d",
+        "uidBase": "28eaecb4",
         "xidRelnType": "occursDuring",
         "uidThis": "e6b6cd47"
       },
-      "y": 0.9076
+      "y": 0.2671
     },
     "8bd5bb7e": {
       "base": {
@@ -501,22 +503,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "occursDuring",
         "object": "PreRevolutionPeriod",
         "keys": {
-          "xid": "R1407996",
+          "xid": "R1369942",
           "xidEntityFrom": "RipSleepEvent",
           "xidEntityTo": "PreRevolutionPeriod",
           "xidRelnType": "occursDuring",
-          "uid": "0dc6b4be"
+          "uid": "f24964f8"
         }
       },
       "keys": {
         "uidDatumFrom": "2070d710",
         "uidDatumTo": "aa8119b1",
         "uidLinkType": "29227d60",
-        "uidBase": "0dc6b4be",
+        "uidBase": "f24964f8",
         "xidRelnType": "occursDuring",
         "uidThis": "8bd5bb7e"
       },
-      "y": 0.7895
+      "y": 0.9608
     },
     "c8a0995b": {
       "base": {
@@ -524,22 +526,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "transformedBy",
         "object": "AmericanRevolution",
         "keys": {
-          "xid": "R1883670",
+          "xid": "R1709625",
           "xidEntityFrom": "RipSleepEvent",
           "xidEntityTo": "AmericanRevolution",
           "xidRelnType": "transformedBy",
-          "uid": "b7d1e039"
+          "uid": "d5203334"
         }
       },
       "keys": {
         "uidDatumFrom": "2070d710",
         "uidDatumTo": "6b7a4a2d",
         "uidLinkType": "556c9bce",
-        "uidBase": "b7d1e039",
+        "uidBase": "d5203334",
         "xidRelnType": "transformedBy",
         "uidThis": "c8a0995b"
       },
-      "y": 0.6846
+      "y": 0.2974
     },
     "29d4dde3": {
       "base": {
@@ -547,22 +549,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "associatedWith",
         "object": "MysteriousMen",
         "keys": {
-          "xid": "R1186236",
+          "xid": "R1616918",
           "xidEntityFrom": "RipSleepEvent",
           "xidEntityTo": "MysteriousMen",
           "xidRelnType": "associatedWith",
-          "uid": "5af54fb3"
+          "uid": "97fb601a"
         }
       },
       "keys": {
         "uidDatumFrom": "2070d710",
         "uidDatumTo": "017db91a",
         "uidLinkType": "e1bc682a",
-        "uidBase": "5af54fb3",
+        "uidBase": "97fb601a",
         "xidRelnType": "associatedWith",
         "uidThis": "29d4dde3"
       },
-      "y": 0.1923
+      "y": 0.0162
     },
     "2e6bfffe": {
       "base": {
@@ -570,22 +572,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "associatedWith",
         "object": "Liquor",
         "keys": {
-          "xid": "R1050738",
+          "xid": "R1579270",
           "xidEntityFrom": "RipSleepEvent",
           "xidEntityTo": "Liquor",
           "xidRelnType": "associatedWith",
-          "uid": "c7f3a0d2"
+          "uid": "a7cd5ad5"
         }
       },
       "keys": {
         "uidDatumFrom": "2070d710",
         "uidDatumTo": "00cc4ea4",
         "uidLinkType": "e1bc682a",
-        "uidBase": "c7f3a0d2",
+        "uidBase": "a7cd5ad5",
         "xidRelnType": "associatedWith",
         "uidThis": "2e6bfffe"
       },
-      "y": 0.6028
+      "y": 0.4128
     },
     "57cb1813": {
       "base": {
@@ -593,22 +595,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "participatesIn",
         "object": "RipSleepEvent",
         "keys": {
-          "xid": "R1619871",
+          "xid": "R1853625",
           "xidEntityFrom": "RipVanWinkle",
           "xidEntityTo": "RipSleepEvent",
           "xidRelnType": "participatesIn",
-          "uid": "e7a07e3b"
+          "uid": "e2543cd4"
         }
       },
       "keys": {
         "uidDatumFrom": "92a390f8",
         "uidDatumTo": "2070d710",
         "uidLinkType": "60ad2bd8",
-        "uidBase": "e7a07e3b",
+        "uidBase": "e2543cd4",
         "xidRelnType": "participatesIn",
         "uidThis": "57cb1813"
       },
-      "y": 0.934
+      "y": 0.3963
     },
     "6ba261d6": {
       "base": {
@@ -616,22 +618,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "occursDuring",
         "object": "PostRevolutionPeriod",
         "keys": {
-          "xid": "R1292888",
+          "xid": "R1276158",
           "xidEntityFrom": "AmericanRevolution",
           "xidEntityTo": "PostRevolutionPeriod",
           "xidRelnType": "occursDuring",
-          "uid": "6827a0ba"
+          "uid": "d19f5014"
         }
       },
       "keys": {
         "uidDatumFrom": "6b7a4a2d",
         "uidDatumTo": "c21ff18e",
         "uidLinkType": "29227d60",
-        "uidBase": "6827a0ba",
+        "uidBase": "d19f5014",
         "xidRelnType": "occursDuring",
         "uidThis": "6ba261d6"
       },
-      "y": 0.1462
+      "y": 0.8699
     },
     "9114b4b8": {
       "base": {
@@ -639,22 +641,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "associatedWith",
         "object": "PoliticalChange",
         "keys": {
-          "xid": "R1498025",
+          "xid": "R1049895",
           "xidEntityFrom": "RipVanWinkle",
           "xidEntityTo": "PoliticalChange",
           "xidRelnType": "associatedWith",
-          "uid": "d22f2af9"
+          "uid": "7d119b32"
         }
       },
       "keys": {
         "uidDatumFrom": "92a390f8",
         "uidDatumTo": "c1529ff7",
         "uidLinkType": "e1bc682a",
-        "uidBase": "d22f2af9",
+        "uidBase": "7d119b32",
         "xidRelnType": "associatedWith",
         "uidThis": "9114b4b8"
       },
-      "y": 0.4442
+      "y": 0.16
     },
     "6c80ca56": {
       "base": {
@@ -662,22 +664,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "associatedWith",
         "object": "DomesticConflict",
         "keys": {
-          "xid": "R1938237",
+          "xid": "R1541065",
           "xidEntityFrom": "RipVanWinkle",
           "xidEntityTo": "DomesticConflict",
           "xidRelnType": "associatedWith",
-          "uid": "9401ed3f"
+          "uid": "7a4a57f8"
         }
       },
       "keys": {
         "uidDatumFrom": "92a390f8",
         "uidDatumTo": "691a5960",
         "uidLinkType": "e1bc682a",
-        "uidBase": "9401ed3f",
+        "uidBase": "7a4a57f8",
         "xidRelnType": "associatedWith",
         "uidThis": "6c80ca56"
       },
-      "y": 0.9737
+      "y": 0.6912
     },
     "4c31f17e": {
       "base": {
@@ -685,22 +687,22 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "associatedWith",
         "object": "FolkloreMagic",
         "keys": {
-          "xid": "R1623868",
+          "xid": "R1334186",
           "xidEntityFrom": "RipSleepEvent",
           "xidEntityTo": "FolkloreMagic",
           "xidRelnType": "associatedWith",
-          "uid": "963fceda"
+          "uid": "d86f4850"
         }
       },
       "keys": {
         "uidDatumFrom": "2070d710",
         "uidDatumTo": "61157303",
         "uidLinkType": "e1bc682a",
-        "uidBase": "963fceda",
+        "uidBase": "d86f4850",
         "xidRelnType": "associatedWith",
         "uidThis": "4c31f17e"
       },
-      "y": 0.1026
+      "y": 0.4779
     },
     "a1eaf0a5": {
       "base": {
@@ -708,45 +710,45 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
         "predicate": "represents",
         "object": "StorytellerRole",
         "keys": {
-          "xid": "R1375301",
+          "xid": "R1240196",
           "xidEntityFrom": "RipVanWinkle",
           "xidEntityTo": "StorytellerRole",
           "xidRelnType": "represents",
-          "uid": "ddf483b8"
+          "uid": "0430df13"
         }
       },
       "keys": {
         "uidDatumFrom": "92a390f8",
         "uidDatumTo": "3b6a4969",
         "uidLinkType": "d1078b57",
-        "uidBase": "ddf483b8",
+        "uidBase": "0430df13",
         "xidRelnType": "represents",
         "uidThis": "a1eaf0a5"
       },
-      "y": 0.2566
+      "y": 0.0635
     },
-    "ff05de2f": {
+    "ce2b3ea1": {
       "base": {
-        "from": "RipChildren",
-        "to": "pl32983",
-        "type": "reports_to",
+        "sourceEntity": "RipChildren",
+        "targetEntity": "pl32983",
+        "predicate": "reports_to",
         "keys": {
-          "xid": "R1554352",
+          "xid": "R1075418",
           "xidEntityFrom": "RipChildren",
           "xidEntityTo": "pl32983",
           "xidRelnType": "reports_to",
-          "uid": "d2e8db65"
+          "uid": "7a28846a"
         }
       },
       "keys": {
         "uidDatumFrom": "702a2d80",
         "uidDatumTo": "ea647dc9",
-        "uidLinkType": "9eebbe5f",
-        "uidBase": "d2e8db65",
-        "xidRelnType": "reports_to",
-        "uidThis": "ff05de2f"
+        "uidLinkType": "00001505",
+        "uidBase": "7a28846a",
+        "xidRelnType": "Unknown",
+        "uidThis": "ce2b3ea1"
       },
-      "y": 0.8774
+      "y": 0.5635
     }
   },
   "forces": {},
@@ -977,6 +979,46 @@ Workspace.loadGraph( 'RipVanWinkle.js', '02-Apr-2026',
     "default": {
       "uid": "00001505",
       "xid": "Unknown"
+    },
+    "8c9b191a": {
+      "uid": "8c9b191a",
+      "xid": "livesIn"
+    },
+    "9fde6a67": {
+      "uid": "9fde6a67",
+      "xid": "marriedTo"
+    },
+    "5447f80d": {
+      "uid": "5447f80d",
+      "xid": "parentOf"
+    },
+    "8e841263": {
+      "uid": "8e841263",
+      "xid": "friendOf"
+    },
+    "bc10b4b4": {
+      "uid": "bc10b4b4",
+      "xid": "encounters"
+    },
+    "60ad2bd8": {
+      "uid": "60ad2bd8",
+      "xid": "participatesIn"
+    },
+    "556c9bce": {
+      "uid": "556c9bce",
+      "xid": "transformedBy"
+    },
+    "29227d60": {
+      "uid": "29227d60",
+      "xid": "occursDuring"
+    },
+    "e1bc682a": {
+      "uid": "e1bc682a",
+      "xid": "associatedWith"
+    },
+    "d1078b57": {
+      "uid": "d1078b57",
+      "xid": "represents"
     }
   },
   "nodeTypes": {
