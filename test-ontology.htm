@@ -66,34 +66,18 @@ async function OnChange() {
 
 //----------------------------------------------------------
 
-async function OnChangeGraph_OK() {
-  
-const arr = Array.from(inputGraph.files); 
-const file = arr[0];
-const json = await read_json_file(file);
-
-if (!(graph instanceof GraphModel)) graph = new GraphModel();
-
-graph.upsertfromJson(json,file);
-create_view(graph);
-console.log(Workspace.graphs);
-
-}
-
-
 async function OnChangeGraph() {
   
-const arr = Array.from(inputGraph.files); 
-const file = arr[0];
-const fdg = await file.text(); // don't parse
-eval(fdg); // we assume it's valid JS
-
-console.log(Workspace.graphs);
+  const arr = Array.from(inputGraph.files); 
+  const file = arr[0];
+  const fdg = await file.text(); // don't parse
+  eval(fdg); // we assume it's valid JS
+  console.log(Workspace.graphs);
 
 }
 
 //----------------------------------------------------------
-
+var x;
 var test_graph;
 const input = document.getElementById("fileInput");
 input.addEventListener("change", OnChange);
@@ -116,12 +100,15 @@ graph
   .addLayer('part_of',['belongs_to_class'])
   .bindAllLayers();
 
-const node_type = graph.getNodeType('Person'); // might default if 'Person' is not already registered
-
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor' };
 
+const node_type = graph.getNodeType('Person'); // might default if 'Person' is not already registered
 const new_node = graph.addNode(node_spec,node_type);
-new_node.addImage('Peter.jpg','main');
+x = new_node;
+console.log(new_node,x)
+
+const img = graph.addImage('peter.svg');
+new_node.setImage(img);
 
 const link_type = graph.getLinkType('child_of'); // might default if 'belongs_to' is not already registered
 
@@ -143,35 +130,110 @@ console.log(graph);
 }
 
 //----------------------------------------------------------
+// base class for ExploreOnly, BasicEdit, etc.
 
+class EventListener {
 
-class ReadOnlyListener {
+}
+
+//----------------------------------------------------------
+// can drag & drop, 
+// resize (solid, restored) boundary, 
+// toggle paradigm (DAG/Euler) 
+// change phase(solid,liquid,gas), 
+// minimise/restore container 
+// illuminate/shade/hide, 
+// zoom & pan, change scale
+// pause/resume simulation, 
+// CANNOT add, change or delete links or nodes
+
+class ExploreOnly extends EventListener {
 
 static OnClick(e) {
   const d = e.srcElement.__data__;
   if (d) {
-  console.log(e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
+  console.log('OnClick',e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
+  }
+ 
+}
+
+static OnMouseOver(e) {
+  const d = e.srcElement.__data__;
+  if (d) {
+  console.log('OnMouseOver',e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
   }
 
 }
 
+
+static OnMouseOut(e) {
+  const d = e.srcElement.__data__;
+  if (d) {
+  console.log('OnMouseOut',e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
+  }
+
 }
+
+static OnContextMenu(e) {
+  const d = e.srcElement.__data__;
+  if (d) {
+  console.log('OnContextMenu', e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
+  }
+
+}
+
+
+
+}
+
+//----------------------------------------------------------
+// all the above, PLUS add, change or delete links or nodes
+// CAN create new scenes, episodes & studies
+// CAN download the enriched FDG, then close, upload & resume working later
+// BUT only one current FDG per session
+// uploading an FDG file REPLACES all in current workspace. (no merge)
+// CANNOT merge(upsert) with a previously-saved FDG or ONT file
+// CANNOT save workspace.
+
+class BasicEdit extends EventListener {
+}
+
+
+//----------------------------------------------------------
+// all the above, PLUS tools for ingesting & merging to create a new FDG file
+// Pre-load 'production' FDG files using <script> elements.
+// upload locally-saved FDG and/or ONT files into session Workspace
+// choose one GraphModel and selectively merge one by one from other graphs now in Workspace
+// Some of which could be newer versions of known upstream source objects. 
+// Smart refresh will check for matching filename, prompt, xid
+// If match found, app checks Y/N before upserting all downstream references
+// User then downloads the updated model as a new self-contained FDG file.
+
+
+
+class Premium extends EventListener {
+
+}
+
 
 
 //----------------------------------------------------------
 
 function create_view(graph) {
 
-  const listener = ReadOnlyListener;
-  const body = d3.select('body');
-  body.on('click',listener.OnClick);
+  const listener = ExploreOnly;
+  const body = d3.select('body')
+    .on('click',listener.OnClick)
+//    .on('mouseover',listener.OnMouseOver)
+//    .on('mouseout',listener.OnMouseOut)
+    .on('contextmenu',listener.OnContextMenu)
+    ;
 
   selPara = body.selectAll('p')
     .data(graph.linkData(),d=>d.uniqueId())
     .join('p')
     .attr('id',d=>d.uniqueId())
     .text(d=>d.toString())
-
     ;
 // what's the cleanest way to keep all 'edit' functions in a separate JS file
 // so it can be either included or removed with a single comment
@@ -218,11 +280,9 @@ class Workspace {
     const graph = new GraphModel();
     // TODO: clean up this!
     const file = { name: filename, lastModifiedDate: dateString };
-    const metadata = { sources: [] };
-    const source = new Source(file,'GraphModel',metadata);
-    json_obj.metadata = json_obj.metadata ?? { sources: [source] };
-    graph.upsertfromJson(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
-    Workspace.graphs[source.uniqueId()] = graph;
+    const source = new Source(file,'GraphModel');
+    graph.upsertFromFdg(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
+    Workspace.graphs[graph.uniqueId()] = graph;
   }
 
 }
@@ -245,20 +305,20 @@ class GraphModel {
 
     }
     else {
-      this.metadata = { sources: {} };
       this.nodes = {};
       this.links = {};
+      this.linkTypes = {default: new LinkType({xid:'Unknown'},this)}; 
+      this.nodeTypes = {default: new NodeType({xid:'Unknown'},this)}; 
+      this.images = {default: new Image('tba.svg',this)};
+      this.layers = {default: new LayerDatum('default',this)};
       this.forces = {};  
-      this.layers = {};
       this.scenes = {};
       this.episodes = {};
-      this.studies = {};
-      this.linkTypes = {};
-      this.nodeTypes = {}; 
-      this.addLayer(new LayerDatum('default',this));
-      this.nodeTypes.default = new NodeType({xid:'Unknown'},this);
-      this.linkTypes.default = new LinkType({xid:'Unknown'},this);
+      this.sources = {};
+      this.studies = {}; // aka narratives, storylines, threads
     }
+
+  this.uid = this.uid ?? hashString(Math.random().toString());
 
   }
 
@@ -267,7 +327,7 @@ class GraphModel {
   // expose the nodes and links as datum arrays as expected by D3.
   nodeData() { return Object.values(this.nodes) }
   linkData() { return Object.values(this.links) }
-  uniqueId()  { return 'TBA' };
+  uniqueId()  { return this.uid };
 
 //------------------------------------------------------------------\
 
@@ -275,7 +335,20 @@ class GraphModel {
 // 2 steps, rehydrate the json object first, then fold it into this graph
 // should be 2 distinct methods
 
-  upsertfromJson(json,source=null) { 
+  hydrate() {
+    // always called when loading from a saved graph (.fdg file), *or* from an external JSON (.ont) source
+    // all underscore-prefixed object references within this graph need to be re-constituted based on their uid keys
+    // If the matching source is not already in memory, then tell user they need to upload it manually.
+    // or they can click to accept the old values.
+    // once hydrated, assign appropriate class prototypes to each object
+    // once done, the newly-hydrated GraphModel is ready to use
+
+  }
+
+// to do: upsert this graph from another (hydrated) graph already in the workspace
+
+
+  upsertFromFdg(json,source=null) { 
             // .conformJson(json) 
             // .addBindings();
     // TODO : replace these with proper upsert 
@@ -285,10 +358,10 @@ class GraphModel {
 
     // TODO : how best to handle embedded js model
     if (!source) source = new Source(file,'GraphModel',json.metadata);
-    this.metadata.sources[source.uniqueId()] = source;
-    Object.values(json.metadata.sources).forEach(d => {
+    this.sources[source.uniqueId()] = source;
+    Object.values(json.sources ?? {}).forEach(d => {
       Object.setPrototypeOf(d,Source.prototype);
-      this.metadata.sources[d.uniqueId()] = d;
+      this.sources[d.uniqueId()] = d;
       } 
     );
   
@@ -302,11 +375,22 @@ class GraphModel {
     );
 
     // ingest new nodeTypes (required before adding nodes)
+
     Object.values(json.nodeTypes).forEach(d => {
       Object.setPrototypeOf(d,NodeType.prototype);
       this.nodeTypes[d.uniqueId()] = d;
       }
     );
+    console.log('upsertFromFdg',this.nodeTypes)
+
+    // ingest new Images
+    Object.values(json.images ?? {}).forEach(d => {
+      Object.setPrototypeOf(d,Image.prototype);
+      this.nodeTypes[d.uniqueId()] = d;
+      }
+    );
+
+
 
 
     // ingest new linkTypes (required before adding links)
@@ -363,6 +447,16 @@ class GraphModel {
     obj.addAliases(aliases);
     return this;
   }
+
+//------------------------------------------------------------------
+
+  addImage(obj) { 
+    if (typeof obj == 'string') obj = new Image(obj,this);
+    this.images[obj.uniqueId()] = obj;
+    return obj;
+  }
+
+  getDefaultImage() { return this.images.default }
 
 //------------------------------------------------------------------
 
@@ -453,8 +547,11 @@ class GraphModel {
 
     console.log("mergeOntology(bound_ont)",bound_ont);  
 
-    this.metadata.sources[bound_ont.source.uniqueId()] = bound_ont.source;
+    this.sources[bound_ont.source.uniqueId()] = bound_ont.source;
 
+
+    // PROBLEM HERE - NodeType sets uid  - should copy uid fro obj
+    debugger; 
     const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new NodeType(obj,this)); 
     new_nodeTypes.forEach(d => this.nodeTypes[d.uniqueId()] = d);
 
@@ -496,7 +593,7 @@ class GraphModel {
 
 class Source {
   
-  constructor(file,type,metadata) {
+  constructor(file,type) {
     Object.assign(this, {
           uid: hashString(file.name + file.lastModifiedDate.toString()),
           type,
@@ -504,7 +601,6 @@ class Source {
           fileName: file.name,
           lastModifiedDate: file.lastModifiedDate.toString(),
           fileSize: file.size,
-          metadata
         });
       }
 
@@ -589,8 +685,7 @@ class Ontology {
       relations = json.relations ?? json.ontology.relationships ?? {},
       classes = json.classes ?? json.ontology.classes ?? {},
       predicates = json.predicates ?? json.ontology.relations ?? {}; // Copilot uses 'relations' in 2 different ways
-
-    source.metadata = json.metadata ?? {};
+      source.metadata = json.metadata ?? {};
 
     return new Ontology({uid, source, entities, relations, classes, predicates}) ;
 
@@ -668,9 +763,12 @@ class NodeDatum {
       uidEntity: this.base.uniqueId(),
  //     uidEntityType: this.base._type.uniqueId(),
       xidEntityType: this.base._type.keyId(),
-      uidNodeType: this.base._type.uniqueId()
+      uidNodeType: this.base._type.uniqueId() 
   
     }
+
+    //console.log('NodeDatum: this.keys.uidNodeType', this.keys.uidNodeType);
+
     this.bind(graph); // ASSUMES graph.nodeTypes is already populated
     this.bindLayer(graph);
 
@@ -688,6 +786,9 @@ class NodeDatum {
 
   bind(graph) { // static bindings
     this._nodeType = graph.nodeTypes[this.keys.uidNodeType];
+    // why doesn't that key exist already in nodeTypes?
+    console.assert(this._nodeType);
+
   }
 
   setNodeType(nodeType) {
@@ -703,11 +804,10 @@ class NodeDatum {
     return this;
   }
 
-  addImage(url,xid='default') { 
+  setImage(obj) { 
     if (!this.images) this.images = {};
-    const new_img = new Image(url);
-    this.images[xid]=new_img;
-    return new_img;
+    this.images[obj.uniqueId()] = obj;
+    return this;
  }
  }
 
@@ -795,9 +895,9 @@ class FrameNode extends ExpandedRectangleNode {
 
 class NodeType {
   constructor(obj,graph) {
-    this.uid = hashString(this.xid + graph.uid);
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
+    this.uid = this.uid ?? hashString(this.xid + graph.uid);
     return this;
   }
 
@@ -811,9 +911,9 @@ class NodeType {
 // trivially upcast the predicate object from ontology
 class LinkType {
   constructor(obj,graph) {
-    this.uid = hashString(this.xid + graph.uid);
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
+    this.uid = hashString(this.xid + graph.uid);
     return this;
   }
 
@@ -828,22 +928,27 @@ class LinkType {
 
 
 class Image {
-  constructor(url=null) {
+  constructor(url=null,graph) {
 
     const obj = {
     
       img_src: url ? url :'tba.svg',
+      colour: { fill: 'white', stroke: 'black'},
       transform: {
           circle: 'translate(0,0) scale(1)',
           rect: 'translate(0,0) scale(1)',
           frame: 'translate(0,0) scale(1)'
           }
+      
 
   };
 
-  Object.assign(this,obj);
+    obj.uid = hashString(obj.img_src);
+    Object.assign(this,obj);
+    WeakBind.parentOf.set(this,graph);
 
 }
+  uniqueId() { return this.uid };
 }
 
 
@@ -865,7 +970,8 @@ class LayerDatum {
           fill: 'white',
           stroke: 'black'
       },
-      image: new Image()
+      image: graph.getDefaultImage(),
+      frame: { bannerHeight: 30, stubWidth: 30, margin: 5 }
     }
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
@@ -1043,25 +1149,32 @@ class Scene { // aka Context
 // each scene is a named, editable collection of links (and their nodes) that are illuminated 'in foreground' (uncloaked)
 // saved within a GraphModel. 
 // scenes can be arranged in sequence and grouped into episodes
-// optionally, edges (and their vertices) from other scenes (past or future) can be 'alluded to' semi-present as 'grey ghosts' 
+// optionally, edges (and their vertices) from other scenes (past or future) can be 'alluded to' semi-present as shaded 'grey ghosts' 
 // some links are always subtext, never stated
-// user can explore analyse one scene, or an arbitrary selection of them in combination
-// the results can be saved as a 'study' (view)
+// user can explore analyse one scene, or an arbitrary selection of them in combination (via Storylines & Studies)
 // each scene belongs to one episode (but can be included in many studies)
-// a link can be illuminated or alluded to in many scenes
 }
 
 
 //============================================================
 
-class Study { // aka Interpretation, Analysis, Discussion, Project
-  // a saved & named selection of multiple scenes, from different episodes,
-  // maybe with notes & comments?
-  // defined at 'workspace' level - the Workspace can include several Graphs
+class Storyline { // Narrative, Storyline, Thread, Pathway, Channel
+  // a 'pathway' of links hand-selected from multiple scenes 
+
+}
+
+//============================================================
+
+class Study { // aka Interpretation, Analysis, Discussion, Project, 
+  // an annotated selection of 1 or more Storylines.
+  // user can shade or illuminate a whole Storyline
+  // maybe with notes & comments? 
+  // could include 
+  // too many complications if we define at 'workspace' level
   
-  // a study can highlight links directly and attach futher meaning?
+  // a study can illuminate links directly and attach futher meaning?
   // a study can be saved to a separate file, with references to the graph/s that need to be imported
-  // webpages can't auto-load 
+  
 }
 
 //============================================================
@@ -1081,13 +1194,13 @@ function RandomId(prefix) {
 
 </script>
 
-<script src="graphs\RipVanWinkle.fdg"></script>
+<!-- <script src="graphs\RipVanWinkle.fdg"></script>
 <script src="graphs\psychology.fdg"></script>
-<script src="graphs\hamlet.fdg"></script>
+<script src="graphs\hamlet.fdg"></script> -->
 
 <script>
 console.log(Workspace.graphs);
 const graph0 = Object.values(Workspace.graphs)[0];
-create_view(graph0);
+// create_view(graph0);
 
 </script>
