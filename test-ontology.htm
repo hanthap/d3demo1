@@ -104,8 +104,7 @@ const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor
 
 const node_type = graph.getNodeType('Person'); // might default if 'Person' is not already registered
 const new_node = graph.addNode(node_spec,node_type);
-x = new_node;
-console.log(new_node,x)
+
 
 const img = graph.addImage('peter.svg');
 new_node.setImage(img);
@@ -276,8 +275,9 @@ class WeakBind {
 class Workspace {
     static graphs = {};
   
-  static loadGraph(filename,dateString,json_obj) {
+  static loadGraph(uid,filename,dateString,json_obj) {
     const graph = new GraphModel();
+    graph.uid = uid;
     // TODO: clean up this!
     const file = { name: filename, lastModifiedDate: dateString };
     const source = new Source(file,'GraphModel');
@@ -386,7 +386,7 @@ class GraphModel {
     // ingest new Images
     Object.values(json.images ?? {}).forEach(d => {
       Object.setPrototypeOf(d,Image.prototype);
-      this.nodeTypes[d.uniqueId()] = d;
+      this.images[d.uniqueId()] = d;
       }
     );
 
@@ -527,12 +527,10 @@ class GraphModel {
           } 
         }, 2 );
 
-    const fdg = `Workspace.loadGraph('${this.uniqueId()}','${Date()}',` + json + ');' ;
+    const fdg = `Workspace.loadGraph('${this.uniqueId()}','${to_filename}','${Date()}',` + json + ');' ;
 
     const blob = new Blob([fdg], { type: "application/json" });
-    console.log(blob);
     const url = URL.createObjectURL(blob);
-    console.log('BLOB object url',url);
     const a = document.createElement('a');
     a.href = url;
     a.download = to_filename;
@@ -550,8 +548,6 @@ class GraphModel {
     this.sources[bound_ont.source.uniqueId()] = bound_ont.source;
 
 
-    // PROBLEM HERE - NodeType sets uid  - should copy uid fro obj
-    debugger; 
     const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new NodeType(obj,this)); 
     new_nodeTypes.forEach(d => this.nodeTypes[d.uniqueId()] = d);
 
@@ -767,8 +763,6 @@ class NodeDatum {
   
     }
 
-    //console.log('NodeDatum: this.keys.uidNodeType', this.keys.uidNodeType);
-
     this.bind(graph); // ASSUMES graph.nodeTypes is already populated
     this.bindLayer(graph);
 
@@ -786,8 +780,8 @@ class NodeDatum {
 
   bind(graph) { // static bindings
     this._nodeType = graph.nodeTypes[this.keys.uidNodeType];
-    // why doesn't that key exist already in nodeTypes?
-    console.assert(this._nodeType);
+    // why doesn't that key exist already in nodeTypes? is it simply being called too soon? 
+    //console.assert(this._nodeType);
 
   }
 
@@ -913,7 +907,7 @@ class LinkType {
   constructor(obj,graph) {
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
-    this.uid = hashString(this.xid + graph.uid);
+    this.uid = this.uid ?? hashString(this.xid + graph.uid);
     return this;
   }
 
