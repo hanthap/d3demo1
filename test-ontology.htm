@@ -1,9 +1,9 @@
 
-Ontologies <input type="file" title="Ontology" id="fileInput" accept=".ont" multiple><br>
+Upload .ont Ontologies: <input type="file" title="Ontology" id="fileInput" accept=".ont" multiple><br>
 
-Graphs <input type="file" title="Graph" id="fileInputGraph" accept=".fdg"><br>
+Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=".fdg" multiple><br>
 
-<button type="button" onclick="graph.downloadFdg()">Download Graph (.fdg)</button>
+<button type="button" onclick="graph.downloadFdg()">Download Graphs (.fdg)</button>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
@@ -51,28 +51,40 @@ async function OnChange() {
   const new_ontologies = await Promise.all(
     arr.map(file => Ontology.createfromJson(file))
   );
-  console.log('new_ontologies',new_ontologies);
 
-  // const 
-  if (!(graph instanceof GraphModel)) graph = new GraphModel();
-// merge all ontologies into one D3-ready dataset
-  for (const ont of new_ontologies) 
-    graph.mergeOntology(ont);
- // console.log(graph);
-  embellish_graph(graph);
-  create_view(graph);
-  
+  new_ontologies.forEach(ont => Workspace.ontologies[ont.uniqueId()] = ont)
+
+  new_ontologies.forEach(ont => {
+    const new_graph = new GraphModel();
+    new_graph.mergeOntology(ont);
+    Workspace.graphs[new_graph.uniqueId()] = new_graph;
+  });
+
+  console.log(Workspace.ontologies,Workspace.graphs);
+
+
 }
 
 //----------------------------------------------------------
 
 async function OnChangeGraph() {
-  
+
   const arr = Array.from(inputGraph.files); 
-  const file = arr[0];
-  const fdg = await file.text(); // don't parse
-  eval(fdg); // we assume it's valid JS
+  
+  const promises = arr.map(file => file.text());
+  console.log(promises);
+
+  const fdg_scripts = await Promise.all(promises);
+  console.log(fdg_scripts);
+  
+  fdg_scripts.forEach(script => eval(script));
+  
   console.log(Workspace.graphs);
+
+  // set graph to the most recent one 
+  const graphs = Object.values(Workspace.graphs);
+  graph = graphs[graphs.length-1];
+
 
 }
 
@@ -274,6 +286,7 @@ class WeakBind {
 
 class Workspace {
     static graphs = {};
+    static ontologies = {};
   
   static loadGraph(uid,filename,dateString,json_obj) {
     const graph = new GraphModel();
@@ -296,7 +309,7 @@ class Workspace {
 // A graph can be exported as json file 
 // or as a .js file that assigns it to a variable - can then be included as an embedded script for autoload.
 
-class GraphModel {
+class GraphModel {  // think "Workbook"  - it includes formatting info as well as data & forces
 
   constructor(obj=null) {
     if (obj) {
@@ -381,7 +394,6 @@ class GraphModel {
       this.nodeTypes[d.uniqueId()] = d;
       }
     );
-    console.log('upsertFromFdg',this.nodeTypes)
 
     // ingest new Images
     Object.values(json.images ?? {}).forEach(d => {
@@ -389,8 +401,6 @@ class GraphModel {
       this.images[d.uniqueId()] = d;
       }
     );
-
-
 
 
     // ingest new linkTypes (required before adding links)
@@ -527,9 +537,9 @@ class GraphModel {
           } 
         }, 2 );
 
-    const fdg = `Workspace.loadGraph('${this.uniqueId()}','${to_filename}','${Date()}',` + json + ');' ;
+    const fdg_script = `Workspace.loadGraph('${this.uniqueId()}','${to_filename}','${Date()}',` + json + ');' ;
 
-    const blob = new Blob([fdg], { type: "application/json" });
+    const blob = new Blob([fdg_script], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -543,7 +553,7 @@ class GraphModel {
 
   mergeOntology(bound_ont) { 
 
-    console.log("mergeOntology(bound_ont)",bound_ont);  
+    //console.log("mergeOntology(bound_ont)",bound_ont);  
 
     this.sources[bound_ont.source.uniqueId()] = bound_ont.source;
 
@@ -675,6 +685,7 @@ class Ontology {
     // TODO: check - does it even look like an ontology? Maybe it's a graph?
 
     const 
+      name = file.name,
       uid = hashString(file.name),
       source = new Source(file,'Ontology'),
       entities = json.entities ?? json.ontology.entities ?? {},
@@ -683,7 +694,7 @@ class Ontology {
       predicates = json.predicates ?? json.ontology.relations ?? {}; // Copilot uses 'relations' in 2 different ways
       source.metadata = json.metadata ?? {};
 
-    return new Ontology({uid, source, entities, relations, classes, predicates}) ;
+    return new Ontology({name, source, entities, relations, classes, predicates, uid}) ;
 
   }
 //----------------------------------------------------------
@@ -1188,13 +1199,13 @@ function RandomId(prefix) {
 
 </script>
 
-<!-- <script src="graphs\RipVanWinkle.fdg"></script>
-<script src="graphs\psychology.fdg"></script>
+<script src="graphs\RipVanWinkle.fdg"></script>
+<!-- <script src="graphs\psychology.fdg"></script>
 <script src="graphs\hamlet.fdg"></script> -->
 
 <script>
-console.log(Workspace.graphs);
+console.log(Workspace.graphs,Workspace.ontologies);
 const graph0 = Object.values(Workspace.graphs)[0];
-// create_view(graph0);
+create_view(graph0);
 
 </script>
