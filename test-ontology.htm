@@ -3,7 +3,11 @@ Upload .ont Ontologies: <input type="file" title="Ontology" id="fileInput" accep
 
 Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=".fdg" multiple><br>
 
-<button type="button" onclick="graph.downloadFdg()">Download Graphs (.fdg)</button>
+<button type="button" onclick="graph.downloadFdg()">Download Graphs (.fdg)</button><br>
+
+<button type="button" onclick="create_view(graph)">Visualise graph</button><br>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
@@ -55,13 +59,15 @@ async function OnChange() {
   new_ontologies.forEach(ont => Workspace.ontologies[ont.uniqueId()] = ont)
 
   new_ontologies.forEach(ont => {
-    const new_graph = new GraphModel();
+    const new_graph = new Workbook();
     new_graph.mergeOntology(ont);
+    new_graph.name = 'New workbook from ' + ont.name;
     Workspace.graphs[new_graph.uniqueId()] = new_graph;
   });
 
   console.log(Workspace.ontologies,Workspace.graphs);
-
+  const graphs = Object.values(Workspace.graphs);
+  graph = graphs[graphs.length-1];
 
 }
 
@@ -72,11 +78,7 @@ async function OnChangeGraph() {
   const arr = Array.from(inputGraph.files); 
   
   const promises = arr.map(file => file.text());
-  console.log(promises);
-
   const fdg_scripts = await Promise.all(promises);
-  console.log(fdg_scripts);
-  
   fdg_scripts.forEach(script => eval(script));
   
   console.log(Workspace.graphs);
@@ -89,8 +91,7 @@ async function OnChangeGraph() {
 }
 
 //----------------------------------------------------------
-var x;
-var test_graph;
+
 const input = document.getElementById("fileInput");
 input.addEventListener("change", OnChange);
 
@@ -214,7 +215,7 @@ class BasicEdit extends EventListener {
 // all the above, PLUS tools for ingesting & merging to create a new FDG file
 // Pre-load 'production' FDG files using <script> elements.
 // upload locally-saved FDG and/or ONT files into session Workspace
-// choose one GraphModel and selectively merge one by one from other graphs now in Workspace
+// choose one Workbook and selectively merge one by one from other graphs now in Workspace
 // Some of which could be newer versions of known upstream source objects. 
 // Smart refresh will check for matching filename, prompt, xid
 // If match found, app checks Y/N before upserting all downstream references
@@ -289,11 +290,11 @@ class Workspace {
     static ontologies = {};
   
   static loadGraph(uid,filename,dateString,json_obj) {
-    const graph = new GraphModel();
+    const graph = new Workbook();
     graph.uid = uid;
     // TODO: clean up this!
     const file = { name: filename, lastModifiedDate: dateString };
-    const source = new Source(file,'GraphModel');
+    const source = new Source(file,'Workbook');
     graph.upsertFromFdg(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
     Workspace.graphs[graph.uniqueId()] = graph;
   }
@@ -302,14 +303,11 @@ class Workspace {
 
 //============================================================
 
-// each graph model has its own private set of D3 node coords, cloaking status etc as updated by user events & simulation
+// each workbook is an enriched graph model with its own private set of D3 node coords, cloaking status etc as updated by user events & simulation
 // usually only one simulation per model but that's not a system constraint
 // it has one svg viewport
 
-// A graph can be exported as json file 
-// or as a .js file that assigns it to a variable - can then be included as an embedded script for autoload.
-
-class GraphModel {  // think "Workbook"  - it includes formatting info as well as data & forces
+class Workbook {  // includes formatting info as well as data & forces
 
   constructor(obj=null) {
     if (obj) {
@@ -318,6 +316,7 @@ class GraphModel {  // think "Workbook"  - it includes formatting info as well a
 
     }
     else {
+      this.name = 'New Workbook';
       this.nodes = {};
       this.links = {};
       this.linkTypes = {default: new LinkType({xid:'Unknown'},this)}; 
@@ -354,14 +353,14 @@ class GraphModel {  // think "Workbook"  - it includes formatting info as well a
     // If the matching source is not already in memory, then tell user they need to upload it manually.
     // or they can click to accept the old values.
     // once hydrated, assign appropriate class prototypes to each object
-    // once done, the newly-hydrated GraphModel is ready to use
+    // once done, the newly-hydrated Workbook is ready to use
 
   }
 
 // to do: upsert this graph from another (hydrated) graph already in the workspace
 
 
-  upsertFromFdg(json,source=null) { 
+  upsertFromFdg(json,source) { 
             // .conformJson(json) 
             // .addBindings();
     // TODO : replace these with proper upsert 
@@ -370,7 +369,8 @@ class GraphModel {  // think "Workbook"  - it includes formatting info as well a
 
 
     // TODO : how best to handle embedded js model
-    if (!source) source = new Source(file,'GraphModel',json.metadata);
+//    if (!source) source = new Source(file,'Workbook',json.metadata);
+    if (source.fileName) this.name = source.fileName; 
     this.sources[source.uniqueId()] = source;
     Object.values(json.sources ?? {}).forEach(d => {
       Object.setPrototypeOf(d,Source.prototype);
@@ -524,7 +524,9 @@ class GraphModel {  // think "Workbook"  - it includes formatting info as well a
 
   //------------------------------------------------------------------
 
-  downloadFdg(to_filename='NewGraph.fdg') {
+  downloadFdg(to_filename=null) {
+
+    to_filename = to_filename ?? this.name + '.fdg';
 
     const exclude_regex = new RegExp('^_', "i"); 
 
@@ -601,12 +603,12 @@ class Source {
   
   constructor(file,type) {
     Object.assign(this, {
-          uid: hashString(file.name + file.lastModifiedDate.toString()),
-          type,
-          editorVersion: 0.1,
           fileName: file.name,
           lastModifiedDate: file.lastModifiedDate.toString(),
           fileSize: file.size,
+          type,
+          editorVersion: 0.1,
+          uid: hashString(file.name + file.lastModifiedDate.toString()),
         });
       }
 
@@ -640,7 +642,7 @@ class Ontology {
   //----------------------------------------------------------
   
   // REQUIRES that .baseFrom, .baseTo and .baseType are ALREADY defined in obj
-  // i.e it is called from GraphModel.addLink()
+  // i.e it is called from Workbook.addLink()
   addRelation(relationSpec) { 
     // 
 
@@ -1110,7 +1112,7 @@ class Relation  {
 
 //============================================================
 
-// each Relation may be referenced in many GraphModels each with its own LinkDatum (x,y,fx,fy,width etc.)
+// each Relation may be referenced in many Workbooks each with its own LinkDatum (x,y,fx,fy,width etc.)
 
 class LinkDatum {  
  constructor(obj,graph) {
@@ -1152,7 +1154,7 @@ class LinkDatum {
 
 class Scene { // aka Context 
 // each scene is a named, editable collection of links (and their nodes) that are illuminated 'in foreground' (uncloaked)
-// saved within a GraphModel. 
+// saved within a Workbook. 
 // scenes can be arranged in sequence and grouped into episodes
 // optionally, edges (and their vertices) from other scenes (past or future) can be 'alluded to' semi-present as shaded 'grey ghosts' 
 // some links are always subtext, never stated
@@ -1198,14 +1200,13 @@ function RandomId(prefix) {
 //----------------------------------------------------------
 
 </script>
-
+<!-- published workbooks can be pre-loaded directly from the web server -->
 <script src="graphs\RipVanWinkle.fdg"></script>
-<!-- <script src="graphs\psychology.fdg"></script>
-<script src="graphs\hamlet.fdg"></script> -->
+<!--
+<script src="graphs\psychology.fdg"></script>
+<script src="graphs\hamlet.fdg"></script> 
+-->
 
 <script>
-console.log(Workspace.graphs,Workspace.ontologies);
-const graph0 = Object.values(Workspace.graphs)[0];
-create_view(graph0);
-
+graph = Object.values(Workspace.graphs)[0];
 </script>
