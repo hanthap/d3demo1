@@ -7,13 +7,13 @@ Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=
 
 <button type="button" onclick="create_view(graph)">Visualise graph</button><br>
 
+<button type="button" onclick="main()">main()</button><br>
 
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
 
 <script>
-var graph, ont, selPara;
 
 
 
@@ -100,46 +100,6 @@ inputGraph.addEventListener("change", OnChangeGraph);
 
 //----------------------------------------------------------
 
-function embellish_graph(graph) {
-
-graph
-  .addLayer('Person',['Party','individual'])
-  .addLayer('child_of',['son_of','daughter_of'])
-  .addLayer('parent_of',['father_of','mother_of'])
-  .addLayer('reports_to',['employee_of','works_for'])
-  .addLayer('Variable',['measure'])
-  .addLayer('Policy')
-  .addLayer('Model',['ModelClass'])
-  .addLayer('part_of',['belongs_to_class'])
-  .bindAllLayers();
-
-const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor' };
-
-const node_type = graph.getNodeType('Person'); // might default if 'Person' is not already registered
-const new_node = graph.addNode(node_spec,node_type);
-
-
-const img = graph.addImage('peter.svg');
-new_node.setImage(img);
-
-const link_type = graph.getLinkType('child_of'); // might default if 'belongs_to' is not already registered
-
-const nodes = graph.nodeData(),
-      _baseFrom = nodes[3].base,
-      _baseTo = new_node.base,
-      _baseType = link_type,
-      // used by Relation constructor to assign xid
-      sourceEntity = _baseFrom.keyId(),
-      targetEntity = _baseTo.keyId(),
-      predicate = 'reports_to',
-      xid = predicate,
-      relationSpec = {_baseFrom,_baseTo,_baseType, sourceEntity,targetEntity,predicate};
-  
-graph.addLink(relationSpec,link_type);
-
-console.log(graph);
-
-}
 
 //----------------------------------------------------------
 // base class for ExploreOnly, BasicEdit, etc.
@@ -325,6 +285,7 @@ class Workbook {  // includes formatting info as well as data & forces
       this.layers = {default: new LayerDatum('default',this)};
       this.forces = {};  
       this.scenes = {};
+      this.storylines = {};
       this.episodes = {};
       this.sources = {};
       this.studies = {}; // aka narratives, storylines, threads
@@ -344,7 +305,7 @@ class Workbook {  // includes formatting info as well as data & forces
 //------------------------------------------------------------------\
 
 // TODO: misnomer, in that "json" is already an object - just needs to be rehydrated.
-// 2 steps, rehydrate the json object first, then fold it into this graph
+// 3 steps, cast json to Workbook, then rehydrate, then fold it into this graph
 // should be 2 distinct methods
 
   hydrate() {
@@ -358,7 +319,6 @@ class Workbook {  // includes formatting info as well as data & forces
   }
 
 // to do: upsert this graph from another (hydrated) graph already in the workspace
-
 
   upsertFromFdg(json,source) { 
             // .conformJson(json) 
@@ -439,6 +399,19 @@ class Workbook {  // includes formatting info as well as data & forces
       }
     );
 
+//  hydrate storylines
+    json.storylines = json.storylines ?? {};
+    Object.values(json.storylines).forEach(d => {
+      Object.setPrototypeOf(d,Storyline.prototype);
+      d._links = Object.fromEntries(d.uidlinks.map(uid => [uid,this.links[uid]]));
+      d.uidlinks = new Set(d.uidlinks);
+      // TODO: repopulate _links based on uidLinks
+      this.storylines[d.uniqueId()] = d;
+      }
+    );
+
+
+
     return this;
 
   }
@@ -455,6 +428,16 @@ class Workbook {  // includes formatting info as well as data & forces
     if (typeof obj == 'string') obj = new LayerDatum(obj,this);
     this.layers[obj.uniqueId()] = obj;
     obj.addAliases(aliases);
+    return this;
+  }
+
+//------------------------------------------------------------------
+
+  addStoryline(links=[]) { 
+    this.storylines = this.storylines ?? {};
+    const obj = new Storyline(this);
+    this.storylines[obj.uniqueId()] = obj;
+    obj.addLinks(links);
     return this;
   }
 
@@ -583,6 +566,7 @@ class Workbook {  // includes formatting info as well as data & forces
     const new_entity = Ontology.getDefault().addEntity(entitySpec);
     const new_NodeDatum = new NodeDatum(new_entity,this);
     new_NodeDatum.setNodeType(nodeType);
+    new_NodeDatum.setSubClass();
     return this.nodes[new_NodeDatum.uniqueId()] = new_NodeDatum;
   }
 
@@ -680,11 +664,9 @@ class Ontology {
 //----------------------------------------------------------
   
   static conformJson(json,file) {
-    // re-align high-level JSON structure in preparation for type-casting and binding 
+    // re-align high-level JSON structure ready for type-casting and binding 
     // LLMs don't always follow a standard JSON structure & naming convention... 
     // Here we cater for a few variants encountered so far
-
-    // TODO: check - does it even look like an ontology? Maybe it's a graph?
 
     const 
       name = file.name,
@@ -703,10 +685,10 @@ class Ontology {
 
   addBindings() {
 
-    // given aligned ontology structure, add local object bindings based on original lookup keys
+    // given aligned ontology structure, add local object bindings based on (raw source) lookup keys
     // First step is to convert each dict to an array of [key,obj] entries
-    // Then cast the generic objects into custom classes, which can generate the approriate local key id
-    // Finally use those local keys to strongly bind all objects within this ontology
+    // Then cast the generic objects into custom classes that implement .keyId()
+    // Then strongly bind all objects within this ontology
 
     const ont = this;
 
@@ -716,12 +698,12 @@ class Ontology {
       ont.entities = Object.entries(ont.entities) // convert dict to array of [key,obj] pairs
           .map(([key,obj]) => new Entity(obj,ont,key)); // simple array of Entities
     }
-    ont.entities = ont.entities.map(obj => [obj.keyId(),obj]); // use class method to get key
+    ont.entities = ont.entities.map(obj => [obj.keyId(),obj]);
     ont.entities = Object.fromEntries(ont.entities); // convert to a hashtable ready to suppoprt binding
 
     //----------------------------------------------------------
     ont.relations = ont.relations.map(obj => new Relation(obj,ont));
-    ont.relations = ont.relations.map(obj => [obj.keyId(),obj]);  // use class method to get key
+    ont.relations = ont.relations.map(obj => [obj.keyId(),obj]); 
     ont.relations = Object.fromEntries(ont.relations);
 
     //----------------------------------------------------------
@@ -751,8 +733,6 @@ class Ontology {
     Object.values(ont.entities).forEach(ent => ent.bind(ont));
     Object.values(ont.relations).forEach(rel => rel.bind(ont));
 
-//    console.log(ont);
-
     return ont;
 
   }
@@ -770,10 +750,9 @@ class NodeDatum {
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.keys = {
       uidEntity: this.base.uniqueId(),
- //     uidEntityType: this.base._type.uniqueId(),
       xidEntityType: this.base._type.keyId(),
       uidNodeType: this.base._type.uniqueId() 
-  
+ 
     }
 
     this.bind(graph); // ASSUMES graph.nodeTypes is already populated
@@ -793,9 +772,6 @@ class NodeDatum {
 
   bind(graph) { // static bindings
     this._nodeType = graph.nodeTypes[this.keys.uidNodeType];
-    // why doesn't that key exist already in nodeTypes? is it simply being called too soon? 
-    //console.assert(this._nodeType);
-
   }
 
   setNodeType(nodeType) {
@@ -825,7 +801,7 @@ class NodeDatum {
 // scale can be zoomed with mouse wheel
 
 class CircleNode extends NodeDatum {
-  // lightweight, prototype only, assigned dynamically at runtime (not recommended when performance matters)
+  // lightweight, prototype only, assigned dynamically at runtime (not recommended in situations where performance matters)
   foobar() { return 'hello circle'}
 
 }
@@ -838,10 +814,10 @@ class RectangleNode extends NodeDatum {
   foobar() { return 'hello rect'}
 
   explodeFrame() {
-    // causes visible CHILD nodes to appear as ordinary connected vertices
+    // shrink this container node WITHOUT hiding its children, 
+    // (so they stay visible, with newly unhidden connecting lines to the container)
 
   }
-
 
 }
 
@@ -1168,6 +1144,24 @@ class Scene { // aka Context
 class Storyline { // Narrative, Storyline, Thread, Pathway, Channel
   // a 'pathway' of links hand-selected from multiple scenes 
 
+  constructor(graph) {
+    this.name = RandomId('S');
+    this.uidlinks = new Set();
+    this._links = {};
+    this.uid = hashString(this.name);
+  }
+
+  addLinks(links_arr) {
+    links_arr.forEach(obj => { 
+        this._links[obj.uniqueId()] = obj;
+        this.uidlinks.add(obj.uniqueId());
+        }
+      )
+  }
+
+  uniqueId() { return this.uid };
+  linkData() { return Object.values(this.links) }
+
 }
 
 //============================================================
@@ -1207,6 +1201,4 @@ function RandomId(prefix) {
 <script src="graphs\hamlet.fdg"></script> 
 -->
 
-<script>
-graph = Object.values(Workspace.graphs)[0];
-</script>
+<script src="test-payload.js"></script>
