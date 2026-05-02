@@ -73,4 +73,11 @@ function embellish_path(graph) {
     graph.addHyperEdge(edge);
 
 
+edge.addJunction();
+
+const path = Object.values(graph.paths)[0];
+path.addHyperEdge(edge);
+
+const members = edge.getMembers();
+console.log(members);
 }

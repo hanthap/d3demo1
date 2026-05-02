@@ -288,6 +288,7 @@ class Workbook {  // includes formatting info as well as data & forces
       this.images = {default: new Image('tba.svg',this)};
       this.layers = {default: new LayerDatum('default',this)};
       this.forces = {};  
+   //   this.junctions = {};  //  a subset of nodes - do we really need it?
       this.scenes = {};
       this.paths = {};
       this.episodes = {};
@@ -305,20 +306,21 @@ class Workbook {  // includes formatting info as well as data & forces
   nodeData() { return Object.values(this.nodes) }
   linkData() { return Object.values(this.links) }
   uniqueId()  { return this.uid };
-
+// TODO: standard subsets, for consistency. eg junctionData(), uncloakedNodeData()  ???
 //------------------------------------------------------------------\
 
-// TODO: misnomer, in that "json" is already an object - just needs to be rehydrated.
-// 3 steps, cast json to Workbook, then rehydrate, then fold it into this graph
-// should be 2 distinct methods
+// TODO: misnomer, in that "json" is already a generic object - just needs to be cast as Workbook and then rehydrated
+// const wbExtra = json.setPrototype('Workbook'), 
+// wbExtra.hydrate() 
+// wbMain.upsertFrom(wbExtra) 
 
   hydrate() {
-    // always called when loading from a saved graph (.fdg file), *or* from an external JSON (.ont) source
+    // always called when loading from a saved workbook (.fdg file), *or* from an external JSON (.ont) source
     // all underscore-prefixed object references within this graph need to be re-constituted based on their uid keys
     // If the matching source is not already in memory, then tell user they need to upload it manually.
     // or they can click to accept the old values.
-    // once hydrated, assign appropriate class prototypes to each object
-    // once done, the newly-hydrated Workbook is ready to use
+    // once hydrated, re-assign appropriate class prototypes to each contained object
+    // once done, the newly-hydrated Workbook is ready to use e.g. to upsert an existing workbook.
 
   }
 
@@ -403,12 +405,28 @@ class Workbook {  // includes formatting info as well as data & forces
       }
     );
 
-//  hydrate paths
+//  hydrate hyperEdges
+    json.hyperEdges = json.hyperEdges ?? {};
+    Object.values(json.hyperEdges).forEach(d => {
+      Object.setPrototypeOf(d,HyperEdge.prototype);
+      d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.links[uid]]));
+      d._junctions = Object.fromEntries(d.uidJunctions.map(uid => [uid,this.junctions[uid]]));
+      d.uidLinks = new Set(d.uidLinks);
+      d.uidJunctions = new Set(d.uidJunctions);
+
+      // TODO: repopulate _links based on uidLinks
+      this.hyperEdges[d.uniqueId()] = d;
+      }
+    );
+
+//  hydrate paths - note similarity to HyperEdges
     json.paths = json.paths ?? {};
     Object.values(json.paths).forEach(d => {
       Object.setPrototypeOf(d,Path.prototype);
-      d._links = Object.fromEntries(d.uidlinks.map(uid => [uid,this.links[uid]]));
-      d.uidlinks = new Set(d.uidlinks);
+      d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.links[uid]]));
+      d._hyperEdges = Object.fromEntries(d.uidHyperEdges.map(uid => [uid,this.hyperEdges[uid]]));
+      d.uidLinks = new Set(d.uidLinks);
+      d.uidJunctions = new Set(d.uidJunctions);
       // TODO: repopulate _links based on uidLinks
       this.paths[d.uniqueId()] = d;
       }
@@ -756,7 +774,7 @@ class NodeDatum {
 
   constructor(obj,graph) {
     this.base = obj; // Entity
-    this.x = Math.random(); // same Entity can appear across many views each with its own NodeDatum (x,y,fx,fy,width etc.)
+    this.x = Math.random(); 
     WeakBind.parentOf.set(this,graph);
 
     // capture robust keys to enable re-binding eg after ontology is refreshed
@@ -794,7 +812,7 @@ class NodeDatum {
   
   setSubClass() { 
     // TODO: decide which subclass I belong to, based on current properties
-    const newSubClass= this.x < 0.4 ? RectangleNode : CircleNode; 
+    const newSubClass= this.x < 0.4 ? RectangleDatum : CircleDatum; 
     Object.setPrototypeOf(this,newSubClass.prototype);      // de-optimises. not recommended when performance matters
     return this;
   }
@@ -812,7 +830,7 @@ class NodeDatum {
 // usually includes a thumbnail image clipped to a circle
 // scale can be zoomed with mouse wheel
 
-class CircleNode extends NodeDatum {
+class CircleDatum extends NodeDatum {
   // lightweight, prototype only, assigned dynamically at runtime (not recommended in situations where performance matters)
   foobar() { return 'hello circle'}
 
@@ -820,16 +838,27 @@ class CircleNode extends NodeDatum {
 
 
 //============================================================
-// a 'mini-node', always part of exactly one HyperEdge
-// all its in & out links are of the same LinkType as the HyperEdge
-// it has x,y coords etc like a regular NodeDatum
-class JunctionDatum extends NodeDatum { 
-  constructor(objLink,graph) {
-    // copy the properties of objLink - including its LinkType!? 
+// a 'lite' node, ALWAYS an integral part of exactly one HyperEdge
+// all its in & out links inherit their LinkType from the HyperEdge
+// it has x,y coords, COG etc like a regular NodeDatum, small radius (but also a hidden clickzone)
+// no charge or mass. 
+// SVG rendering together with polylines, i.e. in front of circle & rect node elements. 
+// possible sub-classes might be 'Fork' or 'Decision' or 'logical gate'
+// may be upcast to an ordinary CircleDatum - but does that mean we have to re-think the HyperEdge membership from scratch?
 
+class JunctionDatum 
+// extends NodeDatum 
+{ 
+  constructor(hyperEdge) {
+    // copy the properties of objLink - including its LinkType!? 
+    console.assert(hyperEdge instanceof HyperEdge);
+    this.name = RandomId('J');
+    this._hyperEdge = hyperEdge;
+    this.uid = hashString(this.name);
   }
 
   foobar() { return 'hello junction'}
+  uniqueId() { return this.uid }
 }
 
 
@@ -837,7 +866,7 @@ class JunctionDatum extends NodeDatum {
 // an abstract base class for container nodes
 // but <rect> attributes in SVG use left,top,width,height 
 // instead of centroid (x,y) as updated by D3 simulation
-class RectangleNode extends NodeDatum {
+class RectangleDatum extends NodeDatum {
   foobar() { return 'hello rect'}
 
   explodeFrame() {
@@ -856,7 +885,7 @@ class RectangleNode extends NodeDatum {
 // usually includes a thumbnail image clipped to a rect
 // scale can be zoomed with mouse wheel
 
-class CollapsedRectangleNode extends RectangleNode {
+class CollapsedRectangleDatum extends RectangleDatum {
 
   restoreFrame() {
     // swap left,top,width,height into D3's node attributes
@@ -870,7 +899,7 @@ class CollapsedRectangleNode extends RectangleNode {
 // handles foreignObject with html banner, stub, thumbnail and body 
 // also preserves collapsed width,height for next zoom-out action
 
-class ExpandedRectangleNode extends RectangleNode {
+class ExpandedRectangleDatum extends RectangleDatum {
 
   minimiseFrame() {
     // swap left,top,width,height into D3's node attributes
@@ -882,7 +911,7 @@ class ExpandedRectangleNode extends RectangleNode {
 // A 'passive' Euler region (with optional thumbnail, header html text  but not body)
 // position and shape are dictated by all its active children (floating or fixed)
 // floating non-members are then pushed out, by custom simulation force
-class ContourNode extends ExpandedRectangleNode {
+class ContourDatum extends ExpandedRectangleDatum {
 
 }
 
@@ -897,7 +926,7 @@ class ContourNode extends ExpandedRectangleNode {
 // can't satisfy both with nested shape. All bar one have to revert to 
 // directed lines.
 
-class FrameNode extends ExpandedRectangleNode {
+class FrameDatum extends ExpandedRectangleDatum {
 
 }
 
@@ -925,7 +954,6 @@ class LinkType {
     WeakBind.parentOf.set(this,graph);
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
     this.reversed = false; // true <=> verb arrow is from "target" node to "source" node (ditto for nesting hierarchy)
-    this.hyperedge_enabled = true; // LinkDatum instances can be upcast to a HyperEdge (by inserting a JunctionDatum)
     return this;
   }
 
@@ -976,6 +1004,8 @@ class LayerDatum {
           closed: true, // true => a non-empty node initially display as collasped (rect)
           reversed: false // true <=> the 'from' node is logically the superset in each pair (normally the subset/element)
       },
+      hyperEdge_ok: true, // instances may be added to a HyperEdge
+
       colour: { 
           fill: 'white',
           stroke: 'black'
@@ -1152,38 +1182,66 @@ class LinkDatum {
 
   getParent() { return WeakBind.parentOf.get(this) }
 
-  insertNode(obj=null) {
-    // split this link & add [obj] in between
+  getHyperEdge() { return this._hyperEdge }
+
+  getHyperEdgeMembers() { return this._hyperEdge.getMembers() }
+  
+
+
+
+  insertNode(node) {
+    console.assert(node instanceof NodeDatum);  // does this include JunctionDatum?
+    // split this link & add node in between
     // clone its properties including paths & scenes
-    // if null then create a new JunctionNode and insert that.
+    // 
 
   }
 
 }
 
 //============================================================
-// a HyperEdge is a small tightly-bound mini-graph of 1 or more JunctionDatum mini-nodes (and all their current in & out linkDatum)
-// All-or-nothing => click any part and you select/deselect the whole Hyperedge.
+// a HyperEdge is like a mini-Path, with these special properties:
+// * all members share the same LayerDatum (set per HyperEdge?)
+// * any internal vertices must be junctions, never containers. 
+// * so, no expand/collapse behaviour inside a hyperEdge
+// * select/unselect is all-or-nothing (one click applies to ALL end nodes & junctions)
+// An extra SVG container <g> element might help achieve that.
 // Can be added to a Path (like LinkDatum)
-// all member LinkDatums inherit their LinkType from their parent HyperEdge
-class HyperEdge 
-// extends LinkDatum 
+class HyperEdge // extends Path ?
 { 
-
   constructor(link)  { 
    // super(); // triggers way too much 
     console.assert(link instanceof LinkDatum);
     this.name = RandomId('H');
     this.uidLinks = new Set([link.uniqueId()]);
+    this.uidJunctions = new Set();
     this._links = {};
+    this._junctions = {};
     this._links[link.uniqueId()] = link;
     link._hyperEdge = this;
     this.uid = hashString(this.name);
-
+    graph.hyperEdges[this.uid] = this;
 }
 
 uniqueId() { return this.uid };
 
+getMembers() {
+  const linkData =  Object.values(this._links);
+  var nodeData = linkData.map(d => [d._datumFrom,d._datumTo]);
+  nodeData = new Set(nodeData); // remove duplicates
+  nodeData = [...nodeData]; // convert to array;
+  const junctionData = nodeData.filter(d => d instanceof JunctionDatum);
+  return { linkData, nodeData, junctionData } ;
+  }
+
+//============================================================
+
+addJunction() {
+  const j = new JunctionDatum(this);
+  this._junctions[j.uniqueId()] = j;
+  this.uidJunctions.add(j.uniqueId());
+  return j;
+}
 
 }
 
@@ -1202,23 +1260,33 @@ class Scene { // aka Context
 
 //============================================================
 
-class Path { // Narrative, Storyline, Thread, Pathway, Channel
-  // a 'pathway' of links & hyperedges, hand-selected from multiple scenes 
-
+class Path { // a distinct narrative, storyline, trace, trail, thread, hypothesis, causal pathway, channel, chain (of events), causation, aetiology
+  // a curated series of links & hyperedges, hand-picked from multiple scenes, layers, episodes, sources
+  // SHOULD be a single unbroken DAG connected end-to-end, but can we guarantee it?
   constructor(graph) {
     this.name = RandomId('P');
-    this.uidlinks = new Set();
+    this.uidLinks = new Set();
+    this.uidHyperEdges = new Set();
     this._links = {};
+    this._hyperEdges = {};
     this.uid = hashString(this.name);
   }
 
   addLinks(links_arr) {
     links_arr.forEach(obj => { 
         this._links[obj.uniqueId()] = obj;
-        this.uidlinks.add(obj.uniqueId());
+        this.uidLinks.add(obj.uniqueId());
         }
       )
   }
+
+  addHyperEdge(obj) {
+        this._hyperEdges = this._hyperEdges ?? {}; // when rehydrated from generic Object
+        this._hyperEdges[obj.uniqueId()] = obj;
+        this.uidHyperEdges.add(obj.uniqueId());
+  }
+
+
 
   uniqueId() { return this.uid };
   linkData() { return Object.values(this.links) }
