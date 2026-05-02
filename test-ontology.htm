@@ -280,15 +280,19 @@ class Workbook {  // includes formatting info as well as data & forces
       this.nodes = {};
       this.links = {};
       this.linkTypes = {default: new LinkType({xid:'Unknown'},this)}; 
-      this.nodeTypes = {default: new NodeType({xid:'Unknown'},this)}; 
+      this.hyperEdges = {};
+      this.nodeTypes = {
+          default: new NodeType({xid:'Unknown'},this),
+          junction: new NodeType({xid:'Junction'},this)
+        }; 
       this.images = {default: new Image('tba.svg',this)};
       this.layers = {default: new LayerDatum('default',this)};
       this.forces = {};  
       this.scenes = {};
-      this.storylines = {};
+      this.paths = {};
       this.episodes = {};
       this.sources = {};
-      this.studies = {}; // aka narratives, storylines, threads
+      this.studies = {}; // cf "worksheet" or "view" = annotated selection of paths, layers, episodes, scenes etc.
     }
 
   this.uid = this.uid ?? hashString(Math.random().toString());
@@ -399,14 +403,14 @@ class Workbook {  // includes formatting info as well as data & forces
       }
     );
 
-//  hydrate storylines
-    json.storylines = json.storylines ?? {};
-    Object.values(json.storylines).forEach(d => {
-      Object.setPrototypeOf(d,Storyline.prototype);
+//  hydrate paths
+    json.paths = json.paths ?? {};
+    Object.values(json.paths).forEach(d => {
+      Object.setPrototypeOf(d,Path.prototype);
       d._links = Object.fromEntries(d.uidlinks.map(uid => [uid,this.links[uid]]));
       d.uidlinks = new Set(d.uidlinks);
       // TODO: repopulate _links based on uidLinks
-      this.storylines[d.uniqueId()] = d;
+      this.paths[d.uniqueId()] = d;
       }
     );
 
@@ -433,13 +437,21 @@ class Workbook {  // includes formatting info as well as data & forces
 
 //------------------------------------------------------------------
 
-  addStoryline(links=[]) { 
-    this.storylines = this.storylines ?? {};
-    const obj = new Storyline(this);
-    this.storylines[obj.uniqueId()] = obj;
+  addPath(links=[]) { 
+    this.paths = this.paths ?? {};
+    const obj = new Path(this);
+    this.paths[obj.uniqueId()] = obj;
     obj.addLinks(links);
     return this;
   }
+
+//------------------------------------------------------------------
+
+
+addHyperEdge(edge) {
+    this.hyperEdges[edge.uniqueId()] = edge;
+}
+
 
 //------------------------------------------------------------------
 
@@ -806,6 +818,21 @@ class CircleNode extends NodeDatum {
 
 }
 
+
+//============================================================
+// a 'mini-node', always part of exactly one HyperEdge
+// all its in & out links are of the same LinkType as the HyperEdge
+// it has x,y coords etc like a regular NodeDatum
+class JunctionDatum extends NodeDatum { 
+  constructor(objLink,graph) {
+    // copy the properties of objLink - including its LinkType!? 
+
+  }
+
+  foobar() { return 'hello junction'}
+}
+
+
 //============================================================
 // an abstract base class for container nodes
 // but <rect> attributes in SVG use left,top,width,height 
@@ -815,7 +842,7 @@ class RectangleNode extends NodeDatum {
 
   explodeFrame() {
     // shrink this container node WITHOUT hiding its children, 
-    // (so they stay visible, with newly unhidden connecting lines to the container)
+    // (so they stay visible, with newly-unhidden connecting lines to the container)
 
   }
 
@@ -891,12 +918,14 @@ class NodeType {
 
 
 //============================================================
-// trivially upcast the predicate object from ontology
+// upcast the predicate object from source ontology
 class LinkType {
   constructor(obj,graph) {
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
+    this.reversed = false; // true <=> verb arrow is from "target" node to "source" node (ditto for nesting hierarchy)
+    this.hyperedge_enabled = true; // LinkDatum instances can be upcast to a HyperEdge (by inserting a JunctionDatum)
     return this;
   }
 
@@ -906,9 +935,7 @@ class LinkType {
   nameMatches(xid) { return this.keyId() == xid }
 }
 
-
 //============================================================
-
 
 class Image {
   constructor(url=null,graph) {
@@ -1050,7 +1077,7 @@ class Entity {
 
 //============================================================
 
-class Relation  {
+class Relation {
 
   constructor(obj,ont) {
     Object.assign(this, obj);
@@ -1124,28 +1151,62 @@ class LinkDatum {
   bindLayer(graph) { this._datumLayer = graph.getLayer(this.keys.xidRelnType) }
 
   getParent() { return WeakBind.parentOf.get(this) }
+
+  insertNode(obj=null) {
+    // split this link & add [obj] in between
+    // clone its properties including paths & scenes
+    // if null then create a new JunctionNode and insert that.
+
+  }
+
+}
+
+//============================================================
+// a HyperEdge is a small tightly-bound mini-graph of 1 or more JunctionDatum mini-nodes (and all their current in & out linkDatum)
+// All-or-nothing => click any part and you select/deselect the whole Hyperedge.
+// Can be added to a Path (like LinkDatum)
+// all member LinkDatums inherit their LinkType from their parent HyperEdge
+class HyperEdge 
+// extends LinkDatum 
+{ 
+
+  constructor(link)  { 
+   // super(); // triggers way too much 
+    console.assert(link instanceof LinkDatum);
+    this.name = RandomId('H');
+    this.uidLinks = new Set([link.uniqueId()]);
+    this._links = {};
+    this._links[link.uniqueId()] = link;
+    link._hyperEdge = this;
+    this.uid = hashString(this.name);
+
+}
+
+uniqueId() { return this.uid };
+
+
 }
 
 //============================================================
 
 class Scene { // aka Context 
-// each scene is a named, editable collection of links (and their nodes) that are illuminated 'in foreground' (uncloaked)
+// each scene is a named, editable collection of links & hyperedges (and their nodes) that are illuminated 'in foreground' (uncloaked)
 // saved within a Workbook. 
 // scenes can be arranged in sequence and grouped into episodes
 // optionally, edges (and their vertices) from other scenes (past or future) can be 'alluded to' semi-present as shaded 'grey ghosts' 
-// some links are always subtext, never stated
-// user can explore analyse one scene, or an arbitrary selection of them in combination (via Storylines & Studies)
+// some links/edges are always subtext, never stated
+// user can explore analyse one scene, or an arbitrary selection of them in combination (via Paths & Studies)
 // each scene belongs to one episode (but can be included in many studies)
 }
 
 
 //============================================================
 
-class Storyline { // Narrative, Storyline, Thread, Pathway, Channel
-  // a 'pathway' of links hand-selected from multiple scenes 
+class Path { // Narrative, Storyline, Thread, Pathway, Channel
+  // a 'pathway' of links & hyperedges, hand-selected from multiple scenes 
 
   constructor(graph) {
-    this.name = RandomId('S');
+    this.name = RandomId('P');
     this.uidlinks = new Set();
     this._links = {};
     this.uid = hashString(this.name);
@@ -1167,8 +1228,8 @@ class Storyline { // Narrative, Storyline, Thread, Pathway, Channel
 //============================================================
 
 class Study { // aka Interpretation, Analysis, Discussion, Project, 
-  // an annotated selection of 1 or more Storylines.
-  // user can shade or illuminate a whole Storyline
+  // an annotated selection of 1 or more paths.
+  // user can shade or illuminate a whole path
   // maybe with notes & comments? 
   // could include 
   // too many complications if we define at 'workspace' level

@@ -4,7 +4,7 @@ graph = Object.values(Workspace.graphs)[0];
 
 function main() {
     embellish_graph(graph) ;
-    embellish_story(graph) ;
+    embellish_path(graph) ;
     console.log(graph);
 
 }
@@ -56,17 +56,21 @@ console.log(graph);
 // -------------------------------------------------------------------------
 
 
-function embellish_story(graph) {
+function embellish_path(graph) {
 
     const 
         links1 = graph.linkData().filter(d => d.y < 0.4),
         links2 = graph.linkData().filter(d => d.y > 0.6),
         links3 = graph.linkData().filter(d => d.y > 0.2 && d.y < 0.7);
 
+        link = links1[0],
+
     graph
-        .addStoryline(links1)
-        .addStoryline(links2)
-        .addStoryline(links3);
-     
+        .addPath(links1)
+        .addPath(links2)
+        .addPath(links3);
+    const edge = new HyperEdge(link);
+    graph.addHyperEdge(edge);
+
 
 }
