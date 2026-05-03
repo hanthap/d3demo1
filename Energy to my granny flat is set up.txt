@@ -1,0 +1,25 @@
+Energy to my granny flat is set up with AGL, and I want to transfer billing to another family member so it's in their name. 
+
+I do NOT want to change the billing for the main residence, which is an entirely different account, in my name, at the same address. It's with Origin.
+
+Problem is that both have the same address. How can I change the account holder for just the granny flat?  
+
+
+
+Hi I want to register myself as primary account holder for 2 energy accounts
+but the exact supply address is not found using the lookup function in AGL's online form. 
+
+The existing accounts are with AGL and show on invoices as
+Supply Address: 13A Alt Street, Ashfield NSW 2131
+Electricity: NMI 41041036345 A/c 7099 624 632 
+Gas: DPI: 52484267077 A/c 7086 773 624
+
+"13A" is a granny flat but only the main address ("13 Alt St") can be found using the lookup function. I do NOT want to take over any accounts for that residence. It has totally different NMI & MIRN and is supplied by Origin, not AGL.
+
+
+NMI: 41027865391
+MIRN: 52400783853
+
+
+If there's an existing AGL internet or energy supply to a property that you want to transfer from one account holder to another, the new account holder needs to sign up to a plan with AGL using their details. Doing this will automatically cancel the old account and the account with the new account holder will start.
+
