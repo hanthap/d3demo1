@@ -72,11 +72,10 @@ function embellish_path(graph) {
         .addPath(links1)
         .addPath(links2)
         .addPath(links3);
-    const edge = new HyperEdge(link);
-    graph.addHyperEdge(edge);
+    const edge = graph.addHyperEdge([link]);
 
 
-edge.addJunction();
+edge.addJunction(); 
 
 const path = Object.values(graph.paths)[0];
 path.addHyperEdge(edge);

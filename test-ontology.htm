@@ -348,6 +348,7 @@ class Workbook {  // includes formatting info as well as data & forces
     this.restoreValuesOf(this.images,Image);
     this.restoreValuesOf(this.nodes,NodeDatum);
     this.restoreValuesOf(this.links,LinkDatum);
+   // this.restoreValuesOf(this.junctions,JunctionDatum);
     this.restoreValuesOf(this.hyperEdges,HyperEdge);
     this.restoreValuesOf(this.paths,Path);
 
@@ -418,9 +419,7 @@ class Workbook {  // includes formatting info as well as data & forces
       Object.setPrototypeOf(d,NodeDatum.prototype);
       Object.setPrototypeOf(d.base,Entity.prototype);
       if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
-      d.restoreBindings(this); // new standard
-//      d.bindLayer(this);
-//      d.bind(this); // explicit, because we bypassed the constructor!
+      d.restoreBindings(this); 
       d.setSubClass(); 
       this.nodes[d.uniqueId()] = d;
       }
@@ -429,12 +428,7 @@ class Workbook {  // includes formatting info as well as data & forces
     Object.values(json.links).forEach(d => {
       Object.setPrototypeOf(d,LinkDatum.prototype);
       Object.setPrototypeOf(d.base,Relation.prototype);
-      d.restoreBindings(this); // new standard
-      // d._datumFrom = this.nodes[d.keys.uidDatumFrom];
-      // d._datumTo = this.nodes[d.keys.uidDatumTo];
-      // d._linkType = this.linkTypes[d.keys.uidLinkType];
-      // d.bindLayer(this);
-      // d.bind(this); // TODO: use a rehydration method instead.
+      d.restoreBindings(this); 
       this.links[d.uniqueId()] = d;
       }
     );
@@ -444,7 +438,9 @@ class Workbook {  // includes formatting info as well as data & forces
     Object.values(json.hyperEdges).forEach(d => {
       Object.setPrototypeOf(d,HyperEdge.prototype);
       d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.links[uid]]));
-      d._junctions = Object.fromEntries(d.uidJunctions.map(uid => [uid,this.junctions[uid]]));
+      // TODO: save and restore junctions to/from this.nodes, no need to maintain a separate dict
+      // upcasting to regular node would require breaking the hyperedge. 
+      d._junctions = Object.fromEntries(d.uidJunctions.map(uid => [uid,this.nodes[uid]]));
       d.uidLinks = new Set(d.uidLinks);
       d.uidJunctions = new Set(d.uidJunctions);
 
@@ -500,8 +496,11 @@ class Workbook {  // includes formatting info as well as data & forces
 //------------------------------------------------------------------
 
 
-addHyperEdge(edge) {
-    this.hyperEdges[edge.uniqueId()] = edge;
+addHyperEdge(links_arr) {
+  console.assert(links_arr instanceof Array) ;
+  const new_edge =  new HyperEdge(links_arr,this);
+  this.hyperEdges[new_edge.uniqueId()] = new_edge;
+  return new_edge;
 }
 
 
@@ -892,18 +891,20 @@ class CircleDatum extends NodeDatum {
 // may be upcast to an ordinary CircleDatum - but does that mean we have to re-think the HyperEdge membership from scratch?
 
 class JunctionDatum 
-// extends NodeDatum 
+  extends NodeDatum 
 { 
-  constructor(hyperEdge) {
+  constructor(obj,graph,hyperEdge) {
+    super(obj,graph);
     // copy the properties of objLink - including its LinkType!? 
     console.assert(hyperEdge instanceof HyperEdge);
-    this.name = RandomId('J');
+//    this.name = RandomId('J');
     this._hyperEdge = hyperEdge;
-    this.uid = hashString(this.name);
+    this.keys.uidHyperEdge = hyperEdge.uniqueId();
+//    this.uid = hashString(this.name);
   }
 
   foobar() { return 'hello junction'}
-  uniqueId() { return this.uid }
+  //uniqueId() { return this.uid }
 }
 
 
@@ -1269,16 +1270,24 @@ class LinkDatum {
 // Can be added to a Path (like LinkDatum)
 class HyperEdge // extends Path ?
 { 
-  constructor(link)  { 
-   // super(); // triggers way too much 
-    console.assert(link instanceof LinkDatum);
+  constructor(links_arr,graph)  { 
+   
+    console.assert(links_arr instanceof Array);
+    console.assert(links_arr.length > 0); // at least one link 
+    console.assert(links_arr.filter(d=>d._hyperEdge).length==0); // fail if any link is already part of another HyperEdge, 
+    console.assert(graph instanceof Workbook);
     this.name = RandomId('H');
-    this.uidLinks = new Set([link.uniqueId()]);
+    this.uidLinks = new Set();
     this.uidJunctions = new Set();
     this._links = {};
     this._junctions = {};
-    this._links[link.uniqueId()] = link;
-    link._hyperEdge = this;
+    links_arr.forEach(link=>{
+      console.assert(link instanceof LinkDatum);
+      this.uidLinks.add(link.uniqueId());
+      this._links[link.uniqueId()] = link;
+      link._hyperEdge = this; // if defined and not null <=> the link is part of a hyperedge
+      });
+    this._workbook = graph; // do we really need this?
     this.uid = hashString(this.name);
     graph.hyperEdges[this.uid] = this;
 }
@@ -1302,10 +1311,15 @@ getMembers() {
 //============================================================
 
 addJunction() {
-  const j = new JunctionDatum(this);
-  this._junctions[j.uniqueId()] = j;
-  this.uidJunctions.add(j.uniqueId());
-  return j;
+  const graph = this._workbook;
+  console.assert(graph instanceof Workbook);
+  const junction_spec = { id: RandomId('J'), name: 'New junction' };
+  const node_type = graph.nodeTypes.junction;
+  const new_node = graph.addNode(junction_spec,node_type);
+  Object.setPrototypeOf(new_node,JunctionDatum.prototype);
+  this._junctions[new_node.uniqueId()] = new_node;
+  this.uidJunctions.add(new_node.uniqueId()); 
+  return new_node;
 }
 
 }
