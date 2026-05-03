@@ -37,6 +37,11 @@ async function read_json_file(file) {
   return json_data;
 }
 
+
+//============================================================
+// 2 utilities called from <dict-class>.restorePrototypes() 
+
+
 //----------------------------------------------------------
 async function OnChange() {
   
@@ -56,7 +61,9 @@ async function OnChange() {
     arr.map(file => Ontology.createfromJson(file))
   );
 
-  new_ontologies.forEach(ont => Workspace.ontologies[ont.uniqueId()] = ont)
+  new_ontologies.forEach(ont => Workspace.ontologies[ont.uniqueId()] = ont);
+
+
 
   new_ontologies.forEach(ont => {
     const new_graph = new Workbook();
@@ -255,11 +262,18 @@ class Workspace {
     // TODO: clean up this!
     const file = { name: filename, lastModifiedDate: dateString };
     const source = new Source(file,'Workbook');
+    Object.setPrototypeOf(json_obj,Workbook.prototype);
+   //json_obj.restorePrototypes(); 
+   //json_obj.restoreBindings(); 
+
+    console.log('hello',json_obj);
+    //return;
     graph.upsertFromFdg(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
     Workspace.graphs[graph.uniqueId()] = graph;
   }
 
 }
+
 
 //============================================================
 
@@ -309,20 +323,36 @@ class Workbook {  // includes formatting info as well as data & forces
 // TODO: standard subsets, for consistency. eg junctionData(), uncloakedNodeData()  ???
 //------------------------------------------------------------------\
 
-// TODO: misnomer, in that "json" is already a generic object - just needs to be cast as Workbook and then rehydrated
-// const wbExtra = json.setPrototype('Workbook'), 
-// wbExtra.hydrate() 
-// wbMain.upsertFrom(wbExtra) 
+  restoreObjectAs(obj,class_name) {
+      Object.setPrototypeOf(obj,class_name.prototype);
+      if (obj.restorePrototypes) obj.restorePrototypes();
+      if (obj.restoreBindings) obj.restoreBindings(this);
+      };
 
-  hydrate() {
+  restoreValuesOf(dict,class_name) {
+    Object.values(dict ?? {})
+      .forEach(obj => this.restoreObjectAs(obj,class_name))
+    };
+
+
+  restorePrototypes() { 
     // always called when loading from a saved workbook (.fdg file), *or* from an external JSON (.ont) source
     // all underscore-prefixed object references within this graph need to be re-constituted based on their uid keys
     // If the matching source is not already in memory, then tell user they need to upload it manually.
     // or they can click to accept the old values.
-    // once hydrated, re-assign appropriate class prototypes to each contained object
     // once done, the newly-hydrated Workbook is ready to use e.g. to upsert an existing workbook.
+    this.restoreValuesOf(this.sources,Source);
+    this.restoreValuesOf(this.layers,LayerDatum);
+    this.restoreValuesOf(this.nodeTypes,NodeType);
+    this.restoreValuesOf(this.linkTypes,LinkType);
+    this.restoreValuesOf(this.images,Image);
+    this.restoreValuesOf(this.nodes,NodeDatum);
+    this.restoreValuesOf(this.links,LinkDatum);
+    this.restoreValuesOf(this.hyperEdges,HyperEdge);
+    this.restoreValuesOf(this.paths,Path);
 
-  }
+    }
+
 
 // to do: upsert this graph from another (hydrated) graph already in the workspace
 
@@ -335,7 +365,9 @@ class Workbook {  // includes formatting info as well as data & forces
 
 
     // TODO : how best to handle embedded js model
-//    if (!source) source = new Source(file,'Workbook',json.metadata);
+    if (!source) source = new Source(file,'Workbook',json.metadata);
+
+//    Object.values(this.uidNodes ?? {}).forEach(d => {this._datumsources[d.uniqueId()] = d);
     if (source.fileName) this.name = source.fileName; 
     this.sources[source.uniqueId()] = source;
     Object.values(json.sources ?? {}).forEach(d => {
@@ -386,8 +418,9 @@ class Workbook {  // includes formatting info as well as data & forces
       Object.setPrototypeOf(d,NodeDatum.prototype);
       Object.setPrototypeOf(d.base,Entity.prototype);
       if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
-      d.bindLayer(this);
-      d.bind(this); // explicit, because we bypassed the constructor!
+      d.restoreBindings(this); // new standard
+//      d.bindLayer(this);
+//      d.bind(this); // explicit, because we bypassed the constructor!
       d.setSubClass(); 
       this.nodes[d.uniqueId()] = d;
       }
@@ -396,10 +429,11 @@ class Workbook {  // includes formatting info as well as data & forces
     Object.values(json.links).forEach(d => {
       Object.setPrototypeOf(d,LinkDatum.prototype);
       Object.setPrototypeOf(d.base,Relation.prototype);
-      d._datumFrom = this.nodes[d.keys.uidDatumFrom];
-      d._datumTo = this.nodes[d.keys.uidDatumTo];
-      d._linkType = this.linkTypes[d.keys.uidLinkType];
-      d.bindLayer(this);
+      d.restoreBindings(this); // new standard
+      // d._datumFrom = this.nodes[d.keys.uidDatumFrom];
+      // d._datumTo = this.nodes[d.keys.uidDatumTo];
+      // d._linkType = this.linkTypes[d.keys.uidLinkType];
+      // d.bindLayer(this);
       // d.bind(this); // TODO: use a rehydration method instead.
       this.links[d.uniqueId()] = d;
       }
@@ -795,12 +829,23 @@ class NodeDatum {
   toString() { return `${this._nodeType.toString()}: ${this.base.toString()}` }
   getParent() { return WeakBind.parentOf.get(this) }
 
+  restorePrototypes() { 
+    restoreObjectAs(this.base,Entity); 
+  }
+
+  // standardised method name called via restorePrototypes() helper function, after restorePrototyes
+  restoreBindings(graph) { 
+    this.bind(graph);
+    this.bindLayer(graph);
+  }
+
+
   bindLayer(graph) { // can vary during session if user edits type-to-layer mapping rules
     this._datumLayer = graph.getLayer(this.base.typeId()); // TODO: should use _nodeType in case of name collision
     return this;
   }
 
-  bind(graph) { // static bindings
+  bind(graph) { // static bindings - mat
     this._nodeType = graph.nodeTypes[this.keys.uidNodeType];
   }
 
@@ -871,7 +916,7 @@ class RectangleDatum extends NodeDatum {
 
   explodeFrame() {
     // shrink this container node WITHOUT hiding its children, 
-    // (so they stay visible, with newly-unhidden connecting lines to the container)
+    // (so they stay visible, with newly-unhidden connecting lines to the minimised container icon)
 
   }
 
@@ -908,7 +953,7 @@ class ExpandedRectangleDatum extends RectangleDatum {
 }
 
 //============================================================
-// A 'passive' Euler region (with optional thumbnail, header html text  but not body)
+// A 'passive' Euler region (with optional thumbnail logo, header html text  but not body)
 // position and shape are dictated by all its active children (floating or fixed)
 // floating non-members are then pushed out, by custom simulation force
 class ContourDatum extends ExpandedRectangleDatum {
@@ -916,7 +961,7 @@ class ContourDatum extends ExpandedRectangleDatum {
 }
 
 //============================================================
-// a locked/fixed rectangle (with optional thumbnail, header text & body)
+// a locked/fixed rectangle (with optional thumbnail logo, header text & body)
 // left,top coords are fixed relative to its frame of reference
 // i.e. the lowest (innermost) fixed ancestor (else the viewport itself)
 // width & height are fixed (editable by mouse drag)
@@ -953,7 +998,7 @@ class LinkType {
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
-    this.reversed = false; // true <=> verb arrow is from "target" node to "source" node (ditto for nesting hierarchy)
+//    this.reversed = false; // true <=> verb arrow is from "target" node to "source" node (ditto for nesting hierarchy)
     return this;
   }
 
@@ -981,7 +1026,7 @@ class Image {
 
   };
 
-    obj.uid = hashString(obj.img_src);
+    obj.uid = url ? hashString(url) : 'default';
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
 
@@ -1005,8 +1050,10 @@ class LayerDatum {
           reversed: false // true <=> the 'from' node is logically the superset in each pair (normally the subset/element)
       },
       hyperEdge_ok: true, // instances may be added to a HyperEdge
+      limit: { max_out_links: 2 }, 
+        // example only : "a person can have no more than 2 biological parents" 
 
-      colour: { 
+      colour: {  
           fill: 'white',
           stroke: 'black'
       },
@@ -1018,6 +1065,10 @@ class LayerDatum {
     return this;
   }
 
+  restorePrototypes(graph) { 
+    graph.restoreObjectAs(this.image,Image); 
+    this.types = new Set(this.types); 
+  }
 
   uniqueId() { return this.class_name }
 
@@ -1151,7 +1202,8 @@ class LinkDatum {
  constructor(obj,graph) {
     this.base = obj; // Relation
 
-    this.bind(graph);
+    this.collectKeys(graph);
+    this.restoreBindings(graph); 
     
     this.y = Math.random(); 
     WeakBind.parentOf.set(this,graph);
@@ -1161,7 +1213,19 @@ class LinkDatum {
   setLinkType(linkType) { this._linkType = linkType; return this; }
   uniqueId() { return this.keys.uidThis } 
   // this only works when merging Ontology. not when rehydrating a saved Graph json
-  bind(graph) {  // TODO: use _datumFrom instead of base? 
+
+  restorePrototypes() { 
+    castObjectAs(this.base,Relation); 
+  }
+
+  restoreBindings(graph) { // new standard
+      this._datumFrom = graph.nodes[this.keys.uidDatumFrom];
+      this._datumTo = graph.nodes[this.keys.uidDatumTo];
+      this._linkType = graph.linkTypes[this.keys.uidLinkType];
+      this.bindLayer(graph);
+  }
+
+  collectKeys(graph) {  // TODO: use _datumFrom instead of base? 
     // capture robust keys to enable re-binding eg after ontology is refreshed
     this.keys = this.keys ?? {
       uidDatumFrom: this.base._baseFrom.uniqueId(),
@@ -1171,10 +1235,6 @@ class LinkDatum {
       xidRelnType:  this.base._baseType.keyId()
     };
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
-    // rehydrate
-    this._datumFrom = graph.nodes[this.keys.uidDatumFrom];
-    this._datumTo = graph.nodes[this.keys.uidDatumTo];
-    this._linkType = graph.linkTypes[this.keys.uidLinkType];
 
   }
 
@@ -1225,6 +1285,11 @@ class HyperEdge // extends Path ?
 
 uniqueId() { return this.uid };
 
+restorePrototypes() {
+  this.uidJunctions = new Set(this.uidJunctions);
+  this.uidLinks = new Set(this.uidLinks);
+}
+
 getMembers() {
   const linkData =  Object.values(this._links);
   var nodeData = linkData.map(d => [d._datumFrom,d._datumTo]);
@@ -1270,6 +1335,11 @@ class Path { // a distinct narrative, storyline, trace, trail, thread, hypothesi
     this._links = {};
     this._hyperEdges = {};
     this.uid = hashString(this.name);
+  }
+
+  restorePrototypes() {
+      this.uidLinks = new Set(this.uidLinks);
+      this.uidHyperEdges = new Set(this.uidHyperEdges);
   }
 
   addLinks(links_arr) {
@@ -1324,8 +1394,8 @@ function RandomId(prefix) {
 
 </script>
 <!-- published workbooks can be pre-loaded directly from the web server -->
-<script src="graphs\RipVanWinkle.fdg"></script>
 <!--
+<script src="graphs\RipVanWinkle.fdg"></script>
 <script src="graphs\psychology.fdg"></script>
 <script src="graphs\hamlet.fdg"></script> 
 -->

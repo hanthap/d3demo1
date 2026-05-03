@@ -8,6 +8,9 @@ function main() {
     console.log(graph);
 
 }
+// const wbExtra = parsed_json.setPrototype('Workbook');
+// wbExtra.restorePrototypes();
+// console.log(wbExtra);
 
 // -------------------------------------------------------------------------
 
