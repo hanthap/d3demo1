@@ -292,8 +292,8 @@ class Workbook {  // includes formatting info as well as data & forces
       this.linkTypes = {default: new LinkType({xid:'Unknown', uid:'default'},this)}; 
       this.hyperEdges = {};
       this.nodeTypes = {
-          default: new NodeType({xid:'Unknown'},this),
-          junction: new NodeType({xid:'Junction'},this)
+          default: new NodeType({xid:'Unknown',uid:'default'},this),
+          junction: new NodeType({xid:'Junction',uid:'junction'},this)
         }; 
       this.images = {default: new Image('tba.svg',this)};
       this.layers = {default: new LayerDatum('default',this)};
