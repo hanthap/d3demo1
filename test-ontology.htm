@@ -3,9 +3,9 @@ Upload .ont Ontologies: <input type="file" title="Ontology" id="fileInput" accep
 
 Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=".fdg" multiple><br>
 
-<button type="button" onclick="graph.downloadFdg()">Download Graphs (.fdg)</button><br>
+<button type="button" onclick="current_graph.downloadFdg()">Download Graphs (.fdg)</button><br>
 
-<button type="button" onclick="create_view(graph)">Visualise graph</button><br>
+<button type="button" onclick="create_view(current_graph)">Visualise graph</button><br>
 
 <button type="button" onclick="main()">main()</button><br>
 
@@ -289,7 +289,7 @@ class Workbook {  // includes formatting info as well as data & forces
       this.name = 'New Workbook';
       this.nodes = {};
       this.links = {};
-      this.linkTypes = {default: new LinkType({xid:'Unknown'},this)}; 
+      this.linkTypes = {default: new LinkType({xid:'Unknown', uid:'default'},this)}; 
       this.hyperEdges = {};
       this.nodeTypes = {
           default: new NodeType({xid:'Unknown'},this),
@@ -832,6 +832,7 @@ class NodeDatum {
   restoreBindings(graph) { 
     this.bind(graph);
     this.bindLayer(graph);
+    this.setSubClass();
   }
 
 
@@ -852,7 +853,7 @@ class NodeDatum {
   
   setSubClass() { 
     // TODO: decide which subclass I belong to, based on current properties
-    const newSubClass= this.x < 0.4 ? RectangleDatum : CircleDatum; 
+    const newSubClass= this._hyperEdge ? JunctionDatum : this.x < 0.4 ? RectangleDatum : CircleDatum; 
     Object.setPrototypeOf(this,newSubClass.prototype);      // de-optimises. not recommended when performance matters
     return this;
   }
@@ -1270,7 +1271,6 @@ class HyperEdge // extends Path ?
    
     console.assert(links_arr instanceof Array);
     console.assert(links_arr.length > 0); // at least one link 
-    console.assert(links_arr.filter(d=>d._hyperEdge).length==0); // fail if any link is already part of another HyperEdge, 
     console.assert(graph instanceof Workbook);
     this.name = RandomId('H');
     this.uidLinks = new Set();
@@ -1281,6 +1281,9 @@ class HyperEdge // extends Path ?
       console.assert(link instanceof LinkDatum);
       this.uidLinks.add(link.uniqueId());
       this._links[link.uniqueId()] = link;
+      // TODO: how to handle cases where the link is already part of another HyperEdge?
+      // without this assert we simply create a new hyperedge - but expanding the old one seems more appropriate
+      console.assert(links_arr.filter(d=>d._hyperEdge).length==0); // fail if any link is already part of another HyperEdge, 
       link._hyperEdge = this; // if defined and not null <=> the link is part of a hyperedge
       });
     this._workbook = graph; // do we really need this?
@@ -1293,6 +1296,21 @@ uniqueId() { return this.uid };
 restorePrototypes(graph) {
   this.uidJunctions = new Set(this.uidJunctions);
   this.uidLinks = new Set(this.uidLinks);
+}
+
+restoreBindings(graph) {
+  this._links = {}; 
+  this._junctions = {};
+  this.uidLinks.forEach(uid => { 
+    this._links[uid] = graph.links[uid];
+    graph.links[uid]._hyperEdge = this;
+  }   );
+  this.uidJunctions.forEach(uid => {
+    this._junctions[uid] = graph.nodes[uid];
+    graph.nodes[uid]._hyperEdge = this;
+    Object.setPrototypeOf(graph.nodes[uid],JunctionDatum.prototype);
+    }
+  );
 }
 
 getMembers() {
@@ -1312,6 +1330,7 @@ addJunction() {
   const junction_spec = { id: RandomId('J'), name: 'New junction' };
   const node_type = graph.nodeTypes.junction;
   const new_node = graph.addNode(junction_spec,node_type);
+  new_node._hyperEdge = this;
   Object.setPrototypeOf(new_node,JunctionDatum.prototype);
   this._junctions[new_node.uniqueId()] = new_node;
   this.uidJunctions.add(new_node.uniqueId()); 
@@ -1335,14 +1354,18 @@ class Scene { // aka Context
 
 //============================================================
 
-class Path { // a distinct narrative, storyline, trace, trail, thread, hypothesis, causal pathway, channel, chain (of events), causation, aetiology
+class Path { 
+// a distinct narrative, storyline, trace, trail, thread, hypothesis, 
+// causal pathway, channel, chain (of events), causation, aetiology, line of reasoning
+// explicit sequence
+
   // a curated series of links & hyperedges, hand-picked from multiple scenes, layers, episodes, sources
   // SHOULD be a single unbroken DAG connected end-to-end, but can we guarantee it?
   constructor(graph) {
     this.name = RandomId('P');
     this.uidLinks = new Set();
     this.uidHyperEdges = new Set();
-    this._links = {};
+    this._links ={};
     this._hyperEdges = {};
     this.uid = hashString(this.name);
   }
@@ -1351,6 +1374,13 @@ class Path { // a distinct narrative, storyline, trace, trail, thread, hypothesi
       this.uidLinks = new Set(this.uidLinks);
       this.uidHyperEdges = new Set(this.uidHyperEdges);
   }
+
+restoreBindings(graph) {
+  this._links = {}; 
+  this._hyperEdges = {};
+  this.uidLinks.forEach(uid => this._links[uid] = graph.links[uid]);
+  this.uidHyperEdges.forEach(uid => this._hyperEdges[uid] = graph.hyperEdges[uid]);
+}
 
   addLinks(links_arr) {
     links_arr.forEach(obj => { 

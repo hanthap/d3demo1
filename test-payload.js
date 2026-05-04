@@ -3,9 +3,9 @@ var ont, selPara;
 // graph = Object.values(Workspace.graphs)[0];
 
 function main() {
-    embellish_graph(graph) ;
-    embellish_path(graph) ;
-    console.log(graph);
+    embellish_graph(current_graph) ;
+    embellish_path(current_graph) ;
+    console.log(current_graph);
 
 }
 // const wbExtra = parsed_json.setPrototype('Workbook');
@@ -75,6 +75,32 @@ function embellish_path(graph) {
     const edge = graph.addHyperEdge([link]);
 
 
+// select a link and give it an elbow 
+// if the selected link is already part of a hyperedge, then add the new elbow and its extra sub-link
+// else, create a new hyperedge out of all 3 components
+
+// drag & drop one end of an existing link
+// if dropping onto a link, then give that link a new elbow (see above) and continue
+// if dropping onto a junction, then 
+// then update the dragged link;
+//  if it's part of a hyperedge, 
+// (continue as for )
+// also 
+
+
+// if both ends are junction nodes, then merge their hyperedges into one. 
+
+
+
+// create a new junction node J and insert it at the midpoint of L 
+// given an existing vertex node V, insert it as-is at the midpoint of L without removing its other connections)
+// 
+
+// create a hyperedge from a given set of nodes (converting them all to junctions)
+// if the new
+// automatically all their in & out links are bound to the new hyperedge 
+// if they're already 
+// convert a link to a hyperedge  (create a junction node and insert it)
 edge.addJunction(); 
 
 const path = Object.values(graph.paths)[0];
