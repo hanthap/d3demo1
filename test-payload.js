@@ -1,6 +1,6 @@
 
-var graph, ont, selPara;
-graph = Object.values(Workspace.graphs)[0];
+var ont, selPara;
+// graph = Object.values(Workspace.graphs)[0];
 
 function main() {
     embellish_graph(graph) ;

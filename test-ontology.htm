@@ -15,7 +15,7 @@ Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=
 
 <script>
 
-
+var current_graph;
 
 
 //----------------------------------------------------------
@@ -70,11 +70,10 @@ async function OnChange() {
     new_graph.mergeOntology(ont);
     new_graph.name = 'New workbook from ' + ont.name;
     Workspace.graphs[new_graph.uniqueId()] = new_graph;
+    current_graph = new_graph;
   });
 
   console.log(Workspace.ontologies,Workspace.graphs);
-  const graphs = Object.values(Workspace.graphs);
-  graph = graphs[graphs.length-1];
 
 }
 
@@ -91,8 +90,7 @@ async function OnChangeGraph() {
   console.log(Workspace.graphs);
 
   // set graph to the most recent one 
-  const graphs = Object.values(Workspace.graphs);
-  graph = graphs[graphs.length-1];
+
 
 
 }
@@ -263,13 +261,11 @@ class Workspace {
     const file = { name: filename, lastModifiedDate: dateString };
     const source = new Source(file,'Workbook');
     Object.setPrototypeOf(json_obj,Workbook.prototype);
-   //json_obj.restorePrototypes(); 
-   //json_obj.restoreBindings(); 
-
+    json_obj.restorePrototypes();
     console.log('hello',json_obj);
-    //return;
-    graph.upsertFromFdg(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
-    Workspace.graphs[graph.uniqueId()] = graph;
+    current_graph = json_obj;
+//    graph.upsertFromFdg(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
+    Workspace.graphs[json_obj.uniqueId()] = json_obj;
   }
 
 }
@@ -325,7 +321,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
   restoreObjectAs(obj,class_name) {
       Object.setPrototypeOf(obj,class_name.prototype);
-      if (obj.restorePrototypes) obj.restorePrototypes();
+      if (obj.restorePrototypes) obj.restorePrototypes(this);
       if (obj.restoreBindings) obj.restoreBindings(this);
       };
 
@@ -828,8 +824,8 @@ class NodeDatum {
   toString() { return `${this._nodeType.toString()}: ${this.base.toString()}` }
   getParent() { return WeakBind.parentOf.get(this) }
 
-  restorePrototypes() { 
-    restoreObjectAs(this.base,Entity); 
+  restorePrototypes(graph) { 
+    graph.restoreObjectAs(this.base,Entity); 
   }
 
   // standardised method name called via restorePrototypes() helper function, after restorePrototyes
@@ -1215,8 +1211,8 @@ class LinkDatum {
   uniqueId() { return this.keys.uidThis } 
   // this only works when merging Ontology. not when rehydrating a saved Graph json
 
-  restorePrototypes() { 
-    castObjectAs(this.base,Relation); 
+  restorePrototypes(graph) { 
+    graph.restoreObjectAs(this.base,Relation); 
   }
 
   restoreBindings(graph) { // new standard
@@ -1294,7 +1290,7 @@ class HyperEdge // extends Path ?
 
 uniqueId() { return this.uid };
 
-restorePrototypes() {
+restorePrototypes(graph) {
   this.uidJunctions = new Set(this.uidJunctions);
   this.uidLinks = new Set(this.uidLinks);
 }
@@ -1351,7 +1347,7 @@ class Path { // a distinct narrative, storyline, trace, trail, thread, hypothesi
     this.uid = hashString(this.name);
   }
 
-  restorePrototypes() {
+  restorePrototypes(graph) {
       this.uidLinks = new Set(this.uidLinks);
       this.uidHyperEdges = new Set(this.uidHyperEdges);
   }
