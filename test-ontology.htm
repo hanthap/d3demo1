@@ -929,6 +929,11 @@ class RectangleDatum extends NodeDatum {
 // scale can be zoomed with mouse wheel
 
 class CollapsedRectangleDatum extends RectangleDatum {
+// In graph theory and network science, a SUPERNODE is a collapsed subgraph treated as a single node.
+// internal structure hidden or shown on demand
+// selection/visibility applies to the whole unit
+// edges connect to the supernode, not its internals
+// expansion reveals the internal DAG
 
   restoreFrame() {
     // swap left,top,width,height into D3's node attributes
@@ -941,6 +946,8 @@ class CollapsedRectangleDatum extends RectangleDatum {
 //============================================================
 // handles foreignObject with html banner, stub, thumbnail and body 
 // also preserves collapsed width,height for next zoom-out action
+
+// In graph theory and network science, a SUPERNODE is a collapsed subgraph treated as a single node.
 
 class ExpandedRectangleDatum extends RectangleDatum {
 
@@ -1044,8 +1051,8 @@ class LayerDatum {
       types: new Set([class_name]),
       nesting: { 
           enabled: false, // true <=> a non-empty node opens to an Euler region/contour
-          closed: true, // true => a non-empty node initially display as collasped (rect)
-          reversed: false // true <=> the 'from' node is logically the superset in each pair (normally the subset/element)
+          closed: true, // true => a non-empty node initially display as supernode (collasped rect)
+          reversed: false // true <=> the 'from' node is logically the parent supernode in each pair (normally the subset/element)
       },
       hyperEdge_ok: true, // instances may be added to a HyperEdge
       limit: { max_out_links: 2 }, 
@@ -1177,7 +1184,7 @@ class Relation {
   uniqueId() { return this.keys.uid } 
   toString() { return `${this._baseFrom.toString()} | ${this._baseType.toString()} | ${this._baseTo.toString()}` }
 
-  // adapt to various names used in the source JSON data
+  // adapt to various names/structures found in the source JSON ontology 
 
   typeId() { return this.keys.xidRelnType }
   fromId() { return this.keys.xidEntityFrom }
@@ -1210,7 +1217,6 @@ class LinkDatum {
   toString() { return `${this._datumFrom.toString()} | ${this._linkType.toString()} | ${this._datumTo.toString()}` } 
   setLinkType(linkType) { this._linkType = linkType; return this; }
   uniqueId() { return this.keys.uidThis } 
-  // this only works when merging Ontology. not when rehydrating a saved Graph json
 
   restorePrototypes(graph) { 
     graph.restoreObjectAs(this.base,Relation); 
@@ -1259,13 +1265,61 @@ class LinkDatum {
 
 //============================================================
 // a HyperEdge is like a mini-Path, with these special properties:
+// a "bipartite representation" meaning each connection is treated as a separate edge
 // * all members share the same LayerDatum (set per HyperEdge?)
 // * any internal vertices must be junctions, never containers. 
+// Question - can hyperedges contain more than one junction node?
+// Copilot says no. Usual approach is to use 2 hyperedges
+// formally, hyperedges can't connect directly - they can only connect to vertices
+// so maybe my impure notion of a hyperedge in bipartite representation with 2 junction nodes
+
+/*
+
+Your “mini‑DAG encapsulated as a single object with special behaviour” corresponds to:
+
+A compound hyperedge / supernode / graph module / nonterminal hyperedge / hyperedge replacement symbol (not 'unit')  
+— a structured relational object that behaves like a hyperedge externally but contains internal DAG structure.
+
+This is a recognised and well‑studied idea across:
+
+graph grammars
+categorical hypergraphs
+workflow modelling
+factor graphs
+hierarchical graph visualisation
+*/
+
 // * so, no expand/collapse behaviour inside a hyperEdge
 // * select/unselect is all-or-nothing (one click applies to ALL end nodes & junctions)
 // An extra SVG container <g> element might help achieve that.
 // Can be added to a Path (like LinkDatum)
-class HyperEdge // extends Path ?
+
+
+class HyperEdge // class includes basic (single-junction) hyperedge AND 'compound' hyperedge (intermediate junction nodes) 
+// complex =  "HRG nonterminal" (from hyperedge replacement grammar), (aka compound, complex, structured, or nested hyperedge)
+// "nonterminal" is from string parsing. eg a '<verb phrase>' that expands into sub-elements
+// extends Path ? 
+// A compound hyperedge is a hyperedge that internally contains:
+// intermediate nodes
+// internal directed structure
+// constraints
+// ordering
+
+// Hyperedge Replacement Grammars (HRGs)
+// This is a formalism where a hyperedge can be replaced by an entire graph fragment.
+
+// Your “mini‑DAG encapsulated as a single object” is precisely an HRG nonterminal.
+
+// Externally: it behaves like a hyperedge.
+// Internally: it is a graph.
+
+// Feder & Pavlidis (1970s)
+// Bauderon & Courcelle (1980s)
+// Engelfriet & Rozenberg (1990s)
+// Habel, Heckel, Plump (algebraic graph transformation)
+// Drewes, Hoffmann, Kreowski (modern HRG theory)
+
+
 { 
   constructor(links_arr,graph)  { 
    
@@ -1281,7 +1335,7 @@ class HyperEdge // extends Path ?
       console.assert(link instanceof LinkDatum);
       this.uidLinks.add(link.uniqueId());
       this._links[link.uniqueId()] = link;
-      // TODO: how to handle cases where the link is already part of another HyperEdge?
+      // TODO: how to handle cases where the link is already part of another HRU?
       // without this assert we simply create a new hyperedge - but expanding the old one seems more appropriate
       console.assert(links_arr.filter(d=>d._hyperEdge).length==0); // fail if any link is already part of another HyperEdge, 
       link._hyperEdge = this; // if defined and not null <=> the link is part of a hyperedge
@@ -1292,6 +1346,20 @@ class HyperEdge // extends Path ?
 }
 
 uniqueId() { return this.uid };
+
+arity() { return 3 }; // the number of vertices in the hyperedge 2 → ordinary edge; 3 → ternary hyperedge
+
+tail() { return [] } // input vertices
+head() { return [] } // output vertices 
+
+roles() { return {} } // When a hyperedge is labelled or typed, each vertex can have a role within the hyperedge.
+// a predicate (the relation type)
+// arguments (the vertices)
+// roles (the semantic positions)
+// example: [Buyer: Alice, Seller: Bob, Item: Book]
+pins() { return {} }; // aka roles individual connections (ordinary links) between a hyperedge and its vertices
+ports() { return {} }; // aka attachment points
+// "role-labelled incidence edges"
 
 restorePrototypes(graph) {
   this.uidJunctions = new Set(this.uidJunctions);
@@ -1395,8 +1463,6 @@ restoreBindings(graph) {
         this._hyperEdges[obj.uniqueId()] = obj;
         this.uidHyperEdges.add(obj.uniqueId());
   }
-
-
 
   uniqueId() { return this.uid };
   linkData() { return Object.values(this.links) }
