@@ -645,7 +645,7 @@ class Workbook {  // includes formatting info as well as data & forces
         xidRelnType:  base?.keyId()
       }
     }
-
+    Object.setPrototypeOf(obj,LinkDatum.prototype); // cheat the constructor
     const new_LinkDatum = new LinkDatum(obj,this);
     //new_LinkDatum.setLinkType(linkType);
     return this.links[new_LinkDatum.uniqueId()] = new_LinkDatum;
@@ -835,7 +835,7 @@ class NodeDatum {
 
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
   toString() { return `${this._nodeType.toString()}: ${this.base.toString()}` }
-  getParent() { return WeakBind.parentOf.get(this) }
+  getWorkbook() { return WeakBind.parentOf.get(this) }
 
   restorePrototypes(graph) { 
     graph.restoreObjectAs(this.base,Entity); 
@@ -867,11 +867,11 @@ class NodeDatum {
   setSubClass() { 
     // TODO: decide which subclass I belong to, based on current properties
     const newSubClass= 
-      this.x < 0.2 ? RectangleDatum : 
-      this.x < 0.4 ? CircleDatum : 
-      this.x < 0.6 ? ContourDatum : 
-      this.x < 0.8 ? HyperEdgeDatum : 
-      JunctionDatum ;  // if parent is a HyperEdge 
+      this._nodeType.uid == 'hyperedge' ? HyperEdgeDatum :
+      this._nodeType.uid == 'junction' ? JunctionDatum :
+      this.x < 0.4 ? RectangleDatum : 
+      this.x < 0.7 ? CircleDatum : 
+       ContourDatum ;
     Object.setPrototypeOf(this,newSubClass.prototype);      // de-optimises. not recommended when performance matters
     return this;
   }
@@ -881,6 +881,9 @@ class NodeDatum {
     this.images[obj.uniqueId()] = obj;
     return this;
  }
+
+
+
  }
 
 //============================================================
@@ -1058,11 +1061,10 @@ class LayerDatum {
       class_name: class_name,
       types: new Set([class_name]),
       nesting: { 
-          enabled: false, // true <=> a non-empty node opens to an Euler region/contour
-          closed: true, // true => a non-empty node initially display as supernode (collasped rect)
+          enabled: false, // true <=> a non-empty supernode restores to an enclosure (liquid Euler contour or static box)
+          closed: true, // true => a non-empty node initially displays as minimised supernode (collasped rect)
           reversed: false // true <=> the 'from' node is logically the parent supernode in each pair (normally the subset/element)
       },
-      hyperEdge_ok: true, // instances may be added to a HyperEdge
       limit: { max_out_links: 2 }, 
         // example only : "a person can have no more than 2 biological parents" 
 
@@ -1071,7 +1073,7 @@ class LayerDatum {
           stroke: 'black'
       },
       image: graph.getDefaultImage(),
-      frame: { bannerHeight: 30, stubWidth: 30, margin: 5 }
+      margin: { banner: 30, stub: 30, default: 5 }
     }
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
@@ -1111,7 +1113,7 @@ class RelationType {
   keyId() { return this.xid }
   uniqueId() { return this.uid } 
   toString() { return this.label ?? this.xid }
-  getParent() { return WeakBind.parentOf.get(this) }
+  getOntology() { return WeakBind.parentOf.get(this) }
 
 }
 
@@ -1131,7 +1133,7 @@ class EntityType {
   keyId() { return this.xid } 
   uniqueId() { return this.uid } 
   toString() { return this.label ?? this.xid }
-  getParent() { return WeakBind.parentOf.get(this) }
+  getOntology() { return WeakBind.parentOf.get(this) }
 
 }
 
@@ -1166,7 +1168,7 @@ class Entity {
   uniqueId() { return this.uid } // used by d3, and to safely bind across ontologies without name collisions
   bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
   toString() { return `${this.txtName}: ${this.txtNote}` } // NodeDatum.toString() will add descriptor via _datumType
-  getParent() { return WeakBind.parentOf.get(this) }
+  getOntology() { return WeakBind.parentOf.get(this) }
 }
 
 //============================================================
@@ -1203,7 +1205,7 @@ class Relation {
     this._baseType = ont.getRelationType(this.typeId());
   }
 
-  getParent() { return WeakBind.parentOf.get(this) }
+  getOntology() { return WeakBind.parentOf.get(this) }
 
 }
 
@@ -1213,10 +1215,16 @@ class Relation {
 
 class LinkDatum {  
  constructor(obj,graph) {
-    if (obj instanceof Relation) this.base = obj; 
-    else Object.assign(this,obj);
+    if (obj instanceof Relation) {
+      this.base = obj; 
+      this.collectKeys(graph);
+    } else if (obj instanceof LinkDatum) {
+      // copy keys by value
+      this.keys = {...obj.keys, uidThis: hashString(RandomId('L'))};
 
-    this.collectKeys(graph);
+      }
+    // else assign(this,obj);
+
     this.restoreBindings(graph); 
     
     this.y = Math.random(); 
@@ -1228,10 +1236,10 @@ class LinkDatum {
   uniqueId() { return this.keys.uidThis } 
 
   restorePrototypes(graph) { 
-    graph.restoreObjectAs(this.base,Relation); 
+    if (this.base) graph.restoreObjectAs(this.base,Relation); 
   }
 
-  restoreBindings(graph) { // new standard
+  restoreBindings(graph) { 
       this._datumFrom = graph.nodes[this.keys.uidDatumFrom];
       this._datumTo = graph.nodes[this.keys.uidDatumTo];
       this._linkType = graph.linkTypes[this.keys.uidLinkType];
@@ -1241,35 +1249,37 @@ class LinkDatum {
   collectKeys(graph) {  // TODO: use _datumFrom instead of base 
     // capture robust keys to enable re-binding eg after ontology is refreshed
 
-    if (this.base) {
 
-      this.keys = this.keys ?? {
+    // TODO: for now, the primary key (uidThis) doesn't change even after endpoints are modified
+    // => user edits could result in logically identical links with distinct uids.  Is that reasonable?
+    // I think there should be an immediate "duplicate key violation" error if they try that.
+    const saved_uidThis = this.keys ? this.keys.uidThis : null;
+
+    if (this.base && this.base._baseFrom)
+      this.keys = {
         uidDatumFrom: this.base._baseFrom.uniqueId(),
         uidDatumTo:   this.base._baseTo.uniqueId(),
         uidLinkType:  this.base._baseType.uniqueId(),
         uidBase:      this.base.uniqueId(),
         xidRelnType:  this.base._baseType.keyId()
+
       };
-
-    } else if (this._datumFrom) {
-
-      this.keys = this.keys ?? {
+  
+  // in case this is a split link, we need to override with the current to & from nodes (not rely on original base)
+    if (this._datumFrom) 
+      this.keys = {
         uidDatumFrom: this._datumFrom.uniqueId(),
         uidDatumTo:   this._datumTo.uniqueId(),
-        uidLinkType:  this._linkType.uniqueId(),
-        uidBase:      null,
-        xidRelnType:  null
+        uidLinkType:  this._linkType.uniqueId()
       };
 
-    }
-
-    this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
+    this.keys.uidThis = saved_uidThis ?? hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
 
   }
 
   bindLayer(graph) { this._datumLayer = graph.getLayer(this.keys.xidRelnType) }
 
-  getParent() { return WeakBind.parentOf.get(this) }
+  getWorkbook() { return WeakBind.parentOf.get(this) }
 
   getHyperEdge() { return this._hyperEdge }
 
@@ -1277,41 +1287,45 @@ class LinkDatum {
   
   copyTo(graph) {
     console.assert(graph instanceof Workbook);
-    const obj = new LinkDatum(this.base,graph);
+    const obj = new LinkDatum(this,graph);
     obj.keys.uidThis = hashString(RandomId('L'));  // needs a new uid to avoid overwriting
+
+
+
+
     graph.links[obj.uniqueId()] = obj;
     return obj;
   }
 
 //-----------------------------------------------
-// insert node as elbow (involves splitting this link into 2)
-// if node is not provided, we create a new one on the spot 
-// either way, node is then cast as JunctionDatum 
+// insert jnode as 'elbow' (involves splitting this link into 2)
+// if jnode is not provided, we create a new one on the spot 
+// either way, jnode is then cast as JunctionDatum 
 // if this link is already part of a hyperedge, we add jnode to that hyperedge (=> it becomes a compound hyperedge)
 // else, create a new hyperedge (in parent graph) and add to that (=> true hyperedge)
 // also (just for performance) bind this link (and the new bit) to the hyperedge
-  addJunction(jnode=null) {
+  interjectNode(jnode=null,graph) {
     console.assert(jnode == null || jnode instanceof NodeDatum);  
-    const graph = this.getParent();
     if (jnode == null) jnode = graph.addNode({id:RandomId('J')}, graph.nodeTypes.junction);
     Object.setPrototypeOf(jnode,JunctionDatum.prototype);
     // add the new jnode to ALL the same parents as this.
     // if the link straddles 2 non-identical sets of parents, the new jnode is adopted by all of them
     // that means their contours will suddenly have a non-empty intersection. Seems reasonable.
-    // if any of those parents is already a hyperedge, too easy
+    // if any of those parents is already a hyperedge, smooth sailing.
     // if neither is, then we need to create one, with the mew jnode as its only child
-    // so the jnode and its links behave as one 
+    // so the jnode and all its links behave as one 
     const hnode = graph.addNode({id:RandomId('H')}, graph.nodeTypes.hyperedge),
         plink = graph.addLink(jnode,hnode,graph.linkTypes.partOf);
 
     const link2 = this.copyTo(graph); // TODO: clone ALL its properties including paths, layer, & scenes bindings
-    //const e = graph.addHyperEdge([jnode])
-
+    // now interject by rebinding 1 endpoint each - remember to update our keyring!
     link2._datumFrom = jnode;
-    this.datumTo = jnode;
-    // split this link & add jnode in between
+    this._datumTo = jnode;
+    link2.collectKeys(); 
+    this.collectKeys(); 
+    // we now have hyperedge: fromNode < this - jnode - link2 > toNode
     // 
-    console.log('LinkDatum.addJunction()',jnode,link2)
+    console.log('LinkDatum.interjectNode() jnode,this,link2',jnode,this,link2)
     return jnode;
   }
 
@@ -1383,19 +1397,10 @@ class HyperEdgeDatum extends NodeDatum
 // Drewes, Hoffmann, Kreowski (modern HRG theory)
 
 { 
-//   constructor(graph)  { 
-   
-//     console.assert(graph instanceof Workbook);
-//     this.name = RandomId('H');
-//     // this.uidLinks = new Set(); for robustness we should always derive this._links starting from this._junctions
-//     this.uidJunctions = new Set();
-//     this._links = {};
-//     this._junctions = {};
-//     this._workbook = graph; // do we really need this?
-//     this.uid = hashString(this.name);
-//     graph.hyperEdges[this.uid] = this;
 
-//   } 
+  foobar() { return 'Hello hyperedge'};
+
+
 // //-------------------------------------------------------------------
 //   addLinks(links_arr) { 
 //     links_arr.forEach(link=>{
@@ -1414,7 +1419,7 @@ class HyperEdgeDatum extends NodeDatum
 
 // uniqueId() { return this.uid };
 
-// arity() { return 3 }; // the number of vertices in the hyperedge 2 → ordinary edge; 3 → ternary hyperedge
+// arity() { return 3 }; // the number of external endpoints: 2 → ordinary edge; 3 → ternary hyperedge
 
 // tail() { return [] } // input vertices
 // head() { return [] } // output vertices 
@@ -1469,7 +1474,7 @@ class HyperEdgeDatum extends NodeDatum
 
 //============================================================
 
-// addJunction() {
+// interjectNode() {
 //   const graph = this._workbook;
 //   console.assert(graph instanceof Workbook);
 //   const junction_spec = { id: RandomId('J'), name: 'New junction' };

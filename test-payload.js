@@ -64,13 +64,13 @@ function embellish_path(graph) {
         .addPath(links1)
         .addPath(links2)
         .addPath(links3);
-const jnode = link.addJunction();
+const jnode = link.interjectNode(null,graph);
 
 
 
 
-    //  junction = link.addJunction() (also creates hyperedge or updates existing one)
-    //    link.addJunction(node) 
+    //  junction = link.interjectNode() (also creates hyperedge or updates existing one)
+    //    link.interjectNode(node) 
 
 
 // select a link and give it an elbow 
