@@ -116,9 +116,9 @@ class EventListener {
 //----------------------------------------------------------
 // can drag & drop, 
 // resize (solid, restored) boundary, 
-// toggle paradigm (DAG/Euler) 
-// change phase(solid,liquid,gas), 
-// minimise/restore container 
+// toggle paradigm (graph/Euler) 
+// change phase(solid,liquid/fluid,gas/inert), 
+// minimise/restore supernode container 
 // illuminate/shade/hide, 
 // zoom & pan, change scale
 // pause/resume simulation, 
@@ -289,16 +289,19 @@ class Workbook {  // includes formatting info as well as data & forces
       this.name = 'New Workbook';
       this.nodes = {};
       this.links = {};
-      this.linkTypes = {default: new LinkType({xid:'Unknown', uid:'default'},this)}; 
-      this.hyperEdges = {};
+      this.linkTypes = {
+        default: new LinkType({xid:'Unknown', uid:'default'},this),
+        partOf: new LinkType({xid:'part-of', uid:'partOf'},this)
+      }; 
+//      this.hyperEdges = {};
       this.nodeTypes = {
-          default: new NodeType({xid:'Unknown',uid:'default'},this),
-          junction: new NodeType({xid:'Junction',uid:'junction'},this)
+        default: new NodeType({xid:'Unknown',uid:'default'},this),
+        hyperedge: new NodeType({xid:'Hyperedge',uid:'hyperedge'},this),
+        junction: new NodeType({xid:'Junction',uid:'junction'},this)
         }; 
-      this.images = {default: new Image('tba.svg',this)};
+      this.images = { default: new Image(null,this) };
       this.layers = {default: new LayerDatum('default',this)};
       this.forces = {};  
-   //   this.junctions = {};  //  a subset of nodes - do we really need it?
       this.scenes = {};
       this.paths = {};
       this.episodes = {};
@@ -345,7 +348,7 @@ class Workbook {  // includes formatting info as well as data & forces
     this.restoreValuesOf(this.nodes,NodeDatum);
     this.restoreValuesOf(this.links,LinkDatum);
    // this.restoreValuesOf(this.junctions,JunctionDatum);
-    this.restoreValuesOf(this.hyperEdges,HyperEdge);
+   // this.restoreValuesOf(this.hyperEdges,HyperEdge);
     this.restoreValuesOf(this.paths,Path);
 
     }
@@ -429,28 +432,28 @@ class Workbook {  // includes formatting info as well as data & forces
       }
     );
 
-//  hydrate hyperEdges
-    json.hyperEdges = json.hyperEdges ?? {};
-    Object.values(json.hyperEdges).forEach(d => {
-      Object.setPrototypeOf(d,HyperEdge.prototype);
-      d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.links[uid]]));
-      // TODO: save and restore junctions to/from this.nodes, no need to maintain a separate dict
-      // upcasting to regular node would require breaking the hyperedge. 
-      d._junctions = Object.fromEntries(d.uidJunctions.map(uid => [uid,this.nodes[uid]]));
-      d.uidLinks = new Set(d.uidLinks);
-      d.uidJunctions = new Set(d.uidJunctions);
+// //  hydrate hyperEdges
+//     json.hyperEdges = json.hyperEdges ?? {};
+//     Object.values(json.hyperEdges).forEach(d => {
+//       Object.setPrototypeOf(d,HyperEdge.prototype);
+//       d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.links[uid]]));
+//       // TODO: save and restore junctions to/from this.nodes, no need to maintain a separate dict
+//       // upcasting to regular node would require breaking the hyperedge. 
+//       d._junctions = Object.fromEntries(d.uidJunctions.map(uid => [uid,this.nodes[uid]]));
+//       d.uidLinks = new Set(d.uidLinks);
+//       d.uidJunctions = new Set(d.uidJunctions);
 
-      // TODO: repopulate _links based on uidLinks
-      this.hyperEdges[d.uniqueId()] = d;
-      }
-    );
+//       // TODO: repopulate _links based on uidLinks
+//       this.hyperEdges[d.uniqueId()] = d;
+//       }
+//     );
 
 //  hydrate paths - note similarity to HyperEdges
     json.paths = json.paths ?? {};
     Object.values(json.paths).forEach(d => {
       Object.setPrototypeOf(d,Path.prototype);
       d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.links[uid]]));
-      d._hyperEdges = Object.fromEntries(d.uidHyperEdges.map(uid => [uid,this.hyperEdges[uid]]));
+  //    d._hyperEdges = Object.fromEntries(d.uidHyperEdges.map(uid => [uid,this.hyperEdges[uid]]));
       d.uidLinks = new Set(d.uidLinks);
       d.uidJunctions = new Set(d.uidJunctions);
       // TODO: repopulate _links based on uidLinks
@@ -492,12 +495,12 @@ class Workbook {  // includes formatting info as well as data & forces
 //------------------------------------------------------------------
 
 
-addHyperEdge(links_arr) {
-  console.assert(links_arr instanceof Array) ;
-  const new_edge =  new HyperEdge(links_arr,this);
-  this.hyperEdges[new_edge.uniqueId()] = new_edge;
-  return new_edge;
-}
+// addHyperEdge(links_arr) {
+//   console.assert(links_arr instanceof Array) ;
+//   const new_edge =  new HyperEdge(links_arr,this);
+//   this.hyperEdges[new_edge.uniqueId()] = new_edge;
+//   return new_edge;
+// }
 
 
 //------------------------------------------------------------------
@@ -631,10 +634,20 @@ addHyperEdge(links_arr) {
 
   //---------------------------------------------------------------------------------
 
-  addLink(relationSpec,linkType) { 
-    const new_relation = Ontology.getDefault().addRelation(relationSpec);
-    const new_LinkDatum = new LinkDatum(new_relation,this);
-    new_LinkDatum.setLinkType(linkType);
+  addLink(fromNode, toNode, linkType, base=null) { 
+
+    const obj = {
+    keys: {
+        uidDatumFrom: fromNode.uniqueId(),
+        uidDatumTo:   toNode.uniqueId(),
+        uidLinkType:  linkType.uniqueId(),
+        uidBase:      base?.uniqueId(),
+        xidRelnType:  base?.keyId()
+      }
+    }
+
+    const new_LinkDatum = new LinkDatum(obj,this);
+    //new_LinkDatum.setLinkType(linkType);
     return this.links[new_LinkDatum.uniqueId()] = new_LinkDatum;
   }
 
@@ -684,14 +697,13 @@ class Ontology {
     }
   //----------------------------------------------------------
   
-  // REQUIRES that .baseFrom, .baseTo and .baseType are ALREADY defined in obj
+  // REQUIRES that .baseFrom, .baseTo and .baseType are ALREADY defined in relationSpec
   // i.e it is called from Workbook.addLink()
   addRelation(relationSpec) { 
     // 
 
     const nr = new Relation(relationSpec,this);
       this.relations[nr.keyId()] = nr;
-      //this.relations.push() .. it's not an array
     return nr;
   }
 
@@ -723,8 +735,8 @@ class Ontology {
 //----------------------------------------------------------
   
   static conformJson(json,file) {
-    // re-align high-level JSON structure ready for type-casting and binding 
-    // LLMs don't always follow a standard JSON structure & naming convention... 
+    // re-align high-level parsed JSON structure ready for type-casting and binding 
+    // LLMs don't always follow a standard structure & naming convention... 
     // Here we cater for a few variants encountered so far
 
     const 
@@ -804,15 +816,16 @@ class NodeDatum {
   constructor(obj,graph) {
     this.base = obj; // Entity
     this.x = Math.random(); 
+    console.assert(graph instanceof Workbook);
     WeakBind.parentOf.set(this,graph);
 
     // capture robust keys to enable re-binding eg after ontology is refreshed
+    
     this.keys = {
-      uidEntity: this.base.uniqueId(),
-      xidEntityType: this.base._type.keyId(),
-      uidNodeType: this.base._type.uniqueId() 
- 
-    }
+      uidEntity: this.base ? this.base.uniqueId() : hashString(RandomId('N')),
+      xidEntityType: this.base ? this.base._type.keyId() : null,
+      uidNodeType: this.base ? this.base._type.uniqueId() : 'default'
+   }
 
     this.bind(graph); // ASSUMES graph.nodeTypes is already populated
     this.bindLayer(graph);
@@ -850,10 +863,15 @@ class NodeDatum {
     this.keys.uidNodeType = nodeType.uniqueId();  // otherwise rehydration fails
     return this;
   }
-  
+
   setSubClass() { 
     // TODO: decide which subclass I belong to, based on current properties
-    const newSubClass= this._hyperEdge ? JunctionDatum : this.x < 0.4 ? RectangleDatum : CircleDatum; 
+    const newSubClass= 
+      this.x < 0.2 ? RectangleDatum : 
+      this.x < 0.4 ? CircleDatum : 
+      this.x < 0.6 ? ContourDatum : 
+      this.x < 0.8 ? HyperEdgeDatum : 
+      JunctionDatum ;  // if parent is a HyperEdge 
     Object.setPrototypeOf(this,newSubClass.prototype);      // de-optimises. not recommended when performance matters
     return this;
   }
@@ -879,10 +897,9 @@ class CircleDatum extends NodeDatum {
 
 
 //============================================================
-// a 'lite' node, ALWAYS an integral part of exactly one HyperEdge
-// all its in & out links inherit their LinkType from the HyperEdge
+// a compact node representing a MINIMISED compound hyperedge replacement 
 // it has x,y coords, COG etc like a regular NodeDatum, small radius (but also a hidden clickzone)
-// no charge or mass. 
+// no charge or mass.  
 // SVG rendering together with polylines, i.e. in front of circle & rect node elements. 
 // possible sub-classes might be 'Fork' or 'Decision' or 'logical gate'
 // may be upcast to an ordinary CircleDatum - but does that mean we have to re-think the HyperEdge membership from scratch?
@@ -890,18 +907,9 @@ class CircleDatum extends NodeDatum {
 class JunctionDatum 
   extends NodeDatum 
 { 
-  constructor(obj,graph,hyperEdge) {
-    super(obj,graph);
-    // copy the properties of objLink - including its LinkType!? 
-    console.assert(hyperEdge instanceof HyperEdge);
-//    this.name = RandomId('J');
-    this._hyperEdge = hyperEdge;
-    this.keys.uidHyperEdge = hyperEdge.uniqueId();
-//    this.uid = hashString(this.name);
-  }
 
   foobar() { return 'hello junction'}
-  //uniqueId() { return this.uid }
+
 }
 
 
@@ -1016,10 +1024,10 @@ class LinkType {
 //============================================================
 
 class Image {
-  constructor(url=null,graph) {
+  constructor(url,graph) {
 
     const obj = {
-    
+      
       img_src: url ? url :'tba.svg',
       colour: { fill: 'white', stroke: 'black'},
       transform: {
@@ -1205,7 +1213,8 @@ class Relation {
 
 class LinkDatum {  
  constructor(obj,graph) {
-    this.base = obj; // Relation
+    if (obj instanceof Relation) this.base = obj; 
+    else Object.assign(this,obj);
 
     this.collectKeys(graph);
     this.restoreBindings(graph); 
@@ -1229,15 +1238,31 @@ class LinkDatum {
       this.bindLayer(graph);
   }
 
-  collectKeys(graph) {  // TODO: use _datumFrom instead of base? 
+  collectKeys(graph) {  // TODO: use _datumFrom instead of base 
     // capture robust keys to enable re-binding eg after ontology is refreshed
-    this.keys = this.keys ?? {
-      uidDatumFrom: this.base._baseFrom.uniqueId(),
-      uidDatumTo:   this.base._baseTo.uniqueId(),
-      uidLinkType:  this.base._baseType.uniqueId(),
-      uidBase:      this.base.uniqueId(),
-      xidRelnType:  this.base._baseType.keyId()
-    };
+
+    if (this.base) {
+
+      this.keys = this.keys ?? {
+        uidDatumFrom: this.base._baseFrom.uniqueId(),
+        uidDatumTo:   this.base._baseTo.uniqueId(),
+        uidLinkType:  this.base._baseType.uniqueId(),
+        uidBase:      this.base.uniqueId(),
+        xidRelnType:  this.base._baseType.keyId()
+      };
+
+    } else if (this._datumFrom) {
+
+      this.keys = this.keys ?? {
+        uidDatumFrom: this._datumFrom.uniqueId(),
+        uidDatumTo:   this._datumTo.uniqueId(),
+        uidLinkType:  this._linkType.uniqueId(),
+        uidBase:      null,
+        xidRelnType:  null
+      };
+
+    }
+
     this.keys.uidThis = hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidLinkType);
 
   }
@@ -1250,15 +1275,44 @@ class LinkDatum {
 
   getHyperEdgeMembers() { return this._hyperEdge.getMembers() }
   
+  copyTo(graph) {
+    console.assert(graph instanceof Workbook);
+    const obj = new LinkDatum(this.base,graph);
+    obj.keys.uidThis = hashString(RandomId('L'));  // needs a new uid to avoid overwriting
+    graph.links[obj.uniqueId()] = obj;
+    return obj;
+  }
 
+//-----------------------------------------------
+// insert node as elbow (involves splitting this link into 2)
+// if node is not provided, we create a new one on the spot 
+// either way, node is then cast as JunctionDatum 
+// if this link is already part of a hyperedge, we add jnode to that hyperedge (=> it becomes a compound hyperedge)
+// else, create a new hyperedge (in parent graph) and add to that (=> true hyperedge)
+// also (just for performance) bind this link (and the new bit) to the hyperedge
+  addJunction(jnode=null) {
+    console.assert(jnode == null || jnode instanceof NodeDatum);  
+    const graph = this.getParent();
+    if (jnode == null) jnode = graph.addNode({id:RandomId('J')}, graph.nodeTypes.junction);
+    Object.setPrototypeOf(jnode,JunctionDatum.prototype);
+    // add the new jnode to ALL the same parents as this.
+    // if the link straddles 2 non-identical sets of parents, the new jnode is adopted by all of them
+    // that means their contours will suddenly have a non-empty intersection. Seems reasonable.
+    // if any of those parents is already a hyperedge, too easy
+    // if neither is, then we need to create one, with the mew jnode as its only child
+    // so the jnode and its links behave as one 
+    const hnode = graph.addNode({id:RandomId('H')}, graph.nodeTypes.hyperedge),
+        plink = graph.addLink(jnode,hnode,graph.linkTypes.partOf);
 
+    const link2 = this.copyTo(graph); // TODO: clone ALL its properties including paths, layer, & scenes bindings
+    //const e = graph.addHyperEdge([jnode])
 
-  insertNode(node) {
-    console.assert(node instanceof NodeDatum);  // does this include JunctionDatum?
-    // split this link & add node in between
-    // clone its properties including paths & scenes
+    link2._datumFrom = jnode;
+    this.datumTo = jnode;
+    // split this link & add jnode in between
     // 
-
+    console.log('LinkDatum.addJunction()',jnode,link2)
+    return jnode;
   }
 
 }
@@ -1295,7 +1349,16 @@ hierarchical graph visualisation
 // Can be added to a Path (like LinkDatum)
 
 
-class HyperEdge // class includes basic (single-junction) hyperedge AND 'compound' hyperedge (intermediate junction nodes) 
+class HyperEdgeDatum extends NodeDatum 
+// an expanded frame that looks & behaves more like a 'link' (all-or-nothing select/visible) 
+// like an expanded Euler group, BUT inert, no visible contour/rect, only the children are visible
+// frame is not in SVG *or* simulation (except maybe as a <g> element for unified CSS and selection behaviour)
+// all child nodes are small junction shapes and appear in the same Z-group as their link polylines.
+// selecting/unselecting propagates all-or-nothing to/from all adjacent nodes.
+// exposed child nodes are all mini junctions but not inert.
+
+
+// includes basic (single-junction) hyperedge AND 'compound' hyperedge (with 2+ junction nodes) 
 // complex =  "HRG nonterminal" (from hyperedge replacement grammar), (aka compound, complex, structured, or nested hyperedge)
 // "nonterminal" is from string parsing. eg a '<verb phrase>' that expands into sub-elements
 // extends Path ? 
@@ -1319,91 +1382,105 @@ class HyperEdge // class includes basic (single-junction) hyperedge AND 'compoun
 // Habel, Heckel, Plump (algebraic graph transformation)
 // Drewes, Hoffmann, Kreowski (modern HRG theory)
 
-
 { 
-  constructor(links_arr,graph)  { 
+//   constructor(graph)  { 
    
-    console.assert(links_arr instanceof Array);
-    console.assert(links_arr.length > 0); // at least one link 
-    console.assert(graph instanceof Workbook);
-    this.name = RandomId('H');
-    this.uidLinks = new Set();
-    this.uidJunctions = new Set();
-    this._links = {};
-    this._junctions = {};
-    links_arr.forEach(link=>{
-      console.assert(link instanceof LinkDatum);
-      this.uidLinks.add(link.uniqueId());
-      this._links[link.uniqueId()] = link;
-      // TODO: how to handle cases where the link is already part of another HRU?
-      // without this assert we simply create a new hyperedge - but expanding the old one seems more appropriate
-      console.assert(links_arr.filter(d=>d._hyperEdge).length==0); // fail if any link is already part of another HyperEdge, 
-      link._hyperEdge = this; // if defined and not null <=> the link is part of a hyperedge
-      });
-    this._workbook = graph; // do we really need this?
-    this.uid = hashString(this.name);
-    graph.hyperEdges[this.uid] = this;
-}
+//     console.assert(graph instanceof Workbook);
+//     this.name = RandomId('H');
+//     // this.uidLinks = new Set(); for robustness we should always derive this._links starting from this._junctions
+//     this.uidJunctions = new Set();
+//     this._links = {};
+//     this._junctions = {};
+//     this._workbook = graph; // do we really need this?
+//     this.uid = hashString(this.name);
+//     graph.hyperEdges[this.uid] = this;
 
-uniqueId() { return this.uid };
+//   } 
+// //-------------------------------------------------------------------
+//   addLinks(links_arr) { 
+//     links_arr.forEach(link=>{
+//       console.assert(link instanceof LinkDatum);
+//       //   this.uidLinks.add(link.uniqueId());
+//       this._links[link.uniqueId()] = link;
+//       // TODO: how to handle cases where the link is already part of another hyperedge
+//       // without this assert we simply create a new hyperedge - but expanding the old one seems more appropriate
+//       // if that results in 2+ junctions then technically it's not a true hyperedge
+//       // instead becomes a "hyperedge replacement" or "compound hyperedge"
+//       console.assert(links_arr.filter(d=>d._hyperEdge).length==0); // fail if any link is already part of another HyperEdge, 
+//       link._hyperEdge = this; // if defined and not null <=> the link is part of a hyperedge
+//       });
+// }
+// //-------------------------------------------------------------------
 
-arity() { return 3 }; // the number of vertices in the hyperedge 2 → ordinary edge; 3 → ternary hyperedge
+// uniqueId() { return this.uid };
 
-tail() { return [] } // input vertices
-head() { return [] } // output vertices 
+// arity() { return 3 }; // the number of vertices in the hyperedge 2 → ordinary edge; 3 → ternary hyperedge
 
-roles() { return {} } // When a hyperedge is labelled or typed, each vertex can have a role within the hyperedge.
-// a predicate (the relation type)
-// arguments (the vertices)
-// roles (the semantic positions)
-// example: [Buyer: Alice, Seller: Bob, Item: Book]
-pins() { return {} }; // aka roles individual connections (ordinary links) between a hyperedge and its vertices
-ports() { return {} }; // aka attachment points
-// "role-labelled incidence edges"
+// tail() { return [] } // input vertices
+// head() { return [] } // output vertices 
 
-restorePrototypes(graph) {
-  this.uidJunctions = new Set(this.uidJunctions);
-  this.uidLinks = new Set(this.uidLinks);
-}
+// roles() { return {} } // When a hyperedge is labelled or typed, each vertex can have a role within the hyperedge.
+// // a predicate (the relation type)
+// // arguments (the vertices)
+// // roles (the semantic positions)
+// // example: [Buyer: Alice, Seller: Bob, Item: Book]
+// pins() { return {} }; // aka roles individual connections (ordinary links) between a hyperedge and its vertices
+// ports() { return {} }; // aka attachment points
+// // "role-labelled incidence edges"
+// //-------------------------------------------------------------------
 
-restoreBindings(graph) {
-  this._links = {}; 
-  this._junctions = {};
-  this.uidLinks.forEach(uid => { 
-    this._links[uid] = graph.links[uid];
-    graph.links[uid]._hyperEdge = this;
-  }   );
-  this.uidJunctions.forEach(uid => {
-    this._junctions[uid] = graph.nodes[uid];
-    graph.nodes[uid]._hyperEdge = this;
-    Object.setPrototypeOf(graph.nodes[uid],JunctionDatum.prototype);
-    }
-  );
-}
+// restorePrototypes(graph) {
+//   this.uidJunctions = new Set(this.uidJunctions);
+// //  this.uidLinks = new Set(this.uidLinks);
+// }
+// //-------------------------------------------------------------------
 
-getMembers() {
-  const linkData =  Object.values(this._links);
-  var nodeData = linkData.map(d => [d._datumFrom,d._datumTo]);
-  nodeData = new Set(nodeData); // remove duplicates
-  nodeData = [...nodeData]; // convert to array;
-  const junctionData = nodeData.filter(d => d instanceof JunctionDatum);
-  return { linkData, nodeData, junctionData } ;
-  }
+// restoreBindings(graph) {
+//   this._links = {}; 
+//   this._junctions = {};
+//   this.uidJunctions.forEach(uid => {
+//     const j = this._junctions[uid] = graph.nodes[uid];
+//     j._hyperEdge = this;
+//     Object.setPrototypeOf(j,JunctionDatum.prototype);
+//     // debugger;
+//     // const a = graph.linkData();
+//     // const b = a.filter(d => { return (d._datumFrom === j) || (d._datumTo === j)} );
+//     graph.linkData().filter(d => d._datumFrom === j || d._datumTo === j)
+//       .forEach(d => this._links[d.uniqueId()] = d);
+//        }
+//     );
+
+//   // this.uidLinks.forEach(uid => { 
+//   //   this._links[uid] = graph.links[uid];
+//   //   graph.links[uid]._hyperEdge = this;
+//   // }   );
+
+// }
+// //-------------------------------------------------------------------
+
+// getMembers() {
+//   const linkData =  Object.values(this._links);
+//   var nodeData = linkData.map(d => [d._datumFrom,d._datumTo]);
+//   nodeData = new Set(nodeData); // remove duplicates
+//   nodeData = [...nodeData]; // convert to array;
+//   const junctionData = nodeData.filter(d => d instanceof JunctionDatum);
+//   return { linkData, nodeData, junctionData } ;
+//   }
 
 //============================================================
 
-addJunction() {
-  const graph = this._workbook;
-  console.assert(graph instanceof Workbook);
-  const junction_spec = { id: RandomId('J'), name: 'New junction' };
-  const node_type = graph.nodeTypes.junction;
-  const new_node = graph.addNode(junction_spec,node_type);
-  new_node._hyperEdge = this;
-  Object.setPrototypeOf(new_node,JunctionDatum.prototype);
-  this._junctions[new_node.uniqueId()] = new_node;
-  this.uidJunctions.add(new_node.uniqueId()); 
-  return new_node;
-}
+// addJunction() {
+//   const graph = this._workbook;
+//   console.assert(graph instanceof Workbook);
+//   const junction_spec = { id: RandomId('J'), name: 'New junction' };
+//   const node_type = graph.nodeTypes.junction;
+//   const new_node = graph.addNode(junction_spec,node_type);
+//   new_node._hyperEdge = this;
+//   Object.setPrototypeOf(new_node,JunctionDatum.prototype);
+//   this._junctions[new_node.uniqueId()] = new_node;
+//   this.uidJunctions.add(new_node.uniqueId()); 
+//   return new_node;
+// }
 
 }
 

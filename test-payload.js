@@ -38,18 +38,9 @@ new_node.setImage(img);
 
 const link_type = graph.getLinkType('child_of'); // might default if 'belongs_to' is not already registered
 
-const nodes = graph.nodeData(),
-      _baseFrom = nodes[3].base,
-      _baseTo = new_node.base,
-      _baseType = link_type,
-      // used by Relation constructor to assign xid
-      sourceEntity = _baseFrom.keyId(),
-      targetEntity = _baseTo.keyId(),
-      predicate = 'reports_to',
-      xid = predicate,
-      relationSpec = {_baseFrom,_baseTo,_baseType, sourceEntity,targetEntity,predicate};
-  
-graph.addLink(relationSpec,link_type);
+ const nodes = graph.nodeData(),
+     datumFrom = nodes[3];
+graph.addLink(datumFrom,new_node,link_type);
 
 console.log(graph);
 
@@ -66,13 +57,20 @@ function embellish_path(graph) {
         links2 = graph.linkData().filter(d => d.y > 0.6),
         links3 = graph.linkData().filter(d => d.y > 0.2 && d.y < 0.7);
 
-        link = links1[0],
+        link = links1[0];
+        
 
     graph
         .addPath(links1)
         .addPath(links2)
         .addPath(links3);
-    const edge = graph.addHyperEdge([link]);
+const jnode = link.addJunction();
+
+
+
+
+    //  junction = link.addJunction() (also creates hyperedge or updates existing one)
+    //    link.addJunction(node) 
 
 
 // select a link and give it an elbow 
@@ -101,11 +99,10 @@ function embellish_path(graph) {
 // automatically all their in & out links are bound to the new hyperedge 
 // if they're already 
 // convert a link to a hyperedge  (create a junction node and insert it)
-edge.addJunction(); 
 
 const path = Object.values(graph.paths)[0];
-path.addHyperEdge(edge);
+//path.addHyperEdge(edge);
 
-const members = edge.getMembers();
-console.log(members);
+//const members = edge.getMembers();
+//console.log(members);
 }
