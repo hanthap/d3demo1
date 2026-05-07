@@ -64,7 +64,17 @@ function embellish_path(graph) {
         .addPath(links1)
         .addPath(links2)
         .addPath(links3);
-const jnode = link.interjectNode(null,graph);
+
+const existing_node = graph.nodeData()[8];
+// const existing_node = null;
+
+const jnode = link.interjectNode(existing_node,graph);
+
+console.log('existing_node,jnode',existing_node,jnode);
+
+const anode = graph.nodeData()[10],
+      pnode = anode.addEnclosure(graph);
+console.log('anode.addEnclosure() => pnode',anode,pnode);
 
 
 

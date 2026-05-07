@@ -293,11 +293,10 @@ class Workbook {  // includes formatting info as well as data & forces
         default: new LinkType({xid:'Unknown', uid:'default'},this),
         partOf: new LinkType({xid:'part-of', uid:'partOf'},this)
       }; 
-//      this.hyperEdges = {};
       this.nodeTypes = {
-        default: new NodeType({xid:'Unknown',uid:'default'},this),
-        hyperedge: new NodeType({xid:'Hyperedge',uid:'hyperedge'},this),
-        junction: new NodeType({xid:'Junction',uid:'junction'},this)
+        default: new NodeType({xid:'Unknown',uid:'default'},this)
+        // hyperedge: new NodeType({xid:'Hyperedge',uid:'hyperedge'},this),
+        // junction: new NodeType({xid:'Junction',uid:'junction'},this)
         }; 
       this.images = { default: new Image(null,this) };
       this.layers = {default: new LayerDatum('default',this)};
@@ -613,11 +612,15 @@ class Workbook {  // includes formatting info as well as data & forces
 
     const new_nodes = Object.values(bound_ont.entities).map(obj => new NodeDatum(obj,this)); 
     new_nodes.forEach(d => this.nodes[d.uniqueId()] = d);
-    new_nodes.forEach(d => d.setSubClass()); // prototype does change, but not reflected in Edge DevTools console
-    
+    new_nodes.forEach(d => d.setSubClass()); 
+ 
     const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
     new_links.forEach(d => this.links[d.uniqueId()] = d);
   
+    new_nodes.forEach(d => d.refreshCache(this));
+    new_links.forEach(d => d.refreshCache(this));
+    
+
     return this;
 
   }
@@ -770,7 +773,7 @@ class Ontology {
           .map(([key,obj]) => new Entity(obj,ont,key)); // simple array of Entities
     }
     ont.entities = ont.entities.map(obj => [obj.keyId(),obj]);
-    ont.entities = Object.fromEntries(ont.entities); // convert to a hashtable ready to suppoprt binding
+    ont.entities = Object.fromEntries(ont.entities); // convert to a hashtable ready to support binding
 
     //----------------------------------------------------------
     ont.relations = ont.relations.map(obj => new Relation(obj,ont));
@@ -825,7 +828,14 @@ class NodeDatum {
       uidEntity: this.base ? this.base.uniqueId() : hashString(RandomId('N')),
       xidEntityType: this.base ? this.base._type.keyId() : null,
       uidNodeType: this.base ? this.base._type.uniqueId() : 'default'
-   }
+   };
+
+     this._cache = {
+      super_links: [],
+      sub_links: [],
+      in_links: [],
+      out_links: []
+    };
 
     this.bind(graph); // ASSUMES graph.nodeTypes is already populated
     this.bindLayer(graph);
@@ -846,6 +856,7 @@ class NodeDatum {
     this.bind(graph);
     this.bindLayer(graph);
     this.setSubClass();
+    this.refreshCache(graph);
   }
 
 
@@ -867,10 +878,9 @@ class NodeDatum {
   setSubClass() { 
     // TODO: decide which subclass I belong to, based on current properties
     const newSubClass= 
-      this._nodeType.uid == 'hyperedge' ? HyperEdgeDatum :
-      this._nodeType.uid == 'junction' ? JunctionDatum :
-      this.x < 0.4 ? RectangleDatum : 
-      this.x < 0.7 ? CircleDatum : 
+      this.x < 0.2 ? RectangleDatum : 
+      this.x < 0.5 ? CircleDatum : 
+      this.x < 0.8 ? JunctionDatum : 
        ContourDatum ;
     Object.setPrototypeOf(this,newSubClass.prototype);      // de-optimises. not recommended when performance matters
     return this;
@@ -882,6 +892,35 @@ class NodeDatum {
     return this;
  }
 
+  addEnclosure(graph) { // create a parent contour node encapsulating just this node
+    const 
+      pnode = graph.addNode({id:RandomId('N')}, graph.nodeTypes.default),
+      plink = graph.addLink(this,pnode,graph.linkTypes.partOf);
+    return pnode;
+  }
+
+  refreshCache(graph) {
+    const 
+      super_links = graph.linkData().filter(d => d.superNodeDatum() == this),
+      sub_links = graph.linkData().filter(d => d.subNodeDatum() == this),
+      in_links = graph.linkData().filter(d => d.toNodeDatum() == this),
+      out_links = graph.linkData().filter(d => d.fromNodeDatum() == this)
+      ;
+
+    this._cache = {
+      super_links,
+      sub_links,
+      in_links,
+      out_links
+    }
+
+  }
+
+  allSuperNodeData() {
+// assumes this._cache is up to date
+    return this._cache.super_links.map(d=>d.superNodeDatum());
+
+  }
 
 
  }
@@ -900,19 +939,21 @@ class CircleDatum extends NodeDatum {
 
 
 //============================================================
-// a compact node representing a MINIMISED compound hyperedge replacement 
+// a compact 'dot' or 'elbow', possibly representing a MINIMISED 'compound hyperedge replacement' 
 // it has x,y coords, COG etc like a regular NodeDatum, small radius (but also a hidden clickzone)
 // no charge or mass.  
+// may be floating OR static relative to its innermost containing box
+// if static, the shape still a circular dot, but with other styles of a static box outline?
 // SVG rendering together with polylines, i.e. in front of circle & rect node elements. 
+// if an inward link is activated then ALL the outward links are too
+// if the LAST inward link is deactivated the so are ALL the outward links...
+// and vice-versa for outward links.
 // possible sub-classes might be 'Fork' or 'Decision' or 'logical gate'
-// may be upcast to an ordinary CircleDatum - but does that mean we have to re-think the HyperEdge membership from scratch?
 
-class JunctionDatum 
-  extends NodeDatum 
+
+class JunctionDatum  extends NodeDatum 
 { 
-
   foobar() { return 'hello junction'}
-
 }
 
 
@@ -1061,12 +1102,15 @@ class LayerDatum {
       class_name: class_name,
       types: new Set([class_name]),
       nesting: { 
-          enabled: false, // true <=> a non-empty supernode restores to an enclosure (liquid Euler contour or static box)
+          enabled: true, // JUST FOR TESTING
+         // enabled: false, // true <=> a non-empty supernode restores to an enclosure (liquid Euler contour or static box)
           closed: true, // true => a non-empty node initially displays as minimised supernode (collasped rect)
           reversed: false // true <=> the 'from' node is logically the parent supernode in each pair (normally the subset/element)
       },
-      limit: { max_out_links: 2 }, 
-        // example only : "a person can have no more than 2 biological parents" 
+      limit: { // example only : "a person can have no more than 2 biological parents" 
+        max_supernodes: 2
+       }, 
+        
 
       colour: {  
           fill: 'white',
@@ -1244,6 +1288,7 @@ class LinkDatum {
       this._datumTo = graph.nodes[this.keys.uidDatumTo];
       this._linkType = graph.linkTypes[this.keys.uidLinkType];
       this.bindLayer(graph);
+      this.refreshCache(graph);
   }
 
   collectKeys(graph) {  // TODO: use _datumFrom instead of base 
@@ -1281,21 +1326,68 @@ class LinkDatum {
 
   getWorkbook() { return WeakBind.parentOf.get(this) }
 
-  getHyperEdge() { return this._hyperEdge }
+//-----------------------------------------------
 
-  getHyperEdgeMembers() { return this._hyperEdge.getMembers() }
-  
+  // _cache = discardable state data, derived values, subtotals, shortcuts etc 
+  // anything that may change with user clicks (but usually doesn't, therefore worth keeping)
+  // except the important ones that require extra care (_datumFrom etc.)
+  refreshCache(graph) { 
+    const
+      superNodeDatum = this.superNodeDatum(),
+      subNodeDatum = this.subNodeDatum(),
+      superNodeData =  this.allSuperNodeData();
+
+    this._cache = {
+      superNodeDatum,
+      subNodeDatum,
+      superNodeData
+      }
+
+    return this;
+  }
+
+//-----------------------------------------------
+
   copyTo(graph) {
     console.assert(graph instanceof Workbook);
     const obj = new LinkDatum(this,graph);
     obj.keys.uidThis = hashString(RandomId('L'));  // needs a new uid to avoid overwriting
-
-
-
-
     graph.links[obj.uniqueId()] = obj;
     return obj;
   }
+//-----------------------------------------------
+// returns a union of supernodes that directly contain either endpoint of this link (or both)
+// called e.g. from this.interjectNode() & this.refreshCache()
+// not counting the endpoints themselves
+// ASSUMES each NodeDatum already has an accurate _cache object
+  allSuperNodeData() {
+    const 
+      p1 = this._datumFrom.allSuperNodeData(),
+      p2 = this._datumTo.allSuperNodeData(),
+      s = new Set([...p1,...p2]);
+    return Array.from(s);
+  }
+//-----------------------------------------------
+
+  superNodeDatum() { // which one of this link's pair of endpoints is actually the container superset? (if applicable) 
+    // after adjusting for 'reversed' predicates, and disregarding any non-hiearchical predicates
+    // by convention arrow is FROM superset TO subelement
+    const nesting = this._datumLayer.nesting;
+    if (nesting.enabled) return nesting.reversed ? this._datumTo : this._datumFrom;
+    return null;
+    }
+//-----------------------------------------------
+
+  subNodeDatum() { // which one of this link's 2 endpoints is actually the nested subelement? (if applicable) 
+    const nesting = this._datumLayer.nesting;
+    if (nesting.enabled) return nesting.reversed ? this._datumFrom : this._datumTo;
+    return null;
+    }
+
+    fromNodeDatum() { return this._datumFrom }
+
+    toNodeDatum() { return this._datumTo }
+
 
 //-----------------------------------------------
 // insert jnode as 'elbow' (involves splitting this link into 2)
@@ -1304,18 +1396,53 @@ class LinkDatum {
 // if this link is already part of a hyperedge, we add jnode to that hyperedge (=> it becomes a compound hyperedge)
 // else, create a new hyperedge (in parent graph) and add to that (=> true hyperedge)
 // also (just for performance) bind this link (and the new bit) to the hyperedge
+
+
+
+/// BUT WAIT!!  Default action should NOT assume it's a junction + hyperedge scenario
+// we just want a generic node inserted here. Simple.
+// Then an optional Node method to turn it into a junction + (new) hyperedge? Not even that..
+// the generic elbow junction starts as a tiny circle (empty container) but can be expanded to reveal a mini-DAG 
+// just like a fixed or floating supernode - except the minimised shape is a "junction dot" (small circle)
+// AND all external links select/deselect as one
+// when expanded, the contour behaves like any other.
+// a hyperedge is nothing more than a rect/contour that collapses into something tiny AND selects all its external edges
+
+// similar to Windows, each node can be maximised (whole screen), restored (contour or frame), minimised (logo icon)
+// But ALSO a 'junction' (dot) - smaller than icon, and with its own distinct behaviour
+// rendered in the same foreground layer as polylines - during drag, can appear in front of icons etc.
+// its external links select/deselect as one. (i.e, just like a hyperedge)
+// or.. click one of its INWARD arrows, autoselects all the OUTWARD arrows FROM that dot (and vice versa)
+// other inward arrows remain unselected (unless the shift key is down, this causes all to select - as usual)
+/// this ONLY happens when the node status is "junction dot"
+// but NOT in paths. A path definition should be immune to node's current status.
+
+// when maximised (whole screen) it means everything not (fully?) inside is cloaked & inert
+// so a scene, episode or study is 'just' another type of maximised node.
+// only a few differences. eg sequencing of "scenes" within "episodes", within 'series' within 'shows'.
+// with time sequence being either absolute or relative to context frame.
+
+
+
+
+
+
   interjectNode(jnode=null,graph) {
     console.assert(jnode == null || jnode instanceof NodeDatum);  
     if (jnode == null) jnode = graph.addNode({id:RandomId('J')}, graph.nodeTypes.junction);
+    else { // check the existing jnode is safe to insert here...
+      console.assert(jnode != this._datumFrom);
+      console.assert(jnode != this._datumTo);
+    }
+    // default initial state is a floating 'elbow' junction
     Object.setPrototypeOf(jnode,JunctionDatum.prototype);
+
     // add the new jnode to ALL the same parents as this.
     // if the link straddles 2 non-identical sets of parents, the new jnode is adopted by all of them
     // that means their contours will suddenly have a non-empty intersection. Seems reasonable.
-    // if any of those parents is already a hyperedge, smooth sailing.
-    // if neither is, then we need to create one, with the mew jnode as its only child
-    // so the jnode and all its links behave as one 
-    const hnode = graph.addNode({id:RandomId('H')}, graph.nodeTypes.hyperedge),
-        plink = graph.addLink(jnode,hnode,graph.linkTypes.partOf);
+    
+
+
 
     const link2 = this.copyTo(graph); // TODO: clone ALL its properties including paths, layer, & scenes bindings
     // now interject by rebinding 1 endpoint each - remember to update our keyring!
@@ -1323,8 +1450,7 @@ class LinkDatum {
     this._datumTo = jnode;
     link2.collectKeys(); 
     this.collectKeys(); 
-    // we now have hyperedge: fromNode < this - jnode - link2 > toNode
-    // 
+    
     console.log('LinkDatum.interjectNode() jnode,this,link2',jnode,this,link2)
     return jnode;
   }
