@@ -566,6 +566,17 @@ class Workbook {  // includes formatting info as well as data & forces
     return this;
     }
 
+
+  //------------------------------------------------------------------
+
+  refreshAllCaches() {
+      // do links before nodes!
+      this.linkData().forEach(d => d.refreshCache(this));
+      this.nodeData().forEach(d => d.refreshCache(this));
+
+}
+
+
   //------------------------------------------------------------------
 
   downloadFdg(to_filename=null) {
@@ -831,8 +842,8 @@ class NodeDatum {
    };
 
      this._cache = {
-      super_links: [],
-      sub_links: [],
+      super_nodes: [],
+      sub_nodes: [],
       in_links: [],
       out_links: []
     };
@@ -901,15 +912,15 @@ class NodeDatum {
 
   refreshCache(graph) {
     const 
-      super_links = graph.linkData().filter(d => d.superNodeDatum() == this),
-      sub_links = graph.linkData().filter(d => d.subNodeDatum() == this),
+      super_nodes = graph.linkData().filter(d => d.subNodeDatum() == this).map(d=>d.superNodeDatum()),
+      sub_nodes = graph.linkData().filter(d => d.superNodeDatum() == this).map(d=>d.subNodeDatum()),
       in_links = graph.linkData().filter(d => d.toNodeDatum() == this),
       out_links = graph.linkData().filter(d => d.fromNodeDatum() == this)
       ;
 
     this._cache = {
-      super_links,
-      sub_links,
+      super_nodes,
+      sub_nodes,
       in_links,
       out_links
     }
@@ -918,7 +929,7 @@ class NodeDatum {
 
   allSuperNodeData() {
 // assumes this._cache is up to date
-    return this._cache.super_links.map(d=>d.superNodeDatum());
+    return this._cache.super_nodes;
 
   }
 
@@ -1102,8 +1113,8 @@ class LayerDatum {
       class_name: class_name,
       types: new Set([class_name]),
       nesting: { 
-          enabled: true, // JUST FOR TESTING
-         // enabled: false, // true <=> a non-empty supernode restores to an enclosure (liquid Euler contour or static box)
+        //  enabled: true, // JUST FOR TESTING
+          enabled: false, // true <=> a non-empty supernode restores to an enclosure (liquid Euler contour or static box)
           closed: true, // true => a non-empty node initially displays as minimised supernode (collasped rect)
           reversed: false // true <=> the 'from' node is logically the parent supernode in each pair (normally the subset/element)
       },

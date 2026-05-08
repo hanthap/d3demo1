@@ -42,6 +42,14 @@ const link_type = graph.getLinkType('child_of'); // might default if 'belongs_to
      datumFrom = nodes[3];
 graph.addLink(datumFrom,new_node,link_type);
 
+
+graph.layers.child_of.nesting.enabled = true;
+graph.layers.child_of.nesting.reversed = true;
+graph.layers.parent_of.nesting.enabled = true;
+
+
+graph.refreshAllCaches();
+
 console.log(graph);
 
 }
