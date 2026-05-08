@@ -262,6 +262,7 @@ class Workspace {
     const source = new Source(file,'Workbook');
     Object.setPrototypeOf(json_obj,Workbook.prototype);
     json_obj.restorePrototypes();
+    json_obj.refreshAllCaches();
     console.log('hello',json_obj);
     current_graph = json_obj;
 //    graph.upsertFromFdg(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
@@ -661,8 +662,10 @@ class Workbook {  // includes formatting info as well as data & forces
     }
     Object.setPrototypeOf(obj,LinkDatum.prototype); // cheat the constructor
     const new_LinkDatum = new LinkDatum(obj,this);
+    this.links[new_LinkDatum.uniqueId()] = new_LinkDatum;
+    this.refreshAllCaches();
     //new_LinkDatum.setLinkType(linkType);
-    return this.links[new_LinkDatum.uniqueId()] = new_LinkDatum;
+    return new_LinkDatum;
   }
 
   //---------------------------------------------------------------------------------
@@ -867,7 +870,7 @@ class NodeDatum {
     this.bind(graph);
     this.bindLayer(graph);
     this.setSubClass();
-    this.refreshCache(graph);
+    // this.refreshCache(graph); // not until all links are fully restored
   }
 
 
@@ -1299,7 +1302,8 @@ class LinkDatum {
       this._datumTo = graph.nodes[this.keys.uidDatumTo];
       this._linkType = graph.linkTypes[this.keys.uidLinkType];
       this.bindLayer(graph);
-      this.refreshCache(graph);
+      this.refreshCache(graph); 
+
   }
 
   collectKeys(graph) {  // TODO: use _datumFrom instead of base 
@@ -1345,13 +1349,13 @@ class LinkDatum {
   refreshCache(graph) { 
     const
       superNodeDatum = this.superNodeDatum(),
-      subNodeDatum = this.subNodeDatum(),
-      superNodeData =  this.allSuperNodeData();
+      subNodeDatum = this.subNodeDatum();
+    //  superNodeData =  this.allSuperNodeData(); // circular dedependency during rehydration
 
     this._cache = {
       superNodeDatum,
-      subNodeDatum,
-      superNodeData
+      subNodeDatum
+      //,superNodeData
       }
 
     return this;
@@ -1461,6 +1465,7 @@ class LinkDatum {
     this._datumTo = jnode;
     link2.collectKeys(); 
     this.collectKeys(); 
+    graph.refreshAllCaches();
     
     console.log('LinkDatum.interjectNode() jnode,this,link2',jnode,this,link2)
     return jnode;
