@@ -322,15 +322,15 @@ class Workbook {  // includes formatting info as well as data & forces
 // TODO: standard subsets, for consistency. eg junctionData(), uncloakedNodeData()  ???
 //------------------------------------------------------------------\
 
-  restoreObjectAs(obj,class_name) {
-      Object.setPrototypeOf(obj,class_name.prototype);
+  restoreObjectAs(obj,classDef) {
+      Object.setPrototypeOf(obj,classDef.prototype);
       if (obj.restorePrototypes) obj.restorePrototypes(this);
       if (obj.restoreBindings) obj.restoreBindings(this);
       };
 
-  restoreValuesOf(dict,class_name) {
+  restoreValuesOf(dict,classDef) {
     Object.values(dict ?? {})
-      .forEach(obj => this.restoreObjectAs(obj,class_name))
+      .forEach(obj => this.restoreObjectAs(obj,classDef))
     };
 
 
@@ -347,8 +347,6 @@ class Workbook {  // includes formatting info as well as data & forces
     this.restoreValuesOf(this.images,Image);
     this.restoreValuesOf(this.nodes,NodeDatum);
     this.restoreValuesOf(this.links,LinkDatum);
-   // this.restoreValuesOf(this.junctions,JunctionDatum);
-   // this.restoreValuesOf(this.hyperEdges,HyperEdge);
     this.restoreValuesOf(this.paths,Path);
 
     }
@@ -467,12 +465,6 @@ class Workbook {  // includes formatting info as well as data & forces
 
   }
 
-  //------------------------------------------------------------------
-
-  addBindings() {
-
-  }
-
 //------------------------------------------------------------------
 
   addLayer(name,aliases=[]) { 
@@ -492,17 +484,6 @@ class Workbook {  // includes formatting info as well as data & forces
     obj.addLinks(links);
     return this;
   }
-
-//------------------------------------------------------------------
-
-
-// addHyperEdge(links_arr) {
-//   console.assert(links_arr instanceof Array) ;
-//   const new_edge =  new HyperEdge(links_arr,this);
-//   this.hyperEdges[new_edge.uniqueId()] = new_edge;
-//   return new_edge;
-// }
-
 
 //------------------------------------------------------------------
 
@@ -537,7 +518,6 @@ class Workbook {  // includes formatting info as well as data & forces
   getNodeType(type_name) {
     const found = Object.values(this.nodeTypes)
       .filter(nt => nt.nameMatches(type_name));
-
     if (found.length == 0) return this.nodeTypes.default; // created during constructor
     else return found[0]; // just the first one 
   }
@@ -547,7 +527,6 @@ class Workbook {  // includes formatting info as well as data & forces
   getLinkType(type_name) {
     const found = Object.values(this.linkTypes)
       .filter(lt => lt.nameMatches(type_name));
-
     if (found.length == 0) return this.linkTypes.default; // created during constructor
     else return found[0]; // just the first one 
   }
@@ -556,6 +535,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
   bindAllLayers() { // to be invoked after user-initiated change of type-to-layer mapping
     Object.values(this.linkTypes).forEach(d=>d.restoreBindings(this));
+    Object.values(this.nodeTypes).forEach(d=>d.restoreBindings(this));
     return this;
     }
 
@@ -574,9 +554,7 @@ class Workbook {  // includes formatting info as well as data & forces
       // do links before nodes!
       this.linkData().forEach(d => d.refreshCache(this));
       this.nodeData().forEach(d => d.refreshCache(this));
-
 }
-
 
   //------------------------------------------------------------------
 
@@ -1053,12 +1031,18 @@ class NodeType {
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
+    this._cache = {};
+    this.restoreBindings(graph);
     return this;
   }
 
   uniqueId() { return this.uid }
+  keyId() { return this.xid }
   toString() { return this.label ?? this.xid ?? this.uid }
-  nameMatches(type_name) { return this.toString() == type_name }
+  nameMatches(xid) { return this.keyId() == xid }
+//  nameMatches(type_name) { return this.toString() == type_name }
+  restorePrototypes() { this._cache = {} }
+  restoreBindings(graph) { this._cache.datumLayer = graph.getLayer(this.xid) }
 }
 
 
@@ -1071,8 +1055,6 @@ class LinkType {
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
     this._cache = {};
     this.restoreBindings(graph);
-
-//    this.reversed = false; // true <=> verb arrow is from "target" node to "source" node (ditto for nesting hierarchy)
     return this;
   }
 
