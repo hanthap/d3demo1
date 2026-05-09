@@ -296,11 +296,11 @@ class Workbook {  // includes formatting info as well as data & forces
         default: new LinkType({xid:'Unknown', uid:'default'},this),
         partOf: new LinkType({xid:'part-of', uid:'partOf'},this)
       }; 
-      this.nodeTypes = {
-        default: new NodeType({xid:'Unknown',uid:'default'},this)
+      // this.nodeTypes = {
+      //   default: new NodeType({xid:'Unknown',uid:'default'},this)
         // hyperedge: new NodeType({xid:'Hyperedge',uid:'hyperedge'},this),
         // junction: new NodeType({xid:'Junction',uid:'junction'},this)
-        }; 
+      //  }; 
       this.forces = {};  
       this.scenes = {};
       this.paths = {};
@@ -342,7 +342,7 @@ class Workbook {  // includes formatting info as well as data & forces
     // once done, the newly-hydrated Workbook is ready to use e.g. to upsert an existing workbook.
     this.restoreValuesOf(this.sources,Source);
     this.restoreValuesOf(this.layers,LayerDatum);
-    this.restoreValuesOf(this.nodeTypes,NodeType);
+  //  this.restoreValuesOf(this.nodeTypes,NodeType);
     this.restoreValuesOf(this.linkTypes,LinkType);
     this.restoreValuesOf(this.images,Image);
     this.restoreValuesOf(this.nodes,NodeDatum);
@@ -385,11 +385,11 @@ class Workbook {  // includes formatting info as well as data & forces
 
     // ingest new nodeTypes (required before adding nodes)
 
-    Object.values(json.nodeTypes).forEach(d => {
-      Object.setPrototypeOf(d,NodeType.prototype);
-      this.nodeTypes[d.uniqueId()] = d;
-      }
-    );
+    // Object.values(json.nodeTypes).forEach(d => {
+    //   Object.setPrototypeOf(d,NodeType.prototype);
+    //   this.nodeTypes[d.uniqueId()] = d;
+    //   }
+    // );
 
     // ingest new Images
     Object.values(json.images ?? {}).forEach(d => {
@@ -497,11 +497,11 @@ class Workbook {  // includes formatting info as well as data & forces
 
 //------------------------------------------------------------------
 
-  addNodeType(obj) { 
-    if (typeof obj == 'string') obj = new NodeType(obj,this);
-    this.nodeTypes[obj.uniqueId()] = obj;
-    return this;
-  }
+  // addNodeType(obj) { 
+  //   if (typeof obj == 'string') obj = new NodeType(obj,this);
+  //   this.nodeTypes[obj.uniqueId()] = obj;
+  //   return this;
+  // }
 
   //------------------------------------------------------------------
   
@@ -515,12 +515,12 @@ class Workbook {  // includes formatting info as well as data & forces
 
   //------------------------------------------------------------------
 
-  getNodeType(type_name) {
-    const found = Object.values(this.nodeTypes)
-      .filter(nt => nt.nameMatches(type_name));
-    if (found.length == 0) return this.nodeTypes.default; // created during constructor
-    else return found[0]; // just the first one 
-  }
+  // getNodeType(type_name) {
+  //   const found = Object.values(this.nodeTypes)
+  //     .filter(nt => nt.nameMatches(type_name));
+  //   if (found.length == 0) return this.nodeTypes.default; // created during constructor
+  //   else return found[0]; // just the first one 
+ // }
 
   //------------------------------------------------------------------
 
@@ -535,7 +535,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
   bindAllLayers() { // to be invoked after user-initiated change of type-to-layer mapping
     Object.values(this.linkTypes).forEach(d=>d.restoreBindings(this));
-    Object.values(this.nodeTypes).forEach(d=>d.restoreBindings(this));
+  //  Object.values(this.nodeTypes).forEach(d=>d.restoreBindings(this));
     return this;
     }
 
@@ -594,8 +594,13 @@ class Workbook {  // includes formatting info as well as data & forces
     this.sources[bound_ont.source.uniqueId()] = bound_ont.source;
 
 
-    const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new NodeType(obj,this)); 
-    new_nodeTypes.forEach(d => this.nodeTypes[d.uniqueId()] = d);
+    // const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new NodeType(obj,this)); 
+    // new_nodeTypes.forEach(d => this.nodeTypes[d.uniqueId()] = d);
+
+
+    // concatenate classes and predicates into a generic lookup table, to be renamed accordingly
+    const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new LinkType(obj,this)); 
+     new_nodeTypes.forEach(d => this.linkTypes[d.uniqueId()] = d);
 
     const new_linkTypes = Object.values(bound_ont.predicates).map(obj => new LinkType(obj,this)); 
     new_linkTypes.forEach(d => this.linkTypes[d.uniqueId()] = d);
@@ -829,8 +834,8 @@ class NodeDatum {
       out_links: []
     };
 
-    this.bind(graph); // ASSUMES graph.nodeTypes is already populated
-    this.bindLayer(graph);
+    this.bind(graph); // ASSUMES graph.Types is already populated
+  //  this.bindLayer(graph);
 
   }
 // TODO: re-bind after ontology is reloaded.
@@ -846,19 +851,21 @@ class NodeDatum {
   // standardised method name called via restorePrototypes() helper function, after restorePrototyes
   restoreBindings(graph) { 
     this.bind(graph);
-    this.bindLayer(graph);
+ //   this.bindLayer(graph);
     this.setSubClass();
     // this.refreshCache(graph); // not until all links are fully restored
   }
 
 
-  bindLayer(graph) { // can vary during session if user edits type-to-layer mapping rules
-    this._datumLayer = graph.getLayer(this.base.typeId()); // TODO: should use _nodeType in case of name collision
-    return this;
-  }
+//   bindLayer(graph) { // can vary during session if user edits type-to-layer mapping rules
+// //    this._datumLayer = graph.getLayer(this.base.typeId()); // TODO: should use _nodeType in case of name collision
+//     this._datumLayer = graph.getLayer(this._nodeType.keyId()); 
+//     return this;
+//   }
 
   bind(graph) { // static bindings - mat
-    this._nodeType = graph.nodeTypes[this.keys.uidNodeType];
+//    this._nodeType = graph.nodeTypes[this.keys.uidNodeType];
+    this._nodeType = graph.linkTypes[this.keys.uidNodeType];
   }
 
   setNodeType(nodeType) {
@@ -886,7 +893,8 @@ class NodeDatum {
 
   addEnclosure(graph) { // create a parent contour node encapsulating just this node
     const 
-      pnode = graph.addNode({id:RandomId('N')}, graph.nodeTypes.default),
+//      pnode = graph.addNode({id:RandomId('N')}, graph.nodeTypes.default),
+      pnode = graph.addNode({id:RandomId('N')}, graph.linkTypes.default),
       plink = graph.addLink(this,pnode,graph.linkTypes.partOf);
     return pnode;
   }
@@ -1026,24 +1034,24 @@ class FrameDatum extends ExpandedRectangleDatum {
 
 //============================================================
 
-class NodeType {
-  constructor(obj,graph) {
-    Object.assign(this,obj);
-    WeakBind.parentOf.set(this,graph);
-    this.uid = this.uid ?? hashString(this.xid + graph.uid);
-    this._cache = {};
-    this.restoreBindings(graph);
-    return this;
-  }
+// class NodeType {
+//   constructor(obj,graph) {
+//     Object.assign(this,obj);
+//     WeakBind.parentOf.set(this,graph);
+//     this.uid = this.uid ?? hashString(this.xid + graph.uid);
+//     this._cache = {};
+//     this.restoreBindings(graph);
+//     return this;
+//   }
 
-  uniqueId() { return this.uid }
-  keyId() { return this.xid }
-  toString() { return this.label ?? this.xid ?? this.uid }
-  nameMatches(xid) { return this.keyId() == xid }
-//  nameMatches(type_name) { return this.toString() == type_name }
-  restorePrototypes() { this._cache = {} }
-  restoreBindings(graph) { this._cache.datumLayer = graph.getLayer(this.xid) }
-}
+//   uniqueId() { return this.uid }
+//   keyId() { return this.xid }
+//   toString() { return this.label ?? this.xid ?? this.uid }
+//   nameMatches(xid) { return this.keyId() == xid }
+// //  nameMatches(type_name) { return this.toString() == type_name }
+//   restorePrototypes() { this._cache = {} }
+//   restoreBindings(graph) { this._cache.datumLayer = graph.getLayer(this.xid) }
+// }
 
 
 //============================================================
@@ -1432,7 +1440,8 @@ class LinkDatum {
 
   interjectNode(jnode=null,graph) {
     console.assert(jnode == null || jnode instanceof NodeDatum);  
-    if (jnode == null) jnode = graph.addNode({id:RandomId('J')}, graph.nodeTypes.junction);
+ //   if (jnode == null) jnode = graph.addNode({id:RandomId('J')}, graph.nodeTypes.junction);
+    if (jnode == null) jnode = graph.addNode({id:RandomId('J')}, graph.linkTypes.junction);
     else { // check the existing jnode is safe to insert here...
       console.assert(jnode != this._datumFrom);
       console.assert(jnode != this._datumTo);

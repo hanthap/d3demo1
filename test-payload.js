@@ -29,7 +29,8 @@ graph
 
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor' };
 
-const node_type = graph.getNodeType('Person'); // might default if 'Person' is not already registered
+//const node_type = graph.getNodeType('Person'); // might default if 'Person' is not already registered
+const node_type = graph.getLinkType('Person'); // might default if 'Person' is not already registered
 const new_node = graph.addNode(node_spec,node_type);
 
 
