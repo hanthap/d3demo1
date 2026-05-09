@@ -475,8 +475,9 @@ class Workbook {  // includes formatting info as well as data & forces
 
 //------------------------------------------------------------------
 
-  addLayer(obj,aliases=[]) { 
-    if (typeof obj == 'string') obj = new LayerDatum(obj,this);
+  addLayer(name,aliases=[]) { 
+    console.assert(typeof name== 'string');
+    const obj = new LayerDatum(name,this);
     this.layers[obj.uniqueId()] = obj;
     obj.addAliases(aliases);
     return this;
@@ -1135,7 +1136,8 @@ class LayerDatum {
           stroke: 'black'
       },
       image: graph.getDefaultImage(),
-      margin: { banner: 30, stub: 30, default: 5 }
+      margin: { banner: 30, stub: 30, default: 5 },
+      uid: hashString(RandomId('T'))
     }
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
@@ -1147,7 +1149,7 @@ class LayerDatum {
     this.types = new Set(this.types); 
   }
 
-  uniqueId() { return this.class_name }
+  uniqueId() { return this.uid }
 
   addAliases(aliases) { 
     aliases.forEach(str => this.types.add(str));  

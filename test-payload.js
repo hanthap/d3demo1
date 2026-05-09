@@ -43,12 +43,15 @@ const link_type = graph.getLinkType('child_of'); // might default if 'belongs_to
 graph.addLink(datumFrom,new_node,link_type);
 
 
-graph.layers.child_of.nesting.enabled = true;
-graph.layers.child_of.nesting.reversed = true;
-graph.layers.parent_of.nesting.enabled = true;
-graph.layers.part_of.nesting.enabled = true;
-graph.layers.part_of.nesting.reversed = true;
-
+const 
+    l1 = graph.getLayer('child_of').nesting,
+    l2 = graph.getLayer('part_of').nesting,
+    l3 = graph.getLayer('parent_of').nesting;
+l1.enabled = true;
+l1.reversed = true;
+l2.enabled = true;
+l2.reversed = true;
+l3.enabled = true;
 
 graph.refreshAllCaches();
 
