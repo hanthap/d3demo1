@@ -17,27 +17,26 @@ function main() {
 function embellish_graph(graph) {
 
 graph
-  .addLayer('Person',['Party','individual'])
-  .addLayer('child_of',['son_of','daughter_of'])
-  .addLayer('parent_of',['father_of','mother_of'])
-  .addLayer('reports_to',['employee_of','works_for'])
-  .addLayer('Variable',['measure'])
-  .addLayer('Policy')
-  .addLayer('Model',['ModelClass'])
-  .addLayer('part_of',['belongs_to_class','part-of','partOf'])
-  .bindAllLayers();
+  .addTemplate('Person',['Party','individual'])
+  .addTemplate('child_of',['son_of','daughter_of'])
+  .addTemplate('parent_of',['father_of','mother_of'])
+  .addTemplate('reports_to',['employee_of','works_for'])
+  .addTemplate('Variable',['measure'])
+  .addTemplate('Policy')
+  .addTemplate('Model',['ModelClass'])
+  .addTemplate('part_of',['belongs_to_class','part-of','partOf'])
+  .bindAllTemplates();
 
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor' };
 
-//const node_type = graph.getNodeType('Person'); // might default if 'Person' is not already registered
-const node_type = graph.getLinkType('Person'); // might default if 'Person' is not already registered
+const node_type = graph.getTypeSpec('Person'); // might default if 'Person' is not already registered
 const new_node = graph.addNode(node_spec,node_type);
 
 
 const img = graph.addImage('peter.svg');
 new_node.setImage(img);
 
-const link_type = graph.getLinkType('child_of'); // might default if 'belongs_to' is not already registered
+const link_type = graph.getTypeSpec('child_of'); // might default if 'belongs_to' is not already registered
 
  const nodes = graph.nodeData(),
      datumFrom = nodes[3];
@@ -45,9 +44,9 @@ graph.addLink(datumFrom,new_node,link_type);
 
 
 const 
-    l1 = graph.getLayer('child_of').nesting,
-    l2 = graph.getLayer('part_of').nesting,
-    l3 = graph.getLayer('parent_of').nesting;
+    l1 = graph.getTemplate('child_of').nesting,
+    l2 = graph.getTemplate('part_of').nesting,
+    l3 = graph.getTemplate('parent_of').nesting;
 l1.enabled = true;
 l1.reversed = true;
 l2.enabled = true;
@@ -72,12 +71,11 @@ function embellish_path(graph) {
         links3 = graph.linkData().filter(d => d.y > 0.2 && d.y < 0.7);
 
         link = links1[0];
-        
 
     graph
-        .addPath(links1)
-        .addPath(links2)
-        .addPath(links3);
+    .addPath(links1)
+    .addPath(links2)
+    .addPath(links3);
 
 const existing_node = graph.nodeData()[8];
 // const existing_node = null;
