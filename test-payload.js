@@ -77,8 +77,8 @@ function embellish_path(graph) {
     .addPath(links2)
     .addPath(links3);
 
-const existing_node = graph.nodeData()[8];
-// const existing_node = null;
+//const existing_node = graph.nodeData()[8];
+ const existing_node = null;
 
 const jnode = link.interjectNode(existing_node,graph);
 

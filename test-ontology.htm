@@ -570,10 +570,10 @@ class Workbook {  // includes formatting info as well as data & forces
 
   //---------------------------------------------------------------------------------
 
-  addNode(entitySpec,nodeType) {
+  addNode(entitySpec) {
     const new_entity = Ontology.getDefault().addEntity(entitySpec);
     const new_NodeDatum = new NodeDatum(new_entity,this);
-    new_NodeDatum.setNodeType(nodeType);
+    new_NodeDatum.setNodeType(this.types.default);
     new_NodeDatum.setSubClass();
     return this.nodes[new_NodeDatum.uniqueId()] = new_NodeDatum;
   }
@@ -778,7 +778,8 @@ class NodeDatum {
       super_nodes: [],
       sub_nodes: [],
       in_links: [],
-      out_links: []
+      out_links: [],
+      nodeType: graph.types.default
     };
 
     this.bind(graph); // ASSUMES graph.Types is already populated
@@ -788,11 +789,14 @@ class NodeDatum {
 // TODO: re-bind after ontology is reloaded.
 
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
-  toString() { return `${this._nodeType.toString()}: ${this.base.toString()}` }
+  setCaption(txt) { this.caption = txt; return this; }
+  getName() { return `${this.caption ?? this.base.getName()}` } 
+  toString() { return `${this._cache.nodeType.toString()}: ${this.caption ?? this.base.toString()}` }
   getWorkbook() { return WeakBind.parentOf.get(this) }
 
   restorePrototypes(graph) { 
     graph.restoreObjectAs(this.base,Entity); 
+    this._cache = {};
   }
 
   // standardised method name called via restorePrototypes() helper function, after restorePrototyes
@@ -804,12 +808,12 @@ class NodeDatum {
 
 
   bind(graph) { // static bindings 
-    this._nodeType = graph.types[this.keys.uidNodeType];
+    this._cache.nodeType = graph.types[this.keys.uidNodeType] ?? graph.types.default;
   }
 
   setNodeType(nodeType) {
-    this._nodeType = nodeType;
-    this.keys.uidNodeType = nodeType.uniqueId();  // otherwise rehydration fails
+    this._cache.nodeType = nodeType;
+    this.keys.uidNodeType = nodeType?.uniqueId();  // otherwise rehydration fails
     return this;
   }
 
@@ -842,14 +846,16 @@ class NodeDatum {
       super_nodes = graph.linkData().filter(d => d.subNodeDatum() == this).map(d=>d.superNodeDatum()),
       sub_nodes = graph.linkData().filter(d => d.superNodeDatum() == this).map(d=>d.subNodeDatum()),
       in_links = graph.linkData().filter(d => d.toNodeDatum() == this),
-      out_links = graph.linkData().filter(d => d.fromNodeDatum() == this)
+      out_links = graph.linkData().filter(d => d.fromNodeDatum() == this),
+      nodeType = graph.types[this.keys.uidNodeType]
       ;
 
     this._cache = {
       super_nodes,
       sub_nodes,
       in_links,
-      out_links
+      out_links,
+      nodeType
     }
 
   }
@@ -1102,6 +1108,7 @@ class EntityType {
   keyId() { return this.xid } 
   uniqueId() { return this.uid } 
   toString() { return this.label ?? this.xid }
+
   getOntology() { return WeakBind.parentOf.get(this) }
 
 }
@@ -1137,6 +1144,8 @@ class Entity {
   uniqueId() { return this.uid } // used by d3, and to safely bind across ontologies without name collisions
   bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
   toString() { return `${this.txtName}: ${this.txtNote}` } // NodeDatum.toString() will add descriptor via _datumType
+  getName() { return this.txtName }
+  
   getOntology() { return WeakBind.parentOf.get(this) }
 }
 
@@ -1352,17 +1361,22 @@ class LinkDatum {
 
   interjectNode(jnode=null,graph) {
     console.assert(jnode == null || jnode instanceof NodeDatum);  
- //   if (jnode == null) jnode = graph.addNode({id:RandomId('J')}, graph.nodeTypes.junction);
-    if (jnode == null) jnode = graph.addNode({id:RandomId('J')}, graph.types.junction);
-    else { // check the existing jnode is safe to insert here...
+    if (jnode == null) { 
+      jnode = graph.addNode({id:RandomId('J')});
+      jnode.setCaption(`[Junction node: ${this._datumFrom.getName()} to ${this._datumTo.getName()}]`);
+    } else { // check the existing jnode is safe to insert here...
       console.assert(jnode != this._datumFrom);
       console.assert(jnode != this._datumTo);
+
     }
     // default initial state is a floating 'elbow' junction
     Object.setPrototypeOf(jnode,JunctionDatum.prototype);
 
+    if (jnode._cache.nodeType == graph.types.default) // seems reasonable to propagate link type 
+      jnode.setNodeType(this._linkType); 
+
     // add the new jnode to ALL the same parents as this.
-    // if the link straddles 2 non-identical sets of parents, the new jnode is adopted by all of them
+    // if the link straddles 2 non-identical sets of supernode parents, the new jnode is 'adopted' by all of them
     // that means their contours will suddenly have a non-empty intersection. Seems reasonable.
     
 
