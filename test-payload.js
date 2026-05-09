@@ -24,7 +24,7 @@ graph
   .addLayer('Variable',['measure'])
   .addLayer('Policy')
   .addLayer('Model',['ModelClass'])
-  .addLayer('part_of',['belongs_to_class'])
+  .addLayer('part_of',['belongs_to_class','part-of','partOf'])
   .bindAllLayers();
 
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor' };
@@ -46,6 +46,8 @@ graph.addLink(datumFrom,new_node,link_type);
 graph.layers.child_of.nesting.enabled = true;
 graph.layers.child_of.nesting.reversed = true;
 graph.layers.parent_of.nesting.enabled = true;
+graph.layers.part_of.nesting.enabled = true;
+graph.layers.part_of.nesting.reversed = true;
 
 
 graph.refreshAllCaches();

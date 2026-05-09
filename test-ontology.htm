@@ -263,7 +263,7 @@ class Workspace {
     Object.setPrototypeOf(json_obj,Workbook.prototype);
     json_obj.restorePrototypes();
     json_obj.refreshAllCaches();
-    console.log('hello',json_obj);
+    console.log('Workspace.loadGraph()',json_obj);
     current_graph = json_obj;
 //    graph.upsertFromFdg(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
     Workspace.graphs[json_obj.uniqueId()] = json_obj;
@@ -288,6 +288,8 @@ class Workbook {  // includes formatting info as well as data & forces
     }
     else {
       this.name = 'New Workbook';
+      this.images = { default: new Image(null,this) };
+      this.layers = {default: new LayerDatum('default',this)};
       this.nodes = {};
       this.links = {};
       this.linkTypes = {
@@ -299,8 +301,6 @@ class Workbook {  // includes formatting info as well as data & forces
         // hyperedge: new NodeType({xid:'Hyperedge',uid:'hyperedge'},this),
         // junction: new NodeType({xid:'Junction',uid:'junction'},this)
         }; 
-      this.images = { default: new Image(null,this) };
-      this.layers = {default: new LayerDatum('default',this)};
       this.forces = {};  
       this.scenes = {};
       this.paths = {};
@@ -525,7 +525,7 @@ class Workbook {  // includes formatting info as well as data & forces
   
   getLayer(type_name) {
     const found = Object.values(this.layers)
-      .filter(sg => sg.appliesTo(type_name));
+      .filter(layer => layer.appliesTo(type_name));
 
     if (found.length == 0) return this.layers.default;
     else return found[0]; // just the first one 
@@ -554,8 +554,7 @@ class Workbook {  // includes formatting info as well as data & forces
   //------------------------------------------------------------------
 
   bindAllLayers() { // to be invoked after user-initiated change of type-to-layer mapping
-    this.nodeData().forEach(d => d.bindLayer(this));
-    this.linkData().forEach(d => d.bindLayer(this));
+    Object.values(this.linkTypes).forEach(d=>d.restoreBindings(this));
     return this;
     }
 
@@ -1069,6 +1068,9 @@ class LinkType {
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
+    this._cache = {};
+    this.restoreBindings(graph);
+
 //    this.reversed = false; // true <=> verb arrow is from "target" node to "source" node (ditto for nesting hierarchy)
     return this;
   }
@@ -1077,6 +1079,8 @@ class LinkType {
   keyId() { return this.xid }
   toString() { return this.label ?? this.xid ?? this.uid }
   nameMatches(xid) { return this.keyId() == xid }
+  restorePrototypes() { this._cache = {} }
+  restoreBindings(graph) { this._cache.datumLayer = graph.getLayer(this.xid) }
 }
 
 //============================================================
@@ -1301,7 +1305,7 @@ class LinkDatum {
       this._datumFrom = graph.nodes[this.keys.uidDatumFrom];
       this._datumTo = graph.nodes[this.keys.uidDatumTo];
       this._linkType = graph.linkTypes[this.keys.uidLinkType];
-      this.bindLayer(graph);
+   //   this.bindLayer(graph);
       this.refreshCache(graph); 
 
   }
@@ -1337,7 +1341,7 @@ class LinkDatum {
 
   }
 
-  bindLayer(graph) { this._datumLayer = graph.getLayer(this.keys.xidRelnType) }
+  //bindLayer(graph) { this._cache.datumLayer = graph.getLayer(this.keys.xidRelnType) }
 
   getWorkbook() { return WeakBind.parentOf.get(this) }
 
@@ -1387,14 +1391,14 @@ class LinkDatum {
   superNodeDatum() { // which one of this link's pair of endpoints is actually the container superset? (if applicable) 
     // after adjusting for 'reversed' predicates, and disregarding any non-hiearchical predicates
     // by convention arrow is FROM superset TO subelement
-    const nesting = this._datumLayer.nesting;
+    const nesting = this._linkType._cache.datumLayer.nesting;
     if (nesting.enabled) return nesting.reversed ? this._datumTo : this._datumFrom;
     return null;
     }
 //-----------------------------------------------
 
   subNodeDatum() { // which one of this link's 2 endpoints is actually the nested subelement? (if applicable) 
-    const nesting = this._datumLayer.nesting;
+    const nesting = this._linkType._cache.datumLayer.nesting;
     if (nesting.enabled) return nesting.reversed ? this._datumFrom : this._datumTo;
     return null;
     }
