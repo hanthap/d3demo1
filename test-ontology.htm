@@ -1032,16 +1032,14 @@ class TemplateSpec { // aka Template
       class_name: class_name,
       types: new Set([class_name]),
       nesting: { 
-        //  enabled: true, // JUST FOR TESTING
-          enabled: false, // true <=> a non-empty supernode restores to an enclosure (elastic Euler contour or static box)
-          closed: true, // true => a non-empty node initially displays as minimised supernode (collasped rect)
-          reversed: false // true <=> the 'from' node is logically the parent supernode in each pair (normally the subset/element)
+          reversed: false, // true <=> the 'from' node is logically the subnode/element in each pair (normally the container/superset)
+          min_subnodes: 3, // restores (expands) as vertex-edge graph (NOT as frame or contour) unless N direct subnodes would be visible
+          max_subnodes: 0, // by default, minimise (collapse) any supernode if more than N direct subnodes would be visible
+          max_supernodes: 2, // per subnode. Input validation rule: eg "a Person can have no more than 2 biological Parents" 
       },
-      limit: { // example only : "a person can have no more than 2 biological parents" 
-        max_supernodes: 2
-       }, 
-        
-
+      junction: { // extra settings for a 'junction dot' (and its 'hyperedge' expansion)
+          linkTypes: { in: [], out: [] } // eg { in:[ mother,father], out: [daughter,son] }
+      },
       colour: {  
           fill: 'white',
           stroke: 'black'
