@@ -573,7 +573,7 @@ class Workbook {  // includes formatting info as well as data & forces
   addNode(entitySpec) {
     const new_entity = Ontology.getDefault().addEntity(entitySpec);
     const new_NodeDatum = new NodeDatum(new_entity,this);
-    new_NodeDatum.setNodeType(this.types.default);
+    new_NodeDatum.setTypeSpec(this.types.default);
     new_NodeDatum.setSubClass();
     return this.nodes[new_NodeDatum.uniqueId()] = new_NodeDatum;
   }
@@ -806,12 +806,11 @@ class NodeDatum {
     // this.refreshCache(graph); // not until all links are fully restored
   }
 
-
-  bind(graph) { // static bindings 
+  bind(graph) { // rehydrate static bindings 
     this._cache.nodeType = graph.types[this.keys.uidNodeType] ?? graph.types.default;
   }
 
-  setNodeType(nodeType) {
+  setTypeSpec(nodeType) {
     this._cache.nodeType = nodeType;
     this.keys.uidNodeType = nodeType?.uniqueId();  // otherwise rehydration fails
     return this;
@@ -1208,7 +1207,14 @@ class LinkDatum {
 
  }
   toString() { return `${this._datumFrom.toString()} | ${this._linkType.toString()} | ${this._datumTo.toString()}` } 
-  setTypeSpec(linkType) { this._linkType = linkType; return this; }
+  
+  setTypeSpec(linkType) { 
+    this._linkType = linkType; 
+    this.keys.uidTypeSpec = linkType?.uniqueId();  // otherwise rehydration fails
+    return this;
+   }
+
+
   uniqueId() { return this.keys.uidThis } 
 
   restorePrototypes(graph) { 
@@ -1371,7 +1377,7 @@ class LinkDatum {
     Object.setPrototypeOf(jnode,JunctionDatum.prototype);
 
     if (jnode._cache.nodeType == graph.types.default) // seems reasonable to propagate link type 
-      jnode.setNodeType(this._linkType); 
+      jnode.setTypeSpec(this._linkType); 
 
     // add the new jnode to ALL the same parents as this.
     // if the link straddles 2 non-identical sets of supernode parents, the new jnode is 'adopted' by all of them

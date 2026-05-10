@@ -30,7 +30,8 @@ graph
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor' };
 
 const node_type = graph.getTypeSpec('Person'); // might default if 'Person' is not already registered
-const new_node = graph.addNode(node_spec,node_type);
+const new_node = graph.addNode(node_spec).setTypeSpec(node_type);
+
 
 
 const img = graph.addImage('peter.svg');
