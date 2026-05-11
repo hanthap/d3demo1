@@ -187,7 +187,7 @@ static OnContextMenu(e) {
 
 //----------------------------------------------------------
 // all the above, PLUS add, change or delete links or nodes
-// CAN create new scenes, episodes & studies
+// CAN create new scenes, episodes & views
 // CAN download the enriched FDG, then close, upload & resume working later
 // BUT only one current FDG per session
 // uploading an FDG file REPLACES all in current workspace. (no merge)
@@ -319,11 +319,11 @@ class Workbook {  // includes formatting info as well as data & forces
         partOf: new TypeSpec({xid:'part-of', uid:'partOf'},this)
       }; 
       this.forces = {};  
-      this.scenes = {};
+   //   this.scenes = {};
       this.paths = {};
-      this.episodes = {};
+   //   this.episodes = {};
       this.sources = {};
-      this.studies = {}; // cf "worksheet" or "view" = annotated selection of paths, layers, episodes, scenes etc.
+      this.views = {}; // cf "worksheet" or "study" = annotated set of "path illuminations" (scenes, sub-narratives)
     }
 
   this.uid = this.uid ?? hashString(Math.random().toString());
@@ -1037,7 +1037,7 @@ class MaximisedRect extends FrameDatum {
 //============================================================
 // A 'passive' elastic Euler region (with optional thumbnail logo, header html text  but not body)
 // position and shape are dictated by all its active children (floating or fixed)
-// floating non-members are then pushed out, by custom simulation force
+// floating non-segments are then pushed out, by custom simulation force
 class FluidRect extends FrameDatum {
 
   foobar() { return 'hello FluidRect (elastic contour)'}
@@ -1529,27 +1529,27 @@ class Path {  // aka Subgraph
 
   constructor(graph) {
     this.name = RandomId('P');
-    this.keys = { uidMembers: new Set() }
-    this._cache = { members: {}};
+    this.keys = { uidSegments: new Set() }
+    this._cache = { segments: {}};
     this.uid = hashString(this.name);
   }
 
   restorePrototypes(graph) {
-      this.keys.uidMembers = new Set(this.keys.uidMembers);
-      this._cache = { members: {}};
+      this.keys.uidSegments = new Set(this.keys.uidSegments);
+      this._cache = { segments: {}};
   }
 
 restoreBindings(graph) {
-  this._cache.members = {}; 
-  this.keys.uidMembers.forEach(uid => this._cache.members[uid] = graph.paths[uid] ?? graph.links[uid] );
+  this._cache.segments = {}; 
+  this.keys.uidSegments.forEach(uid => this._cache.segments[uid] = graph.paths[uid] ?? graph.links[uid] );
 
 }
 
   addLinks(arr) {
     console.assert(Array.isArray(arr));
     arr.forEach(obj => { 
-        this._cache.members[obj.uniqueId()] = obj;
-        this.keys.uidMembers.add(obj.uniqueId());
+        this._cache.segments[obj.uniqueId()] = obj;
+        this.keys.uidSegments.add(obj.uniqueId());
         }
       )
   }
@@ -1561,13 +1561,13 @@ restoreBindings(graph) {
 
 //============================================================
 
-class Study { // aka View. Interpretation, Analysis, Discussion, Project, 
+class View { // aka Study, Interpretation, Analysis, Discussion, Project, 
   // an annotated selection of 1 or more paths. A path can appear in multiple Studies
   // each member path can be 'illuminated' or not, by setting its light status
   // user can experiment with illumination settings - the current 'lighting sequence' is saved as part of that study
   // individually tweaked illumination settings may also be captured per node or link?, along with annotations
 
-  // user can quickly switch between studies in the same workbook.
+  // user can quickly switch between views in the same workbook.
   
   // a study can illuminate links directly and attach futher meaning?
   // a study can be saved to a separate file, with references to the graph/s that need to be imported
@@ -1579,7 +1579,6 @@ class Study { // aka View. Interpretation, Analysis, Discussion, Project,
 // class Episode { // aka chapter or Act or Movement
   // a saved & named selection of scenes (or episodes), in sequence
   // tree to any depth - Table of Contents
-}
 
 //============================================================
 
