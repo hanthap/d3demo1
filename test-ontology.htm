@@ -18,6 +18,28 @@ Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=
 var current_graph;
 
 
+// node subclass depends on Phase & Shape 
+const Phase = Object.freeze({
+  GAS: 'gas',    // 'neutrino' - excluded from force simulation, even if visible
+  LIQUID: 'liquid', // elastic, floating
+  SOLID: 'solid'   // locked, fixed
+});
+
+const Shape = Object.freeze({
+  DOT: 'dot',  // junction node (with clickzone)
+  ICON: 'icon', // minimised (circle or rect, with logo)
+  RECT: 'rec', // 'restored' container (elastic contour or fixed frame)
+  MAX: 'max'   // maximised (whole viewbox)
+});
+
+const Light = Object.freeze({
+  NONE: 'none', // invisible
+  BACK: 'back', // monochrome, transparent, blurred, shadow
+  FORE: 'fore', // solid colour, opaque
+  SPOT: 'spot'  // highlight, glowing, drop shadow? 
+});
+
+
 //----------------------------------------------------------
 
 function hashString(str) {
@@ -774,6 +796,12 @@ class NodeDatum {
       uidNodeType: this.base ? this.base._type.uniqueId() : 'default'
    };
 
+   this.state = { 
+    // phase: Phase.LIQUID,
+    // shape: Shape.ICON,
+    // light: Light.BACK
+   };
+
      this._cache = {
       super_nodes: [],
       sub_nodes: [],
@@ -793,9 +821,15 @@ class NodeDatum {
   getName() { return `${this.caption ?? this.base.getName()}` } 
   toString() { return `${this._cache.nodeType.toString()}: ${this.caption ?? this.base.toString()}` }
   getWorkbook() { return WeakBind.parentOf.get(this) }
+  // searchpath for current state 
+  getPhase() { return this.state.phase ?? this.getTypeSpec().state.phase ?? this.getTemplate().state.phase }
+  getShape() { return this.state.shape ?? this.getTypeSpec().state.shape ?? this.getTemplate().state.shape }
+  getLight() { return this.state.light ?? this.getTypeSpec().state.light ?? this.getTemplate().state.light }
+  // getImage() ( return this.images)
 
   restorePrototypes(graph) { 
     graph.restoreObjectAs(this.base,Entity); 
+    if (this.keys.uidImages) this.keys.uidImages = new Set(this.keys.uidImages);
     this._cache = {};
   }
 
@@ -810,6 +844,9 @@ class NodeDatum {
     this._cache.nodeType = graph.types[this.keys.uidNodeType] ?? graph.types.default;
   }
 
+  getTemplate() { return this.getTypeSpec().getTemplate() }
+
+  getTypeSpec() { return this._cache.nodeType }
   setTypeSpec(nodeType) {
     this._cache.nodeType = nodeType;
     this.keys.uidNodeType = nodeType?.uniqueId();  // otherwise rehydration fails
@@ -817,19 +854,22 @@ class NodeDatum {
   }
 
   setSubClass() { 
-    // TODO: decide which subclass I belong to, based on current properties
-    const newSubClass= 
-      this.x < 0.2 ? RectangleDatum : 
-      this.x < 0.5 ? CircleDatum : 
-      this.x < 0.8 ? JunctionDatum : 
-      ContourDatum ;
+    // TODO: decide which subclass I belong to, based on current state ( phase, shape )
+  const phase = this.getPhase(), shape = this.getShape();
+   const newSubClass = 
+      shape == Shape.RECT ? phase == Phase.SOLID ? SolidRect : FluidRect
+    : shape == Shape.ICON ? phase == Phase.SOLID ? SolidIcon : FluidIcon   
+    : shape == Shape.DOT  ? phase == Phase.SOLID ? SolidDot  : FluidDot   
+    : MaximisedRect;
     Object.setPrototypeOf(this,newSubClass.prototype);      // de-optimises. not recommended when performance matters
     return this;
   }
 
   setImage(obj) { 
-    if (!this.images) this.images = {};
-    this.images[obj.uniqueId()] = obj;
+    if (!this._cache.images) this._cache.images = {};
+    if (!this.keys.uidImages) this.keys.uidImages = new Set();
+    this._cache.images[obj.uniqueId()] = obj;
+    this.keys.uidImages.add(obj.uniqueId());
     return this;
  }
 
@@ -837,6 +877,8 @@ class NodeDatum {
     const 
       pnode = graph.addNode({id:RandomId('N')}, graph.types.default),
       plink = graph.addLink(this,pnode,graph.types.partOf);
+      pnode.state.shape = Shape.RECT; 
+      pnode.setSubClass();
     return pnode;
   }
 
@@ -846,16 +888,18 @@ class NodeDatum {
       sub_nodes = graph.linkData().filter(d => d.superNodeDatum() == this).map(d=>d.subNodeDatum()),
       in_links = graph.linkData().filter(d => d.toNodeDatum() == this),
       out_links = graph.linkData().filter(d => d.fromNodeDatum() == this),
-      nodeType = graph.types[this.keys.uidNodeType]
-      ;
+      nodeType = graph.types[this.keys.uidNodeType],
+      images = this.keys.uidImages ? Array.from(this.keys.uidImages).map(uid => graph.images[uid]) : undefined;
 
     this._cache = {
       super_nodes,
       sub_nodes,
       in_links,
       out_links,
-      nodeType
+      nodeType,
     }
+
+    if (images) this._cache.images = images;
 
   }
 
@@ -874,9 +918,9 @@ class NodeDatum {
 // usually includes a thumbnail image clipped to a circle
 // scale can be zoomed with mouse wheel
 
-class CircleDatum extends NodeDatum {
+class FluidIcon extends NodeDatum {
   // lightweight, prototype only, assigned dynamically at runtime (not recommended in situations where performance matters)
-  foobar() { return 'hello circle'}
+  foobar() { return 'hello FluidIcon (circle)'}
 
 }
 
@@ -894,44 +938,44 @@ class CircleDatum extends NodeDatum {
 // possible sub-classes might be 'Fork' or 'Decision' or 'logical gate'
 
 
-class JunctionDatum  extends NodeDatum 
+class SolidDot extends NodeDatum 
 { 
-  foobar() { return 'hello junction'}
+  foobar() { return 'hello solid dot (junction)'}
 }
 
+class FluidDot extends SolidDot
+{ 
+  foobar() { return 'hello fluid dot (junction)'}
+}
 
 //============================================================
-// an abstract base class for container nodes
+// an abstract base class for 'open' supernode containers rect. 
 // but <rect> attributes in SVG use left,top,width,height 
 // instead of centroid (x,y) as updated by D3 simulation
 class RectangleDatum extends NodeDatum {
   foobar() { return 'hello rect'}
-
-  explodeFrame() {
-    // shrink this container node WITHOUT hiding its children, 
-    // (so they stay visible, with newly-unhidden connecting lines to the minimised container icon)
-
-  }
-
 }
+
 
 //============================================================
 // a small rect with thumbnail only (or text) but no banner or stub
 // behaves as a leaf node but can be expanded by 'zooming in'
-// may be fixed or floating
 // also preserves expanded width,height for next zoom-in action
 // usually includes a thumbnail image clipped to a rect
 // scale can be zoomed with mouse wheel
 
-class CollapsedRectangleDatum extends RectangleDatum {
+class SolidIcon extends RectangleDatum {
 // In graph theory and network science, a SUPERNODE is a collapsed subgraph treated as a single node.
 // internal structure hidden or shown on demand
 // selection/visibility applies to the whole unit
 // edges connect to the supernode, not its internals
 // expansion reveals the internal DAG
 
+  foobar() { return 'hello Solid Icon (rect)'}
+
   restoreFrame() {
     // swap left,top,width,height into D3's node attributes
+    // unhide any exposed descendants 
 
   }
 }
@@ -940,27 +984,34 @@ class CollapsedRectangleDatum extends RectangleDatum {
 // handles foreignObject with html banner, stub, thumbnail and body 
 // also preserves collapsed width,height for next zoom-out action
 
-// In graph theory and network science, a SUPERNODE is a collapsed subgraph treated as a single node.
+class FrameDatum extends RectangleDatum {
 
-class ExpandedRectangleDatum extends RectangleDatum {
+  foobar() { return 'hello FrameDatum'}
+
+  explodeFrame() {
+    // shrink this container node (to icon or dot) WITHOUT hiding its children, 
+    // (so they stay visible, with newly-unhidden connecting lines to the minimised container icon/dot)
+
+
+  }
 
   minimiseFrame() {
+    // shrink this container node to Icon (or Dot) and 
+    // HIDE its children (ONLY if they have no other visible parent frames) - and their descendants
     // swap left,top,width,height into D3's node attributes
   }
 
-}
 
-//============================================================
-// A 'passive' Euler region (with optional thumbnail logo, header html text  but not body)
-// position and shape are dictated by all its active children (floating or fixed)
-// floating non-members are then pushed out, by custom simulation force
-class ContourDatum extends ExpandedRectangleDatum {
 
 }
 
 //============================================================
+
+
+// In graph theory and network science, a SUPERNODE is a collapsed subgraph treated as a single node.
+
 // a locked/fixed rectangle (with optional thumbnail logo, header text & body)
-// left,top coords are fixed relative to its frame of reference
+// left,top coords are fixed relative to its (innermost solid) frame of reference
 // i.e. the lowest (innermost) fixed ancestor (else the viewport itself)
 // width & height are fixed (editable by mouse drag)
 // limiting the movement of its active floating children
@@ -969,9 +1020,31 @@ class ContourDatum extends ExpandedRectangleDatum {
 // can't satisfy both with nested shape. All bar one have to revert to 
 // directed lines.
 
-class FrameDatum extends ExpandedRectangleDatum {
+
+class SolidRect extends FrameDatum {
+
+  foobar() { return 'hello SolidRect (locked frame)'}
 
 }
+
+class MaximisedRect extends FrameDatum {
+
+  foobar() { return 'hello MaximisedRect (locked, full screen frame)'}
+
+}
+
+
+//============================================================
+// A 'passive' elastic Euler region (with optional thumbnail logo, header html text  but not body)
+// position and shape are dictated by all its active children (floating or fixed)
+// floating non-members are then pushed out, by custom simulation force
+class FluidRect extends FrameDatum {
+
+  foobar() { return 'hello FluidRect (elastic contour)'}
+
+
+}
+
 
 //============================================================
 // wrapper for the 'predicate' and 'class' objects from source ontology
@@ -982,6 +1055,7 @@ class TypeSpec {
     WeakBind.parentOf.set(this,graph);
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
     this._cache = {};
+    this.state = {}; 
     this.restoreBindings(graph);
     return this;
   }
@@ -990,8 +1064,9 @@ class TypeSpec {
   keyId() { return this.xid }
   toString() { return this.label ?? this.xid ?? this.uid }
   nameMatches(xid) { return this.keyId() == xid }
-  restorePrototypes() { this._cache = {} }
+  restorePrototypes() { this._cache = {}; this.state = {} }
   restoreBindings(graph) { this._cache.template = graph.getTemplate(this.xid) }
+  getTemplate() { return this._cache.template ?? graph.getTemplate(this.xid) }
 }
 
 //============================================================
@@ -1045,6 +1120,13 @@ class TemplateSpec { // aka Template
       },
       image: graph.getDefaultImage(),
       margin: { banner: 30, stub: 30, default: 5 },
+      state: { 
+        phase: Phase.LIQUID,
+        shape: Shape.ICON,
+        light: Light.BACK
+       },
+
+
       uid: hashString(RandomId('T'))
     }
     Object.assign(this,obj);
@@ -1328,7 +1410,7 @@ class LinkDatum {
 //-----------------------------------------------
 // insert jnode as 'elbow' (involves splitting this link into 2)
 // if jnode is not provided, we create a new one on the spot 
-// either way, jnode is then cast as JunctionDatum 
+// either way, jnode is then cast as LiquidDot 
 // if this link is already part of a hyperedge, we add jnode to that hyperedge (=> it becomes a compound hyperedge)
 // else, create a new hyperedge (in parent graph) and add to that (=> true hyperedge)
 // also (just for performance) bind this link (and the new bit) to the hyperedge
@@ -1374,7 +1456,7 @@ class LinkDatum {
 
     }
     // default initial state is a floating 'elbow' junction
-    Object.setPrototypeOf(jnode,JunctionDatum.prototype);
+    Object.setPrototypeOf(jnode,FluidDot.prototype);
 
     if (jnode._cache.nodeType == graph.types.default) // seems reasonable to propagate link type 
       jnode.setTypeSpec(this._linkType); 
@@ -1400,234 +1482,92 @@ class LinkDatum {
 
 }
 
-//============================================================
-// a HyperEdge is like a mini-Path, with these special properties:
-// a "bipartite representation" meaning each connection is treated as a separate edge
-// * all members share the same TemplateSpec (set per HyperEdge?)
-// * any internal vertices must be junctions, never containers. 
-// Question - can hyperedges contain more than one junction node?
-// Copilot says no. Usual approach is to use 2 hyperedges
-// formally, hyperedges can't connect directly - they can only connect to vertices
-// so maybe my impure notion of a hyperedge in bipartite representation with 2 junction nodes
-
-/*
-
-Your “mini‑DAG encapsulated as a single object with special behaviour” corresponds to:
-
-A compound hyperedge / supernode / graph module / nonterminal hyperedge / hyperedge replacement symbol (not 'unit')  
-— a structured relational object that behaves like a hyperedge externally but contains internal DAG structure.
-
-This is a recognised and well‑studied idea across:
-
-graph grammars
-categorical hypergraphs
-workflow modelling
-factor graphs
-hierarchical graph visualisation
-*/
-
-// * so, no expand/collapse behaviour inside a hyperEdge
-// * select/unselect is all-or-nothing (one click applies to ALL end nodes & junctions)
-// An extra SVG container <g> element might help achieve that.
-// Can be added to a Path (like LinkDatum)
-
-
-class HyperEdgeDatum extends NodeDatum 
-// an expanded frame that looks & behaves more like a 'link' (all-or-nothing select/visible) 
-// like an expanded Euler group, BUT inert, no visible contour/rect, only the children are visible
-// frame is not in SVG *or* simulation (except maybe as a <g> element for unified CSS and selection behaviour)
-// all child nodes are small junction shapes and appear in the same Z-group as their link polylines.
-// selecting/unselecting propagates all-or-nothing to/from all adjacent nodes.
-// exposed child nodes are all mini junctions but not inert.
-
-
-// includes basic (single-junction) hyperedge AND 'compound' hyperedge (with 2+ junction nodes) 
-// complex =  "HRG nonterminal" (from hyperedge replacement grammar), (aka compound, complex, structured, or nested hyperedge)
-// "nonterminal" is from string parsing. eg a '<verb phrase>' that expands into sub-elements
-// extends Path ? 
-// A compound hyperedge is a hyperedge that internally contains:
-// intermediate nodes
-// internal directed structure
-// constraints
-// ordering
-
-// Hyperedge Replacement Grammars (HRGs)
-// This is a formalism where a hyperedge can be replaced by an entire graph fragment.
-
-// Your “mini‑DAG encapsulated as a single object” is precisely an HRG nonterminal.
-
-// Externally: it behaves like a hyperedge.
-// Internally: it is a graph.
-
-// Feder & Pavlidis (1970s)
-// Bauderon & Courcelle (1980s)
-// Engelfriet & Rozenberg (1990s)
-// Habel, Heckel, Plump (algebraic graph transformation)
-// Drewes, Hoffmann, Kreowski (modern HRG theory)
-
-{ 
-
-  foobar() { return 'Hello hyperedge'};
-
-
-// //-------------------------------------------------------------------
-//   addLinks(links_arr) { 
-//     links_arr.forEach(link=>{
-//       console.assert(link instanceof LinkDatum);
-//       //   this.uidLinks.add(link.uniqueId());
-//       this._links[link.uniqueId()] = link;
-//       // TODO: how to handle cases where the link is already part of another hyperedge
-//       // without this assert we simply create a new hyperedge - but expanding the old one seems more appropriate
-//       // if that results in 2+ junctions then technically it's not a true hyperedge
-//       // instead becomes a "hyperedge replacement" or "compound hyperedge"
-//       console.assert(links_arr.filter(d=>d._hyperEdge).length==0); // fail if any link is already part of another HyperEdge, 
-//       link._hyperEdge = this; // if defined and not null <=> the link is part of a hyperedge
-//       });
-// }
-// //-------------------------------------------------------------------
-
-// uniqueId() { return this.uid };
-
-// arity() { return 3 }; // the number of external endpoints: 2 → ordinary edge; 3 → ternary hyperedge
-
-// tail() { return [] } // input vertices
-// head() { return [] } // output vertices 
-
-// roles() { return {} } // When a hyperedge is labelled or typed, each vertex can have a role within the hyperedge.
-// // a predicate (the relation type)
-// // arguments (the vertices)
-// // roles (the semantic positions)
-// // example: [Buyer: Alice, Seller: Bob, Item: Book]
-// pins() { return {} }; // aka roles individual connections (ordinary links) between a hyperedge and its vertices
-// ports() { return {} }; // aka attachment points
-// // "role-labelled incidence edges"
-// //-------------------------------------------------------------------
-
-// restorePrototypes(graph) {
-//   this.uidJunctions = new Set(this.uidJunctions);
-// //  this.uidLinks = new Set(this.uidLinks);
-// }
-// //-------------------------------------------------------------------
-
-// restoreBindings(graph) {
-//   this._links = {}; 
-//   this._junctions = {};
-//   this.uidJunctions.forEach(uid => {
-//     const j = this._junctions[uid] = graph.nodes[uid];
-//     j._hyperEdge = this;
-//     Object.setPrototypeOf(j,JunctionDatum.prototype);
-//     // debugger;
-//     // const a = graph.linkData();
-//     // const b = a.filter(d => { return (d._datumFrom === j) || (d._datumTo === j)} );
-//     graph.linkData().filter(d => d._datumFrom === j || d._datumTo === j)
-//       .forEach(d => this._links[d.uniqueId()] = d);
-//        }
-//     );
-
-//   // this.uidLinks.forEach(uid => { 
-//   //   this._links[uid] = graph.links[uid];
-//   //   graph.links[uid]._hyperEdge = this;
-//   // }   );
-
-// }
-// //-------------------------------------------------------------------
-
-// getMembers() {
-//   const linkData =  Object.values(this._links);
-//   var nodeData = linkData.map(d => [d._datumFrom,d._datumTo]);
-//   nodeData = new Set(nodeData); // remove duplicates
-//   nodeData = [...nodeData]; // convert to array;
-//   const junctionData = nodeData.filter(d => d instanceof JunctionDatum);
-//   return { linkData, nodeData, junctionData } ;
-//   }
 
 //============================================================
 
-// interjectNode() {
-//   const graph = this._workbook;
-//   console.assert(graph instanceof Workbook);
-//   const junction_spec = { id: RandomId('J'), name: 'New junction' };
-//   const node_type = graph.nodeTypes.junction;
-//   const new_node = graph.addNode(junction_spec,node_type);
-//   new_node._hyperEdge = this;
-//   Object.setPrototypeOf(new_node,JunctionDatum.prototype);
-//   this._junctions[new_node.uniqueId()] = new_node;
-//   this.uidJunctions.add(new_node.uniqueId()); 
-//   return new_node;
-// }
+class Path {  // aka Subgraph
+// an ordered set of links and (recursive) subgraphs
+// typically an unbroken thread, in the context of a Study
+// subclasses/use cases include Scene, Episode, chapter, narrative arc, scenario, critical path,
+// storyline, trace, trail, thread, hypothesis, causal pathway, channel, chain (of events), 
+// causation, aetiology, line of reasoning, explicit sequence
 
-}
+// a path implicitly includes both endpoint nodes of every link
+// if an endpoint is currently a junction (hyperedge) then the freshly-calculated path also includes all the "complementary" 
+// links terminating at that junction, as well as their outer node - and so on, recursively ending with the last non-junction node
+// if link X is an in-link to junction node J, its set of complementary links X' contains ALL the out-links from J
+// and vice versa starting with a single out-link from junction K.
 
-//============================================================
+// a path often includes a time dimension - at least ordinal/relative ('before', 'during' and 'after') if not absolute.
+// could use an editable sort key (like Dewey) to rearrange the serialisation of links within the path
+// sortkey could be ISO date time or just random text. 
+// in dramatic fiction there are many examples where the 'crucial' link that is REVEALED last 
+// is NOT the the one at the 'end' of the ACTUAL path
+// so there could be multiple paths, one for the HISTORICAL/PHYSICAL/FACT sequence and one for each draft NARRATIVE sequence.
+// when drafting a screenplay (or a standup routine) it would be handy if the 'reveal status/order' is 
+// indicated visually, derived on the fly depending on which draft narrative is currently "active"
+// with extra cues to indicate "plot twist", "cliffhanger", "missing link not yet revealed" or "spoiler"
+// 'alluded to', 'ambiguous', 'hypothetical', 'unconfirmed'
+// think how the 'critical path' appears in red. In storytelling it's not always 'which tasks are delaying completion?'
 
-class Scene { // aka Context 
-// each scene is a named, editable collection of links & hyperedges (and their nodes) that are illuminated 'in foreground' (uncloaked)
-// saved within a Workbook. 
-// scenes can be arranged in sequence and grouped into episodes
-// optionally, edges (and their vertices) from other scenes (past or future) can be 'alluded to' semi-present as shaded 'grey ghosts' 
-// some links/edges are always subtext, never stated
-// user can explore analyse one scene, or an arbitrary selection of them in combination (via Paths & Studies)
-// each scene belongs to one episode (but can be included in many studies)
-}
+// user could try swapping between different draft narratives, alternate Paths to see which has the greatest impact
 
+// a path can be the 'reveal' sequence or the 'physical' sequence. Any other sequences?
+// for a simple narrative 'live commentary' they're both the same
+// each revealed link can be 'revealed' (indicated, attested, or hinted) more than once, 
+// across different scenes with different actors 
 
-//============================================================
+// an activated path's 'lighting level' can be set en-masse to SPOT, FORE, BACK or NONE
+// but to simplify, the new state settings are applied to the current member objects, not recalculated declaratively.
+// the new path-level setting propagates to each link (and node) on that path
+// according to priority rules that also respect (the effects of any other recently-activated path)
+// whether path-driven or not, 
+// increase in lighting flows from links to nodes (if they're not already brighter)
+// decrease in lighting flows from nodes to links (if they're not already duller)
 
-class Path { 
-// a distinct narrative, storyline, trace, trail, thread, hypothesis, 
-// causal pathway, channel, chain (of events), causation, aetiology, line of reasoning
-// explicit sequence
+// a path may also include sub-paths, recursively. 
 
-  // a curated series of links & hyperedges, hand-picked from multiple scenes, layers, episodes, sources
-  // SHOULD be a single unbroken DAG connected end-to-end, but can we guarantee it?
   constructor(graph) {
     this.name = RandomId('P');
-    this.uidLinks = new Set();
-    this.uidHyperEdges = new Set();
-    this._links ={};
-    this._hyperEdges = {};
+    this.keys = { uidMembers: new Set() }
+    this._cache = { members: {}};
     this.uid = hashString(this.name);
   }
 
   restorePrototypes(graph) {
-      this.uidLinks = new Set(this.uidLinks);
-      this.uidHyperEdges = new Set(this.uidHyperEdges);
+      this.keys.uidMembers = new Set(this.keys.uidMembers);
+      this._cache = { members: {}};
   }
 
 restoreBindings(graph) {
-  this._links = {}; 
-  this._hyperEdges = {};
-  this.uidLinks.forEach(uid => this._links[uid] = graph.links[uid]);
-  this.uidHyperEdges.forEach(uid => this._hyperEdges[uid] = graph.hyperEdges[uid]);
+  this._cache.members = {}; 
+  this.keys.uidMembers.forEach(uid => this._cache.members[uid] = graph.paths[uid] ?? graph.links[uid] );
+
 }
 
-  addLinks(links_arr) {
-    links_arr.forEach(obj => { 
-        this._links[obj.uniqueId()] = obj;
-        this.uidLinks.add(obj.uniqueId());
+  addLinks(arr) {
+    console.assert(Array.isArray(arr));
+    arr.forEach(obj => { 
+        this._cache.members[obj.uniqueId()] = obj;
+        this.keys.uidMembers.add(obj.uniqueId());
         }
       )
   }
 
-  addHyperEdge(obj) {
-        this._hyperEdges = this._hyperEdges ?? {}; // when rehydrated from generic Object
-        this._hyperEdges[obj.uniqueId()] = obj;
-        this.uidHyperEdges.add(obj.uniqueId());
-  }
-
   uniqueId() { return this.uid };
-  linkData() { return Object.values(this.links) }
+  linkData() { return Object.values(this._cache.links) }
 
 }
 
 //============================================================
 
-class Study { // aka Interpretation, Analysis, Discussion, Project, 
-  // an annotated selection of 1 or more paths.
-  // user can shade or illuminate a whole path
-  // maybe with notes & comments? 
-  // could include 
-  // too many complications if we define at 'workspace' level
+class Study { // aka View. Interpretation, Analysis, Discussion, Project, 
+  // an annotated selection of 1 or more paths. A path can appear in multiple Studies
+  // each member path can be 'illuminated' or not, by setting its light status
+  // user can experiment with illumination settings - the current 'lighting sequence' is saved as part of that study
+  // individually tweaked illumination settings may also be captured per node or link?, along with annotations
+
+  // user can quickly switch between studies in the same workbook.
   
   // a study can illuminate links directly and attach futher meaning?
   // a study can be saved to a separate file, with references to the graph/s that need to be imported
@@ -1636,7 +1576,7 @@ class Study { // aka Interpretation, Analysis, Discussion, Project,
 
 //============================================================
 
-class Episode { // aka chapter or Act or Movement
+// class Episode { // aka chapter or Act or Movement
   // a saved & named selection of scenes (or episodes), in sequence
   // tree to any depth - Table of Contents
 }
