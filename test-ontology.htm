@@ -319,11 +319,9 @@ class Workbook {  // includes formatting info as well as data & forces
         partOf: new TypeSpec({xid:'part-of', uid:'partOf'},this)
       }; 
       this.forces = {};  
-   //   this.scenes = {};
       this.paths = {};
-   //   this.episodes = {};
       this.sources = {};
-      this.views = {}; // cf "worksheet" or "study" = annotated set of "path illuminations" (scenes, sub-narratives)
+      this.views = { default: new View(this,'default') }; 
     }
 
   this.uid = this.uid ?? hashString(Math.random().toString());
@@ -364,7 +362,7 @@ class Workbook {  // includes formatting info as well as data & forces
     this.restoreValuesOf(this.nodes,NodeDatum);
     this.restoreValuesOf(this.links,LinkDatum);
     this.restoreValuesOf(this.paths,Path);
-
+    this.restoreValuesOf(this.views,View);
     }
 
 
@@ -796,11 +794,7 @@ class NodeDatum {
       uidNodeType: this.base ? this.base._type.uniqueId() : 'default'
    };
 
-   this.state = { 
-    // phase: Phase.LIQUID,
-    // shape: Shape.ICON,
-    // light: Light.BACK
-   };
+   this.state = { };
 
      this._cache = {
       super_nodes: [],
@@ -861,7 +855,7 @@ class NodeDatum {
     : shape == Shape.ICON ? phase == Phase.SOLID ? SolidIcon : FluidIcon   
     : shape == Shape.DOT  ? phase == Phase.SOLID ? SolidDot  : FluidDot   
     : MaximisedRect;
-    Object.setPrototypeOf(this,newSubClass.prototype);      // de-optimises. not recommended when performance matters
+    Object.setPrototypeOf(this,newSubClass.prototype);
     return this;
   }
 
@@ -921,9 +915,7 @@ class NodeDatum {
 class FluidIcon extends NodeDatum {
   // lightweight, prototype only, assigned dynamically at runtime (not recommended in situations where performance matters)
   foobar() { return 'hello FluidIcon (circle)'}
-
 }
-
 
 //============================================================
 // a compact 'dot' or 'elbow', possibly representing a MINIMISED 'compound hyperedge replacement' 
@@ -936,7 +928,6 @@ class FluidIcon extends NodeDatum {
 // if the LAST inward link is deactivated the so are ALL the outward links...
 // and vice-versa for outward links.
 // possible sub-classes might be 'Fork' or 'Decision' or 'logical gate'
-
 
 class SolidDot extends NodeDatum 
 { 
@@ -1054,8 +1045,7 @@ class TypeSpec {
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
-    this._cache = {};
-    this.state = {}; 
+    this.restorePrototypes();
     this.restoreBindings(graph);
     return this;
   }
@@ -1072,10 +1062,10 @@ class TypeSpec {
 //============================================================
 
 class Image {
+
   constructor(url,graph) {
 
     const obj = {
-      
       img_src: url ? url :'tba.svg',
       colour: { fill: 'white', stroke: 'black'},
       transform: {
@@ -1083,16 +1073,15 @@ class Image {
           rect: 'translate(0,0) scale(1)',
           frame: 'translate(0,0) scale(1)'
           }
-      
-
-  };
+      };
 
     obj.uid = url ? hashString(url) : 'default';
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
+  }
 
-}
   uniqueId() { return this.uid };
+
 }
 
 
@@ -1278,11 +1267,9 @@ class LinkDatum {
     } else if (obj instanceof LinkDatum) {
       // copy keys by value
       this.keys = {...obj.keys, uidThis: hashString(RandomId('L'))};
-
       }
-    // else assign(this,obj);
 
-    this.restoreBindings(graph); 
+      this.restoreBindings(graph); 
     
     this.y = Math.random(); 
     WeakBind.parentOf.set(this,graph);
@@ -1296,7 +1283,6 @@ class LinkDatum {
     return this;
    }
 
-
   uniqueId() { return this.keys.uidThis } 
 
   restorePrototypes(graph) { 
@@ -1304,17 +1290,16 @@ class LinkDatum {
   }
 
   restoreBindings(graph) { 
+      // start with the "edit-resistant" references
       this._datumFrom = graph.nodes[this.keys.uidDatumFrom];
       this._datumTo = graph.nodes[this.keys.uidDatumTo];
+      // now for the edit-sensitive parts
       this._linkType = graph.types[this.keys.uidTypeSpec];
       this.refreshCache(graph); 
-
   }
 
   collectKeys(graph) {  // TODO: use _datumFrom instead of base 
     // capture robust keys to enable re-binding eg after ontology is refreshed
-
-
     // TODO: for now, the primary key (uidThis) doesn't change even after endpoints are modified
     // => user edits could result in logically identical links with distinct uids.  Is that reasonable?
     // I think there should be an immediate "duplicate key violation" error if they try that.
@@ -1346,9 +1331,9 @@ class LinkDatum {
 
 //-----------------------------------------------
 
-  // _cache = discardable state data, derived values, subtotals, shortcuts etc 
-  // anything that may change with user clicks (but usually doesn't, therefore worth keeping)
-  // except the important ones that require extra care (_datumFrom etc.)
+  // _cache = discardable, transient state data, derived values, subtotals, shortcuts etc 
+  // anything that's free to change with user clicks (but often needed, eg during simulation ticks)
+  // except the "edit-resistant" ones that require extra care (_datumFrom etc.)
   refreshCache(graph) { 
     const
       superNodeDatum = this.superNodeDatum(),
@@ -1402,10 +1387,9 @@ class LinkDatum {
     return null;
     }
 
-    fromNodeDatum() { return this._datumFrom }
+  fromNodeDatum() { return this._datumFrom }
 
-    toNodeDatum() { return this._datumTo }
-
+  toNodeDatum() { return this._datumTo }
 
 //-----------------------------------------------
 // insert jnode as 'elbow' (involves splitting this link into 2)
@@ -1440,11 +1424,6 @@ class LinkDatum {
 // only a few differences. eg sequencing of "scenes" within "episodes", within 'series' within 'shows'.
 // with time sequence being either absolute or relative to context frame.
 
-
-
-
-
-
   interjectNode(jnode=null,graph) {
     console.assert(jnode == null || jnode instanceof NodeDatum);  
     if (jnode == null) { 
@@ -1461,11 +1440,9 @@ class LinkDatum {
     if (jnode._cache.nodeType == graph.types.default) // seems reasonable to propagate link type 
       jnode.setTypeSpec(this._linkType); 
 
-    // add the new jnode to ALL the same parents as this.
+    // TODO: add the new jnode to ALL the same parents as this.
     // if the link straddles 2 non-identical sets of supernode parents, the new jnode is 'adopted' by all of them
     // that means their contours will suddenly have a non-empty intersection. Seems reasonable.
-    
-
 
 
     const link2 = this.copyTo(graph); // TODO: clone ALL its properties including paths, layer, & scenes bindings
@@ -1486,13 +1463,13 @@ class LinkDatum {
 //============================================================
 
 class Path {  // aka Subgraph
-// an ordered set of links and (recursive) subgraphs
+// an ordered? set of path segments (= binary links and/or (recursive) subgraphs)
 // typically an unbroken thread, in the context of a Study
-// subclasses/use cases include Scene, Episode, chapter, narrative arc, scenario, critical path,
+// use case variants include Scene, Episode, chapter, narrative arc, scenario, critical path,
 // storyline, trace, trail, thread, hypothesis, causal pathway, channel, chain (of events), 
 // causation, aetiology, line of reasoning, explicit sequence
 
-// a path implicitly includes both endpoint nodes of every link
+// a path implicitly includes both endpoint nodes of every segment 
 // if an endpoint is currently a junction (hyperedge) then the freshly-calculated path also includes all the "complementary" 
 // links terminating at that junction, as well as their outer node - and so on, recursively ending with the last non-junction node
 // if link X is an in-link to junction node J, its set of complementary links X' contains ALL the out-links from J
@@ -1512,7 +1489,7 @@ class Path {  // aka Subgraph
 
 // user could try swapping between different draft narratives, alternate Paths to see which has the greatest impact
 
-// a path can be the 'reveal' sequence or the 'physical' sequence. Any other sequences?
+// a path can define the 'reveal' sequence or the 'physical' sequence. Any other sequences?
 // for a simple narrative 'live commentary' they're both the same
 // each revealed link can be 'revealed' (indicated, attested, or hinted) more than once, 
 // across different scenes with different actors 
@@ -1563,7 +1540,7 @@ restoreBindings(graph) {
 
 class View { // aka Study, Interpretation, Analysis, Discussion, Project, 
   // an annotated selection of 1 or more paths. A path can appear in multiple Studies
-  // each member path can be 'illuminated' or not, by setting its light status
+  // each included path can be 'illuminated' or not, by setting its light status
   // user can experiment with illumination settings - the current 'lighting sequence' is saved as part of that study
   // individually tweaked illumination settings may also be captured per node or link?, along with annotations
 
@@ -1571,14 +1548,37 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
   
   // a study can illuminate links directly and attach futher meaning?
   // a study can be saved to a separate file, with references to the graph/s that need to be imported
+
+  constructor(graph,uid) {
+    this.name = RandomId('V');
+    this.keys = {uidPaths: []};
+    this._cache = {};
+    this.uid = uid ?? hashString(this.name);
+    this.restorePrototypes(graph);
+  }
   
+  uniqueId() { return this.uid };
+
+  restorePrototypes(graph) {
+    this.keys.uidPaths = new Set(this.keys.uidPaths);
+    this._cache = {paths: {}};
+    return this;
+  }
+
+  restoreBindings(graph) {
+    this._cache.paths = {}; 
+    this.keys.uidPaths.forEach(uid => this._cache.paths[uid] = graph.paths[uid] );
+    return this;
+  }
+
+  addPath(path) {
+    console.assert(path instanceof Path);
+    this._cache.paths[path.uniqueId()] = path;
+    this.keys.uidPaths.add(path.uniqueId());
+    return this;
+  }
+
 }
-
-//============================================================
-
-// class Episode { // aka chapter or Act or Movement
-  // a saved & named selection of scenes (or episodes), in sequence
-  // tree to any depth - Table of Contents
 
 //============================================================
 

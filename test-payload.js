@@ -124,8 +124,6 @@ console.log('anode.addEnclosure() => pnode',anode,pnode);
 // convert a link to a hyperedge  (create a junction node and insert it)
 
 const path = Object.values(graph.paths)[0];
-//path.addHyperEdge(edge);
 
-//const members = edge.getMembers();
-//console.log(members);
+graph.views.default.addPath(path);
 }
