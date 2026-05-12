@@ -20,18 +20,19 @@ var current_graph;
 
 // node subclass depends on Phase & Shape 
 const Phase = Object.freeze({
-  GAS: 'gas',    // 'neutrino' - excluded from force simulation, even if visible
-  LIQUID: 'liquid', // elastic, floating
-  SOLID: 'solid'   // locked, fixed
+  GAS: 'gas',    // highly compressible fluid, minimal physics, even if visible
+  LIQUID: 'liquid', // elastic, mobile, floating, passive, non-compressible fluid
+  SOLID: 'solid'   // locked, fixed, anchored, rigid
 });
 
 const Shape = Object.freeze({
-  DOT: 'dot',  // junction node (with clickzone)
+  DOT: 'dot',  // junction node (with invisible clickzone)
   ICON: 'icon', // minimised (circle or rect, with logo)
-  RECT: 'rec', // 'restored' container (elastic contour or fixed frame)
+  RECT: 'rect', // 'restored' set boundary (elastic contour OR fixed frame)
   MAX: 'max'   // maximised (whole viewbox)
 });
 
+// lighting depends on the current View, applies to nodes AND links, is derived through "path illuminations" 
 const Light = Object.freeze({
   NONE: 'none', // invisible
   BACK: 'back', // monochrome, transparent, blurred, shadow
@@ -310,13 +311,13 @@ class Workbook {  // includes formatting info as well as data & forces
     }
     else {
       this.name = 'New Workbook';
-      this.images = { default: new Image(null,this) };
-      this.templates = {default: new TemplateSpec('default',this)};
+      this.images = { default: new Image(this) };
+      this.templates = {default: new TemplateSpec(this,'default')};
       this.nodes = {};
       this.links = {};
       this.types = {
-        default: new TypeSpec({xid:'Unknown', uid:'default'},this),
-        partOf: new TypeSpec({xid:'part-of', uid:'partOf'},this)
+        default: new TypeSpec(this,{xid:'Unknown', uid:'default'}),
+        partOf: new TypeSpec(this,{xid:'part-of', uid:'partOf'})
       }; 
       this.forces = {};  
       this.paths = {};
@@ -461,7 +462,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
   addTemplate(name,aliases=[]) { 
     console.assert(typeof name== 'string');
-    const obj = new TemplateSpec(name,this);
+    const obj = new TemplateSpec(this,name);
     this.templates[obj.uniqueId()] = obj;
     obj.addAliases(aliases);
     return this;
@@ -480,7 +481,7 @@ class Workbook {  // includes formatting info as well as data & forces
 //------------------------------------------------------------------
 
   addImage(obj) { 
-    if (typeof obj == 'string') obj = new Image(obj,this);
+    if (typeof obj == 'string') obj = new Image(this,obj);
     this.images[obj.uniqueId()] = obj;
     return obj;
   }
@@ -568,17 +569,17 @@ class Workbook {  // includes formatting info as well as data & forces
     this.sources[bound_ont.source.uniqueId()] = bound_ont.source;
 
     // concatenate classes and predicates into a generic 'types' lookup table
-    const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new TypeSpec(obj,this)); 
+    const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new TypeSpec(this,obj)); 
      new_nodeTypes.forEach(d => this.types[d.uniqueId()] = d);
 
-    const new_types = Object.values(bound_ont.predicates).map(obj => new TypeSpec(obj,this)); 
+    const new_types = Object.values(bound_ont.predicates).map(obj => new TypeSpec(this,obj)); 
     new_types.forEach(d => this.types[d.uniqueId()] = d);
 
-    const new_nodes = Object.values(bound_ont.entities).map(obj => new NodeDatum(obj,this)); 
+    const new_nodes = Object.values(bound_ont.entities).map(obj => new NodeDatum(this,obj)); 
     new_nodes.forEach(d => this.nodes[d.uniqueId()] = d);
     new_nodes.forEach(d => d.setSubClass()); 
  
-    const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(obj,this));
+    const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(this,obj));
     new_links.forEach(d => this.links[d.uniqueId()] = d);
   
     new_nodes.forEach(d => d.refreshCache(this));
@@ -592,7 +593,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
   addNode(entitySpec) {
     const new_entity = Ontology.getDefault().addEntity(entitySpec);
-    const new_NodeDatum = new NodeDatum(new_entity,this);
+    const new_NodeDatum = new NodeDatum(this,new_entity);
     new_NodeDatum.setTypeSpec(this.types.default);
     new_NodeDatum.setSubClass();
     return this.nodes[new_NodeDatum.uniqueId()] = new_NodeDatum;
@@ -612,7 +613,7 @@ class Workbook {  // includes formatting info as well as data & forces
       }
     }
     Object.setPrototypeOf(obj,LinkDatum.prototype); // cheat the constructor
-    const new_LinkDatum = new LinkDatum(obj,this);
+    const new_LinkDatum = new LinkDatum(this,obj);
     this.links[new_LinkDatum.uniqueId()] = new_LinkDatum;
     this.refreshAllCaches();
     return new_LinkDatum;
@@ -780,7 +781,7 @@ class Ontology {
 
 class NodeDatum { 
 
-  constructor(obj,graph) {
+  constructor(graph,obj) {
     this.base = obj; // Entity
     this.x = Math.random(); 
     console.assert(graph instanceof Workbook);
@@ -1041,7 +1042,7 @@ class FluidRect extends FrameDatum {
 // wrapper for the 'predicate' and 'class' objects from source ontology
 // used to map Nodes and Links to their appropriate style template (layer)
 class TypeSpec {
-  constructor(obj,graph) {
+  constructor(graph,obj) {
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
@@ -1063,7 +1064,7 @@ class TypeSpec {
 
 class Image {
 
-  constructor(url,graph) {
+  constructor(graph,url) {
 
     const obj = {
       img_src: url ? url :'tba.svg',
@@ -1090,7 +1091,7 @@ class Image {
 // also drives non-CSS default attributes such as image URL, initial transform, nestable, default cloaking etc.
 
 class TemplateSpec { // aka Template
-  constructor(class_name,graph) {
+  constructor(graph,class_name) {
     const obj = {
       class_name: class_name,
       types: new Set([class_name]),
@@ -1260,7 +1261,7 @@ class Relation {
 // each Relation may be referenced in many Workbooks each with its own LinkDatum (x,y,fx,fy,width etc.)
 
 class LinkDatum {  
- constructor(obj,graph) {
+ constructor(graph,obj) {
     if (obj instanceof Relation) {
       this.base = obj; 
       this.collectKeys(graph);
@@ -1353,7 +1354,7 @@ class LinkDatum {
 
   copyTo(graph) {
     console.assert(graph instanceof Workbook);
-    const obj = new LinkDatum(this,graph);
+    const obj = new LinkDatum(graph,this);
     obj.keys.uidThis = hashString(RandomId('L'));  // needs a new uid to avoid overwriting
     graph.links[obj.uniqueId()] = obj;
     return obj;
