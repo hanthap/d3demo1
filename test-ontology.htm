@@ -812,6 +812,12 @@ class VertexDetail {
 
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise EdgeDetail binding will require extra indirection
   setCaption(txt) { this.caption = txt; return this; }
+  setJunction(flag) { 
+    this.is_junction = flag;
+    Object.setPrototypeOf(this, flag ? JunctionDetail.prototype : VertexDetail.prototype);  
+    return this;
+  }
+
   getName() { return `${this.caption ?? this.base.getName()}` } 
   toString() { return `${this._cache.nodeType.toString()}: ${this.caption ?? this.base.toString()}` }
   getWorkbook() { return WeakBind.parentOf.get(this) }
@@ -821,6 +827,7 @@ class VertexDetail {
     graph.restoreObjectAs(this.base,Entity); 
     if (this.keys.uidImages) this.keys.uidImages = new Set(this.keys.uidImages);
     this._cache = {};
+    this.setJunction(this.is_junction);
   }
 
   // standardised method name called via restorePrototypes() helper function, after restorePrototyes
@@ -891,6 +898,14 @@ class VertexDetail {
 
 
  }
+
+//============================================================
+
+class JunctionDetail extends VertexDetail {
+// a type of vertex that behaves like a hyperedge
+// NOT a local View-level format attribute, as it also determines what's in logical scope of a Path
+
+}
 
 //============================================================
 
@@ -1329,6 +1344,7 @@ class EdgeDetail {
 
   restorePrototypes(graph) { 
     if (this.base) graph.restoreObjectAs(this.base,Relation); 
+
   }
 
   restoreBindings(graph) { 
@@ -1470,14 +1486,13 @@ class EdgeDetail {
     console.assert(jnode == null || jnode instanceof VertexDetail);  
     if (jnode == null) { 
       jnode = graph.addNode({id:RandomId('J')});
-      jnode.setCaption(`[Junction node: ${this._datumFrom.getName()} to ${this._datumTo.getName()}]`);
+      jnode.setJunction(true);
+      jnode.setCaption(`${this._datumFrom.getName()} to ${this._datumTo.getName()}`);
     } else { // check the existing jnode is safe to insert here...
       console.assert(jnode != this._datumFrom);
       console.assert(jnode != this._datumTo);
 
     }
-    // default initial state is a floating 'elbow' junction
-  //  Object.setPrototypeOf(jnode,VertexDetail.prototype);
 
 
     if (jnode._cache.nodeType == graph.types.default) // seems reasonable to propagate link type 
@@ -1513,7 +1528,7 @@ class Path {  // aka Subgraph
 // causation, aetiology, line of reasoning, explicit sequence
 
 // a path implicitly includes both endpoint nodes of every segment 
-// if an endpoint is currently a junction (hyperedge) then the freshly-calculated path also includes all the "complementary" 
+// if an endpoint is a JunctionVertex (hyperedge) then the freshly-calculated path also includes all the "complementary" 
 // links terminating at that junction, as well as their outer node - and so on, recursively ending with the last non-junction node
 // if link X is an in-link to junction node J, its set of complementary links X' contains ALL the out-links from J
 // and vice versa starting with a single out-link from junction K.
@@ -1576,6 +1591,15 @@ restoreBindings(graph) {
 
   uniqueId() { return this.uid };
   linkData() { return Object.values(this._cache.links) }
+
+  onChange(graph) { 
+    // called after any change that might affect what's included the path
+    // use this._cache.segments to repopulate this._cache.vertices, this._cache.edges
+    // for each segment, add 
+  }
+
+
+
 
 }
 
