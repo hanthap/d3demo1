@@ -318,7 +318,11 @@ class Workbook {  // includes formatting info as well as data & forces
       this.types = {
         default: new TypeSpec(this,{xid:'Unknown', uid:'default'}),
         partOf: new TypeSpec(this,{xid:'part-of', uid:'partOf'}),
-        contour: new TypeSpec(this,{xid:'contour', uid:'contour', state: {shape: Shape.RECT, phase: Phase.LIQUID}})
+        contour: new TypeSpec(this,
+        { xid:'contour', 
+          uid:'contour', 
+          state: {shape: Shape.RECT, phase: Phase.LIQUID} } 
+        )
       }; 
       this.types.contour.state.shape = Shape.RECT;
       this.forces = {};  
@@ -805,7 +809,7 @@ class VertexDetail {
       nodeType: graph.types.default
     };
 
-    this.bind(graph); // ASSUMES graph.Types is already populated
+    this.bind(graph); // ASSUMES graph.types is already populated
 
   }
 // TODO: re-bind after ontology is reloaded.
@@ -813,7 +817,7 @@ class VertexDetail {
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise EdgeDetail binding will require extra indirection
   setCaption(txt) { this.caption = txt; return this; }
   setJunction(flag) { 
-    if ( flag || this.is_junction ) this.is_junction = flag;
+    if (flag || this.is_junction) this.is_junction = flag;
     Object.setPrototypeOf(this, flag ? JunctionDetail.prototype : VertexDetail.prototype);  
     return this;
   }
@@ -823,7 +827,10 @@ class VertexDetail {
   getWorkbook() { return WeakBind.parentOf.get(this) }
   
   getFanEdgesOf(edge) {
-    // TO DO: return the complementary subset of edges which are incident to this vertex
+    console.assert(edge instanceof EdgeDetail);
+    // TO DO: return all 'in-stream' complementary edges which are 'incident to' this vertex
+    // e.g. so that JunctionDetail nodes will behave as hyperedges, but could be useful in other situations
+    // needs to consider the LOGICAL direction/flow (after adjusting for 'reversed' edge types)
   }
 
   restorePrototypes(graph) { 
@@ -833,7 +840,7 @@ class VertexDetail {
     this.setJunction(this.is_junction);
   }
 
-  // standardised method name called via restorePrototypes() helper function, after restorePrototyes
+  // standardised method name called via restorePrototypes() helper function
   restoreBindings(graph) { 
     this.bind(graph);
     //   this.setSubClass();
@@ -862,13 +869,10 @@ class VertexDetail {
     return this;
  }
 
- // TODO: move this to D3NodeDatum so we can set shape there
   addEnclosure(graph) { // create a parent contour node encapsulating just this node
     const 
       pnode = graph.addNode({id:RandomId('N')}, graph.types.contour), 
       plink = graph.addLink(this,pnode,graph.types.partOf);
-      // pnode.state.shape = Shape.RECT; 
-      // pnode.setSubClass();
     return pnode;
   }
 
@@ -887,7 +891,7 @@ class VertexDetail {
       in_links,
       out_links,
       nodeType,
-    }
+    };
 
     if (images) this._cache.images = images;
 
@@ -905,9 +909,10 @@ class VertexDetail {
 //============================================================
 
 class JunctionDetail extends VertexDetail {
-// a type of vertex that behaves like a hyperedge 
-// a "pass-through" node, such that selecting one incoming edge automatically selects ALL outward edges
-// and vice versa
+// a special type of vertex that behaves as a hyperedge 
+// a "pass-through" node, such that state (light) applied to to one incoming edge 
+// automatically flows to ALL outward edges - and vice versa
+// uses fan
 // NOT a local View-level format attribute, as it also determines what's in logical scope of a Path
 
 }
@@ -1116,7 +1121,7 @@ class TypeSpec {
   keyId() { return this.xid }
   toString() { return this.label ?? this.xid ?? this.uid }
   nameMatches(xid) { return this.keyId() == xid }
-  restorePrototypes() { this._cache = {}; this.state = {} }
+  restorePrototypes() { this._cache = {}; this.state = this.state ?? {} }
   restoreBindings(graph) { this._cache.template = graph.getTemplate(this.xid) }
   getTemplate() { return this._cache.template ?? graph.getTemplate(this.xid) }
 }
