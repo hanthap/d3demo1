@@ -152,7 +152,7 @@ class ExploreOnly extends EventListener {
 static OnClick(e) {
   const d = e.srcElement.__data__;
   if (d) {
-  console.log('OnClick',e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
+  console.log('OnClick',e,d,d.toString(),d._cache.datumFrom, d._cache.datumTo);
   }
  
 }
@@ -160,7 +160,7 @@ static OnClick(e) {
 static OnMouseOver(e) {
   const d = e.srcElement.__data__;
   if (d) {
-  console.log('OnMouseOver',e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
+  console.log('OnMouseOver',e,d,d.toString(),d._cache.datumFrom, d._cache.datumTo);
   }
 
 }
@@ -169,7 +169,7 @@ static OnMouseOver(e) {
 static OnMouseOut(e) {
   const d = e.srcElement.__data__;
   if (d) {
-  console.log('OnMouseOut',e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
+  console.log('OnMouseOut',e,d,d.toString(),d._cache.datumFrom, d._cache.datumTo);
   }
 
 }
@@ -177,7 +177,7 @@ static OnMouseOut(e) {
 static OnContextMenu(e) {
   const d = e.srcElement.__data__;
   if (d) {
-  console.log('OnContextMenu', e,d,d.toString(),d._datumFrom, d._datumTo,d._datumFrom.foobar(), d._datumTo.foobar());
+  console.log('OnContextMenu', e,d,d.toString(),d._cache.datumFrom, d._cache.datumTo,);
   }
 
 }
@@ -813,7 +813,7 @@ class VertexDetail {
   uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise EdgeDetail binding will require extra indirection
   setCaption(txt) { this.caption = txt; return this; }
   setJunction(flag) { 
-    this.is_junction = flag;
+    if ( flag || this.is_junction ) this.is_junction = flag;
     Object.setPrototypeOf(this, flag ? JunctionDetail.prototype : VertexDetail.prototype);  
     return this;
   }
@@ -822,6 +822,9 @@ class VertexDetail {
   toString() { return `${this._cache.nodeType.toString()}: ${this.caption ?? this.base.toString()}` }
   getWorkbook() { return WeakBind.parentOf.get(this) }
   
+  getFanEdgesOf(edge) {
+    // TO DO: return the complementary subset of edges which are incident to this vertex
+  }
 
   restorePrototypes(graph) { 
     graph.restoreObjectAs(this.base,Entity); 
@@ -902,7 +905,9 @@ class VertexDetail {
 //============================================================
 
 class JunctionDetail extends VertexDetail {
-// a type of vertex that behaves like a hyperedge
+// a type of vertex that behaves like a hyperedge 
+// a "pass-through" node, such that selecting one incoming edge automatically selects ALL outward edges
+// and vice versa
 // NOT a local View-level format attribute, as it also determines what's in logical scope of a Path
 
 }
@@ -1321,21 +1326,22 @@ class EdgeDetail {
     if (obj instanceof Relation) {
       this.base = obj; 
       this.collectKeys(graph);
+
     } else if (obj instanceof EdgeDetail) {
       // copy keys by value
       this.keys = {...obj.keys, uidThis: hashString(RandomId('L'))};
       }
-
-      this.restoreBindings(graph); 
+    this._cache = this.cache ?? {};
+    this.restoreBindings(graph); 
     
     this.y = Math.random(); 
     WeakBind.parentOf.set(this,graph);
 
  }
-  toString() { return `${this._datumFrom.toString()} | ${this._linkType.toString()} | ${this._datumTo.toString()}` } 
+  toString() { return `${this._cache.datumFrom.toString()} | ${this._cache.linkType.toString()} | ${this._cache.datumTo.toString()}` } 
   
   setTypeSpec(linkType) { 
-    this._linkType = linkType; 
+    this._cache.linkType = linkType; 
     this.keys.uidTypeSpec = linkType?.uniqueId();  // otherwise rehydration fails
     return this;
    }
@@ -1344,15 +1350,16 @@ class EdgeDetail {
 
   restorePrototypes(graph) { 
     if (this.base) graph.restoreObjectAs(this.base,Relation); 
+    this._cache = this._cache ?? {};
 
   }
 
   restoreBindings(graph) { 
       // start with the "edit-resistant" references
-      this._datumFrom = graph.nodes[this.keys.uidDatumFrom];
-      this._datumTo = graph.nodes[this.keys.uidDatumTo];
+      this._cache.datumFrom = graph.nodes[this.keys.uidDatumFrom];
+      this._cache.datumTo = graph.nodes[this.keys.uidDatumTo];
       // now for the edit-sensitive parts
-      this._linkType = graph.types[this.keys.uidTypeSpec];
+      this._cache.linkType = graph.types[this.keys.uidTypeSpec];
       this.refreshCache(graph); 
   }
 
@@ -1376,9 +1383,9 @@ class EdgeDetail {
   // in case this is a split link, we need to override with the current to & from nodes (not rely on original base)
     if (this._datumFrom) 
       this.keys = {
-        uidDatumFrom: this._datumFrom.uniqueId(),
-        uidDatumTo:   this._datumTo.uniqueId(),
-        uidTypeSpec:  this._linkType.uniqueId()
+        uidDatumFrom: this._cache.datumFrom.uniqueId(),
+        uidDatumTo:   this._cache.datumTo.uniqueId(),
+        uidTypeSpec:  this._cache.linkType.uniqueId()
       };
 
     this.keys.uidThis = saved_uidThis ?? hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidTypeSpec);
@@ -1395,12 +1402,19 @@ class EdgeDetail {
   refreshCache(graph) { 
     const
       superVertexDetail = this.superVertexDetail(),
-      subVertexDetail = this.subVertexDetail();
+      subVertexDetail = this.subVertexDetail(),
+      linkType =  graph.types[this.keys.uidTypeSpec],
+      datumFrom = this.fromVertexDetail(),
+      datumTo = this.toVertexDetail();
+
     //  superNodeData =  this.allSuperNodeData(); // circular dedependency during rehydration
 
     this._cache = {
       superVertexDetail,
-      subVertexDetail
+      subVertexDetail,
+      linkType,
+      datumFrom,
+      datumTo
       //,superNodeData
       }
 
@@ -1423,8 +1437,8 @@ class EdgeDetail {
 // ASSUMES each VertexDetail already has an accurate _cache object
   allSuperNodeData() {
     const 
-      p1 = this._datumFrom.allSuperNodeData(),
-      p2 = this._datumTo.allSuperNodeData(),
+      p1 = this._cache.datumFrom.allSuperNodeData(),
+      p2 = this._cache.datumTo.allSuperNodeData(),
       s = new Set([...p1,...p2]);
     return Array.from(s);
   }
@@ -1433,21 +1447,21 @@ class EdgeDetail {
   superVertexDetail() { // which one of this link's pair of endpoints is actually the container superset? (if applicable) 
     // after adjusting for 'reversed' predicates, and disregarding any non-hiearchical predicates
     // by convention arrow is FROM superset TO subelement
-    const nesting = this._linkType._cache.template.nesting;
+    const nesting = this._cache.linkType._cache.template.nesting;
     if (nesting.enabled) return nesting.reversed ? this._datumTo : this._datumFrom;
     return null;
     }
 //-----------------------------------------------
 
   subVertexDetail() { // which one of this link's 2 endpoints is actually the nested subelement? (if applicable) 
-    const nesting = this._linkType._cache.template.nesting;
+    const nesting = this._cache.linkType._cache.template.nesting;
     if (nesting.enabled) return nesting.reversed ? this._datumFrom : this._datumTo;
     return null;
     }
 
-  fromVertexDetail() { return this._datumFrom }
+  fromVertexDetail() { return this._cache.datumFrom }
 
-  toVertexDetail() { return this._datumTo }
+  toVertexDetail() { return this._cache.datumTo }
 
 //-----------------------------------------------
 // insert jnode as 'elbow' (involves splitting this link into 2)
@@ -1487,7 +1501,7 @@ class EdgeDetail {
     if (jnode == null) { 
       jnode = graph.addNode({id:RandomId('J')});
       jnode.setJunction(true);
-      jnode.setCaption(`${this._datumFrom.getName()} to ${this._datumTo.getName()}`);
+      jnode.setCaption(`${this._cache.datumFrom.getName()} to ${this._cache.datumTo.getName()}`);
     } else { // check the existing jnode is safe to insert here...
       console.assert(jnode != this._datumFrom);
       console.assert(jnode != this._datumTo);
@@ -1496,7 +1510,7 @@ class EdgeDetail {
 
 
     if (jnode._cache.nodeType == graph.types.default) // seems reasonable to propagate link type 
-      jnode.setTypeSpec(this._linkType); 
+      jnode.setTypeSpec(this._cache.linkType); 
 
     // TODO: add the new jnode to ALL the same parents as this.
     // if the link straddles 2 non-identical sets of supernode parents, the new jnode is 'adopted' by all of them
@@ -1505,8 +1519,8 @@ class EdgeDetail {
 
     const link2 = this.copyTo(graph); // TODO: clone ALL its properties including paths, layer, & scenes bindings
     // now interject by rebinding 1 endpoint each - remember to update our keyring!
-    link2._datumFrom = jnode;
-    this._datumTo = jnode;
+    link2._cache.datumFrom = jnode;
+    this._cache.datumTo = jnode;
     link2.collectKeys(); 
     this.collectKeys(); 
     graph.refreshAllCaches();
