@@ -271,13 +271,38 @@ class WeakBind {
   }
 }
 
+
+
 //============================================================
+  // a ViewPort manages & preents one View at a time, in an SVG container. Each view stores all the 'non-default' coordinates and state info
+  // not part of a Workbook. From a single viewport the user can 'change channel' & switch between views even from diffent workbooks ? 
+  // at any time it presents one View (and therefore its Workbook, Simulation etc.)
+  // it listens and captures all user events clicks, drags, keypresses and sends them th 
+  class ViewPort // extends Window? aka GUI
+
+
+{
+constructor(graph) { 
+
+}
+
+}
+
+//============================================================
+// entry point for repeatable 'macro'-style eval scripts, written to js file which can be executed from editor GUI.
+// const g = Workspace.loadGraph('filename1.fdg');
+// ca 
+
+
+
+
 
 class Workspace {
     static graphs = {};
     static ontologies = {};
+    static viewports = { default: new ViewPort() };
   
-  static loadGraph(uid,filename,dateString,json_obj) {
+  static loadGraph(uid,filename,dateString,json_obj) { 
     const graph = new Workbook();
     graph.uid = uid;
     // TODO: clean up this!
@@ -290,6 +315,7 @@ class Workspace {
     current_graph = json_obj;
 //    graph.upsertFromFdg(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
     Workspace.graphs[json_obj.uniqueId()] = json_obj;
+    return json_obj;
   }
 
 }
@@ -297,9 +323,10 @@ class Workspace {
 
 //============================================================
 
-// each workbook is an enriched graph model with its own private set of D3 node coords, cloaking status etc as updated by user events & simulation
-// usually only one simulation per model but that's not a system constraint
-// it has one svg viewport
+// each workbook is an enriched graph model 
+// contains 1 or more views, each with its own private set of D3 node coords, cloaking status etc as updated by user events & simulation
+// usually only one simulation per workbook but that's not a system constraint
+// Different Views of the same Workbook can be presented concurrently in different ViewPorts. 
 
 class Workbook {  // includes formatting info as well as data & forces
 
@@ -1625,7 +1652,9 @@ restoreBindings(graph) {
 //============================================================
 
 class View { // aka Study, Interpretation, Analysis, Discussion, Project, 
-  // an annotated selection of 1 or more paths. A path can appear in multiple Studies
+  // an annotated selection of 1 or more paths. A path can appear in multiple Views
+  // user can export a single View as a self-contained JSON file, for loading into opensource playback runtime app.
+  // the output JSON needs to be standalone so includes objects and few uids
   // each included path can be 'illuminated' or not, by setting its light status
   // user can experiment with illumination settings - the current 'lighting sequence' is saved as part of that study
   // individually tweaked illumination settings may also be captured per node or link?, along with annotations
@@ -1711,20 +1740,6 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
 
 }
 
-//============================================================
-  // a ViewPort manages & preents one View at a time, in an SVG container. Each view stores all the 'non-default' coordinates and state info
-  // not part of a Workbook. From a single viewport the user can 'change channel' & switch between views even from diffent workbooks ? 
-  // at any time it presents one View (and therefore its Workbook, Simulation etc.)
-  // it listens and captures all user events clicks, drags, keypresses and sends them th 
-  class ViewPort // extends Window? aka GUI
-
-
-{
-constructor(graph) { 
-
-}
-
-}
 
 //============================================================
 
