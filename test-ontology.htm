@@ -317,8 +317,10 @@ class Workbook {  // includes formatting info as well as data & forces
       this.links = {};
       this.types = {
         default: new TypeSpec(this,{xid:'Unknown', uid:'default'}),
-        partOf: new TypeSpec(this,{xid:'part-of', uid:'partOf'})
+        partOf: new TypeSpec(this,{xid:'part-of', uid:'partOf'}),
+        contour: new TypeSpec(this,{xid:'contour', uid:'contour', state: {shape: Shape.RECT, phase: Phase.LIQUID}})
       }; 
+      this.types.contour.state.shape = Shape.RECT;
       this.forces = {};  
       this.paths = {};
       this.sources = {};
@@ -360,8 +362,8 @@ class Workbook {  // includes formatting info as well as data & forces
     this.restoreValuesOf(this.templates,TemplateSpec);
     this.restoreValuesOf(this.types,TypeSpec);
     this.restoreValuesOf(this.images,Image);
-    this.restoreValuesOf(this.nodes,NodeDatum);
-    this.restoreValuesOf(this.links,LinkDatum);
+    this.restoreValuesOf(this.nodes,VertexDetail);
+    this.restoreValuesOf(this.links,EdgeDetail);
     this.restoreValuesOf(this.paths,Path);
     this.restoreValuesOf(this.views,View);
     }
@@ -421,7 +423,7 @@ class Workbook {  // includes formatting info as well as data & forces
   // the graph's other nodes are left untouched
 
     Object.values(json.nodes).forEach(d => {
-      Object.setPrototypeOf(d,NodeDatum.prototype);
+      Object.setPrototypeOf(d,VertexDetail.prototype);
       Object.setPrototypeOf(d.base,Entity.prototype);
       if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
       d.restoreBindings(this); 
@@ -431,7 +433,7 @@ class Workbook {  // includes formatting info as well as data & forces
     ); 
 
     Object.values(json.links).forEach(d => {
-      Object.setPrototypeOf(d,LinkDatum.prototype);
+      Object.setPrototypeOf(d,EdgeDetail.prototype);
       Object.setPrototypeOf(d.base,Relation.prototype);
       d.restoreBindings(this); 
       this.links[d.uniqueId()] = d;
@@ -575,11 +577,11 @@ class Workbook {  // includes formatting info as well as data & forces
     const new_types = Object.values(bound_ont.predicates).map(obj => new TypeSpec(this,obj)); 
     new_types.forEach(d => this.types[d.uniqueId()] = d);
 
-    const new_nodes = Object.values(bound_ont.entities).map(obj => new NodeDatum(this,obj)); 
+    const new_nodes = Object.values(bound_ont.entities).map(obj => new VertexDetail(this,obj)); 
     new_nodes.forEach(d => this.nodes[d.uniqueId()] = d);
-    new_nodes.forEach(d => d.setSubClass()); 
+    // new_nodes.forEach(d => d.setSubClass()); 
  
-    const new_links = Object.values(bound_ont.relations).map(obj => new LinkDatum(this,obj));
+    const new_links = Object.values(bound_ont.relations).map(obj => new EdgeDetail(this,obj));
     new_links.forEach(d => this.links[d.uniqueId()] = d);
   
     new_nodes.forEach(d => d.refreshCache(this));
@@ -593,10 +595,10 @@ class Workbook {  // includes formatting info as well as data & forces
 
   addNode(entitySpec) {
     const new_entity = Ontology.getDefault().addEntity(entitySpec);
-    const new_NodeDatum = new NodeDatum(this,new_entity);
-    new_NodeDatum.setTypeSpec(this.types.default);
-    new_NodeDatum.setSubClass();
-    return this.nodes[new_NodeDatum.uniqueId()] = new_NodeDatum;
+    const new_VertexDetail = new VertexDetail(this,new_entity);
+    new_VertexDetail.setTypeSpec(this.types.default);
+//    new_VertexDetail.setSubClass();
+    return this.nodes[new_VertexDetail.uniqueId()] = new_VertexDetail;
   }
 
   //---------------------------------------------------------------------------------
@@ -612,11 +614,11 @@ class Workbook {  // includes formatting info as well as data & forces
         xidRelnType:  base?.keyId()
       }
     }
-    Object.setPrototypeOf(obj,LinkDatum.prototype); // cheat the constructor
-    const new_LinkDatum = new LinkDatum(this,obj);
-    this.links[new_LinkDatum.uniqueId()] = new_LinkDatum;
+    Object.setPrototypeOf(obj,EdgeDetail.prototype); // cheat the constructor
+    const new_EdgeDetail = new EdgeDetail(this,obj);
+    this.links[new_EdgeDetail.uniqueId()] = new_EdgeDetail;
     this.refreshAllCaches();
-    return new_LinkDatum;
+    return new_EdgeDetail;
   }
 
   //---------------------------------------------------------------------------------
@@ -778,8 +780,8 @@ class Ontology {
 }
 
 //============================================================
-
-class NodeDatum { 
+// workbook-level info shared across all Views i.e. with no View-specific state attributes
+class VertexDetail { 
 
   constructor(graph,obj) {
     this.base = obj; // Entity
@@ -795,8 +797,6 @@ class NodeDatum {
       uidNodeType: this.base ? this.base._type.uniqueId() : 'default'
    };
 
-   this.state = { };
-
      this._cache = {
       super_nodes: [],
       sub_nodes: [],
@@ -807,20 +807,15 @@ class NodeDatum {
 
     this.bind(graph); // ASSUMES graph.Types is already populated
 
-
   }
 // TODO: re-bind after ontology is reloaded.
 
-  uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise LinkDatum binding will require extra indirection
+  uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise EdgeDetail binding will require extra indirection
   setCaption(txt) { this.caption = txt; return this; }
   getName() { return `${this.caption ?? this.base.getName()}` } 
   toString() { return `${this._cache.nodeType.toString()}: ${this.caption ?? this.base.toString()}` }
   getWorkbook() { return WeakBind.parentOf.get(this) }
-  // searchpath for current state 
-  getPhase() { return this.state.phase ?? this.getTypeSpec().state.phase ?? this.getTemplate().state.phase }
-  getShape() { return this.state.shape ?? this.getTypeSpec().state.shape ?? this.getTemplate().state.shape }
-  getLight() { return this.state.light ?? this.getTypeSpec().state.light ?? this.getTemplate().state.light }
-  // getImage() ( return this.images)
+  
 
   restorePrototypes(graph) { 
     graph.restoreObjectAs(this.base,Entity); 
@@ -831,7 +826,7 @@ class NodeDatum {
   // standardised method name called via restorePrototypes() helper function, after restorePrototyes
   restoreBindings(graph) { 
     this.bind(graph);
-    this.setSubClass();
+    //   this.setSubClass();
     // this.refreshCache(graph); // not until all links are fully restored
   }
 
@@ -842,21 +837,10 @@ class NodeDatum {
   getTemplate() { return this.getTypeSpec().getTemplate() }
 
   getTypeSpec() { return this._cache.nodeType }
+
   setTypeSpec(nodeType) {
     this._cache.nodeType = nodeType;
     this.keys.uidNodeType = nodeType?.uniqueId();  // otherwise rehydration fails
-    return this;
-  }
-
-  setSubClass() { 
-    // TODO: decide which subclass I belong to, based on current state ( phase, shape )
-  const phase = this.getPhase(), shape = this.getShape();
-   const newSubClass = 
-      shape == Shape.RECT ? phase == Phase.SOLID ? SolidRect : FluidRect
-    : shape == Shape.ICON ? phase == Phase.SOLID ? SolidIcon : FluidIcon   
-    : shape == Shape.DOT  ? phase == Phase.SOLID ? SolidDot  : FluidDot   
-    : MaximisedRect;
-    Object.setPrototypeOf(this,newSubClass.prototype);
     return this;
   }
 
@@ -868,21 +852,22 @@ class NodeDatum {
     return this;
  }
 
+ // TODO: move this to D3NodeDatum so we can set shape there
   addEnclosure(graph) { // create a parent contour node encapsulating just this node
     const 
-      pnode = graph.addNode({id:RandomId('N')}, graph.types.default),
+      pnode = graph.addNode({id:RandomId('N')}, graph.types.contour), 
       plink = graph.addLink(this,pnode,graph.types.partOf);
-      pnode.state.shape = Shape.RECT; 
-      pnode.setSubClass();
+      // pnode.state.shape = Shape.RECT; 
+      // pnode.setSubClass();
     return pnode;
   }
 
   refreshCache(graph) {
     const 
-      super_nodes = graph.linkData().filter(d => d.subNodeDatum() == this).map(d=>d.superNodeDatum()),
-      sub_nodes = graph.linkData().filter(d => d.superNodeDatum() == this).map(d=>d.subNodeDatum()),
-      in_links = graph.linkData().filter(d => d.toNodeDatum() == this),
-      out_links = graph.linkData().filter(d => d.fromNodeDatum() == this),
+      super_nodes = graph.linkData().filter(d => d.subVertexDetail() == this).map(d=>d.superVertexDetail()),
+      sub_nodes = graph.linkData().filter(d => d.superVertexDetail() == this).map(d=>d.subVertexDetail()),
+      in_links = graph.linkData().filter(d => d.toVertexDetail() == this),
+      out_links = graph.linkData().filter(d => d.fromVertexDetail() == this),
       nodeType = graph.types[this.keys.uidNodeType],
       images = this.keys.uidImages ? Array.from(this.keys.uidImages).map(uid => graph.images[uid]) : undefined;
 
@@ -908,19 +893,75 @@ class NodeDatum {
  }
 
 //============================================================
+
+class D3NodeDatum {
+
+  constructor(view,obj) {
+    console.assert(view instanceof View);
+    console.assert(obj instanceof VertexDetail);
+
+    this._detail = obj;
+    this.state = { };
+
+  }
+
+
+  // TODO: searchpath for current state 
+  getPhase() { return this.state.phase ?? this._detail.getTypeSpec().state.phase ?? this._detail.getTemplate().state.phase }
+  getShape() { return this.state.shape ?? this._detail.getTypeSpec().state.shape ?? this._detail.getTemplate().state.shape }
+  getLight() { return this.state.light ?? this._detail.getTypeSpec().state.light ?? this._detail.getTemplate().state.light }
+  // getImage() ( return this.images)
+
+
+  setSubClass() { 
+    // TODO: decide which subclass I belong to, based on current state ( phase, shape )
+  const phase = this.getPhase(), shape = this.getShape();
+   const newSubClass = 
+      shape == Shape.RECT ? phase == Phase.SOLID ? SolidRect : FluidRect
+    : shape == Shape.ICON ? phase == Phase.SOLID ? SolidIcon : FluidIcon   
+    : shape == Shape.DOT  ? phase == Phase.SOLID ? SolidDot  : FluidDot   
+    : MaximisedRect;
+    Object.setPrototypeOf(this,newSubClass.prototype);
+    return this;
+  }
+
+
+
+
+
+}
+
+//============================================================
+
+class D3LinkDatum {
+
+  constructor(view,obj) {
+    console.assert(view instanceof View);
+    console.assert(obj instanceof EdgeDetail);
+
+    this._detail = obj;
+    this.state = { };
+
+}
+
+  getLight() { return this.state.light ?? this._detail.getTypeSpec().state.light ?? this._detail.getTemplate().state.light }
+
+}
+
+//============================================================
 // simplest leaf node with no uncloaked children
 // displayed as <circle> with attributes x,y (same as D3 simulation)
 // usually includes a thumbnail image clipped to a circle
 // scale can be zoomed with mouse wheel
 
-class FluidIcon extends NodeDatum {
+class FluidIcon extends D3NodeDatum {
   // lightweight, prototype only, assigned dynamically at runtime (not recommended in situations where performance matters)
   foobar() { return 'hello FluidIcon (circle)'}
 }
 
 //============================================================
 // a compact 'dot' or 'elbow', possibly representing a MINIMISED 'compound hyperedge replacement' 
-// it has x,y coords, COG etc like a regular NodeDatum, minimal radius (but also a hidden clickzone)
+// it has x,y coords, COG etc like a regular VertexDetail, minimal radius (but also a hidden clickzone)
 // no charge or mass.  
 // may be floating OR static relative to its innermost containing box
 // if static, the shape still a circular dot, but with other styles of a static box outline?
@@ -930,7 +971,7 @@ class FluidIcon extends NodeDatum {
 // and vice-versa for outward links.
 // possible sub-classes might be 'Fork' or 'Decision' or 'logical gate'
 
-class SolidDot extends NodeDatum 
+class SolidDot extends D3NodeDatum 
 { 
   foobar() { return 'hello solid dot (junction)'}
 }
@@ -944,7 +985,7 @@ class FluidDot extends SolidDot
 // an abstract base class for 'open' supernode containers rect. 
 // but <rect> attributes in SVG use left,top,width,height 
 // instead of centroid (x,y) as updated by D3 simulation
-class RectangleDatum extends NodeDatum {
+class RectangleDatum extends D3NodeDatum {
   foobar() { return 'hello rect'}
 }
 
@@ -1212,7 +1253,7 @@ class Entity {
   keyId() { return this.xid } // for local binding within this ontology
   uniqueId() { return this.uid } // used by d3, and to safely bind across ontologies without name collisions
   bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
-  toString() { return `${this.txtName}: ${this.txtNote}` } // NodeDatum.toString() will add descriptor via _datumType
+  toString() { return `${this.txtName}: ${this.txtNote}` } // VertexDetail.toString() will add descriptor via _datumType
   getName() { return this.txtName }
   
   getOntology() { return WeakBind.parentOf.get(this) }
@@ -1258,14 +1299,14 @@ class Relation {
 
 //============================================================
 
-// each Relation may be referenced in many Workbooks each with its own LinkDatum (x,y,fx,fy,width etc.)
-
-class LinkDatum {  
+// each Relation may be referenced in many Workbooks
+// Workbook-level 
+class EdgeDetail {  
  constructor(graph,obj) {
     if (obj instanceof Relation) {
       this.base = obj; 
       this.collectKeys(graph);
-    } else if (obj instanceof LinkDatum) {
+    } else if (obj instanceof EdgeDetail) {
       // copy keys by value
       this.keys = {...obj.keys, uidThis: hashString(RandomId('L'))};
       }
@@ -1337,13 +1378,13 @@ class LinkDatum {
   // except the "edit-resistant" ones that require extra care (_datumFrom etc.)
   refreshCache(graph) { 
     const
-      superNodeDatum = this.superNodeDatum(),
-      subNodeDatum = this.subNodeDatum();
+      superVertexDetail = this.superVertexDetail(),
+      subVertexDetail = this.subVertexDetail();
     //  superNodeData =  this.allSuperNodeData(); // circular dedependency during rehydration
 
     this._cache = {
-      superNodeDatum,
-      subNodeDatum
+      superVertexDetail,
+      subVertexDetail
       //,superNodeData
       }
 
@@ -1354,7 +1395,7 @@ class LinkDatum {
 
   copyTo(graph) {
     console.assert(graph instanceof Workbook);
-    const obj = new LinkDatum(graph,this);
+    const obj = new EdgeDetail(graph,this);
     obj.keys.uidThis = hashString(RandomId('L'));  // needs a new uid to avoid overwriting
     graph.links[obj.uniqueId()] = obj;
     return obj;
@@ -1363,7 +1404,7 @@ class LinkDatum {
 // returns a union of supernodes that directly contain either endpoint of this link (or both)
 // called e.g. from this.interjectNode() & this.refreshCache()
 // not counting the endpoints themselves
-// ASSUMES each NodeDatum already has an accurate _cache object
+// ASSUMES each VertexDetail already has an accurate _cache object
   allSuperNodeData() {
     const 
       p1 = this._datumFrom.allSuperNodeData(),
@@ -1373,7 +1414,7 @@ class LinkDatum {
   }
 //-----------------------------------------------
 
-  superNodeDatum() { // which one of this link's pair of endpoints is actually the container superset? (if applicable) 
+  superVertexDetail() { // which one of this link's pair of endpoints is actually the container superset? (if applicable) 
     // after adjusting for 'reversed' predicates, and disregarding any non-hiearchical predicates
     // by convention arrow is FROM superset TO subelement
     const nesting = this._linkType._cache.template.nesting;
@@ -1382,15 +1423,15 @@ class LinkDatum {
     }
 //-----------------------------------------------
 
-  subNodeDatum() { // which one of this link's 2 endpoints is actually the nested subelement? (if applicable) 
+  subVertexDetail() { // which one of this link's 2 endpoints is actually the nested subelement? (if applicable) 
     const nesting = this._linkType._cache.template.nesting;
     if (nesting.enabled) return nesting.reversed ? this._datumFrom : this._datumTo;
     return null;
     }
 
-  fromNodeDatum() { return this._datumFrom }
+  fromVertexDetail() { return this._datumFrom }
 
-  toNodeDatum() { return this._datumTo }
+  toVertexDetail() { return this._datumTo }
 
 //-----------------------------------------------
 // insert jnode as 'elbow' (involves splitting this link into 2)
@@ -1426,7 +1467,7 @@ class LinkDatum {
 // with time sequence being either absolute or relative to context frame.
 
   interjectNode(jnode=null,graph) {
-    console.assert(jnode == null || jnode instanceof NodeDatum);  
+    console.assert(jnode == null || jnode instanceof VertexDetail);  
     if (jnode == null) { 
       jnode = graph.addNode({id:RandomId('J')});
       jnode.setCaption(`[Junction node: ${this._datumFrom.getName()} to ${this._datumTo.getName()}]`);
@@ -1436,7 +1477,8 @@ class LinkDatum {
 
     }
     // default initial state is a floating 'elbow' junction
-    Object.setPrototypeOf(jnode,FluidDot.prototype);
+  //  Object.setPrototypeOf(jnode,VertexDetail.prototype);
+
 
     if (jnode._cache.nodeType == graph.types.default) // seems reasonable to propagate link type 
       jnode.setTypeSpec(this._linkType); 
@@ -1454,7 +1496,7 @@ class LinkDatum {
     this.collectKeys(); 
     graph.refreshAllCaches();
     
-    console.log('LinkDatum.interjectNode() jnode,this,link2',jnode,this,link2)
+    console.log('EdgeDetail.interjectNode() jnode,this,link2',jnode,this,link2)
     return jnode;
   }
 
@@ -1544,25 +1586,58 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
   // each included path can be 'illuminated' or not, by setting its light status
   // user can experiment with illumination settings - the current 'lighting sequence' is saved as part of that study
   // individually tweaked illumination settings may also be captured per node or link?, along with annotations
+  // unlike Paths, a View can also include (illuminate) individual Nodes directly without affecting their Links
+  // Optionally store their current state (Shape & Phase), to be re-applied when the same View is reactivated.
+  // other nodes (with non-saved state) are reset to their defaults
+  // so, the effective state of a node or link is local to the current View context
+  // D3 logic is based on View, not the Workbook
+  // a ViewPort manages one View at a time. Each view stores all the 'edited' coordinates and state info
+  // basically any D3 datum info that was changed by user interaction, eg dragging a FluidIcon sets the COG 
+  // but we still want D3 methods to work eg selection.attr('r',d=>d.radius())
+  // the datum object has to read & write an assortment of local View-specific AND global Workbook-level attributes per node and per link
+  // the simulation reads & writes directly to (View-specific local) d.x,d.y, d.fx, d.fy, 
+  // every d must be a View-specific wrapper object, with 
+  // suvbclasses of Node are all View-specific wrappers - each instance exists in a particular View 
+  // "adding a node to a view" means creating a wrapper with its own x,y (and when user intervenes),fx,fy,scale, 
+  // normally done via Paths,  that is. 
+  // "adding a path to a view" means "adding a EdgeDetail shell wrapper for each Link kernel 
+  // AND for each added Link, creating (or replacing) a VertexDetail shell wrapper for both ends
+  // "illuminating a path" means "setting the lighting attributes" of each local View-specific datum on that path
+  // subject to rules of precedence as described earlier.
 
-  // user can quickly switch between views in the same workbook.
+  // At ViewPort, user can quickly switch between views in the same workbook or another workbook
   
-  // a study can illuminate links directly and attach futher meaning?
-  // a study can be saved to a separate file, with references to the graph/s that need to be imported
+  // a View can illuminate links directly and attach futher meaning?
+  // a View can be saved to a separate file, with references to the graph/s that need to be imported
+
+  // a 
+
+
 
   constructor(graph,uid) {
     this.name = RandomId('V');
     this.keys = {uidPaths: []};
-    this._cache = {};
+//  this._cache = {};
+    // for in-scope nodes & links:  wrapper objects storing local (if non-default) state, COGx, COGy, scale
+    // also live D3-managed attributes: x,y, fx, fy
+    // plus _cached ref to central workbook-level Node and Link details
+    this.d3nodes = {}; 
+    this.d3links = {};
     this.uid = uid ?? hashString(this.name);
     this.restorePrototypes(graph);
   }
   
   uniqueId() { return this.uid };
 
+  nodeData() { return Object.values(this.d3nodes) }
+  linkData() { return Object.values(this.d3links) }
+  
+
   restorePrototypes(graph) {
     this.keys.uidPaths = new Set(this.keys.uidPaths);
     this._cache = {paths: {}};
+    this.nodeData().forEach(obj=>Object.setPrototypeOf(obj,D3NodeDatum));
+    this.linkData().forEach(obj=>Object.setPrototypeOf(obj,D3LinkDatum));
     return this;
   }
 
@@ -1578,6 +1653,33 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
     this.keys.uidPaths.add(path.uniqueId());
     return this;
   }
+
+  createLinkData() {
+
+    // for each path in this._cache.paths
+    //    for each segment in path._cache.segments
+    //      recursively expand & collect edges & junctions (& complementary edges)
+    //      NOTE! 'junction' (hyperedge) flag is a Vertex property. Not local to current View
+    //      for each edge in segment
+    //        create a D3LinkDatum
+    //        add it to path._cache.links
+  }
+
+
+}
+
+//============================================================
+  // a ViewPort manages & preents one View at a time, in an SVG container. Each view stores all the 'non-default' coordinates and state info
+  // not part of a Workbook. From a single viewport the user can 'change channel' & switch between views even from diffent workbooks ? 
+  // at any time it presents one View (and therefore its Workbook, Simulation etc.)
+  // it listens and captures all user events clicks, drags, keypresses and sends them th 
+  class ViewPort // extends Window? aka GUI
+
+
+{
+constructor(graph) { 
+
+}
 
 }
 
