@@ -74,9 +74,9 @@ function embellish_path(graph) {
         link = links1[0];
 
     graph
-    .addPath(links1)
-    .addPath(links2)
-    .addPath(links3);
+    .addPathSpec(links1)
+    .addPathSpec(links2)
+    .addPathSpec(links3);
 
 //const existing_node = graph.nodeData()[8];
  const existing_node = null;
@@ -125,5 +125,8 @@ console.log('anode.addEnclosure() => pnode',anode,pnode);
 
 const path = Object.values(graph.paths)[0];
 
-graph.views.default.addPath(path);
+graph.views.default.appendData(graph);
+graph.views.default.addPathSpec(path);
+
+
 }

@@ -395,7 +395,7 @@ class Workbook {  // includes formatting info as well as data & forces
     this.restoreValuesOf(this.images,Image);
     this.restoreValuesOf(this.nodes,VertexDetail);
     this.restoreValuesOf(this.links,EdgeDetail);
-    this.restoreValuesOf(this.paths,Path);
+    this.restoreValuesOf(this.paths,PathSpec);
     this.restoreValuesOf(this.views,View);
     }
 
@@ -475,7 +475,7 @@ class Workbook {  // includes formatting info as well as data & forces
 //  hydrate paths - note similarity to HyperEdges
     json.paths = json.paths ?? {};
     Object.values(json.paths).forEach(d => {
-      Object.setPrototypeOf(d,Path.prototype);
+      Object.setPrototypeOf(d,PathSpec.prototype);
       d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.links[uid]]));
   //    d._hyperEdges = Object.fromEntries(d.uidHyperEdges.map(uid => [uid,this.hyperEdges[uid]]));
       d.uidLinks = new Set(d.uidLinks);
@@ -503,9 +503,9 @@ class Workbook {  // includes formatting info as well as data & forces
 
 //------------------------------------------------------------------
 
-  addPath(links=[]) { 
+  addPathSpec(links=[]) { 
     this.paths = this.paths ?? {};
-    const obj = new Path(this);
+    const obj = new PathSpec(this);
     this.paths[obj.uniqueId()] = obj;
     obj.addLinks(links);
     return this;
@@ -816,7 +816,6 @@ class VertexDetail {
 
   constructor(graph,obj) {
     this.base = obj; // Entity
-    this.x = Math.random(); 
     console.assert(graph instanceof Workbook);
     WeakBind.parentOf.set(this,graph);
 
@@ -940,7 +939,7 @@ class JunctionDetail extends VertexDetail {
 // a "pass-through" node, such that state (light) applied to to one incoming edge 
 // automatically flows to ALL outward edges - and vice versa
 // uses fan
-// NOT a local View-level format attribute, as it also determines what's in logical scope of a Path
+// NOT a local View-level format attribute, as it also determines what's in logical scope of a PathSpec
 
 }
 
@@ -951,7 +950,8 @@ class D3NodeDatum {
   constructor(view,obj) {
     console.assert(view instanceof View);
     console.assert(obj instanceof VertexDetail);
-
+    this.x = Math.random(); 
+    this.y = Math.random(); 
     this._detail = obj;
     this.state = { };
 
@@ -984,7 +984,7 @@ class D3NodeDatum {
 }
 
 //============================================================
-
+// TODO: D3Links must connect to D3Nodes, to get their end points. 
 class D3LinkDatum {
 
   constructor(view,obj) {
@@ -1366,7 +1366,7 @@ class EdgeDetail {
     this._cache = this.cache ?? {};
     this.restoreBindings(graph); 
     
-    this.y = Math.random(); 
+    this.y = Math.random(); // just for randomly assigning into PathSpecs
     WeakBind.parentOf.set(this,graph);
 
  }
@@ -1566,7 +1566,7 @@ class EdgeDetail {
 
 //============================================================
 
-class Path {  // aka Subgraph
+class PathSpec {  // aka Subgraph
 // an ordered? set of path segments (= binary links and/or (recursive) subgraphs)
 // typically an unbroken thread, in the context of a Study
 // use case variants include Scene, Episode, chapter, narrative arc, scenario, critical path,
@@ -1591,7 +1591,7 @@ class Path {  // aka Subgraph
 // 'alluded to', 'ambiguous', 'hypothetical', 'unconfirmed'
 // think how the 'critical path' appears in red. In storytelling it's not always 'which tasks are delaying completion?'
 
-// user could try swapping between different draft narratives, alternate Paths to see which has the greatest impact
+// user could try swapping between different draft narratives, alternate PathSpecs to see which has the greatest impact
 
 // a path can define the 'reveal' sequence or the 'physical' sequence. Any other sequences?
 // for a simple narrative 'live commentary' they're both the same
@@ -1617,12 +1617,14 @@ class Path {  // aka Subgraph
 
   restorePrototypes(graph) {
       this.keys.uidSegments = new Set(this.keys.uidSegments);
-      this._cache = { segments: {}};
+      this._cache = { segments: {}, uidEdges: new Set(), uidVertices: new Set() };
   }
 
 restoreBindings(graph) {
   this._cache.segments = {}; 
   this.keys.uidSegments.forEach(uid => this._cache.segments[uid] = graph.paths[uid] ?? graph.links[uid] );
+// TODO: expand all segments to repopulate _cache.uidEdges and .uidVertices
+
 
 }
 
@@ -1650,6 +1652,29 @@ restoreBindings(graph) {
 }
 
 //============================================================
+// View-level wrapper for a PathSpec, translated & expanded into illuminated subsets of (intra-View) D3LinkDatum and D3NodeDatum  
+// 
+
+class D3PathIllumination { 
+
+  constructor(view,path) {
+    console.assert(view instanceof View);
+    console.assert(path instanceof PathSpec);
+    this.light = Light.BACK;
+    this._cache = {
+      d3links: {},
+      d3nodes: {},
+      path
+    }; 
+    this.uid = path.uniqueId(); // one View cannot save multiple illuminations of the same PathSpec
+  }
+
+  uniqueId() { return this.uid }
+
+}
+
+
+//============================================================
 
 class View { // aka Study, Interpretation, Analysis, Discussion, Project, 
   // an annotated selection of 1 or more paths. A path can appear in multiple Views
@@ -1658,7 +1683,7 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
   // each included path can be 'illuminated' or not, by setting its light status
   // user can experiment with illumination settings - the current 'lighting sequence' is saved as part of that study
   // individually tweaked illumination settings may also be captured per node or link?, along with annotations
-  // unlike Paths, a View can also include (illuminate) individual Nodes directly without affecting their Links
+  // unlike PathSpecs, a View can also include (illuminate) individual Nodes directly without affecting their Links
   // Optionally store their current state (Shape & Phase), to be re-applied when the same View is reactivated.
   // other nodes (with non-saved state) are reset to their defaults
   // so, the effective state of a node or link is local to the current View context
@@ -1671,7 +1696,7 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
   // every d must be a View-specific wrapper object, with 
   // suvbclasses of Node are all View-specific wrappers - each instance exists in a particular View 
   // "adding a node to a view" means creating a wrapper with its own x,y (and when user intervenes),fx,fy,scale, 
-  // normally done via Paths,  that is. 
+  // normally done via PathSpecs,  that is. 
   // "adding a path to a view" means "adding a EdgeDetail shell wrapper for each Link kernel 
   // AND for each added Link, creating (or replacing) a VertexDetail shell wrapper for both ends
   // "illuminating a path" means "setting the lighting attributes" of each local View-specific datum on that path
@@ -1682,19 +1707,18 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
   // a View can illuminate links directly and attach futher meaning?
   // a View can be saved to a separate file, with references to the graph/s that need to be imported
 
-  // a 
-
 
 
   constructor(graph,uid) {
     this.name = RandomId('V');
-    this.keys = {uidPaths: []};
+    this.keys = {uidPathSpecs: []};
 //  this._cache = {};
     // for in-scope nodes & links:  wrapper objects storing local (if non-default) state, COGx, COGy, scale
     // also live D3-managed attributes: x,y, fx, fy
     // plus _cached ref to central workbook-level Node and Link details
     this.d3nodes = {}; 
     this.d3links = {};
+    this.d3paths = {};  // D3PathIllumination objects
     this.uid = uid ?? hashString(this.name);
     this.restorePrototypes(graph);
   }
@@ -1703,26 +1727,39 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
 
   nodeData() { return Object.values(this.d3nodes) }
   linkData() { return Object.values(this.d3links) }
+
+  appendData(graph) { // insert any d3 data wrappers not already in scope
+
+    graph.nodeData().forEach(vertex=>{ 
+      if (this.d3nodes[vertex.uniqueId()] == undefined) this.d3nodes[vertex.uniqueId()] = new D3NodeDatum(this,vertex);
+      });
+
+    graph.linkData().forEach(edge=>{ 
+      if (this.d3links[edge.uniqueId()] == undefined) this.d3links[edge.uniqueId()] = new D3LinkDatum(this,edge);
+      });
+
+    return this;
+    }
   
 
   restorePrototypes(graph) {
-    this.keys.uidPaths = new Set(this.keys.uidPaths);
+    this.keys.uidPathSpecs = new Set(this.keys.uidPathSpecs);
     this._cache = {paths: {}};
-    this.nodeData().forEach(obj=>Object.setPrototypeOf(obj,D3NodeDatum));
-    this.linkData().forEach(obj=>Object.setPrototypeOf(obj,D3LinkDatum));
+    this.nodeData().forEach(obj=>Object.setPrototypeOf(obj,D3NodeDatum.prototype));
+    this.linkData().forEach(obj=>Object.setPrototypeOf(obj,D3LinkDatum.prototype));
     return this;
   }
 
   restoreBindings(graph) {
     this._cache.paths = {}; 
-    this.keys.uidPaths.forEach(uid => this._cache.paths[uid] = graph.paths[uid] );
+    this.keys.uidPathSpecs.forEach(uid => this._cache.paths[uid] = graph.paths[uid]);
     return this;
   }
 
-  addPath(path) {
-    console.assert(path instanceof Path);
+  addPathSpec(path) {
+    console.assert(path instanceof PathSpec);
     this._cache.paths[path.uniqueId()] = path;
-    this.keys.uidPaths.add(path.uniqueId());
+    this.keys.uidPathSpecs.add(path.uniqueId());
     return this;
   }
 
