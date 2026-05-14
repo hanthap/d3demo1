@@ -954,9 +954,11 @@ class D3NodeDatum {
     this.y = Math.random(); 
     this._detail = obj;
     this.state = { };
+    this.uid = obj.uniqueId();
 
   }
 
+  uniqueId() { return this.uid }
 
   // TODO: searchpath for current state 
   getPhase() { return this.state.phase ?? this._detail.getTypeSpec().state.phase ?? this._detail.getTemplate().state.phase }
@@ -977,6 +979,16 @@ class D3NodeDatum {
     return this;
   }
 
+  restorePrototypes(view) { 
+    console.assert(view instanceof View);
+    this._detail = this._detail ?? {};
+  }
+
+restoreBindings(graph){
+    console.assert(graph instanceof Workbook);
+    this._detail = graph.nodes[this.uniqueId()];
+}
+
 
 
 
@@ -990,13 +1002,27 @@ class D3LinkDatum {
   constructor(view,obj) {
     console.assert(view instanceof View);
     console.assert(obj instanceof EdgeDetail);
-
     this._detail = obj;
     this.state = { };
+    this.uid = obj.uniqueId();
 
-}
+  }
+
+  uniqueId() { return this.uid }
 
   getLight() { return this.state.light ?? this._detail.getTypeSpec().state.light ?? this._detail.getTemplate().state.light }
+
+  restorePrototypes(view) { 
+    console.assert(view instanceof View);
+    this._detail = this._detail ?? {};
+  }
+
+restoreBindings(graph){
+    console.assert(graph instanceof Workbook);
+    this._detail = graph.links[this.uniqueId()];
+
+  }
+
 
 }
 
@@ -1085,8 +1111,6 @@ class FrameDatum extends RectangleDatum {
     // HIDE its children (ONLY if they have no other visible parent frames) - and their descendants
     // swap left,top,width,height into D3's node attributes
   }
-
-
 
 }
 
@@ -1568,35 +1592,35 @@ class EdgeDetail {
 
 class PathSpec {  // aka Subgraph
 // an ordered? set of path segments (= binary links and/or (recursive) subgraphs)
-// typically an unbroken thread, in the context of a Study
+// typically expands to an unbroken thread, in the context of a View
 // use case variants include Scene, Episode, chapter, narrative arc, scenario, critical path,
 // storyline, trace, trail, thread, hypothesis, causal pathway, channel, chain (of events), 
 // causation, aetiology, line of reasoning, explicit sequence
 
-// a path implicitly includes both endpoint nodes of every segment 
-// if an endpoint is a JunctionVertex (hyperedge) then the freshly-calculated path also includes all the "complementary" 
-// links terminating at that junction, as well as their outer node - and so on, recursively ending with the last non-junction node
-// if link X is an in-link to junction node J, its set of complementary links X' contains ALL the out-links from J
+// a path always implicitly includes both endpoint vertices of every segment 
+// if an endpoint is a JunctionVertex (hyperedge) then the freshly-calculated path also includes all the "complementary" fan
+// edges terminating at that junction, as well as their outer node - and so on, recursively ending with the last non-junction node
+// if edge X is an in-link to junction node J, its set of complementary edges X' contains ALL the out-links from J
 // and vice versa starting with a single out-link from junction K.
 
 // a path often includes a time dimension - at least ordinal/relative ('before', 'during' and 'after') if not absolute.
 // could use an editable sort key (like Dewey) to rearrange the serialisation of links within the path
 // sortkey could be ISO date time or just random text. 
-// in dramatic fiction there are many examples where the 'crucial' link that is REVEALED last 
+// in dramatic fiction there are many examples where the 'crucial' edge that is REVEALED last 
 // is NOT the the one at the 'end' of the ACTUAL path
 // so there could be multiple paths, one for the HISTORICAL/PHYSICAL/FACT sequence and one for each draft NARRATIVE sequence.
 // when drafting a screenplay (or a standup routine) it would be handy if the 'reveal status/order' is 
 // indicated visually, derived on the fly depending on which draft narrative is currently "active"
 // with extra cues to indicate "plot twist", "cliffhanger", "missing link not yet revealed" or "spoiler"
 // 'alluded to', 'ambiguous', 'hypothetical', 'unconfirmed'
-// think how the 'critical path' appears in red. In storytelling it's not always 'which tasks are delaying completion?'
+// think how the 'critical path' appears automatically in red. In storytelling it's not always 'which tasks are delaying completion?'
 
 // user could try swapping between different draft narratives, alternate PathSpecs to see which has the greatest impact
 
 // a path can define the 'reveal' sequence or the 'physical' sequence. Any other sequences?
 // for a simple narrative 'live commentary' they're both the same
 // each revealed link can be 'revealed' (indicated, attested, or hinted) more than once, 
-// across different scenes with different actors 
+// across different scenes (paths) with different actors 
 
 // an activated path's 'lighting level' can be set en-masse to SPOT, FORE, BACK or NONE
 // but to simplify, the new state settings are applied to the current member objects, not recalculated declaratively.
@@ -1652,7 +1676,7 @@ restoreBindings(graph) {
 }
 
 //============================================================
-// View-level wrapper for a PathSpec, translated & expanded into illuminated subsets of (intra-View) D3LinkDatum and D3NodeDatum  
+// View-level wrapper for an (expanded) PathSpec, translated into illuminated subsets of (intra-View) D3LinkDatum and D3NodeDatum  
 // 
 
 class D3PathIllumination { 
@@ -1677,36 +1701,35 @@ class D3PathIllumination {
 //============================================================
 
 class View { // aka Study, Interpretation, Analysis, Discussion, Project, 
-  // an annotated selection of 1 or more paths. A path can appear in multiple Views
+  // an annotated selection of 1 or more path illuminations. (The source path can appear in multiple Views)
   // user can export a single View as a self-contained JSON file, for loading into opensource playback runtime app.
-  // the output JSON needs to be standalone so includes objects and few uids
+  // the output JSON needs to be standalone so includes objects (and relatively few uids)
   // each included path can be 'illuminated' or not, by setting its light status
   // user can experiment with illumination settings - the current 'lighting sequence' is saved as part of that study
   // individually tweaked illumination settings may also be captured per node or link?, along with annotations
   // unlike PathSpecs, a View can also include (illuminate) individual Nodes directly without affecting their Links
-  // Optionally store their current state (Shape & Phase), to be re-applied when the same View is reactivated.
-  // other nodes (with non-saved state) are reset to their defaults
+  // Optionally store their current state (Shape & Phase), to be re-applied each time the same View is reactivated.
+  // other nodes (with non-saved state) are reset to their default states based on current Type/Template bindings
   // so, the effective state of a node or link is local to the current View context
-  // D3 logic is based on View, not the Workbook
+  // All D3 logic is mediated based on View, not directly to the Workbook/Graph
   // a ViewPort manages one View at a time. Each view stores all the 'edited' coordinates and state info
   // basically any D3 datum info that was changed by user interaction, eg dragging a FluidIcon sets the COG 
   // but we still want D3 methods to work eg selection.attr('r',d=>d.radius())
   // the datum object has to read & write an assortment of local View-specific AND global Workbook-level attributes per node and per link
-  // the simulation reads & writes directly to (View-specific local) d.x,d.y, d.fx, d.fy, 
+  // the simulation reads/writes directly from/to (View-specific local) d.x,d.y, d.fx, d.fy, 
   // every d must be a View-specific wrapper object, with 
-  // suvbclasses of Node are all View-specific wrappers - each instance exists in a particular View 
+  // subclasses of D3NodeDatum are all View-specific wrappers - each instance exists in a particular View 
   // "adding a node to a view" means creating a wrapper with its own x,y (and when user intervenes),fx,fy,scale, 
   // normally done via PathSpecs,  that is. 
-  // "adding a path to a view" means "adding a EdgeDetail shell wrapper for each Link kernel 
+  // "adding a path to a view" means "adding a D3LinkDatum wrapper for each express or implied EdgeDetail
   // AND for each added Link, creating (or replacing) a VertexDetail shell wrapper for both ends
   // "illuminating a path" means "setting the lighting attributes" of each local View-specific datum on that path
   // subject to rules of precedence as described earlier.
 
-  // At ViewPort, user can quickly switch between views in the same workbook or another workbook
+  // At ViewPort, user can quickly switch between views in the same workbook, or another workbook
   
   // a View can illuminate links directly and attach futher meaning?
-  // a View can be saved to a separate file, with references to the graph/s that need to be imported
-
+  // a View may be exported to a separate standalone JSON file OPTIONALLY with references to its source Workbook version
 
 
   constructor(graph,uid) {
@@ -1714,8 +1737,8 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
     this.keys = {uidPathSpecs: []};
 //  this._cache = {};
     // for in-scope nodes & links:  wrapper objects storing local (if non-default) state, COGx, COGy, scale
-    // also live D3-managed attributes: x,y, fx, fy
-    // plus _cached ref to central workbook-level Node and Link details
+    // also whatever non-DOM properties D3 wants to maintain in the bound __datum__ object. x,y, fx, fy, etc
+    // plus _cached ref to workbook-level Vertex and Edge details
     this.d3nodes = {}; 
     this.d3links = {};
     this.d3paths = {};  // D3PathIllumination objects
@@ -1753,6 +1776,8 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
   restoreBindings(graph) {
     this._cache.paths = {}; 
     this.keys.uidPathSpecs.forEach(uid => this._cache.paths[uid] = graph.paths[uid]);
+    this.nodeData().forEach(obj=>obj.restoreBindings(graph));
+    this.linkData().forEach(obj=>obj.restoreBindings(graph,this)); // D3links need to know BOTH their View-level Nodes AND Workbook-level Vertices
     return this;
   }
 
