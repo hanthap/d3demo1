@@ -343,9 +343,9 @@ class Workbook {  // includes formatting info as well as data & forces
       this.nodes = {};
       this.links = {};
       this.types = {
-        default: new TypeSpec(this,{xid:'Unknown', uid:'default'}),
-        partOf: new TypeSpec(this,{xid:'part-of', uid:'partOf'}),
-        contour: new TypeSpec(this,
+        default: new TypeSpecRW(this,{xid:'Unknown', uid:'default'}),
+        partOf: new TypeSpecRW(this,{xid:'part-of', uid:'partOf'}),
+        contour: new TypeSpecRW(this,
         { xid:'contour', 
           uid:'contour', 
           state: {shape: Shape.RECT, phase: Phase.LIQUID} } 
@@ -391,11 +391,11 @@ class Workbook {  // includes formatting info as well as data & forces
     // once done, the newly-hydrated Workbook is ready to use e.g. to upsert an existing workbook.
     this.restoreValuesOf(this.sources,Source);
     this.restoreValuesOf(this.templates,TemplateSpec);
-    this.restoreValuesOf(this.types,TypeSpec);
+    this.restoreValuesOf(this.types,TypeSpecRW);
     this.restoreValuesOf(this.images,Image);
-    this.restoreValuesOf(this.nodes,VertexDetail);
-    this.restoreValuesOf(this.links,EdgeDetail);
-    this.restoreValuesOf(this.paths,PathSpec);
+    this.restoreValuesOf(this.nodes,VertexRW);
+    this.restoreValuesOf(this.links,EdgeRW);
+    this.restoreValuesOf(this.paths,PathSpecRW);
     this.restoreValuesOf(this.views,View);
     }
 
@@ -442,7 +442,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
     // ingest new types (required before adding links)
     Object.values(json.types).forEach(d => {
-      Object.setPrototypeOf(d,TypeSpec.prototype);
+      Object.setPrototypeOf(d,TypeSpecRW.prototype);
       this.types[d.uniqueId()] = d;
       }
     );
@@ -454,7 +454,7 @@ class Workbook {  // includes formatting info as well as data & forces
   // the graph's other nodes are left untouched
 
     Object.values(json.nodes).forEach(d => {
-      Object.setPrototypeOf(d,VertexDetail.prototype);
+      Object.setPrototypeOf(d,VertexRW.prototype);
       Object.setPrototypeOf(d.base,Entity.prototype);
       if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
       d.restoreBindings(this); 
@@ -464,7 +464,7 @@ class Workbook {  // includes formatting info as well as data & forces
     ); 
 
     Object.values(json.links).forEach(d => {
-      Object.setPrototypeOf(d,EdgeDetail.prototype);
+      Object.setPrototypeOf(d,EdgeRW.prototype);
       Object.setPrototypeOf(d.base,Relation.prototype);
       d.restoreBindings(this); 
       this.links[d.uniqueId()] = d;
@@ -475,7 +475,7 @@ class Workbook {  // includes formatting info as well as data & forces
 //  hydrate paths - note similarity to HyperEdges
     json.paths = json.paths ?? {};
     Object.values(json.paths).forEach(d => {
-      Object.setPrototypeOf(d,PathSpec.prototype);
+      Object.setPrototypeOf(d,PathSpecRW.prototype);
       d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.links[uid]]));
   //    d._hyperEdges = Object.fromEntries(d.uidHyperEdges.map(uid => [uid,this.hyperEdges[uid]]));
       d.uidLinks = new Set(d.uidLinks);
@@ -505,7 +505,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
   addPathSpec(links=[]) { 
     this.paths = this.paths ?? {};
-    const obj = new PathSpec(this);
+    const obj = new PathSpecRW(this);
     this.paths[obj.uniqueId()] = obj;
     obj.addLinks(links);
     return this;
@@ -602,17 +602,17 @@ class Workbook {  // includes formatting info as well as data & forces
     this.sources[bound_ont.source.uniqueId()] = bound_ont.source;
 
     // concatenate classes and predicates into a generic 'types' lookup table
-    const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new TypeSpec(this,obj)); 
+    const new_nodeTypes = Object.values(bound_ont.classes).map(obj => new TypeSpecRW(this,obj)); 
      new_nodeTypes.forEach(d => this.types[d.uniqueId()] = d);
 
-    const new_types = Object.values(bound_ont.predicates).map(obj => new TypeSpec(this,obj)); 
+    const new_types = Object.values(bound_ont.predicates).map(obj => new TypeSpecRW(this,obj)); 
     new_types.forEach(d => this.types[d.uniqueId()] = d);
 
-    const new_nodes = Object.values(bound_ont.entities).map(obj => new VertexDetail(this,obj)); 
+    const new_nodes = Object.values(bound_ont.entities).map(obj => new VertexRW(this,obj)); 
     new_nodes.forEach(d => this.nodes[d.uniqueId()] = d);
     // new_nodes.forEach(d => d.setSubClass()); 
  
-    const new_links = Object.values(bound_ont.relations).map(obj => new EdgeDetail(this,obj));
+    const new_links = Object.values(bound_ont.relations).map(obj => new EdgeRW(this,obj));
     new_links.forEach(d => this.links[d.uniqueId()] = d);
   
     new_nodes.forEach(d => d.refreshCache(this));
@@ -626,7 +626,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
   addNode(entitySpec) {
     const new_entity = Ontology.getDefault().addEntity(entitySpec);
-    const new_VertexDetail = new VertexDetail(this,new_entity);
+    const new_VertexDetail = new VertexRW(this,new_entity);
     new_VertexDetail.setTypeSpec(this.types.default);
 //    new_VertexDetail.setSubClass();
     return this.nodes[new_VertexDetail.uniqueId()] = new_VertexDetail;
@@ -645,8 +645,8 @@ class Workbook {  // includes formatting info as well as data & forces
         xidRelnType:  base?.keyId()
       }
     }
-    Object.setPrototypeOf(obj,EdgeDetail.prototype); // cheat the constructor
-    const new_EdgeDetail = new EdgeDetail(this,obj);
+    Object.setPrototypeOf(obj,EdgeRW.prototype); // cheat the constructor
+    const new_EdgeDetail = new EdgeRW(this,obj);
     this.links[new_EdgeDetail.uniqueId()] = new_EdgeDetail;
     this.refreshAllCaches();
     return new_EdgeDetail;
@@ -812,7 +812,7 @@ class Ontology {
 
 //============================================================
 // workbook-level info shared across all Views i.e. with no View-specific state attributes
-class VertexDetail { 
+class VertexRW { 
 
   constructor(graph,obj) {
     this.base = obj; // Entity
@@ -840,11 +840,11 @@ class VertexDetail {
   }
 // TODO: re-bind after ontology is reloaded.
 
-  uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise EdgeDetail binding will require extra indirection
+  uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise EdgeRW binding will require extra indirection
   setCaption(txt) { this.caption = txt; return this; }
   setJunction(flag) { 
     if (flag || this.is_junction) this.is_junction = flag;
-    Object.setPrototypeOf(this, flag ? JunctionDetail.prototype : VertexDetail.prototype);  
+    Object.setPrototypeOf(this, flag ? JunctionDetail.prototype : VertexRW.prototype);  
     return this;
   }
 
@@ -853,7 +853,7 @@ class VertexDetail {
   getWorkbook() { return WeakBind.parentOf.get(this) }
   
   getFanEdgesOf(edge) {
-    console.assert(edge instanceof EdgeDetail);
+    console.assert(edge instanceof EdgeRW);
     // TO DO: return all 'in-stream' complementary edges which are 'incident to' this vertex
     // e.g. so that JunctionDetail nodes will behave as hyperedges, but could be useful in other situations
     // needs to consider the LOGICAL direction/flow (after adjusting for 'reversed' edge types)
@@ -934,7 +934,7 @@ class VertexDetail {
 
 //============================================================
 
-class JunctionDetail extends VertexDetail {
+class JunctionDetail extends VertexRW {
 // a special type of vertex that behaves as a hyperedge 
 // a "pass-through" node, such that state (light) applied to to one incoming edge 
 // automatically flows to ALL outward edges - and vice versa
@@ -949,7 +949,7 @@ class D3NodeDatum {
 
   constructor(view,obj) {
     console.assert(view instanceof View);
-    console.assert(obj instanceof VertexDetail);
+    console.assert(obj instanceof VertexRW);
     this.x = Math.random(); 
     this.y = Math.random(); 
     this._detail = obj;
@@ -989,10 +989,20 @@ restoreBindings(graph){
     this._detail = graph.nodes[this.uniqueId()];
 }
 
+  foobar() {
+    console.log('D3NodeDatum.foobar()');
+  }
 
 
 
+}
 
+class D3NodeDatumRW extends D3NodeDatum {
+  
+  foobar() {
+    console.log('D3NodeDatumRW.foobar()');
+    super.foobar();
+  }
 }
 
 //============================================================
@@ -1001,7 +1011,7 @@ class D3LinkDatum {
 
   constructor(view,obj) {
     console.assert(view instanceof View);
-    console.assert(obj instanceof EdgeDetail);
+    console.assert(obj instanceof EdgeRW);
     this._detail = obj;
     this.state = { };
     this.uid = obj.uniqueId();
@@ -1039,7 +1049,7 @@ class FluidIcon extends D3NodeDatum {
 
 //============================================================
 // a compact 'dot' or 'elbow', possibly representing a MINIMISED 'compound hyperedge replacement' 
-// it has x,y coords, COG etc like a regular VertexDetail, minimal radius (but also a hidden clickzone)
+// it has x,y coords, COG etc like a regular VertexRW, minimal radius (but also a hidden clickzone)
 // no charge or mass.  
 // may be floating OR static relative to its innermost containing box
 // if static, the shape still a circular dot, but with other styles of a static box outline?
@@ -1158,8 +1168,15 @@ class FluidRect extends FrameDatum {
 //============================================================
 // wrapper for the 'predicate' and 'class' objects from source ontology
 // used to map Nodes and Links to their appropriate style template (layer)
-class TypeSpec {
+class TypeSpec {  // read-only, for hydrating a seolf-contained View
+
+
+}
+
+
+class TypeSpecRW extends TypeSpec {
   constructor(graph,obj) {
+    super();
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
     this.uid = this.uid ?? hashString(this.xid + graph.uid);
@@ -1167,7 +1184,6 @@ class TypeSpec {
     this.restoreBindings(graph);
     return this;
   }
-
   uniqueId() { return this.uid }
   keyId() { return this.xid }
   toString() { return this.label ?? this.xid ?? this.uid }
@@ -1176,6 +1192,7 @@ class TypeSpec {
   restoreBindings(graph) { this._cache.template = graph.getTemplate(this.xid) }
   getTemplate() { return this._cache.template ?? graph.getTemplate(this.xid) }
 }
+
 
 //============================================================
 
@@ -1329,7 +1346,7 @@ class Entity {
   keyId() { return this.xid } // for local binding within this ontology
   uniqueId() { return this.uid } // used by d3, and to safely bind across ontologies without name collisions
   bind(ont) { this._type = ont.getEntityType(this.typeId()); return this; }
-  toString() { return `${this.txtName}: ${this.txtNote}` } // VertexDetail.toString() will add descriptor via _datumType
+  toString() { return `${this.txtName}: ${this.txtNote}` } // VertexRW.toString() will add descriptor via _datumType
   getName() { return this.txtName }
   
   getOntology() { return WeakBind.parentOf.get(this) }
@@ -1375,15 +1392,22 @@ class Relation {
 
 //============================================================
 
+// when loading a View into runtime player app
+class Edge {
+
+}
+
+
 // each Relation may be referenced in many Workbooks
 // Workbook-level 
-class EdgeDetail {  
+class EdgeRW extends Edge {  
  constructor(graph,obj) {
+    super();
     if (obj instanceof Relation) {
       this.base = obj; 
       this.collectKeys(graph);
 
-    } else if (obj instanceof EdgeDetail) {
+    } else if (obj instanceof EdgeRW) {
       // copy keys by value
       this.keys = {...obj.keys, uidThis: hashString(RandomId('L'))};
       }
@@ -1481,7 +1505,7 @@ class EdgeDetail {
 
   copyTo(graph) {
     console.assert(graph instanceof Workbook);
-    const obj = new EdgeDetail(graph,this);
+    const obj = new EdgeRW(graph,this);
     obj.keys.uidThis = hashString(RandomId('L'));  // needs a new uid to avoid overwriting
     graph.links[obj.uniqueId()] = obj;
     return obj;
@@ -1490,7 +1514,7 @@ class EdgeDetail {
 // returns a union of supernodes that directly contain either endpoint of this link (or both)
 // called e.g. from this.interjectNode() & this.refreshCache()
 // not counting the endpoints themselves
-// ASSUMES each VertexDetail already has an accurate _cache object
+// ASSUMES each VertexRW already has an accurate _cache object
   allSuperNodeData() {
     const 
       p1 = this._cache.datumFrom.allSuperNodeData(),
@@ -1553,7 +1577,7 @@ class EdgeDetail {
 // with time sequence being either absolute or relative to context frame.
 
   interjectNode(jnode=null,graph) {
-    console.assert(jnode == null || jnode instanceof VertexDetail);  
+    console.assert(jnode == null || jnode instanceof VertexRW);  
     if (jnode == null) { 
       jnode = graph.addNode({id:RandomId('J')});
       jnode.setJunction(true);
@@ -1581,7 +1605,7 @@ class EdgeDetail {
     this.collectKeys(); 
     graph.refreshAllCaches();
     
-    console.log('EdgeDetail.interjectNode() jnode,this,link2',jnode,this,link2)
+    console.log('EdgeRW.interjectNode() jnode,this,link2',jnode,this,link2)
     return jnode;
   }
 
@@ -1590,7 +1614,12 @@ class EdgeDetail {
 
 //============================================================
 
-class PathSpec {  // aka Subgraph
+class PathSpec {
+
+
+}
+
+class PathSpecRW extends PathSpec {  // aka Subgraph
 // an ordered? set of path segments (= binary links and/or (recursive) subgraphs)
 // typically expands to an unbroken thread, in the context of a View
 // use case variants include Scene, Episode, chapter, narrative arc, scenario, critical path,
@@ -1633,6 +1662,7 @@ class PathSpec {  // aka Subgraph
 // a path may also include sub-paths, recursively. 
 
   constructor(graph) {
+    super();
     this.name = RandomId('P');
     this.keys = { uidSegments: new Set() }
     this._cache = { segments: {}};
@@ -1683,7 +1713,7 @@ class D3PathIllumination {
 
   constructor(view,path) {
     console.assert(view instanceof View);
-    console.assert(path instanceof PathSpec);
+    console.assert(path instanceof PathSpecRW);
     this.light = Light.BACK;
     this._cache = {
       d3links: {},
@@ -1721,8 +1751,8 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
   // subclasses of D3NodeDatum are all View-specific wrappers - each instance exists in a particular View 
   // "adding a node to a view" means creating a wrapper with its own x,y (and when user intervenes),fx,fy,scale, 
   // normally done via PathSpecs,  that is. 
-  // "adding a path to a view" means "adding a D3LinkDatum wrapper for each express or implied EdgeDetail
-  // AND for each added Link, creating (or replacing) a VertexDetail shell wrapper for both ends
+  // "adding a path to a view" means "adding a D3LinkDatum wrapper for each express or implied EdgeRW
+  // AND for each added Link, creating (or replacing) a VertexRW shell wrapper for both ends
   // "illuminating a path" means "setting the lighting attributes" of each local View-specific datum on that path
   // subject to rules of precedence as described earlier.
 
@@ -1782,7 +1812,7 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
   }
 
   addPathSpec(path) {
-    console.assert(path instanceof PathSpec);
+    console.assert(path instanceof PathSpecRW);
     this._cache.paths[path.uniqueId()] = path;
     this.keys.uidPathSpecs.add(path.uniqueId());
     return this;

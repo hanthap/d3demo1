@@ -127,6 +127,9 @@ const path = Object.values(graph.paths)[0];
 
 graph.views.default.appendData(graph);
 graph.views.default.addPathSpec(path);
+const n = graph.views.default.nodeData()[1];
+Object.setPrototypeOf(n,D3NodeDatumRW.prototype);
+
 
 
 }
