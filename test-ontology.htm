@@ -153,7 +153,7 @@ class ExploreOnly extends EventListener {
 static OnClick(e) {
   const d = e.srcElement.__data__;
   if (d) {
-  console.log('OnClick',e,d,d.toString(),d._cache.datumFrom, d._cache.datumTo);
+  console.log('OnClick',e,d,d.toString(),d._cache.vertFrom, d._cache.vertTo);
   }
  
 }
@@ -161,7 +161,7 @@ static OnClick(e) {
 static OnMouseOver(e) {
   const d = e.srcElement.__data__;
   if (d) {
-  console.log('OnMouseOver',e,d,d.toString(),d._cache.datumFrom, d._cache.datumTo);
+  console.log('OnMouseOver',e,d,d.toString(),d._cache.vertFrom, d._cache.vertTo);
   }
 
 }
@@ -170,7 +170,7 @@ static OnMouseOver(e) {
 static OnMouseOut(e) {
   const d = e.srcElement.__data__;
   if (d) {
-  console.log('OnMouseOut',e,d,d.toString(),d._cache.datumFrom, d._cache.datumTo);
+  console.log('OnMouseOut',e,d,d.toString(),d._cache.vertFrom, d._cache.vertTo);
   }
 
 }
@@ -178,7 +178,7 @@ static OnMouseOut(e) {
 static OnContextMenu(e) {
   const d = e.srcElement.__data__;
   if (d) {
-  console.log('OnContextMenu', e,d,d.toString(),d._cache.datumFrom, d._cache.datumTo,);
+  console.log('OnContextMenu', e,d,d.toString(),d._cache.vertFrom, d._cache.vertTo,);
   }
 
 }
@@ -631,13 +631,13 @@ class Workbook {  // includes formatting info as well as data & forces
 
   //---------------------------------------------------------------------------------
 
-  addLink(fromNode, toNode, linkType, base=null) { 
+  addLink(fromNode, toNode, edgeType, base=null) { 
 
     const obj = {
     keys: {
         uidDatumFrom: fromNode.uniqueId(),
         uidDatumTo:   toNode.uniqueId(),
-        uidTypeSpec:  linkType.uniqueId(),
+        uidTypeSpec:  edgeType.uniqueId(),
         uidBase:      base?.uniqueId(),
         xidRelnType:  base?.keyId()
       }
@@ -807,9 +807,27 @@ class Ontology {
 
 //============================================================
 // workbook-level info shared across all Views i.e. with no View-specific state attributes
-class VertexRW { 
+
+class Vertex { 
+  uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise EdgeRW binding will require extra indirection
+  getName() { return `${this.caption ?? this.base.getName()}` } 
+  toString() { return `${this._cache.vertexType.toString()}: ${this.caption ?? this.base.toString()}` }
+
+  getFanEdgesOf(edge) {
+    console.assert(edge instanceof EdgeRW);
+    // TO DO: return all 'in-stream' complementary edges which are 'incident to' this vertex
+    // e.g. so that JunctionDetail nodes will behave as hyperedges, but could be useful in other situations
+    // needs to consider the LOGICAL direction/flow (after adjusting for 'reversed' edge types)
+  }
+
+
+
+}
+
+class VertexRW extends Vertex { 
 
   constructor(graph,obj) {
+    super();
     this.base = obj; // Entity
     console.assert(graph instanceof Workbook);
     WeakBind.parentOf.set(this,graph);
@@ -819,15 +837,15 @@ class VertexRW {
     this.keys = {
       uidEntity: this.base ? this.base.uniqueId() : hashString(RandomId('N')),
       xidEntityType: this.base ? this.base._type.keyId() : null,
-      uidNodeType: this.base ? this.base._type.uniqueId() : 'default'
+      uidVertexType: this.base ? this.base._type.uniqueId() : 'default'
    };
 
      this._cache = {
-      super_nodes: [],
-      sub_nodes: [],
-      in_links: [],
-      out_links: [],
-      nodeType: graph.types.default
+      vertsSuper: [],
+      vertsSub: [],
+      edgesIn: [],
+      edgesOut: [],
+      vertexType: graph.types.default,
     };
 
     this.bind(graph); // ASSUMES graph.types is already populated
@@ -835,7 +853,6 @@ class VertexRW {
   }
 // TODO: re-bind after ontology is reloaded.
 
-  uniqueId() { return this.keys.uidEntity } // must be same as Entity, otherwise EdgeRW binding will require extra indirection
   setCaption(txt) { this.caption = txt; return this; }
   setJunction(flag) { 
     if (flag || this.is_junction) this.is_junction = flag;
@@ -843,16 +860,8 @@ class VertexRW {
     return this;
   }
 
-  getName() { return `${this.caption ?? this.base.getName()}` } 
-  toString() { return `${this._cache.nodeType.toString()}: ${this.caption ?? this.base.toString()}` }
   getWorkbook() { return WeakBind.parentOf.get(this) }
   
-  getFanEdgesOf(edge) {
-    console.assert(edge instanceof EdgeRW);
-    // TO DO: return all 'in-stream' complementary edges which are 'incident to' this vertex
-    // e.g. so that JunctionDetail nodes will behave as hyperedges, but could be useful in other situations
-    // needs to consider the LOGICAL direction/flow (after adjusting for 'reversed' edge types)
-  }
 
   restorePrototypes(graph) { 
     graph.restoreObjectAs(this.base,Entity); 
@@ -869,16 +878,16 @@ class VertexRW {
   }
 
   bind(graph) { // rehydrate static bindings 
-    this._cache.nodeType = graph.types[this.keys.uidNodeType] ?? graph.types.default;
+    this._cache.vertexType = graph.types[this.keys.uidVertexType] ?? graph.types.default;
   }
 
   getTemplate() { return this.getTypeSpec().getTemplate() }
 
-  getTypeSpec() { return this._cache.nodeType }
+  getTypeSpec() { return this._cache.vertexType }
 
-  setTypeSpec(nodeType) {
-    this._cache.nodeType = nodeType;
-    this.keys.uidNodeType = nodeType?.uniqueId();  // otherwise rehydration fails
+  setTypeSpec(vertexType) {
+    this._cache.vertexType = vertexType;
+    this.keys.uidVertexType = vertexType?.uniqueId();  // otherwise rehydration fails
     return this;
   }
 
@@ -890,28 +899,28 @@ class VertexRW {
     return this;
  }
 
-  addEnclosure(graph) { // create a parent contour node encapsulating just this node
+  addEnclosure(graph) { // create a parent contour vertex encapsulating just this vertex
     const 
-      pnode = graph.addNode({id:RandomId('N')}, graph.types.contour), 
-      plink = graph.addLink(this,pnode,graph.types.partOf);
-    return pnode;
+      pVertex = graph.addNode({id:RandomId('N')}, graph.types.contour), 
+      pEdge = graph.addLink(this,pVertex,graph.types.partOf);
+    return pVertex;
   }
 
   refreshCache(graph) {
     const 
-      super_nodes = graph.linkData().filter(d => d.subVertexDetail() == this).map(d=>d.superVertexDetail()),
-      sub_nodes = graph.linkData().filter(d => d.superVertexDetail() == this).map(d=>d.subVertexDetail()),
-      in_links = graph.linkData().filter(d => d.toVertexDetail() == this),
-      out_links = graph.linkData().filter(d => d.fromVertexDetail() == this),
-      nodeType = graph.types[this.keys.uidNodeType],
+      vertsSuper = graph.linkData().filter(d => d.subVertex() == this).map(d=>d.superVertex()),
+      vertsSub = graph.linkData().filter(d => d.superVertex() == this).map(d=>d.subVertex()),
+      edgesIn = graph.linkData().filter(d => d.toVertex() == this),
+      edgesOut = graph.linkData().filter(d => d.fromVertex() == this),
+      vertexType = graph.types[this.keys.uidVertexType],
       images = this.keys.uidImages ? Array.from(this.keys.uidImages).map(uid => graph.images[uid]) : undefined;
 
     this._cache = {
-      super_nodes,
-      sub_nodes,
-      in_links,
-      out_links,
-      nodeType,
+      vertsSuper,
+      vertsSub,
+      edgesIn,
+      edgesOut,
+      vertexType
     };
 
     if (images) this._cache.images = images;
@@ -920,7 +929,7 @@ class VertexRW {
 
   allSuperNodeData() {
 // assumes this._cache is up to date
-    return this._cache.super_nodes;
+    return this._cache.vertsSuper;
 
   }
 
@@ -1239,7 +1248,7 @@ class TemplateSpec { // aka Template
           max_supernodes: 2, // per subnode. Input validation rule: eg "a Person can have no more than 2 biological Parents" 
       },
       junction: { // extra settings for a 'junction dot' (and its 'hyperedge' expansion)
-          linkTypes: { in: [], out: [] } // eg { in:[ mother,father], out: [daughter,son] }
+          edgeTypes: { in: [], out: [] } // eg { in:[ mother,father], out: [daughter,son] }
       },
       colour: {  
           fill: 'white',
@@ -1421,11 +1430,11 @@ class EdgeRW extends Edge {
     WeakBind.parentOf.set(this,graph);
 
  }
-  toString() { return `${this._cache.datumFrom.toString()} | ${this._cache.linkType.toString()} | ${this._cache.datumTo.toString()}` } 
+  toString() { return `${this._cache.vertFrom.toString()} | ${this._cache.edgeType.toString()} | ${this._cache.vertTo.toString()}` } 
   
-  setTypeSpec(linkType) { 
-    this._cache.linkType = linkType; 
-    this.keys.uidTypeSpec = linkType?.uniqueId();  // otherwise rehydration fails
+  setTypeSpec(edgeType) { 
+    this._cache.edgeType = edgeType; 
+    this.keys.uidTypeSpec = edgeType?.uniqueId();  // otherwise rehydration fails
     return this;
    }
 
@@ -1439,14 +1448,14 @@ class EdgeRW extends Edge {
 
   restoreBindings(graph) { 
       // start with the "edit-resistant" references
-      this._cache.datumFrom = graph.vertices[this.keys.uidDatumFrom];
-      this._cache.datumTo = graph.vertices[this.keys.uidDatumTo];
+      this._cache.vertFrom = graph.vertices[this.keys.uidDatumFrom];
+      this._cache.vertTo = graph.vertices[this.keys.uidDatumTo];
       // now for the edit-sensitive parts
-      this._cache.linkType = graph.types[this.keys.uidTypeSpec];
+      this._cache.edgeType = graph.types[this.keys.uidTypeSpec];
       this.refreshCache(graph); 
   }
 
-  collectKeys(graph) {  // TODO: use _datumFrom instead of base 
+  collectKeys(graph) {  // TODO: use _vertFrom instead of base 
     // capture robust keys to enable re-binding eg after ontology is refreshed
     // TODO: for now, the primary key (uidThis) doesn't change even after endpoints are modified
     // => user edits could result in logically identical links with distinct uids.  Is that reasonable?
@@ -1463,12 +1472,12 @@ class EdgeRW extends Edge {
 
       };
   
-  // in case this is a split link, we need to override with the current to & from nodes (not rely on original base)
-    if (this._datumFrom) 
+  // in case this edge has been modified, we need to override with the current to & from vertices (not rely on original base)
+    if (this._cache?.vertFrom) 
       this.keys = {
-        uidDatumFrom: this._cache.datumFrom.uniqueId(),
-        uidDatumTo:   this._cache.datumTo.uniqueId(),
-        uidTypeSpec:  this._cache.linkType.uniqueId()
+        uidDatumFrom: this._cache.vertFrom.uniqueId(),
+        uidDatumTo:   this._cache.vertTo.uniqueId(),
+        uidTypeSpec:  this._cache.edgeType.uniqueId()
       };
 
     this.keys.uidThis = saved_uidThis ?? hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidTypeSpec);
@@ -1481,24 +1490,23 @@ class EdgeRW extends Edge {
 
   // _cache = discardable, transient state data, derived values, subtotals, shortcuts etc 
   // anything that's free to change with user clicks (but often needed, eg during simulation ticks)
-  // except the "edit-resistant" ones that require extra care (_datumFrom etc.)
+  // except the "edit-resistant" ones that require extra care (_vertFrom etc.)
   refreshCache(graph) { 
     const
-      superVertexDetail = this.superVertexDetail(),
-      subVertexDetail = this.subVertexDetail(),
-      linkType =  graph.types[this.keys.uidTypeSpec],
-      datumFrom = this.fromVertexDetail(),
-      datumTo = this.toVertexDetail();
+      vertSuper = this.superVertex(),
+      vertSub = this.subVertex(),
+      edgeType =  graph.types[this.keys.uidTypeSpec],
+      vertFrom = this.fromVertex(),
+      vertTo = this.toVertex();
 
     //  superNodeData =  this.allSuperNodeData(); // circular dedependency during rehydration
 
     this._cache = {
-      superVertexDetail,
-      subVertexDetail,
-      linkType,
-      datumFrom,
-      datumTo
-      //,superNodeData
+      vertSuper,
+      vertSub,
+      edgeType, 
+      vertFrom, 
+      vertTo
       }
 
     return this;
@@ -1520,31 +1528,32 @@ class EdgeRW extends Edge {
 // ASSUMES each VertexRW already has an accurate _cache object
   allSuperNodeData() {
     const 
-      p1 = this._cache.datumFrom.allSuperNodeData(),
-      p2 = this._cache.datumTo.allSuperNodeData(),
+      p1 = this._cache.vertFrom.allSuperNodeData(),
+      p2 = this._cache.vertTo.allSuperNodeData(),
       s = new Set([...p1,...p2]);
     return Array.from(s);
   }
 //-----------------------------------------------
 
-  superVertexDetail() { // which one of this link's pair of endpoints is actually the container superset? (if applicable) 
+  superVertex() { // which one of this link's pair of endpoints is actually the container superset? (if applicable) 
     // after adjusting for 'reversed' predicates, and disregarding any non-hiearchical predicates
     // by convention arrow is FROM superset TO subelement
-    const nesting = this._cache.linkType._cache.template.nesting;
-    if (nesting.enabled) return nesting.reversed ? this._datumTo : this._datumFrom;
+    const nesting = this._cache.edgeType._cache.template.nesting;
+    if (nesting.enabled) return nesting.reversed ? this._cache.vertTo : this._cache.vertFrom;
     return null;
     }
 //-----------------------------------------------
 
-  subVertexDetail() { // which one of this link's 2 endpoints is actually the nested subelement? (if applicable) 
-    const nesting = this._cache.linkType._cache.template.nesting;
-    if (nesting.enabled) return nesting.reversed ? this._datumFrom : this._datumTo;
+  subVertex() { // which one of this link's 2 endpoints is actually the nested subelement? (if applicable) 
+    const nesting = this._cache.edgeType._cache.template.nesting;
+    if (nesting.enabled) return nesting.reversed ? this._cache.vertFrom : this._cache.vertTo;
     return null;
     }
 
-  fromVertexDetail() { return this._cache.datumFrom }
+    // TODO: adjust for reversal flag, for Fan edges . reversal is not just for hierarchies
+  fromVertex() { return this._cache.vertFrom }
 
-  toVertexDetail() { return this._cache.datumTo }
+  toVertex() { return this._cache.vertTo }
 
 //-----------------------------------------------
 // insert jnode as 'elbow' (involves splitting this link into 2)
@@ -1584,16 +1593,16 @@ class EdgeRW extends Edge {
     if (jnode == null) { 
       jnode = graph.addNode({id:RandomId('J')});
       jnode.setJunction(true);
-      jnode.setCaption(`${this._cache.datumFrom.getName()} to ${this._cache.datumTo.getName()}`);
+      jnode.setCaption(`${this._cache.vertFrom.getName()} to ${this._cache.vertTo.getName()}`);
     } else { // check the existing jnode is safe to insert here...
-      console.assert(jnode != this._datumFrom);
-      console.assert(jnode != this._datumTo);
+      console.assert(jnode != this._vertFrom);
+      console.assert(jnode != this._vertTo);
 
     }
 
 
-    if (jnode._cache.nodeType == graph.types.default) // seems reasonable to propagate link type 
-      jnode.setTypeSpec(this._cache.linkType); 
+    if (jnode._cache.vertexType == graph.types.default) // seems reasonable to propagate link type 
+      jnode.setTypeSpec(this._cache.edgeType); 
 
     // TODO: add the new jnode to ALL the same parents as this.
     // if the link straddles 2 non-identical sets of supernode parents, the new jnode is 'adopted' by all of them
@@ -1602,8 +1611,8 @@ class EdgeRW extends Edge {
 
     const link2 = this.copyTo(graph); // TODO: clone ALL its properties including paths, layer, & scenes bindings
     // now interject by rebinding 1 endpoint each - remember to update our keyring!
-    link2._cache.datumFrom = jnode;
-    this._cache.datumTo = jnode;
+    link2._cache.vertFrom = jnode;
+    this._cache.vertTo = jnode;
     link2.collectKeys(); 
     this.collectKeys(); 
     graph.refreshAllCaches();
