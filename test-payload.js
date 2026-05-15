@@ -30,7 +30,7 @@ graph
 const node_spec = { id: 'pl32983', name: 'Peter Luckock', description: 'Inventor' };
 
 const node_type = graph.getTypeSpec('Person'); // might default if 'Person' is not already registered
-const new_node = graph.addNode(node_spec).setTypeSpec(node_type);
+const new_node = graph.addVertex(node_spec).setTypeSpec(node_type);
 
 
 
@@ -41,7 +41,7 @@ const link_type = graph.getTypeSpec('child_of'); // might default if 'belongs_to
 
  const nodes = graph.nodeData(),
      datumFrom = nodes[3];
-graph.addLink(datumFrom,new_node,link_type);
+graph.addEdge(datumFrom,new_node,link_type);
 
 
 const 
@@ -81,7 +81,7 @@ function embellish_path(graph) {
 //const existing_node = graph.nodeData()[8];
  const existing_node = null;
 
-const jnode = link.interjectNode(existing_node,graph);
+const jnode = link.interjectVertex(existing_node,graph);
 
 console.log('existing_node,jnode',existing_node,jnode);
 
@@ -92,8 +92,8 @@ console.log('anode.addEnclosure() => pnode',anode,pnode);
 
 
 
-    //  junction = link.interjectNode() (also creates hyperedge or updates existing one)
-    //    link.interjectNode(node) 
+    //  junction = link.interjectVertex() (also creates hyperedge or updates existing one)
+    //    link.interjectVertex(node) 
 
 
 // select a link and give it an elbow 

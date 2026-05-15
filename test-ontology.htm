@@ -9,6 +9,10 @@ Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=
 
 <button type="button" onclick="main()">main()</button><br>
 
+<button type="button" onclick="current_view.download()">Download View (.view)</button><br>
+
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
@@ -35,10 +39,10 @@ const Shape = Object.freeze({
 
 // light applies to nodes AND links, is derived through "path illuminations" 
 const Light = Object.freeze({
-  NONE: 'none', // invisible, cloaked
-  BACK: 'back', // monochrome, transparent, blurred, shadow, grey, dimmed
-  FORE: 'fore', // solid colour, opaque
-  SPOT: 'spot'  // highlight, glowing, drop shadow? 
+  OFF: 'off', // invisible, cloaked
+  LOW: 'low', // monochrome, transparent, blurred, shadow, grey, dimmed
+  MID: 'mid', // full colour, opaque
+  HIGH: 'high'  // highlight, glowing, drop shadow? 
 });
 
 
@@ -337,7 +341,7 @@ class Workbook {  // includes formatting info as well as data & forces
     else {
       this.name = 'New Workbook';
       this.images = { default: new Image(this) };
-      this.templates = {default: new TemplateSpec(this,'default')};
+      this.templates = {default: new TemplateSpecRW(this,'default')};
       this.vertices = {};
       this.edges = {};
       this.types = {
@@ -388,7 +392,7 @@ class Workbook {  // includes formatting info as well as data & forces
     // or they can click to accept the old values.
     // once done, the newly-hydrated Workbook is ready to use e.g. to upsert an existing workbook.
     this.restoreValuesOf(this.sources,Source);
-    this.restoreValuesOf(this.templates,TemplateSpec);
+    this.restoreValuesOf(this.templates,TemplateSpecRW);
     this.restoreValuesOf(this.types,TypeSpecRW);
     this.restoreValuesOf(this.images,Image);
     this.restoreValuesOf(this.vertices,VertexRW);
@@ -422,7 +426,7 @@ class Workbook {  // includes formatting info as well as data & forces
   
     // ingest new layers
     Object.values(json.templates).forEach(d => {
-      Object.setPrototypeOf(d,TemplateSpec.prototype);
+      Object.setPrototypeOf(d,TemplateSpecRW.prototype);
       Object.setPrototypeOf(d.image,Image.prototype);
       d.types = new Set(d.types);
       this.templates[d.uniqueId()] = d;
@@ -475,7 +479,6 @@ class Workbook {  // includes formatting info as well as data & forces
     Object.values(json.paths).forEach(d => {
       Object.setPrototypeOf(d,PathSpecRW.prototype);
       d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.edges[uid]]));
-  //    d._hyperEdges = Object.fromEntries(d.uidHyperEdges.map(uid => [uid,this.hyperEdges[uid]]));
       d.uidLinks = new Set(d.uidLinks);
       d.uidJunctions = new Set(d.uidJunctions);
       // TODO: repopulate _links based on uidLinks
@@ -493,7 +496,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
   addTemplate(name,aliases=[]) { 
     console.assert(typeof name== 'string');
-    const obj = new TemplateSpec(this,name);
+    const obj = new TemplateSpecRW(this,name);
     this.templates[obj.uniqueId()] = obj;
     obj.addAliases(aliases);
     return this;
@@ -622,7 +625,7 @@ class Workbook {  // includes formatting info as well as data & forces
 
   //---------------------------------------------------------------------------------
 
-  addNode(entitySpec) {
+  addVertex(entitySpec) {
     const new_entity = Ontology.getDefault().addEntity(entitySpec);
     const new_vertex = new VertexRW(this,new_entity);
     new_vertex.setTypeSpec(this.types.default);
@@ -631,18 +634,21 @@ class Workbook {  // includes formatting info as well as data & forces
 
   //---------------------------------------------------------------------------------
 
-  addLink(fromNode, toNode, edgeType, base=null) { 
+  addEdge(vertFrom, vertTo, edgeType, base=null) { 
+    console.assert(vertFrom instanceof VertexRW);
+    console.assert(vertTo instanceof VertexRW);
+    console.assert(edgeType instanceof TypeSpecRW);
 
     const obj = {
     keys: {
-        uidDatumFrom: fromNode.uniqueId(),
-        uidDatumTo:   toNode.uniqueId(),
-        uidTypeSpec:  edgeType.uniqueId(),
-        uidBase:      base?.uniqueId(),
-        xidRelnType:  base?.keyId()
+      uidVertexFrom: vertFrom.uniqueId(),
+      uidVertexTo:   vertTo.uniqueId(),
+      uidTypeSpec:  edgeType.uniqueId(),
+      uidBase:      base?.uniqueId(),
+      xidRelnType:  base?.keyId()
       }
     }
-    Object.setPrototypeOf(obj,EdgeRW.prototype); // cheat the constructor
+    Object.setPrototypeOf(obj,EdgeRW.prototype);  // IS THIS NECESSARY???
     const new_edge = new EdgeRW(this,obj);
     this.edges[new_edge.uniqueId()] = new_edge;
     this.refreshAllCaches();
@@ -696,12 +702,10 @@ class Ontology {
   //----------------------------------------------------------
   
   // REQUIRES that .baseFrom, .baseTo and .baseType are ALREADY defined in relationSpec
-  // i.e it is called from Workbook.addLink()
+  // i.e it is called from Workbook.addEdge()
   addRelation(relationSpec) { 
-    // 
-
     const nr = new Relation(relationSpec,this);
-      this.relations[nr.keyId()] = nr;
+    this.relations[nr.keyId()] = nr;
     return nr;
   }
 
@@ -720,11 +724,7 @@ class Ontology {
   }
 
   //----------------------------------------------------------
-  
-  // all newly-created Entity & Relation objects will be maintained together in one container
-  // It could be one of the source ontologies, but for now assume output will be a different file.
-  // TODO might also be the output destination for ALL Graph, Node and Link objects?
-  // I think it's cleaner to save each Graph as a separate JSON file, which stores the path of each input Ontology
+  // TODO: allow new Vertex with no Entity.  remove this 'output ontology' concept
   static outputOntology = new Ontology({uid: '_NEW', file: {}, metadata: {}, entities: {}, relations: {}, classes: {}, predicates: {}});
 
   static getDefault() { return Ontology.outputOntology; }
@@ -816,21 +816,19 @@ class Vertex {
   getFanEdgesOf(edge) {
     console.assert(edge instanceof EdgeRW);
     // TO DO: return all 'in-stream' complementary edges which are 'incident to' this vertex
-    // e.g. so that HyperEdgeRW nodes will behave as hyperedges, but could be useful in other situations
+    // e.g. so that HyperEdgeRW selection will be all-or-none, but could be useful in other situations
     // needs to consider the LOGICAL direction/flow (after adjusting for 'reversed' edge types)
   }
-
-
 
 }
 
 //============================================================
-// 'mixin' used by VertexRW and HyperEdgeRW 
+// achieve multiple inheritance for VertexRW and HyperEdgeRW, using 'mixin' capability
 
-const EditableVertex = Base => class extends Base {
-  // add all Vertex RW methods 
+const EditableVertex = BaseVertex => class extends BaseVertex {
+  // add all Vertex RW methods here...
 
-  // can it include a constructor?
+  // can it include a constructor? Apparently yes!
   constructor(graph,obj) {
     super();
     this.base = obj; // Entity
@@ -866,7 +864,6 @@ const EditableVertex = Base => class extends Base {
   }
 
   getWorkbook() { return WeakBind.parentOf.get(this) }
-  
 
   restorePrototypes(graph) { 
     graph.restoreObjectAs(this.base,Entity); 
@@ -879,7 +876,7 @@ const EditableVertex = Base => class extends Base {
   restoreBindings(graph) { 
     this.bind(graph);
     //   this.setSubClass();
-    // this.refreshCache(graph); // not until all links are fully restored
+    // this.refreshCache(graph); // not until all edges are fully restored
   }
 
   bind(graph) { // rehydrate static bindings 
@@ -906,8 +903,8 @@ const EditableVertex = Base => class extends Base {
 
   addEnclosure(graph) { // create a parent contour vertex encapsulating just this vertex
     const 
-      pVertex = graph.addNode({id:RandomId('N')}, graph.types.contour), 
-      pEdge = graph.addLink(this,pVertex,graph.types.partOf);
+      pVertex = graph.addVertex({id:RandomId('N')}, graph.types.contour), 
+      pEdge = graph.addEdge(this,pVertex,graph.types.partOf);
     return pVertex;
   }
 
@@ -941,7 +938,7 @@ const EditableVertex = Base => class extends Base {
 
  }
 
-
+// use 'mixin' capability to achieve multiple inheritance
 class VertexRW extends EditableVertex(Vertex) { 
 
 }
@@ -950,17 +947,16 @@ class VertexRW extends EditableVertex(Vertex) {
 
 class HyperEdge extends Vertex {
   // read-only version of HyperEdgeRW
-
-}
-
-// Multiple inheritance using mixin
-
-class HyperEdgeRW extends EditableVertex(HyperEdge) {
 // a special type of vertex that behaves as a hyperedge 
 // a "pass-through" node, such that state (light) applied to to one incoming edge 
 // automatically flows to ALL outward edges - and vice versa
 // uses fan
 // NOT a local View-level format attribute, as it also determines what's in logical scope of a PathSpec
+
+}
+
+// use 'mixin' capability to achieve multiple inheritance
+class HyperEdgeRW extends EditableVertex(HyperEdge) {
 
 }
 
@@ -1051,7 +1047,6 @@ class D3LinkDatumRW extends D3LinkDatum {
 
   }
 
-
   restorePrototypes(view) { 
     console.assert(view instanceof ViewRW);
     this._detail = this._detail ?? {};
@@ -1062,7 +1057,6 @@ restoreBindings(graph){
     this._detail = graph.edges[this.uniqueId()];
 
   }
-
 
 }
 
@@ -1199,7 +1193,13 @@ class FluidRect extends FrameDatum {
 // wrapper for the 'predicate' and 'class' objects from source ontology
 // used to map Nodes and Links to their appropriate style template (layer)
 class TypeSpec {  // read-only, for hydrating a self-contained View
-
+  uniqueId() { return this.uid }
+  keyId() { return this.xid }
+  toString() { return this.label ?? this.xid ?? this.uid }
+  nameMatches(xid) { return this.keyId() == xid }
+  restorePrototypes() { this._cache = {}; this.state = this.state ?? {} }
+  restoreBindings(graph) { this._cache.template = graph.getTemplate(this.xid) }
+  getTemplate() { return this._cache.template ?? graph.getTemplate(this.xid) }
 
 }
 
@@ -1214,13 +1214,6 @@ class TypeSpecRW extends TypeSpec {
     this.restoreBindings(graph);
     return this;
   }
-  uniqueId() { return this.uid }
-  keyId() { return this.xid }
-  toString() { return this.label ?? this.xid ?? this.uid }
-  nameMatches(xid) { return this.keyId() == xid }
-  restorePrototypes() { this._cache = {}; this.state = this.state ?? {} }
-  restoreBindings(graph) { this._cache.template = graph.getTemplate(this.xid) }
-  getTemplate() { return this._cache.template ?? graph.getTemplate(this.xid) }
 }
 
 
@@ -1251,42 +1244,10 @@ class Image {
 
 
 //============================================================
-// a list of object (link and node) types that share the same CSS class & default styling
-// also drives non-CSS default attributes such as image URL, initial transform, nestable, default cloaking etc.
+// a list of object (vertex and edge) types whose D3 data/elements will share the same CSS class & default styling
+// also drives non-CSS default attributes such as image URL, initial transform, nestable, default state (light, shape)
 
-class TemplateSpec { // aka Template
-  constructor(graph,class_name) {
-    const obj = {
-      class_name: class_name,
-      types: new Set([class_name]),
-      nesting: { 
-          reversed: false, // true <=> the 'from' node is logically the subnode/element in each pair (normally the container/superset)
-          min_subnodes: 3, // restores (expands) as vertex-edge graph (NOT as frame or contour) unless N direct subnodes would be visible
-          max_subnodes: 0, // by default, minimise (collapse) any supernode if more than N direct subnodes would be visible
-          max_supernodes: 2, // per subnode. Input validation rule: eg "a Person can have no more than 2 biological Parents" 
-      },
-      junction: { // extra settings for a 'junction dot' (and its 'hyperedge' expansion)
-          edgeTypes: { in: [], out: [] } // eg { in:[ mother,father], out: [daughter,son] }
-      },
-      colour: {  
-          fill: 'white',
-          stroke: 'black'
-      },
-      image: graph.getDefaultImage(),
-      margin: { banner: 30, stub: 30, default: 5 },
-      state: { 
-        phase: Phase.LIQUID,
-        shape: Shape.ICON,
-        light: Light.BACK
-       },
-
-
-      uid: hashString(RandomId('T'))
-    }
-    Object.assign(this,obj);
-    WeakBind.parentOf.set(this,graph);
-    return this;
-  }
+class TemplateSpec { 
 
   restorePrototypes(graph) { 
     graph.restoreObjectAs(this.image,Image); 
@@ -1294,6 +1255,44 @@ class TemplateSpec { // aka Template
   }
 
   uniqueId() { return this.uid }
+
+  }
+
+//---------------------------------------------------------
+
+class TemplateSpecRW extends TemplateSpec { 
+  constructor(graph,class_name) {
+    super();
+    const obj = {
+      class_name: class_name,
+      types: new Set([class_name]),
+      nesting: { 
+        reversed: false, // true <=> the 'from' node is logically the subnode/element in each pair (normally the container/superset)
+        min_subnodes: 3, // restores (expands) as vertex-edge graph (NOT as frame or contour) unless N direct subnodes would be visible
+        max_subnodes: 0, // by default, minimise (collapse) any supernode if more than N direct subnodes would be visible
+        max_supernodes: 2, // per subnode. Input validation rule: eg "a Person can have no more than 2 biological Parents" 
+      },
+      junction: { // extra settings for a 'junction dot' (and its 'hyperedge' expansion)
+        edgeTypes: { in: [], out: [] } // eg { in:[ mother,father], out: [daughter,son] }
+      },
+      colour: {  
+        fill: 'white',
+        stroke: 'black'
+      },
+      image: graph.getDefaultImage(),
+      margin: { banner: 30, stub: 30, default: 5 },
+      state: { 
+        phase: Phase.LIQUID,
+        shape: Shape.ICON,
+        light: Light.LOW
+       },
+
+      uid: hashString(RandomId('T'))
+    }
+    Object.assign(this,obj);
+    WeakBind.parentOf.set(this,graph);
+    return this;
+  }
 
   addAliases(aliases) { 
     aliases.forEach(str => this.types.add(str));  
@@ -1466,8 +1465,8 @@ class EdgeRW extends Edge {
 
   restoreBindings(graph) { 
       // start with the "edit-resistant" references
-      this._cache.vertFrom = graph.vertices[this.keys.uidDatumFrom];
-      this._cache.vertTo = graph.vertices[this.keys.uidDatumTo];
+      this._cache.vertFrom = graph.vertices[this.keys.uidVertexFrom];
+      this._cache.vertTo = graph.vertices[this.keys.uidVertexTo];
       // now for the edit-sensitive parts
       this._cache.edgeType = graph.types[this.keys.uidTypeSpec];
       this.refreshCache(graph); 
@@ -1482,8 +1481,8 @@ class EdgeRW extends Edge {
 
     if (this.base && this.base._baseFrom)
       this.keys = {
-        uidDatumFrom: this.base._baseFrom.uniqueId(),
-        uidDatumTo:   this.base._baseTo.uniqueId(),
+        uidVertexFrom: this.base._baseFrom.uniqueId(),
+        uidVertexTo:   this.base._baseTo.uniqueId(),
         uidTypeSpec:  this.base._baseType.uniqueId(),
         uidBase:      this.base.uniqueId(),
         xidRelnType:  this.base._baseType.keyId()
@@ -1493,12 +1492,12 @@ class EdgeRW extends Edge {
   // in case this edge has been modified, we need to override with the current to & from vertices (not rely on original base)
     if (this._cache?.vertFrom) 
       this.keys = {
-        uidDatumFrom: this._cache.vertFrom.uniqueId(),
-        uidDatumTo:   this._cache.vertTo.uniqueId(),
+        uidVertexFrom: this._cache.vertFrom.uniqueId(),
+        uidVertexTo:   this._cache.vertTo.uniqueId(),
         uidTypeSpec:  this._cache.edgeType.uniqueId()
       };
 
-    this.keys.uidThis = saved_uidThis ?? hashString(this.keys.uidDatumFrom + this.keys.uidDatumTo + this.keys.uidTypeSpec);
+    this.keys.uidThis = saved_uidThis ?? hashString(this.keys.uidVertexFrom + this.keys.uidVertexTo + this.keys.uidTypeSpec);
 
   }
 
@@ -1541,7 +1540,7 @@ class EdgeRW extends Edge {
   }
 //-----------------------------------------------
 // returns a union of supernodes that directly contain either endpoint of this link (or both)
-// called e.g. from this.interjectNode() & this.refreshCache()
+// called e.g. from this.interjectVertex() & this.refreshCache()
 // not counting the endpoints themselves
 // ASSUMES each VertexRW already has an accurate _cache object
   allSuperNodeData() {
@@ -1574,10 +1573,10 @@ class EdgeRW extends Edge {
   toVertex() { return this._cache.vertTo }
 
 //-----------------------------------------------
-// insert jnode as 'elbow' (involves splitting this link into 2)
-// if jnode is not provided, we create a new one on the spot 
-// either way, jnode is then cast as LiquidDot 
-// if this link is already part of a hyperedge, we add jnode to that hyperedge (=> it becomes a compound hyperedge)
+// insert jvert as 'elbow' (involves splitting this link into 2)
+// if jvert is not provided, we create a new one on the spot 
+// either way, jvert is then cast as LiquidDot 
+// if this link is already part of a hyperedge, we add jvert to that hyperedge (=> it becomes a compound hyperedge)
 // else, create a new hyperedge (in parent graph) and add to that (=> true hyperedge)
 // also (just for performance) bind this link (and the new bit) to the hyperedge
 
@@ -1606,63 +1605,65 @@ class EdgeRW extends Edge {
 // only a few differences. eg sequencing of "scenes" within "episodes", within 'series' within 'shows'.
 // with time sequence being either absolute or relative to context frame.
 
-  interjectNode(jnode=null,graph) {
-    console.assert(jnode == null || jnode instanceof VertexRW);  
-    if (jnode == null) { 
-      jnode = graph.addNode({id:RandomId('J')});
-      jnode.setJunction(true);
-      jnode.setCaption(`${this._cache.vertFrom.getName()} to ${this._cache.vertTo.getName()}`);
-    } else { // check the existing jnode is safe to insert here...
-      console.assert(jnode != this._vertFrom);
-      console.assert(jnode != this._vertTo);
+  interjectVertex(jvert=null,graph) {
+    console.assert(jvert == null || jvert instanceof VertexRW);  
+    if (jvert == null) { 
+      jvert = graph.addVertex({id:RandomId('J')});
+      jvert.setJunction(true);
+      jvert.setCaption(`${this._cache.vertFrom.getName()} to ${this._cache.vertTo.getName()}`);
+    } else { // check the existing jvert is safe to insert here...
+      console.assert(jvert != this._vertFrom);
+      console.assert(jvert != this._vertTo);
 
     }
 
 
-    if (jnode._cache.vertexType == graph.types.default) // seems reasonable to propagate link type 
-      jnode.setTypeSpec(this._cache.edgeType); 
+    if (jvert._cache.vertexType == graph.types.default) // seems reasonable to propagate link type 
+      jvert.setTypeSpec(this._cache.edgeType); 
 
-    // TODO: add the new jnode to ALL the same parents as this.
-    // if the link straddles 2 non-identical sets of supernode parents, the new jnode is 'adopted' by all of them
+    // TODO: add the new jvert to ALL the same parents as this.
+    // if the link straddles 2 non-identical sets of supernode parents, the new jvert is 'adopted' by all of them
     // that means their contours will suddenly have a non-empty intersection. Seems reasonable.
 
 
     const link2 = this.copyTo(graph); // TODO: clone ALL its properties including paths, layer, & scenes bindings
     // now interject by rebinding 1 endpoint each - remember to update our keyring!
-    link2._cache.vertFrom = jnode;
-    this._cache.vertTo = jnode;
+    link2._cache.vertFrom = jvert;
+    this._cache.vertTo = jvert;
     link2.collectKeys(); 
     this.collectKeys(); 
     graph.refreshAllCaches();
     
-    console.log('EdgeRW.interjectNode() jnode,this,link2',jnode,this,link2)
-    return jnode;
+    console.log('EdgeRW.interjectVertex() jvert,this,link2',jvert,this,link2)
+    return jvert;
   }
 
 }
 
 
 //============================================================
+ // aka Subgraph
+// an ordered? set of path segments (= binary links and/or (recursive) subgraphs)
+// typically expands to an unbroken thread, in the context of a View
 
 class PathSpec {
 
 
 }
 
-class PathSpecRW extends PathSpec {  // aka Subgraph
-// an ordered? set of path segments (= binary links and/or (recursive) subgraphs)
-// typically expands to an unbroken thread, in the context of a View
+
 // use case variants include Scene, Episode, chapter, narrative arc, scenario, critical path,
 // storyline, trace, trail, thread, hypothesis, causal pathway, channel, chain (of events), 
 // causation, aetiology, line of reasoning, explicit sequence
 
 // a path always implicitly includes both endpoint vertices of every segment 
-// if an endpoint is a JunctionVertex (hyperedge) then the freshly-calculated path also includes all the "complementary" fan
-// edges terminating at that junction, as well as their outer node - and so on, recursively ending with the last non-junction node
-// if edge X is an in-link to junction node J, its set of complementary edges X' contains ALL the out-links from J
-// and vice versa starting with a single out-link from junction K.
+// if an endpoint vertex V is a HyperEdge then the freshly-calculated path also includes all the 
+// "complementary" fan edges terminating at V, as well as any adjacent HyperEdges, and so on, 
+// up to but not including the next ordinary vertex
+// if edge X is an in-edge to hyperedge H, its set of complementary edges X' contains ALL the out-edges from H
+// and vice versa
 
-// a path often includes a time dimension - at least ordinal/relative ('before', 'during' and 'after') if not absolute.
+// a path often suggests or implies a time dimension - at least ordinal/relative ('before', 'during' and 'after') if not absolute.
 // could use an editable sort key (like Dewey) to rearrange the serialisation of links within the path
 // sortkey could be ISO date time or just random text. 
 // in dramatic fiction there are many examples where the 'crucial' edge that is REVEALED last 
@@ -1676,21 +1677,22 @@ class PathSpecRW extends PathSpec {  // aka Subgraph
 
 // user could try swapping between different draft narratives, alternate PathSpecs to see which has the greatest impact
 
-// a path can define the 'reveal' sequence or the 'physical' sequence. Any other sequences?
+// a PathSpec can define the 'reveal' sequence or the 'physical' sequence. Any other sequences?
 // for a simple narrative 'live commentary' they're both the same
 // each revealed link can be 'revealed' (indicated, attested, or hinted) more than once, 
 // across different scenes (paths) with different actors 
 
-// an activated path's 'lighting level' can be set en-masse to SPOT, FORE, BACK or NONE
-// but to simplify, the new state settings are applied to the current member objects, not recalculated declaratively.
-// the new path-level setting propagates to each link (and node) on that path
+// once expanded, a path instance's 'lighting level' can be set en-masse to OFF, LOW, MID or HIGH
+// To simplify, the new light settings are applied to the current member objects, not recalculated declaratively.
+// to each link (and node) on that path
 // according to priority rules that also respect (the effects of any other recently-activated path)
 // whether path-driven or not, 
 // increase in lighting flows from links to nodes (if they're not already brighter)
 // decrease in lighting flows from nodes to links (if they're not already duller)
 
-// a path may also include sub-paths, recursively. 
+// a PathSpec may also include sub-paths, recursively. 
 
+class PathSpecRW extends PathSpec { 
   constructor(graph) {
     super();
     this.name = RandomId('P');
@@ -1738,11 +1740,8 @@ restoreBindings(graph) {
 //============================================================
 // View-level wrapper for an (expanded) PathSpec, translated into illuminated subsets of (intra-View) D3LinkDatum and D3NodeDatum  
 // 
-class D3PathIllumination { 
-
+class D3PathIllumination {  // aka PathInstance?
   uniqueId() { return this.uid }
-
-
 }
 
 class D3PathIlluminationRW extends D3PathIllumination { 
@@ -1751,7 +1750,7 @@ class D3PathIlluminationRW extends D3PathIllumination {
     super();
     console.assert(view instanceof View);
     console.assert(path instanceof PathSpecRW);
-    this.light = Light.BACK;
+    this.light = Light.LOW;
     this._cache = {
       d3links: {},
       d3nodes: {},
@@ -1784,7 +1783,7 @@ class ViewRW extends View { // aka Study, Interpretation, Analysis, Discussion, 
   // individually tweaked illumination settings may also be captured per node or link?, along with annotations
   // unlike PathSpecs, a View can also include (illuminate) individual Nodes directly without affecting their Links
   // Optionally store their current state (Shape & Phase), to be re-applied each time the same View is reactivated.
-  // other nodes (with non-saved state) are reset to their default states based on current Type/Template bindings
+  // other nodes (with non-saved state) are reset to their default states based on current TypeSpec/TemplateSpec bindings
   // so, the effective state of a node or link is local to the current View context
   // All D3 logic is mediated based on View, not directly to the Workbook/Graph
   // a ViewPort manages one View at a time. Each view stores all the 'edited' coordinates and state info
