@@ -816,7 +816,7 @@ class Vertex {
   getFanEdgesOf(edge) {
     console.assert(edge instanceof EdgeRW);
     // TO DO: return all 'in-stream' complementary edges which are 'incident to' this vertex
-    // e.g. so that JunctionDetail nodes will behave as hyperedges, but could be useful in other situations
+    // e.g. so that HyperEdgeRW nodes will behave as hyperedges, but could be useful in other situations
     // needs to consider the LOGICAL direction/flow (after adjusting for 'reversed' edge types)
   }
 
@@ -824,8 +824,13 @@ class Vertex {
 
 }
 
-class VertexRW extends Vertex { 
+//============================================================
+// 'mixin' used by VertexRW and HyperEdgeRW 
 
+const EditableVertex = Base => class extends Base {
+  // add all Vertex RW methods 
+
+  // can it include a constructor?
   constructor(graph,obj) {
     super();
     this.base = obj; // Entity
@@ -856,7 +861,7 @@ class VertexRW extends Vertex {
   setCaption(txt) { this.caption = txt; return this; }
   setJunction(flag) { 
     if (flag || this.is_junction) this.is_junction = flag;
-    Object.setPrototypeOf(this, flag ? JunctionDetail.prototype : VertexRW.prototype);  
+    Object.setPrototypeOf(this, flag ? HyperEdgeRW.prototype : VertexRW.prototype);  
     return this;
   }
 
@@ -936,9 +941,21 @@ class VertexRW extends Vertex {
 
  }
 
+
+class VertexRW extends EditableVertex(Vertex) { 
+
+}
+
 //============================================================
 
-class JunctionDetail extends VertexRW {
+class HyperEdge extends Vertex {
+  // read-only version of HyperEdgeRW
+
+}
+
+// Multiple inheritance using mixin
+
+class HyperEdgeRW extends EditableVertex(HyperEdge) {
 // a special type of vertex that behaves as a hyperedge 
 // a "pass-through" node, such that state (light) applied to to one incoming edge 
 // automatically flows to ALL outward edges - and vice versa
@@ -946,6 +963,7 @@ class JunctionDetail extends VertexRW {
 // NOT a local View-level format attribute, as it also determines what's in logical scope of a PathSpec
 
 }
+
 
 //============================================================
 // Read-only 
@@ -961,7 +979,7 @@ class D3NodeDatumRW extends D3NodeDatum {
   constructor(view,obj) {
     super();
     console.assert(view instanceof View);
-    console.assert(obj instanceof VertexRW);
+    console.assert(obj instanceof Vertex);
     this.x = Math.random(); 
     this.y = Math.random(); 
     this._detail = obj;
