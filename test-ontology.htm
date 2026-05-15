@@ -16,8 +16,9 @@ Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=
 <script>
 
 var current_graph;
+var current_view;
 
-
+// View-specific states determine subclass and apply only to D3 datum
 // node subclass depends on Phase & Shape 
 const Phase = Object.freeze({
   GAS: 'gas',    // highly compressible fluid, minimal physics, even if visible
@@ -32,10 +33,10 @@ const Shape = Object.freeze({
   MAX: 'max'   // maximised (whole viewbox)
 });
 
-// lighting depends on the current View, applies to nodes AND links, is derived through "path illuminations" 
+// light applies to nodes AND links, is derived through "path illuminations" 
 const Light = Object.freeze({
-  NONE: 'none', // invisible
-  BACK: 'back', // monochrome, transparent, blurred, shadow
+  NONE: 'none', // invisible, cloaked
+  BACK: 'back', // monochrome, transparent, blurred, shadow, grey, dimmed
   FORE: 'fore', // solid colour, opaque
   SPOT: 'spot'  // highlight, glowing, drop shadow? 
 });
@@ -294,9 +295,6 @@ constructor(graph) {
 // ca 
 
 
-
-
-
 class Workspace {
     static graphs = {};
     static ontologies = {};
@@ -340,8 +338,8 @@ class Workbook {  // includes formatting info as well as data & forces
       this.name = 'New Workbook';
       this.images = { default: new Image(this) };
       this.templates = {default: new TemplateSpec(this,'default')};
-      this.nodes = {};
-      this.links = {};
+      this.vertices = {};
+      this.edges = {};
       this.types = {
         default: new TypeSpecRW(this,{xid:'Unknown', uid:'default'}),
         partOf: new TypeSpecRW(this,{xid:'part-of', uid:'partOf'}),
@@ -355,7 +353,7 @@ class Workbook {  // includes formatting info as well as data & forces
       this.forces = {};  
       this.paths = {};
       this.sources = {};
-      this.views = { default: new View(this,'default') }; 
+      this.views = { default: new ViewRW(this,'default') }; 
     }
 
   this.uid = this.uid ?? hashString(Math.random().toString());
@@ -365,8 +363,8 @@ class Workbook {  // includes formatting info as well as data & forces
 //------------------------------------------------------------------\
 
   // expose the nodes and links as datum arrays as expected by D3.
-  nodeData() { return Object.values(this.nodes) }
-  linkData() { return Object.values(this.links) }
+  nodeData() { return Object.values(this.vertices) }
+  linkData() { return Object.values(this.edges) }
   uniqueId()  { return this.uid };
 // TODO: standard subsets, for consistency. eg junctionData(), uncloakedNodeData()  ???
 //------------------------------------------------------------------\
@@ -393,10 +391,10 @@ class Workbook {  // includes formatting info as well as data & forces
     this.restoreValuesOf(this.templates,TemplateSpec);
     this.restoreValuesOf(this.types,TypeSpecRW);
     this.restoreValuesOf(this.images,Image);
-    this.restoreValuesOf(this.nodes,VertexRW);
-    this.restoreValuesOf(this.links,EdgeRW);
+    this.restoreValuesOf(this.vertices,VertexRW);
+    this.restoreValuesOf(this.edges,EdgeRW);
     this.restoreValuesOf(this.paths,PathSpecRW);
-    this.restoreValuesOf(this.views,View);
+    this.restoreValuesOf(this.views,ViewRW);
     }
 
 
@@ -453,21 +451,21 @@ class Workbook {  // includes formatting info as well as data & forces
   // any existing nodes with the same uid => VOIDS any unsaved edits
   // the graph's other nodes are left untouched
 
-    Object.values(json.nodes).forEach(d => {
+    Object.values(json.vertices).forEach(d => {
       Object.setPrototypeOf(d,VertexRW.prototype);
       Object.setPrototypeOf(d.base,Entity.prototype);
       if (d.images) Object.values(d.images).forEach(img => Object.setPrototypeOf(img,Image.prototype));
       d.restoreBindings(this); 
       d.setSubClass(); 
-      this.nodes[d.uniqueId()] = d;
+      this.vertices[d.uniqueId()] = d;
       }
     ); 
 
-    Object.values(json.links).forEach(d => {
+    Object.values(json.edges).forEach(d => {
       Object.setPrototypeOf(d,EdgeRW.prototype);
       Object.setPrototypeOf(d.base,Relation.prototype);
       d.restoreBindings(this); 
-      this.links[d.uniqueId()] = d;
+      this.edges[d.uniqueId()] = d;
       }
     );
 
@@ -476,7 +474,7 @@ class Workbook {  // includes formatting info as well as data & forces
     json.paths = json.paths ?? {};
     Object.values(json.paths).forEach(d => {
       Object.setPrototypeOf(d,PathSpecRW.prototype);
-      d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.links[uid]]));
+      d._links = Object.fromEntries(d.uidLinks.map(uid => [uid,this.edges[uid]]));
   //    d._hyperEdges = Object.fromEntries(d.uidHyperEdges.map(uid => [uid,this.hyperEdges[uid]]));
       d.uidLinks = new Set(d.uidLinks);
       d.uidJunctions = new Set(d.uidJunctions);
@@ -609,11 +607,11 @@ class Workbook {  // includes formatting info as well as data & forces
     new_types.forEach(d => this.types[d.uniqueId()] = d);
 
     const new_nodes = Object.values(bound_ont.entities).map(obj => new VertexRW(this,obj)); 
-    new_nodes.forEach(d => this.nodes[d.uniqueId()] = d);
+    new_nodes.forEach(d => this.vertices[d.uniqueId()] = d);
     // new_nodes.forEach(d => d.setSubClass()); 
  
     const new_links = Object.values(bound_ont.relations).map(obj => new EdgeRW(this,obj));
-    new_links.forEach(d => this.links[d.uniqueId()] = d);
+    new_links.forEach(d => this.edges[d.uniqueId()] = d);
   
     new_nodes.forEach(d => d.refreshCache(this));
     new_links.forEach(d => d.refreshCache(this));
@@ -626,10 +624,9 @@ class Workbook {  // includes formatting info as well as data & forces
 
   addNode(entitySpec) {
     const new_entity = Ontology.getDefault().addEntity(entitySpec);
-    const new_VertexDetail = new VertexRW(this,new_entity);
-    new_VertexDetail.setTypeSpec(this.types.default);
-//    new_VertexDetail.setSubClass();
-    return this.nodes[new_VertexDetail.uniqueId()] = new_VertexDetail;
+    const new_vertex = new VertexRW(this,new_entity);
+    new_vertex.setTypeSpec(this.types.default);
+    return this.vertices[new_vertex.uniqueId()] = new_vertex;
   }
 
   //---------------------------------------------------------------------------------
@@ -646,10 +643,10 @@ class Workbook {  // includes formatting info as well as data & forces
       }
     }
     Object.setPrototypeOf(obj,EdgeRW.prototype); // cheat the constructor
-    const new_EdgeDetail = new EdgeRW(this,obj);
-    this.links[new_EdgeDetail.uniqueId()] = new_EdgeDetail;
+    const new_edge = new EdgeRW(this,obj);
+    this.edges[new_edge.uniqueId()] = new_edge;
     this.refreshAllCaches();
-    return new_EdgeDetail;
+    return new_edge;
   }
 
   //---------------------------------------------------------------------------------
@@ -718,11 +715,9 @@ class Ontology {
   static async createfromJson(file) {
     const json = await read_json_file(file);
     return Ontology
-            .conformJson(json,file) // static method, calls class constructor
-            .addBindings();
+      .conformJson(json,file) // static method, calls class constructor
+      .addBindings();
   }
-
-
 
   //----------------------------------------------------------
   
@@ -944,10 +939,18 @@ class JunctionDetail extends VertexRW {
 }
 
 //============================================================
-
+// Read-only 
 class D3NodeDatum {
+  
+  foobar() {
+    console.log('D3NodeDatum.foobar()');
+  }
+}
+
+class D3NodeDatumRW extends D3NodeDatum {
 
   constructor(view,obj) {
+    super();
     console.assert(view instanceof View);
     console.assert(obj instanceof VertexRW);
     this.x = Math.random(); 
@@ -986,50 +989,50 @@ class D3NodeDatum {
 
 restoreBindings(graph){
     console.assert(graph instanceof Workbook);
-    this._detail = graph.nodes[this.uniqueId()];
+    this._detail = graph.vertices[this.uniqueId()];
 }
 
-  foobar() {
-    console.log('D3NodeDatum.foobar()');
-  }
-
-
-
-}
-
-class D3NodeDatumRW extends D3NodeDatum {
-  
   foobar() {
     console.log('D3NodeDatumRW.foobar()');
     super.foobar();
+
   }
+
 }
+
 
 //============================================================
 // TODO: D3Links must connect to D3Nodes, to get their end points. 
 class D3LinkDatum {
 
+  uniqueId() { return this.uid }
+
+  getLight() { return this.state.light ?? this._detail.getTypeSpec().state.light ?? this._detail.getTemplate().state.light }
+
+
+}
+
+class D3LinkDatumRW extends D3LinkDatum {
+
   constructor(view,obj) {
-    console.assert(view instanceof View);
+    console.assert(view instanceof ViewRW);
     console.assert(obj instanceof EdgeRW);
+    super();
     this._detail = obj;
     this.state = { };
     this.uid = obj.uniqueId();
 
   }
 
-  uniqueId() { return this.uid }
-
-  getLight() { return this.state.light ?? this._detail.getTypeSpec().state.light ?? this._detail.getTemplate().state.light }
 
   restorePrototypes(view) { 
-    console.assert(view instanceof View);
+    console.assert(view instanceof ViewRW);
     this._detail = this._detail ?? {};
   }
 
 restoreBindings(graph){
     console.assert(graph instanceof Workbook);
-    this._detail = graph.links[this.uniqueId()];
+    this._detail = graph.edges[this.uniqueId()];
 
   }
 
@@ -1168,7 +1171,7 @@ class FluidRect extends FrameDatum {
 //============================================================
 // wrapper for the 'predicate' and 'class' objects from source ontology
 // used to map Nodes and Links to their appropriate style template (layer)
-class TypeSpec {  // read-only, for hydrating a seolf-contained View
+class TypeSpec {  // read-only, for hydrating a self-contained View
 
 
 }
@@ -1436,8 +1439,8 @@ class EdgeRW extends Edge {
 
   restoreBindings(graph) { 
       // start with the "edit-resistant" references
-      this._cache.datumFrom = graph.nodes[this.keys.uidDatumFrom];
-      this._cache.datumTo = graph.nodes[this.keys.uidDatumTo];
+      this._cache.datumFrom = graph.vertices[this.keys.uidDatumFrom];
+      this._cache.datumTo = graph.vertices[this.keys.uidDatumTo];
       // now for the edit-sensitive parts
       this._cache.linkType = graph.types[this.keys.uidTypeSpec];
       this.refreshCache(graph); 
@@ -1507,7 +1510,7 @@ class EdgeRW extends Edge {
     console.assert(graph instanceof Workbook);
     const obj = new EdgeRW(graph,this);
     obj.keys.uidThis = hashString(RandomId('L'));  // needs a new uid to avoid overwriting
-    graph.links[obj.uniqueId()] = obj;
+    graph.edges[obj.uniqueId()] = obj;
     return obj;
   }
 //-----------------------------------------------
@@ -1676,7 +1679,7 @@ class PathSpecRW extends PathSpec {  // aka Subgraph
 
 restoreBindings(graph) {
   this._cache.segments = {}; 
-  this.keys.uidSegments.forEach(uid => this._cache.segments[uid] = graph.paths[uid] ?? graph.links[uid] );
+  this.keys.uidSegments.forEach(uid => this._cache.segments[uid] = graph.paths[uid] ?? graph.edges[uid] );
 // TODO: expand all segments to repopulate _cache.uidEdges and .uidVertices
 
 
@@ -1708,10 +1711,17 @@ restoreBindings(graph) {
 //============================================================
 // View-level wrapper for an (expanded) PathSpec, translated into illuminated subsets of (intra-View) D3LinkDatum and D3NodeDatum  
 // 
-
 class D3PathIllumination { 
 
+  uniqueId() { return this.uid }
+
+
+}
+
+class D3PathIlluminationRW extends D3PathIllumination { 
+
   constructor(view,path) {
+    super();
     console.assert(view instanceof View);
     console.assert(path instanceof PathSpecRW);
     this.light = Light.BACK;
@@ -1723,14 +1733,22 @@ class D3PathIllumination {
     this.uid = path.uniqueId(); // one View cannot save multiple illuminations of the same PathSpec
   }
 
-  uniqueId() { return this.uid }
 
 }
 
 
 //============================================================
-
 class View { // aka Study, Interpretation, Analysis, Discussion, Project, 
+
+  uniqueId() { return this.uid };
+
+  nodeData() { return Object.values(this.d3nodes) }
+  linkData() { return Object.values(this.d3links) }
+
+}
+
+
+class ViewRW extends View { // aka Study, Interpretation, Analysis, Discussion, Project, 
   // an annotated selection of 1 or more path illuminations. (The source path can appear in multiple Views)
   // user can export a single View as a self-contained JSON file, for loading into opensource playback runtime app.
   // the output JSON needs to be standalone so includes objects (and relatively few uids)
@@ -1763,6 +1781,7 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
 
 
   constructor(graph,uid) {
+    super();
     this.name = RandomId('V');
     this.keys = {uidPathSpecs: []};
 //  this._cache = {};
@@ -1776,19 +1795,14 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
     this.restorePrototypes(graph);
   }
   
-  uniqueId() { return this.uid };
-
-  nodeData() { return Object.values(this.d3nodes) }
-  linkData() { return Object.values(this.d3links) }
-
   appendData(graph) { // insert any d3 data wrappers not already in scope
 
     graph.nodeData().forEach(vertex=>{ 
-      if (this.d3nodes[vertex.uniqueId()] == undefined) this.d3nodes[vertex.uniqueId()] = new D3NodeDatum(this,vertex);
+      if (this.d3nodes[vertex.uniqueId()] == undefined) this.d3nodes[vertex.uniqueId()] = new D3NodeDatumRW(this,vertex);
       });
 
     graph.linkData().forEach(edge=>{ 
-      if (this.d3links[edge.uniqueId()] == undefined) this.d3links[edge.uniqueId()] = new D3LinkDatum(this,edge);
+      if (this.d3links[edge.uniqueId()] == undefined) this.d3links[edge.uniqueId()] = new D3LinkDatumRW(this,edge);
       });
 
     return this;
@@ -1798,8 +1812,8 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
   restorePrototypes(graph) {
     this.keys.uidPathSpecs = new Set(this.keys.uidPathSpecs);
     this._cache = {paths: {}};
-    this.nodeData().forEach(obj=>Object.setPrototypeOf(obj,D3NodeDatum.prototype));
-    this.linkData().forEach(obj=>Object.setPrototypeOf(obj,D3LinkDatum.prototype));
+    this.nodeData().forEach(obj=>Object.setPrototypeOf(obj,D3NodeDatumRW.prototype));
+    this.linkData().forEach(obj=>Object.setPrototypeOf(obj,D3LinkDatumRW.prototype));
     return this;
   }
 
