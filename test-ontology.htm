@@ -9,8 +9,9 @@ Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=
 
 <button type="button" onclick="main()">main()</button><br>
 
-<button type="button" onclick="current_view.download()">Download View (.view)</button><br>
+<button type="button" onclick="current_view.download()">Download View (.fdv)</button><br>
 
+Upload .fdv View: <input type="file" title="View" id="fileInputView" accept=".fdv"><br>
 
 
 
@@ -123,6 +124,14 @@ async function OnChangeGraph() {
 
 }
 
+async function OnChangeView() {
+  const file = Array.from(inputView.files)[0]; 
+
+  const script = await file.text();
+  View.current_view = await eval(script);
+  console.log(View.current_view);
+}
+
 //----------------------------------------------------------
 
 const input = document.getElementById("fileInput");
@@ -130,6 +139,10 @@ input.addEventListener("change", OnChange);
 
 const inputGraph = document.getElementById("fileInputGraph");
 inputGraph.addEventListener("change", OnChangeGraph);
+
+const inputView = document.getElementById("fileInputView");
+inputView.addEventListener("change", OnChangeView);
+
 
 //----------------------------------------------------------
 
@@ -315,6 +328,7 @@ class Workspace {
     json_obj.refreshAllCaches();
     console.log('Workspace.loadGraph()',json_obj);
     current_graph = json_obj;
+    current_view = json_obj.views.default;
 //    graph.upsertFromFdg(json_obj,source); // misnomer,  2 steps, rehydrate then upsert
     Workspace.graphs[json_obj.uniqueId()] = json_obj;
     return json_obj;
@@ -1766,10 +1780,27 @@ class D3PathIlluminationRW extends D3PathIllumination {
 //============================================================
 class View { // aka Study, Interpretation, Analysis, Discussion, Project, 
 
-  uniqueId() { return this.uid };
+  static current_view;
+
+  uniqueId() { return this.uid }
 
   nodeData() { return Object.values(this.d3nodes) }
   linkData() { return Object.values(this.d3links) }
+
+  static async loadFrom(uid,filename,dateString,json_obj) {
+    // parse JSON & set read-only prototypes on everything
+
+    json_obj.uid = hashString(RandomId('V'));
+    // TODO: clean up this!
+    const file = { name: filename, lastModifiedDate: dateString };
+    const source = new Source(file,'View');
+    Object.setPrototypeOf(json_obj,View.prototype);
+//    json_obj.restorePrototypes();
+//    json_obj.refreshAllCaches();
+//    console.log('View.loadFrom()',json_obj);
+    return json_obj;
+
+  } 
 
 }
 
@@ -1867,6 +1898,34 @@ class ViewRW extends View { // aka Study, Interpretation, Analysis, Discussion, 
     //      for each edge in segment
     //        create a D3LinkDatum
     //        add it to path._cache.links
+  }
+
+  download(to_filename=null) {
+
+    to_filename = to_filename ?? this.name + '.fdv';
+    const exclude_regex = new RegExp('^_', "i"); 
+
+    // Cool feature of JSON.stringify is that it stops if it detects a circular structure. 
+
+    const json = JSON.stringify(this, (key, value) => { 
+        if (exclude_regex.test(key)) return undefined; // skip keys that start with underscore
+        else {
+          if (value instanceof Set) return [...value]; // convert
+          if (typeof value === 'number') return Math.round(value*10000)/10000;
+          else return value; 
+          } 
+        }, 2 );
+
+    const fdg_script = `View.loadFrom('${this.uniqueId()}','${to_filename}','${Date()}',` + json + ');' ;
+
+    const blob = new Blob([fdg_script], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = to_filename;
+    a.click();
+
+    URL.revokeObjectURL(url);
   }
 
 

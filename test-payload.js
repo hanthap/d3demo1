@@ -6,7 +6,7 @@ function main() {
     embellish_graph(current_graph) ;
     embellish_path(current_graph) ;
     console.log(current_graph);
-
+    current_view = current_graph.views.default;
 }
 // const wbExtra = parsed_json.setPrototype('Workbook');
 // wbExtra.restorePrototypes();
@@ -127,7 +127,8 @@ const path = Object.values(graph.paths)[0];
 
 graph.views.default.appendData(graph);
 graph.views.default.addPathSpec(path);
-const n = graph.views.default.nodeData()[1];
+current_view = graph.views.default;
+const n = current_view.nodeData()[1];
 Object.setPrototypeOf(n,D3NodeDatumRW.prototype);
 
 
