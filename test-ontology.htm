@@ -355,7 +355,7 @@ class Workbook {  // includes formatting info as well as data & forces
     else {
       this.name = 'New Workbook';
       this.images = { default: new Image(this) };
-      this.templates = {default: new TemplateSpecRW(this,'default')};
+      this.templates = {default: new TemplateSpecRW(this)};
       this.vertices = {};
       this.edges = {};
       this.types = {
@@ -1046,6 +1046,15 @@ class D3LinkDatum {
 
   getLight() { return this.state.light ?? this._detail.getTypeSpec().state.light ?? this._detail.getTemplate().state.light }
 
+restoreBindings(view){
+    console.assert(view instanceof View);
+    this.nodeFrom = view.d3nodes[this.keys.uidVertexFrom];
+    this.nodeTo = view.d3nodes[this.keys.uidVertexTo];
+    this.edgeType = view.types[this.keys.uidTypeSpec];
+ //   this.template = view.templates[this.keys.uidTemplate]; // unnecessary
+
+  }
+  
 
 }
 
@@ -1275,7 +1284,7 @@ class TemplateSpec {
 //---------------------------------------------------------
 
 class TemplateSpecRW extends TemplateSpec { 
-  constructor(graph,class_name) {
+  constructor(graph,class_name='default') {
     super();
     const obj = {
       class_name: class_name,
@@ -1301,7 +1310,7 @@ class TemplateSpecRW extends TemplateSpec {
         light: Light.LOW
        },
 
-      uid: hashString(RandomId('T'))
+      uid: class_name == 'default' ? 'default' : hashString(class_name)
     }
     Object.assign(this,obj);
     WeakBind.parentOf.set(this,graph);
@@ -1798,9 +1807,39 @@ class View { // aka Study, Interpretation, Analysis, Discussion, Project,
 //    json_obj.restorePrototypes();
 //    json_obj.refreshAllCaches();
 //    console.log('View.loadFrom()',json_obj);
+    json_obj.restorePrototypes();
+    json_obj.restoreBindings();
     return json_obj;
 
   } 
+
+  restorePrototypes() {
+    this.keys.uidPathSpecs = new Set(this.keys.uidPathSpecs);
+    this._cache = {paths: {}};
+    this.nodeData().forEach(obj=>Object.setPrototypeOf(obj,D3NodeDatum.prototype));
+    this.linkData().forEach(obj=>Object.setPrototypeOf(obj,D3LinkDatum.prototype));
+    Object.values(this.images).forEach(obj=>Object.setPrototypeOf(obj,Image.prototype));
+    Object.values(this.templates).forEach(obj=>Object.setPrototypeOf(obj,TemplateSpec.prototype));
+    Object.values(this.types).forEach(obj=>Object.setPrototypeOf(obj,TypeSpec.prototype));    
+ 
+    return this;
+  }
+
+restoreBindings() {
+    this._cache.paths = {}; 
+//    this.keys.uidPathSpecs.forEach(uid => this._cache.paths[uid] = this.paths[uid]);
+//    this.nodeData().forEach(obj=>obj.restoreBindings(view));
+    this.linkData().forEach(obj=>obj.restoreBindings(this)); // D3links need to know BOTH their View-level Nodes AND Workbook-level Vertices
+
+    Object.values(this.types).forEach(obj=>obj.template = this.templates[obj.uidTemplate]);
+    Object.values(this.templates).forEach(obj=>obj.image = this.images[obj.uidImage]);
+
+
+
+    return this;
+  }
+
+
 
 }
 
@@ -1847,7 +1886,7 @@ class ViewRW extends View { // aka Study, Interpretation, Analysis, Discussion, 
     // plus _cached ref to workbook-level Vertex and Edge details
     this.d3nodes = {}; 
     this.d3links = {};
-    this.d3paths = {};  // D3PathIllumination objects
+    this.d3paths = {};  // D3PathIllumination objects (expanded lists of links & nodes)
     this.uid = uid ?? hashString(this.name);
     this.restorePrototypes(graph);
   }
@@ -1868,13 +1907,14 @@ class ViewRW extends View { // aka Study, Interpretation, Analysis, Discussion, 
 
   restorePrototypes(graph) {
     this.keys.uidPathSpecs = new Set(this.keys.uidPathSpecs);
-    this._cache = {paths: {}};
+    this._cache = {graph, paths: {}};
     this.nodeData().forEach(obj=>Object.setPrototypeOf(obj,D3NodeDatumRW.prototype));
     this.linkData().forEach(obj=>Object.setPrototypeOf(obj,D3LinkDatumRW.prototype));
     return this;
   }
 
   restoreBindings(graph) {
+    this._cache.graph = graph;
     this._cache.paths = {}; 
     this.keys.uidPathSpecs.forEach(uid => this._cache.paths[uid] = graph.paths[uid]);
     this.nodeData().forEach(obj=>obj.restoreBindings(graph));
@@ -1902,6 +1942,26 @@ class ViewRW extends View { // aka Study, Interpretation, Analysis, Discussion, 
 
   download(to_filename=null) {
 
+// TODO: this just in time workaround action would affect the current workbook 
+// all objects are copied by reference, so imact the workbook as a whole.
+// might be better to create a separate copy 'by value' and export that instead.
+// either that or undo any extra info straight after exporting.
+
+    // grab snapshots of just the uid keys we need for a minimal restore
+    this.templates = this._cache.graph.templates;
+    this.types = this._cache.graph.types;
+    this.images = this._cache.graph.images;
+
+    this.linkData().forEach(d => { 
+        d.keys = d._detail.keys;
+        d.keys.uidSubNode = d._detail._cache.vertSub?.uniqueId();
+        d.keys.uidSuperNode = d._detail._cache.vertSuper?.uniqueId();
+        d.keys.uidTemplate = d._detail._cache.edgeType._cache.template.uniqueId();
+    });
+
+    Object.values(this.types).forEach(obj => obj.uidTemplate = obj._cache.template.uniqueId());
+    Object.values(this.templates).forEach(obj => obj.uidImage = obj.image.uniqueId());
+
     to_filename = to_filename ?? this.name + '.fdv';
     const exclude_regex = new RegExp('^_', "i"); 
 
@@ -1910,6 +1970,7 @@ class ViewRW extends View { // aka Study, Interpretation, Analysis, Discussion, 
     const json = JSON.stringify(this, (key, value) => { 
         if (exclude_regex.test(key)) return undefined; // skip keys that start with underscore
         else {
+          if (key == 'uid') return undefined;
           if (value instanceof Set) return [...value]; // convert
           if (typeof value === 'number') return Math.round(value*10000)/10000;
           else return value; 
