@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../resume"
+		}
+	],
+	"settings": {
+		"powershell.cwd": "resume",
+		"todo-tree.tree.scanMode": "workspace only"
+	}
+}

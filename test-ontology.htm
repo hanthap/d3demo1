@@ -1,15 +1,15 @@
 
-Upload .ont Ontologies: <input type="file" title="Ontology" id="fileInput" accept=".ont" multiple><br>
+Upload .ont Ontologies: <input type="file" title="Ontology" id="fileInputOnt" accept=".ont" multiple><br>
 
 Upload .fdg Graphs: <input type="file" title="Graph" id="fileInputGraph" accept=".fdg" multiple><br>
 
-<button type="button" onclick="current_graph.downloadFdg()">Download Graphs (.fdg)</button><br>
+<button type="button" id="download_fsg" onclick="current_graph.downloadFdg()">Download Graphs (.fdg)</button><br>
 
-<button type="button" onclick="create_view(current_graph)">Visualise graph</button><br>
+<button type="button" id="visualise" onclick="create_view(current_graph)">Visualise graph</button><br>
 
-<button type="button" onclick="main()">main()</button><br>
+<button type="button" id="run_main" onclick="main()">main()</button><br>
 
-<button type="button" onclick="current_view.download()">Download View (.fdv)</button><br>
+<button type="button" id-="download_fdv" onclick="current_view.download()">Download View (.fdv)</button><br>
 
 Upload .fdv View: <input type="file" title="View" id="fileInputView" accept=".fdv"><br>
 
@@ -134,7 +134,7 @@ async function OnChangeView() {
 
 //----------------------------------------------------------
 
-const input = document.getElementById("fileInput");
+const input = document.getElementById("fileInputOnt");
 input.addEventListener("change", OnChange);
 
 const inputGraph = document.getElementById("fileInputGraph");
@@ -1249,6 +1249,7 @@ class Image {
     const obj = {
       img_src: url ? url :'tba.svg',
       colour: { fill: 'white', stroke: 'black'},
+      text: { alt: 'Unknown', copyright: 'Registered trademark. All rights reserved.'},
       transform: {
           circle: 'translate(0,0) scale(1)',
           rect: 'translate(0,0) scale(1)',
